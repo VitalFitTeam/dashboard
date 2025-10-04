@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import { colors } from "@/styles/styles";
-
 export const metadata: Metadata = {
   title: "GymApp Dashboard",
   description: "Administra tus reservas, entrenadores y sucursales de gimnasio",
@@ -15,7 +13,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className='antialiased bg-gray-50 text-gray-900'
+        className='antialiased bg-gray-50 text-gray-900 border-none '
       >
         {children}
       </body>
