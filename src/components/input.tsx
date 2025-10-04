@@ -16,7 +16,7 @@ const Input = ({
   placeholder,
 }: InputProps) => {
   return (
-    <div className="flex flex-col gap-1 ">
+    <div className="flex flex-col gap-1">
       {/* Label */}
       <label
         className="text-sm font-medium"
@@ -30,18 +30,19 @@ const Input = ({
         type={type}
         value={value}
         placeholder={placeholder}
-        className="px-3 py-2 border rounded-md font-sans focus:outline-none focus:ring-2 focus:ring-primary"
-        style={{
-          borderColor: colors.complementary.darkGray,
-        }}
+        className={`
+          px-3 py-2 rounded-md font-sans border
+          bg-gray-50 text-gray-900
+          border-gray-300
+          focus:outline-none focus:ring-2 focus:ring-[${colors.primary}] focus:border-transparent
+          transition-all duration-200
+          placeholder:text-gray-400
+        `}
       />
 
       {/* Helper Text */}
       {helperText && (
-        <span
-          className="text-xs"
-          style={{ color: colors.complementary.darkGray }}
-        >
+        <span className="text-xs" style={{ color: colors.complementary.darkGray }}>
           {helperText}
         </span>
       )}

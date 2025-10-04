@@ -12,6 +12,7 @@ export default function Home() {
         helperText="Debe tener al menos 8 caracteres"
       />
       <Button />
+      
     </div>
   );
 }
