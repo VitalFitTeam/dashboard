@@ -1,7 +1,8 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
@@ -14,6 +15,7 @@ import {
   QuestionMarkCircleIcon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
+  ArrowRightCircleIcon,
 } from "@heroicons/react/24/outline";
 
 interface NavItem {
@@ -31,22 +33,36 @@ const navigationSections: NavSection[] = [
   {
     title: "Menú principal",
     items: [
-      { name: "Dashboard", href: "#", icon: HomeIcon },
-      { name: "Sucursales", href: "#", icon: BuildingStorefrontIcon },
-      { name: "Usuarios Admin", href: "#", icon: UsersIcon },
-      { name: "Promos y cupones", href: "#", icon: TicketIcon },
-      { name: "Anuncios", href: "#", icon: MegaphoneIcon },
+      { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
+      {
+        name: "Sucursales",
+        href: "/dashboard/sucursales",
+        icon: BuildingStorefrontIcon,
+      },
+      { name: "Usuarios Admin", href: "/dashboard/usuarios", icon: UsersIcon },
+      { name: "Promos y cupones", href: "/dashboard/promos", icon: TicketIcon },
+      { name: "Anuncios", href: "/dashboard/anuncios", icon: MegaphoneIcon },
     ],
   },
   {
     title: "Reportes y estadísticas",
-    items: [{ name: "Reportes", href: "#", icon: ChartBarIcon }],
+    items: [
+      { name: "Reportes", href: "/dashboard/reportes", icon: ChartBarIcon },
+    ],
   },
   {
     title: "Otros",
     items: [
-      { name: "Configuración", href: "#", icon: Cog6ToothIcon },
-      { name: "Centro de ayuda", href: "#", icon: QuestionMarkCircleIcon },
+      {
+        name: "Configuración",
+        href: "/dashboard/configuracion",
+        icon: Cog6ToothIcon,
+      },
+      {
+        name: "Centro de ayuda",
+        href: "/dashboard/ayuda",
+        icon: QuestionMarkCircleIcon,
+      },
     ],
   },
 ];
@@ -55,15 +71,17 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-64 flex-col bg-white">
-      <div className="flex items-center gap-3 px-6 pt-2">
-        <div className="flex items-center gap-3 border border-blue-50 rounded-lg px-5 py-2">
-          <img
-            src="/assets/images/isotipo 1.svg"
+    <aside className="flex h-screen w-64 flex-col bg-white border-b-gray-400 shadow-sm">
+      {/* Logo & Rol */}
+      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center gap-4 w-full ">
+          <Image
+            src="/images/isotipo.png"
             alt="Logo Vitalfit"
-            width={32}
-          />{" "}
-          {/* Cambia aquí la forma de importar el logo */}
+            width={60}
+            height={60}
+            priority
+          />
           <div className="flex flex-col">
             <span className="text-sm font-bold text-gray-900">VITALFIT</span>
             <span className="text-xs text-gray-500">Super Admin</span>
@@ -72,31 +90,34 @@ export function Sidebar() {
         </div>
       </div>
 
+      {/* Navegación */}
       <nav className="flex-1 overflow-y-auto px-3 py-3">
         {navigationSections.map((section, sectionIndex) => (
-          <div key={sectionIndex} className="mb-4">
+          <div key={sectionIndex} className="mb-5">
             {section.title && (
-              <h3 className="mb-2 px-3 text-xs text-gray-500">
+              <h3 className="mb-2 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 {section.title}
               </h3>
             )}
             <ul className="space-y-1">
-              {section.items.map((item) => {
-                const isActive = pathname === item.href;
-                const Icon = item.icon;
-
+              {section.items.map(({ name, href, icon: Icon }) => {
+                const isActive = pathname === href;
                 return (
-                  <li key={item.name}>
+                  <li key={name}>
                     <Link
-                      href={item.href}
+                      href={href}
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                         isActive
-                          ? "bg-gray-100 text-gray-900"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          ? "bg-blue-50 text-blue-600 font-medium"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span>{item.name}</span>
+                      <Icon
+                        className={`h-5 w-5 ${
+                          isActive ? "text-blue-600" : "text-gray-500"
+                        }`}
+                      />
+                      <span>{name}</span>
                     </Link>
                   </li>
                 );
@@ -105,33 +126,31 @@ export function Sidebar() {
           </div>
         ))}
 
-        <div className="mt-1">
+        {/* Cerrar sesión */}
+        <div className="mt-6">
           <button
-            onClick={() => {
-              console.log("Cerrar sesión");
-            }}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm  text-red-600 transition-colors hover:bg-red-50"
+            onClick={() => console.log("Cerrar sesión")}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
           >
-            <ArrowRightOnRectangleIcon className="h-5 w-5" />
+            <ArrowRightCircleIcon className="h-5 w-5" />
             <span>Cerrar sesión</span>
           </button>
         </div>
       </nav>
 
-      <div className="p-3">
-        <div className="flex items-center gap-3 border border-blue-50 rounded-lg px-4 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm text-gray-700">
-              A
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="truncate text-sm font-medium text-gray-900">
-                Albani Barragan
-              </span>
-              <span className="truncate text-xs text-gray-500">
-                albani@gmail.com
-              </span>
-            </div>
+      {/* Usuario (footer) */}
+      <div className="p-4 border-t border-gray-200">
+        <div className="flex items-center gap-3 rounded-lg px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-700">
+            A
+          </div>
+          <div className="flex flex-col overflow-hidden">
+            <span className="truncate text-sm font-medium text-gray-900">
+              Albani Barragán
+            </span>
+            <span className="truncate text-xs text-gray-500">
+              albani@gmail.com
+            </span>
           </div>
         </div>
       </div>

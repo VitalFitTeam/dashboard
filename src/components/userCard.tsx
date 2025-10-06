@@ -18,7 +18,7 @@ export default function UserCard({ name, role, avatarUrl }: UserCardProps) {
             alt={`${name} avatar`}
             width={72}
             height={72}
-            className="rounded-full object-cover w-12 h-12 sm:w-14 sm:h-14 lg:w-[72px] lg:h-[72px]"
+            className="rounded-full object-cover w-12 h-12 sm:w-14 sm:h-14 lg:w-[72px] lg:h-[72px] "
           />
         ) : (
           <div className="rounded-full bg-gray-200 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-[72px] lg:h-[72px]">
@@ -49,7 +49,7 @@ export default function UserCard({ name, role, avatarUrl }: UserCardProps) {
           {name}
         </h2>
         <p
-          className={`text-sm sm:text-base text-gray-500 ${montserrat.className}`}
+          className={`text-gray-500 text-sm lg:text-base font-medium ${montserrat.className}`}
         >
           {role}
         </p>

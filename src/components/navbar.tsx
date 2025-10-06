@@ -1,66 +1,56 @@
 import React from "react";
+import {
+  BellIcon,
+  MagnifyingGlassIcon,
+  Squares2X2Icon,
+  SunIcon,
+} from "@heroicons/react/24/outline";
 import { typography, colors } from "@/styles/styles";
 
 const Navbar: React.FC = () => {
   return (
     <div
-      className={`flex items-center justify-between ${colors.complementary.white}`}
-      style={{
-        padding: "0.5rem 1rem",
-        borderBottom: `1px solid ${colors.complementary.lightGray}`,
-      }}
+      className={`h-14 border-b-gray-300 flex items-center justify-between px-6 bg-white ${colors.complementary.white}`}
     >
-      <div className="flex items-center space-x-6">
-        <img src="/button.svg" alt="Button Icon" className="w-9 h-9" />
+      <div className="flex items-center space-x-2 text-sm">
+        <Squares2X2Icon className="w-5 h-5 text-gray-700" />
         <span
-          className={`text-${colors.complementary.lightGray} ${typography.body}`}
-          style={{
-            fontFamily: "var(--font-montserrat)",
-            color: colors.complementary.lightGray,
-          }}
+          className={`${typography.body} text-gray-500`}
+          style={{ color: colors.complementary.black }}
         >
           Dashboards
         </span>
-        <span
-          className={`text-${colors.complementary.lightGray}`} // Color gris claro para el separador
-        >
-          /
-        </span>
-        <span
-          className={`text-black ${typography.body}`}
-          style={{ fontFamily: "var(--font-montserrat)" }}
-        >
-          Default
-        </span>
+        <span className="text-gray-800 font-medium">/ Default</span>
       </div>
 
-      <div className="flex items-center space-x-20">
-        {" "}
-        {/* Espaciado ajustado */}
-        {/* Icono de Notificación */}
-        <img src="/bell.svg" alt="Notificaciones" className="w-7 h-7" />
-        {/* Icono de Luz */}
-        <img src="/sun.svg" alt="Luz" className="w-7 h-7" />
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          className="relative p-1 rounded-full hover:bg-gray-100 transition-colors"
+          aria-label="Notificaciones"
+        >
+          <BellIcon className="w-6 h-6 text-gray-700" />
+        </button>
+        <button
+          type="button"
+          className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+          aria-label="Cambiar tema"
+        >
+          <SunIcon className="w-6 h-6 text-gray-700" />
+        </button>
         {/* Campo de Búsqueda */}
         <div className="relative">
-          {" "}
-          {/* Contenedor relativo para el icono */}
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Search"
-            className={`py-1 pl-10 pr-4 outline-none ${typography.body} text-${colors.complementary.lightGray}`}
+            placeholder="Buscar..."
+            className={`pl-10 pr-4 py-1.5 border text-sm rounded-lg focus:ring-1 focus:ring-gray-300 focus:border-gray-300 outline-none ${typography.body}`}
             style={{
-              fontFamily: "var(--font-montserrat)",
-              border: `1px solid ${colors.complementary.lightGray}`,
-              borderRadius: "0.6rem",
-              width: "300px",
+              color: colors.complementary.black,
+              borderColor: colors.complementary.lightGray,
+              width: "280px",
             }}
           />
-          <img
-            src="/magnifying-glass.svg"
-            alt="Buscar"
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 cursor-pointer"
-          />{" "}
         </div>
       </div>
     </div>

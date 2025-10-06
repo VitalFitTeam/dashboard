@@ -1,9 +1,13 @@
-const ProfilePage = () => {
-  return (
-    <div className="font-poppins space-y-4 p-8 py-0 [&_input]:text-gray-500">
-      <h1>albani</h1>
-    </div>
-  );
-};
+import Button from "@/components/button";
+import Input from "@/components/input";
+import TabSelector from "@/components/TabSelector";
+import UserCard from "@/components/userCard";
 
-export default ProfilePage;
+export default function ProfilePage() {
+  return (
+    <section className="flex flex-col items-center justify-start  bg-white rounded-xl shadow-sm p-6 mt-8">
+      <UserCard name="Albani Barragan" role="Super Administrador" />
+      <TabSelector />
+    </section>
+  );
+}

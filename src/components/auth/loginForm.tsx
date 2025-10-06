@@ -11,8 +11,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 import Input from "@/components/input";
 import PasswordInput from "@/components/passwordInput";
-import PrimaryButton from "@/components/primaryButton";
 import { colors, montserrat } from "@/styles/styles";
+import Button from "../button";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -92,13 +92,7 @@ export default function LoginForm() {
             </a>
           </div>
 
-          <PrimaryButton
-            type="submit"
-            isLoading={isLoading}
-            className={`w-full bg-[${colors.primary}] hover:opacity-90 text-white font-semibold py-3 rounded-lg text-lg transition-all`}
-          >
-            Iniciar sesión
-          </PrimaryButton>
+          <Button>Iniciar sesion</Button>
         </form>
       </div>
     </div>
