@@ -1,18 +1,16 @@
 import Button from "@/components/button";
 import Input from "@/components/input";
+import { Sidebar } from "@/components/sidebar";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <h1>Hola</h1>
-      <Input
-        label="Contraseña"
-        type="password"
-        placeholder="Ingresa tu contraseña"
-        helperText="Debe tener al menos 8 caracteres"
-      />
-      <Button />
-      
+    <div className="flex h-screen">
+      <Sidebar />
+      <main className="flex-1 overflow-y-auto p-8">
+        <h1 className="text-3xl font-bold">Bienvenido al Dashboard</h1>
+        <p className="mt-4 text-muted-foreground">prueba sidebar</p>
+        {/* Puedes agregar más contenido aquí */}
+      </main>
     </div>
   );
 }
