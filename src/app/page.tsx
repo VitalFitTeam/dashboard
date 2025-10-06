@@ -1,5 +1,6 @@
 import Button from "@/components/primaryButton";
 import Input from "@/components/input";
+import { Sidebar } from "@/components/sidebar";
 
 export default function Home() {
   return (
