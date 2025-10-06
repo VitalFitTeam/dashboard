@@ -1,53 +1,41 @@
-import { colors } from "@/styles/styles";
+// src/components/Input.tsx
+"use client";
 
-type InputProps = {
-  label: string;
-  value?: string;
-  type?: string;
-  helperText?: string;
-  placeholder?: string;
-};
+import React, { forwardRef } from "react";
 
-const Input = ({
-  label,
-  type = "text",
-  value,
-  helperText,
-  placeholder,
-}: InputProps) => {
-  return (
-    <div className="flex flex-col gap-1">
-      {/* Label */}
-      <label
-        className="text-sm font-medium"
-        style={{ color: colors.complementary.black }}
-      >
-        {label}
-      </label>
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  containerClassName?: string;
+}
 
-      {/* Input */}
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        className={`
-          px-3 py-2 rounded-md font-sans border
-          bg-gray-50 text-gray-900
-          border-gray-300
-          focus:outline-none focus:ring-2 focus:ring-[${colors.primary}] focus:border-transparent
-          transition-all duration-200
-          placeholder:text-gray-400
-        `}
-      />
+const Input = forwardRef<HTMLInputElement, InputProps>(
+  (
+    { label, error, className = "", containerClassName = "", ...props },
+    ref,
+  ) => {
+    return (
+      <div className={`w-full ${containerClassName}`}>
+        {label && (
+          <label className="block text-sm font-medium text-gray-800 mb-1">
+            {label}
+          </label>
+        )}
+        <input
+          {...props}
+          ref={ref}
+          className={`w-full px-4 py-2 border rounded-lg border-[#A4A4A4] 
+            focus:border-[#F27F2A] focus:ring-[#F27F2A] 
+            focus:outline-none text-[#1A1A1A] text-auto transition-colors duration-200
+            ${error ? "border-red-500" : "border-gray-300"}
+            ${className}`}
+        />
+        {error && <p className="text-red-600 text-xs mt-1">{error}</p>}
+      </div>
+    );
+  },
+);
 
-      {/* Helper Text */}
-      {helperText && (
-        <span className="text-xs" style={{ color: colors.complementary.darkGray }}>
-          {helperText}
-        </span>
-      )}
-    </div>
-  );
-};
-
+Input.displayName = "Input";
 export default Input;
