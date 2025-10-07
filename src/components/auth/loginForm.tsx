@@ -13,6 +13,7 @@ import Input from "@/components/input";
 import PasswordInput from "@/components/passwordInput";
 import { colors, montserrat } from "@/styles/styles";
 import Button from "../button";
+import { fetchAPI } from "@/lib/api";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,8 +29,15 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      console.log("Login Data:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const result = await fetchAPI("/auth/login", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+      console.log("Login exitoso:", result);
+      localStorage.setItem("token", result.token);
+      window.location.href = "/profile";
+    } catch (err) {
+      alert("Error al iniciar sesión");
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +100,7 @@ export default function LoginForm() {
             </a>
           </div>
 
-          <Button>Iniciar sesion</Button>
+          <Button type="submit">Iniciar sesion</Button>
         </form>
       </div>
     </div>
