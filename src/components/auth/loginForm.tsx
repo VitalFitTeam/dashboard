@@ -59,7 +59,6 @@ export default function LoginForm() {
           />
         </div>
 
-        {/* Título */}
         <h2
           className={`text-center text-[1.5rem] font-semibold text-[${colors.complementary.black}] mb-2`}
         >
@@ -68,8 +67,6 @@ export default function LoginForm() {
         <p className="text-center text-gray-600 text-base mb-8">
           Por favor introduce tus datos para iniciar sesión
         </p>
-
-        {/* Formulario */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Input
             label="Correo electrónico"

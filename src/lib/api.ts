@@ -3,10 +3,11 @@ export const API_URL = "https://api-rm8x.onrender.com/v1";
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   try {
     const res = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
       headers: {
         "Content-Type": "application/json",
+        ...(options.headers || {}), // merge con headers enviados en options
       },
-      ...options,
     });
 
     if (!res.ok) {

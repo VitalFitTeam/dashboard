@@ -28,12 +28,10 @@ export default function ProfilePage() {
 
     fetchAPI("/user/whoami", {
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     })
       .then((data) => {
-        console.log("Datos del usuario:", data);
         setUser(data.user);
       })
       .catch((err) => console.error(err))
@@ -56,7 +54,7 @@ export default function ProfilePage() {
           avatarUrl={user.profile_picture_url || "/logo/isotipo.png"}
         />
       )}
-      <TabSelector />
+      <TabSelector user={user} />
     </section>
   );
 }
