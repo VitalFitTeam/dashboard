@@ -16,7 +16,9 @@ import {
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
   ArrowRightCircleIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
+import { CalendarIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
 
 interface NavItem {
   name: string;
@@ -40,14 +42,19 @@ const navigationSections: NavSection[] = [
         icon: BuildingStorefrontIcon,
       },
       { name: "Usuarios Admin", href: "/dashboard/usuarios", icon: UsersIcon },
-      { name: "Promos y cupones", href: "/dashboard/promos", icon: TicketIcon },
-      { name: "Anuncios", href: "/dashboard/anuncios", icon: MegaphoneIcon },
+      {
+        name: "servicios",
+        href: "/dashboard/promos",
+        icon: CurrencyDollarIcon,
+      },
+      { name: "Clientes", href: "/dashboard/anuncios", icon: UserIcon },
     ],
   },
   {
     title: "Reportes y estadísticas",
     items: [
       { name: "Reportes", href: "/dashboard/reportes", icon: ChartBarIcon },
+      { name: "Calendario", href: "/dashboard/Calendario", icon: CalendarIcon },
     ],
   },
   {
@@ -72,7 +79,6 @@ export function Sidebar() {
 
   return (
     <aside className="flex h-screen w-64 flex-col bg-white border-b-gray-400 shadow-sm">
-      {/* Logo & Rol */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200">
         <div className="flex items-center gap-4 w-full ">
           <Image

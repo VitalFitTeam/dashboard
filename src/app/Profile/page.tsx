@@ -2,6 +2,7 @@
 import TabSelector from "@/components/TabSelector";
 import UserCard from "@/components/userCard";
 import { fetchAPI } from "@/lib/api";
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
@@ -22,8 +23,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      window.location.href = "/login";
-      return;
+      redirect("/login");
     }
 
     fetchAPI("/user/whoami", {
