@@ -1,4 +1,4 @@
-export const API_URL = "https://api-rm8x.onrender.com/v1";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   try {
@@ -6,7 +6,7 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
       ...options,
       headers: {
         "Content-Type": "application/json",
-        ...(options.headers || {}), // merge con headers enviados en options
+        ...(options.headers || {}),
       },
     });
 
