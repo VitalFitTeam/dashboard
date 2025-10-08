@@ -1,8 +1,6 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   try {
-    const res = await fetch(`${API_URL}${endpoint}`, {
+    const res = await fetch(`https://api-rm8x.onrender.com/v1${endpoint}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",
