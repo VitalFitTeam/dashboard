@@ -6,8 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/validation/loginSchema";
 import type { z } from "zod";
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { useRouter } from "next/navigation";
 
 import Input from "@/components/input";
 import PasswordInput from "@/components/passwordInput";
@@ -15,8 +14,11 @@ import { colors, montserrat } from "@/styles/styles";
 import Button from "../button";
 import { fetchAPI } from "@/lib/api";
 
+type LoginFormData = z.infer<typeof loginSchema>;
+
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -33,11 +35,15 @@ export default function LoginForm() {
         method: "POST",
         body: JSON.stringify(data),
       });
-      console.log("Login exitoso:", result);
+
+      if (!result.token) {
+        throw new Error("Token no recibido");
+      }
       localStorage.setItem("token", result.token);
-      window.location.href = "/profile";
+      router.push("/profile");
     } catch (err) {
-      alert("Error al iniciar sesión");
+      console.error("Error al iniciar sesión:", err);
+      alert("Error al iniciar sesión. Revisa tus credenciales.");
     } finally {
       setIsLoading(false);
     }
@@ -67,6 +73,7 @@ export default function LoginForm() {
         <p className="text-center text-gray-600 text-base mb-8">
           Por favor introduce tus datos para iniciar sesión
         </p>
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Input
             label="Correo electrónico"
@@ -97,7 +104,9 @@ export default function LoginForm() {
             </a>
           </div>
 
-          <Button type="submit">Iniciar sesion</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Cargando..." : "Iniciar sesión"}
+          </Button>
         </form>
       </div>
     </div>
