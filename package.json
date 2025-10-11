@@ -7,7 +7,11 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "prepare": "husky"
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -34,5 +38,12 @@
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.14",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --fix",
+    "*.{js,jsx,ts,tsx,css,md}": [
+      "prettier --write",
+      "npx jest --findRelatedTests --bail --passWithNoTests"
+    ]
   }
 }
