@@ -15,7 +15,6 @@ const customJestConfig = {
     // Manejar mocks de CSS
     '^.+\\.(css|sass|scss)$': 'identity-obj-proxy',
   },
-  preset: 'ts-jest',
 };
 
 // createJestConfig se exporta de esta manera para asegurar que next/jest pueda cargar la configuración de Next.js
