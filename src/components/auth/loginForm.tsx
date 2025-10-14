@@ -8,10 +8,10 @@ import { loginSchema } from "@/lib/validation/loginSchema";
 import type { z } from "zod";
 import { useRouter } from "next/navigation";
 
-import Input from "@/components/input";
+import Input from "@/components/Input";
 import PasswordInput from "@/components/passwordInput";
 import { colors, montserrat } from "@/styles/styles";
-import Button from "../button";
+import Button from "../Button";
 import { fetchAPI } from "@/lib/api";
 
 type LoginFormData = z.infer<typeof loginSchema>;

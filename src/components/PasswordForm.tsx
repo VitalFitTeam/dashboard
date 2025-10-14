@@ -1,6 +1,6 @@
 import React from "react";
-import Input from "./input";
-import Button from "./button";
+import Input from "./Input";
+import Button from "./Button";
 
 export const PasswordForm: React.FC = () => {
   return (
