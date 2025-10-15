@@ -1,6 +1,6 @@
 "use client";
-
-import Button from "@/components/Button";
+import { Button } from "@/components/ui/button";
+import { UserIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
@@ -13,8 +13,8 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-8">
       <h1 className="text-6xl font-bold text-center">VITALFIT</h1>
-      <Button onClick={handleClick} width="small" variant="primary">
-        Ir a Login
+      <Button variant="primary" onClick={handleClick}>
+        Ir al Login
       </Button>
     </div>
   );

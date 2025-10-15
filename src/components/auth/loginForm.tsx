@@ -11,8 +11,8 @@ import { useRouter } from "next/navigation";
 import Input from "@/components/Input";
 import PasswordInput from "@/components/passwordInput";
 import { colors, montserrat } from "@/styles/styles";
-import Button from "../Button";
 import { fetchAPI } from "@/lib/api";
+import { Button } from "../ui/button";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -104,8 +104,15 @@ export default function LoginForm() {
             </a>
           </div>
 
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Cargando..." : "Iniciar sesión"}
+          <Button
+            type="submit"
+            fullWidth
+            isLoading={isLoading}
+            disabled={isLoading}
+            variant="primary"
+            size="lg"
+          >
+            Iniciar sesión
           </Button>
         </form>
       </div>
