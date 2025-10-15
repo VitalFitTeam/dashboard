@@ -1,7 +1,6 @@
 "use client";
 
 import Button from "@/components/Button";
-import PaymentTable from "@/components/tables/PaymentTable";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
@@ -17,7 +16,6 @@ export default function Home() {
       <Button onClick={handleClick} width="small" variant="primary">
         Ir a Login
       </Button>
-      <PaymentTable />
     </div>
   );
 }
