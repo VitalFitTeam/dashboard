@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
-import { Sidebar } from "@/components/sidebar";
+import { Sidebar } from "@/components/Sidebar";
 
-export default function ProfileLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;

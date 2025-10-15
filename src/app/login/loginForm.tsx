@@ -12,7 +12,7 @@ import Input from "@/components/Input";
 import PasswordInput from "@/components/passwordInput";
 import { colors, montserrat } from "@/styles/styles";
 import { fetchAPI } from "@/lib/api";
-import { Button } from "../ui/button";
+import { Button } from "../../components/ui/button";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 

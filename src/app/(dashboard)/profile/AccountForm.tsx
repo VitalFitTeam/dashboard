@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import Input from "./Input";
-import Button from "./Button";
+import Input from "../../../components/Input";
+import { Button } from "@/components/ui/button";
 
 interface AccountFormProps {
   user: {
@@ -56,7 +56,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
         />
       </div>
       <div className="pt-4">
-        <Button width="w-full" variant="primary" disabled>
+        <Button fullWidth variant="primary" disabled>
           Actualizar datos
         </Button>
       </div>

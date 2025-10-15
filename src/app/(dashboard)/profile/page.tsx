@@ -1,9 +1,11 @@
 "use client";
-import TabSelector from "@/components/TabSelector";
+import { TabSelector } from "@/components/TabSelector";
 import UserCard from "@/components/userCard";
 import { fetchAPI } from "@/lib/api";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
+import { PasswordForm } from "./PasswordForm";
+import { AccountForm } from "./AccountForm";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<{
@@ -45,6 +47,19 @@ export default function ProfilePage() {
     return <p>No se pudo cargar la información del usuario.</p>;
   }
 
+  const tabs = [
+    {
+      value: "Personal",
+      label: "Datos Personales",
+      content: <AccountForm user={user} />,
+    },
+    {
+      value: "Password",
+      label: "Password",
+      content: <PasswordForm />,
+    },
+  ];
+
   return (
     <section className="flex flex-col items-center justify-start  bg-white rounded-xl shadow-sm p-6 mt-8">
       {user && (
@@ -54,7 +69,7 @@ export default function ProfilePage() {
           avatarUrl={user.profile_picture_url || "/logo/isotipo.png"}
         />
       )}
-      <TabSelector user={user} />
+      <TabSelector tabs={tabs} defaultValue="Personal" />
     </section>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { UserIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 
 export default function Home() {

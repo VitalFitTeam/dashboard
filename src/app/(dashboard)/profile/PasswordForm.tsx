@@ -1,6 +1,6 @@
 import React from "react";
-import Input from "./Input";
-import Button from "./Button";
+import Input from "../../../components/Input";
+import { Button } from "../../../components/ui/button";
 
 export const PasswordForm: React.FC = () => {
   return (
@@ -24,7 +24,7 @@ export const PasswordForm: React.FC = () => {
       </div>
 
       <div className="pt-4">
-        <Button width="w-full" variant="primary">
+        <Button fullWidth variant="primary">
           Actualizar Contraseña
         </Button>
       </div>
