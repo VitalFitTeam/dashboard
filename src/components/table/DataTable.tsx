@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+"use client";
 import {
   Table,
   TableHeader,
@@ -9,6 +9,7 @@ import {
 } from "../ui/table";
 import { Checkbox } from "../ui/checkbox";
 import { PaginationControls } from "./PaginationControls";
+import { useState } from "react";
 
 export type Column<T> = {
   header: string;
