@@ -2,8 +2,8 @@
 import { Column, DataTable } from "@/components/table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { RefreshCcw, RotateCwIcon } from "lucide-react";
+import { EyeIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { RefreshCcw } from "lucide-react";
 import { useState } from "react";
 
 type Branches = {
@@ -24,6 +24,7 @@ const branchesColumns: Column<Branches>[] = [
   {
     header: "Nombre",
     accessor: "name",
+    filterType: "text",
   },
   {
     header: "RIF",
@@ -40,10 +41,22 @@ const branchesColumns: Column<Branches>[] = [
   {
     header: "País",
     accessor: "country",
+    filterType: "select",
+    filterOptions: [
+      { label: "Venezuela", value: "Venezuela" },
+      { label: "Colombia", value: "Colombia" },
+      { label: "Perú", value: "Perú" },
+    ],
   },
   {
     header: "Status",
     accessor: "status",
+    filterType: "select",
+    filterOptions: [
+      { label: "Activa", value: "active" },
+      { label: "Inactiva", value: "inactive" },
+      { label: "En mantenimiento", value: "maintenance" },
+    ],
     render: (value) => {
       let displayText = "";
       let color = "";
@@ -75,15 +88,98 @@ const branchesColumns: Column<Branches>[] = [
   },
 ];
 
-const sucursales: Branches[] = Array.from({ length: 30 }).map((_, i) => ({
-  id: `00${i + 1}`,
-  name: "VitalFit - Centro",
-  rif: "J-12345678-9",
-  administrator: "Ana García",
-  location: "Avenida Principal 123, Ciudad",
-  country: "Venezuela",
-  status: i < 10 ? "active" : i < 20 ? "inactive" : "maintenance",
-}));
+const sucursales: Branches[] = [
+  {
+    id: "001",
+    name: "VitalFit Centro",
+    rif: "J-12345678-9",
+    administrator: "Ana García",
+    location: "Avenida Principal 123, Caracas",
+    country: "Venezuela",
+    status: "active",
+  },
+  {
+    id: "002",
+    name: "PowerGym Norte",
+    rif: "J-98765432-1",
+    administrator: "Luis Pérez",
+    location: "Calle 45, Bogotá",
+    country: "Colombia",
+    status: "inactive",
+  },
+  {
+    id: "003",
+    name: "FitLife Sur",
+    rif: "J-11112222-3",
+    administrator: "María López",
+    location: "Av. Los Próceres 200, Lima",
+    country: "Perú",
+    status: "maintenance",
+  },
+  {
+    id: "004",
+    name: "GymMax Centro",
+    rif: "J-44445555-6",
+    administrator: "Carlos Fernández",
+    location: "Calle 10, Valencia",
+    country: "Venezuela",
+    status: "active",
+  },
+  {
+    id: "005",
+    name: "Energy Gym Este",
+    rif: "J-66667777-8",
+    administrator: "Laura Gómez",
+    location: "Av. Libertador 50, Medellín",
+    country: "Colombia",
+    status: "inactive",
+  },
+  {
+    id: "006",
+    name: "Health Club Oeste",
+    rif: "J-99990000-1",
+    administrator: "Pedro Martínez",
+    location: "Av. Perú 123, Lima",
+    country: "Perú",
+    status: "active",
+  },
+  {
+    id: "007",
+    name: "Muscle Factory",
+    rif: "J-22223333-4",
+    administrator: "Sofía Ramírez",
+    location: "Av. Bolívar 75, Caracas",
+    country: "Venezuela",
+    status: "maintenance",
+  },
+  {
+    id: "008",
+    name: "Iron Gym Norte",
+    rif: "J-55556666-7",
+    administrator: "Jorge Torres",
+    location: "Calle 7, Bogotá",
+    country: "Colombia",
+    status: "active",
+  },
+  {
+    id: "009",
+    name: "FitWorld",
+    rif: "J-88889999-0",
+    administrator: "Camila Díaz",
+    location: "Av. Lima 321, Lima",
+    country: "Perú",
+    status: "inactive",
+  },
+  {
+    id: "010",
+    name: "VitalFit Sur",
+    rif: "J-10101010-2",
+    administrator: "Andrés Silva",
+    location: "Calle 5, Valencia",
+    country: "Venezuela",
+    status: "active",
+  },
+];
 
 export default function BranchesTable() {
   const [page, setPage] = useState(1);
@@ -95,6 +191,7 @@ export default function BranchesTable() {
       page={page}
       pageSize={10}
       onPageChange={setPage}
+      enableFilters
       actions={() => (
         <div className="flex items-center gap-2">
           <Button size="icon" variant="ghost">
