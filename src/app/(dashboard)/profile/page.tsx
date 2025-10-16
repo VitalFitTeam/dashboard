@@ -61,7 +61,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <section className="flex flex-col items-center justify-start  bg-white rounded-xl shadow-sm p-6 mt-8">
+    <section className="flex flex-col justify-start  bg-white rounded-xl shadow-sm p-6 mt-8">
       {user && (
         <UserCard
           name={`${user.first_name} ${user.last_name}`}

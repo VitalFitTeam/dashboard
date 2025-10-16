@@ -8,11 +8,10 @@ import { loginSchema } from "@/lib/validation/loginSchema";
 import type { z } from "zod";
 import { useRouter } from "next/navigation";
 
-import Input from "@/components/Input";
-import PasswordInput from "@/components/passwordInput";
+import { Button } from "@/components/ui/button";
 import { colors, montserrat } from "@/styles/styles";
 import { fetchAPI } from "@/lib/api";
-import { Button } from "../../components/ui/button";
+import InputField from "@/components/InputField";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -39,6 +38,7 @@ export default function LoginForm() {
       if (!result.token) {
         throw new Error("Token no recibido");
       }
+
       localStorage.setItem("token", result.token);
       router.push("/profile");
     } catch (err) {
@@ -54,7 +54,6 @@ export default function LoginForm() {
       <div
         className={`bg-white border border-gray-200 shadow-2xl rounded-2xl p-10 w-full max-w-md ${montserrat.className}`}
       >
-        {/* Logo */}
         <div className="flex justify-center mb-6">
           <Image
             src="/logo/isotipo.png"
@@ -75,7 +74,7 @@ export default function LoginForm() {
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Input
+          <InputField
             label="Correo electrónico"
             type="email"
             placeholder="albanibarragan@vitalfit.com"
@@ -83,18 +82,15 @@ export default function LoginForm() {
             error={errors.email?.message}
           />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-800 mb-1">
-              Contraseña
-            </label>
-            <PasswordInput
-              placeholder="Ingresa tu contraseña"
-              {...register("password")}
-              error={errors.password?.message}
-            />
-          </div>
+          <InputField
+            label="Contraseña"
+            type="password"
+            placeholder="Ingresa tu contraseña"
+            {...register("password")}
+            error={errors.password?.message}
+          />
 
-          <div className={"text-center text-[1rem]"}>
+          <div className="text-center text-[1rem]">
             <a
               href="#"
               style={{ color: colors.primary }}

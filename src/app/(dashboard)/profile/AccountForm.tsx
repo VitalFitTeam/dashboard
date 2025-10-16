@@ -1,7 +1,8 @@
 "use client";
+
 import React from "react";
-import Input from "../../../components/Input";
 import { Button } from "@/components/ui/button";
+import InputField from "@/components/InputField";
 
 interface AccountFormProps {
   user: {
@@ -16,50 +17,56 @@ interface AccountFormProps {
 
 export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
   return (
-    <div className="p-6 bg-white space-y-8">
+    <form className="p-6 bg-white space-y-8 rounded-xl shadow-sm">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Input
+        <InputField
           label="Nombre*"
           type="text"
-          defaultValue={user.first_name}
+          value={user.first_name}
           disabled
         />
-        <Input
+
+        <InputField
           label="Apellido*"
           type="text"
-          defaultValue={user.last_name}
+          value={user.last_name}
           disabled
         />
-        <Input
-          label="Número de telefono*"
+
+        <InputField
+          label="Número de teléfono*"
           type="text"
-          defaultValue={user.phone || ""}
+          value={user.phone || ""}
           disabled
         />
-        <Input
+
+        <InputField
           label="Documento de identidad*"
           type="text"
-          defaultValue={user.identity_document || ""}
+          value={user.identity_document || ""}
           disabled
         />
-        <Input
+
+        <InputField
           label="Fecha de nacimiento*"
           type="date"
-          defaultValue={user.birth_date ? user.birth_date.split("T")[0] : ""}
+          value={user.birth_date ? user.birth_date.split("T")[0] : ""}
           disabled
         />
-        <Input
+
+        <InputField
           label="Correo electrónico*"
           type="email"
-          defaultValue={user.email}
+          value={user.email}
           disabled
         />
       </div>
+
       <div className="pt-4">
         <Button fullWidth variant="primary" disabled>
           Actualizar datos
         </Button>
       </div>
-    </div>
+    </form>
   );
 };

@@ -38,7 +38,7 @@ const navigationSections: NavSection[] = [
       { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
       {
         name: "Sucursales",
-        href: "/dashboard/sucursales",
+        href: "/branches",
         icon: BuildingStorefrontIcon,
       },
       { name: "Usuarios Admin", href: "/dashboard/usuarios", icon: UsersIcon },

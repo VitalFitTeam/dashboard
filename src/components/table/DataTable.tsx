@@ -23,7 +23,7 @@ import {
 import { Checkbox } from "../ui/checkbox";
 import { PaginationControls } from "./PaginationControls";
 import { ArrowUp, ArrowDown } from "lucide-react";
-import Input from "../Input";
+import { Input } from "../Input";
 
 export type Column<T> = {
   header: string;
