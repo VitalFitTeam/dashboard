@@ -99,6 +99,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
         <span
           className={cn(
+            "flex items-center gap-1",
             "transition-opacity duration-200",
             isLoading ? "opacity-70" : "opacity-100",
           )}

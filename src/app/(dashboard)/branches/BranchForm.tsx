@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import Image from "next/image";
 
-export default function SucursalesForm({ onClose }: { onClose: () => void }) {
+export default function BranchFrom({ onClose }: { onClose: () => void }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     razonSocial: "FitnessPlaza",

@@ -184,47 +184,28 @@ const sucursales: Branches[] = [
 
 export default function BranchesTable() {
   const [page, setPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
 
   return (
-    <>
-      <div className="flex justify-end">
-        <button
-          onClick={() => setShowModal(true)}
-          className="border border-gray-500 hover:bg-orange-400 text-gray px-4 py-2 rounded-sm text-sm font-medium"
-        >
-          + Crear Sucursal
-        </button>
-      </div>
-      <DataTable
-        columns={branchesColumns}
-        data={sucursales}
-        page={page}
-        pageSize={10}
-        onPageChange={setPage}
-        enableFilters
-        actions={() => (
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="ghost">
-              <PencilIcon className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost">
-              <EyeIcon className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost">
-              <RefreshCcw className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-      />
-      {showModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          onClick={() => setShowModal(false)}
-        >
-          <SucursalesForm onClose={() => setShowModal(false)} />
+    <DataTable
+      columns={branchesColumns}
+      data={sucursales}
+      page={page}
+      pageSize={10}
+      onPageChange={setPage}
+      enableFilters
+      actions={() => (
+        <div className="flex items-center gap-2">
+          <Button size="icon" variant="ghost">
+            <PencilIcon className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant="ghost">
+            <EyeIcon className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant="ghost">
+            <RefreshCcw className="h-4 w-4" />
+          </Button>
         </div>
       )}
-    </>
+    />
   );
 }

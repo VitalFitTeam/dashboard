@@ -22,7 +22,7 @@ export const typography = {
   h4: "text-[1.5rem] leading-[2rem] font-medium font-sans",
   h5: "text-[1.25rem] leading-[1.75rem] font-medium font-sans",
   body: "text-[1rem] leading-[1.5rem] font-normal font-sans",
-  heading: "font-heading text-[2.5rem] tracking-wide", // Bebas Neue
+  heading: "font-heading text-[2.5rem] tracking-wide",
 };
 
 export const colors = {
