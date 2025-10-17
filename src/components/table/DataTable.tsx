@@ -23,7 +23,7 @@ import {
 import { Checkbox } from "../ui/checkbox";
 import { PaginationControls } from "./PaginationControls";
 import { ArrowUp, ArrowDown } from "lucide-react";
-import { Input } from "../input";
+import { Input } from "../Input";
 
 export type Column<T> = {
   header: string;
@@ -76,12 +76,12 @@ export function DataTable<T>({
         filterFn:
           col.filterType === "select"
             ? (row, columnId, filterValue) =>
-              String(row.getValue(columnId)) === filterValue
+                String(row.getValue(columnId)) === filterValue
             : col.filterType === "text"
               ? (row, columnId, filterValue) =>
-                String(row.getValue(columnId))
-                  .toLowerCase()
-                  .includes(String(filterValue).toLowerCase())
+                  String(row.getValue(columnId))
+                    .toLowerCase()
+                    .includes(String(filterValue).toLowerCase())
               : undefined,
       })),
     [columns],

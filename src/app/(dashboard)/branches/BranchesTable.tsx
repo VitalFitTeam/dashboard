@@ -3,7 +3,7 @@ import { Column, DataTable } from "@/components/table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EyeIcon, PencilIcon } from "@heroicons/react/24/outline";
-import SucursalesForm from "@/components/sucursales/SucursalesForm";
+import SucursalesForm from "@/app/(dashboard)/branches/SucursalesForm";
 import { RefreshCcw } from "lucide-react";
 import { useState } from "react";
 
@@ -191,9 +191,9 @@ export default function BranchesTable() {
       <div className="flex justify-end">
         <button
           onClick={() => setShowModal(true)}
-          className="border border-gray-500 hover:bg-orange-600 text-gray px-4 py-2 rounded-sm text-sm font-medium"
+          className="border border-gray-500 hover:bg-orange-400 text-gray px-4 py-2 rounded-sm text-sm font-medium"
         >
-        + Crear Sucursal
+          + Crear Sucursal
         </button>
       </div>
       <DataTable

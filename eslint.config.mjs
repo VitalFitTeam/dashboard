@@ -1,17 +1,10 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import tsParser from "@typescript-eslint/parser";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import nextPlugin from "@next/eslint-plugin-next";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+export default [
   {
+    files: ["**/*.{js,jsx,ts,tsx}"],
     ignores: [
       "node_modules/**",
       ".next/**",
@@ -19,22 +12,24 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
     ],
-    files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
+      parser: tsParser,
       ecmaVersion: "latest",
       sourceType: "module",
     },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
+      "@next/next": nextPlugin,
+    },
     rules: {
-      // Reglas recomendadas de estilo y consistencia
-      "semi": ["error", "always"],                   // Siempre usar punto y coma
-      "quotes": ["error", "double"], // Comillas dobles
-      "no-unused-vars": ["warn"],                   // Variables no usadas → warning
-      "no-console": ["warn", { allow: ["warn", "error"] }], // console.log → warning
-      "eqeqeq": ["error", "always"],                // Usar siempre === y !==
-      "curly": ["error", "all"],                    // Siempre llaves en if/for/while
-      "indent": ["error", 2, { "SwitchCase": 1 }], // Indentación 2 espacios
+      ...nextPlugin.configs["core-web-vitals"].rules,
+      semi: ["error", "always"],
+      quotes: ["error", "double"],
+      "no-unused-vars": ["warn"],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      eqeqeq: ["error", "always"],
+      curly: ["error", "all"],
+      "indent": "off",
     },
   },
 ];
-
-export default eslintConfig;

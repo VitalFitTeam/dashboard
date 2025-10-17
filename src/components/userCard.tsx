@@ -10,7 +10,6 @@ type UserCardProps = {
 export default function UserCard({ name, role, avatarUrl }: UserCardProps) {
   return (
     <div className="flex items-center border-t border-dotted border-gray-200 px-4 w-full min-h-[100px] lg:w-[742px] lg:h-[100px]">
-      {/* Avatar */}
       <div className="flex-shrink-0 mr-6 lg:mr-[34px]">
         {avatarUrl ? (
           <Image

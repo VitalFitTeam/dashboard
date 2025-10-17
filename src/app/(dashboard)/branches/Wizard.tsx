@@ -14,14 +14,17 @@ export default function Wizard({ steps, currentStep }: WizardProps) {
     <div className="mb-12">
       <div className="flex items-center justify-between relative">
         {steps.map((step, index) => (
-          <div key={step.id} className="flex flex-col items-center flex-1 relative">
+          <div
+            key={step.id}
+            className="flex flex-col items-center flex-1 relative"
+          >
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center border-2 mb-2 transition-all ${
                 step.id === currentStep
                   ? "bg-orange-500 border-orange-500 text-white"
                   : step.id < currentStep
-                  ? "bg-gray-300 border-gray-300 text-white"
-                  : "bg-white border-gray-300 text-gray-400"
+                    ? "bg-gray-300 border-gray-300 text-white"
+                    : "bg-white border-gray-300 text-gray-400"
               }`}
             >
               {step.id}
@@ -29,9 +32,7 @@ export default function Wizard({ steps, currentStep }: WizardProps) {
             <div className="text-center">
               <div
                 className={`text-xs font-medium ${
-                  step.id === currentStep
-                    ? "text-gray-800"
-                    : "text-gray-500"
+                  step.id === currentStep ? "text-gray-800" : "text-gray-500"
                 }`}
               >
                 {step.name}
