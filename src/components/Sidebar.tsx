@@ -112,14 +112,14 @@ export function Sidebar() {
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         isActive
-                          ? "bg-blue-50 text-blue-600 font-medium"
+                          ? "bg-orange-100 text-black font-medium"
                           : "text-gray-700 hover:bg-gray-50 hover:text-gray-900",
                       )}
                     >
                       <Icon
                         className={cn(
                           "h-5 w-5",
-                          isActive ? "text-blue-600" : "text-gray-500",
+                          isActive ? "text-orange-400 " : "text-gray-500",
                         )}
                       />
                       <span>{name}</span>

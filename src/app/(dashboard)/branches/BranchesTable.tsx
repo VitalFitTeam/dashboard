@@ -3,7 +3,7 @@ import { Column, DataTable } from "@/components/table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EyeIcon, PencilIcon } from "@heroicons/react/24/outline";
-import SucursalesForm from "@/app/(dashboard)/branches/SucursalesForm";
+import SucursalesForm from "@/app/(dashboard)/branches/BranchForm";
 import { RefreshCcw } from "lucide-react";
 import { useState } from "react";
 
