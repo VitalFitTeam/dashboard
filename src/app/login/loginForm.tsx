@@ -4,19 +4,20 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/lib/validation/loginSchema";
-import type { z } from "zod";
+import {
+  LoginFormData,
+  LoginPayload,
+  loginSchema,
+} from "@/lib/validation/loginSchema";
 import { useRouter } from "next/navigation";
-
 import { Button } from "@/components/ui/button";
 import { colors, montserrat } from "@/styles/styles";
 import { fetchAPI } from "@/lib/api";
 import InputField from "@/components/InputField";
 
-type LoginFormData = z.infer<typeof loginSchema>;
-
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
   const {
@@ -29,10 +30,17 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
+    setErrorMessage(null);
+
+    const payload: LoginPayload = {
+      ...data,
+      context: "dashboard",
+    };
+
     try {
       const result = await fetchAPI("/auth/login", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!result.token) {
@@ -43,7 +51,9 @@ export default function LoginForm() {
       router.push("/profile");
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
-      alert("Error al iniciar sesión. Revisa tus credenciales.");
+      setErrorMessage(
+        "Fallo en el inicio de sesión. Credenciales no válidas o acceso restringido.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -54,30 +64,39 @@ export default function LoginForm() {
       <div
         className={`bg-white border border-gray-200 shadow-2xl rounded-2xl p-10 w-full max-w-md ${montserrat.className}`}
       >
-        <div className="flex justify-center mb-6">
+        {errorMessage && (
+          <div
+            className="mb-10 p-4 text-center text-red-700 bg-red-50 border border-red-300 rounded-lg font-medium"
+            role="alert"
+          >
+            {errorMessage}
+          </div>
+        )}
+
+        <div className="flex justify-center mb-4">
           <Image
             src="/logo/isotipo.png"
             alt="VitalFit Logo"
-            width={140}
-            height={140}
+            width={120}
+            height={120}
             className="rounded-full"
           />
         </div>
 
         <h2
-          className={`text-center text-[1.5rem] font-semibold text-[${colors.complementary.black}] mb-2`}
+          className={`text-center text-[1.6rem] font-bold text-[${colors.complementary.black}] mb-2`}
         >
-          Bienvenido
+          Acceso Administrativo
         </h2>
-        <p className="text-center text-gray-600 text-base mb-8">
-          Por favor introduce tus datos para iniciar sesión
+        <p className="text-center text-gray-600 text-sm mb-8">
+          Solo personal autorizado. Ingrese sus credenciales.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <InputField
             label="Correo electrónico"
             type="email"
-            placeholder="albanibarragan@vitalfit.com"
+            placeholder="administrador@vitalfit.com"
             {...register("email")}
             error={errors.email?.message}
           />
@@ -85,16 +104,16 @@ export default function LoginForm() {
           <InputField
             label="Contraseña"
             type="password"
-            placeholder="Ingresa tu contraseña"
+            placeholder="Ingrese su contraseña"
             {...register("password")}
             error={errors.password?.message}
           />
 
-          <div className="text-center text-[1rem]">
+          <div className="text-right text-[0.9rem] mb-6">
             <a
               href="#"
               style={{ color: colors.primary }}
-              className="font-semibold hover:no-underline transition-colors duration-200"
+              className="font-semibold hover:underline transition-colors duration-200"
             >
               ¿Olvidaste tu contraseña?
             </a>
@@ -108,7 +127,7 @@ export default function LoginForm() {
             variant="primary"
             size="lg"
           >
-            Iniciar sesión
+            Acceder al Dashboard
           </Button>
         </form>
       </div>
