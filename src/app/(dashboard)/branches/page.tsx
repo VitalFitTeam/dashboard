@@ -1,8 +1,11 @@
+"use client";
 import { StatCard } from "@/components/StatCard";
 import BranchesTable from "./BranchesTable";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { PlusCircleIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import BranchFrom from "./BranchForm";
+import { PlusIcon } from "@heroicons/react/24/outline";
 
 const statsData = {
   total: 100,
@@ -31,10 +34,11 @@ const statCardsConfig = [
 ];
 
 export default function HomeBranches() {
+  const [showModal, setShowModal] = useState(false);
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title="SUCURSALES">
-        <Button variant="primary">
+        <Button variant="primary" onClick={() => setShowModal(true)}>
           <PlusIcon className="h-5 w-5" />
           Crear Sucursal
         </Button>
@@ -56,6 +60,14 @@ export default function HomeBranches() {
       </div>
 
       <BranchesTable />
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={() => setShowModal(false)}
+        >
+          <BranchFrom onClose={() => setShowModal(false)} />
+        </div>
+      )}
     </div>
   );
 }
