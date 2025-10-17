@@ -48,7 +48,7 @@ export default function HomeBranches() {
             value={
               <>
                 {statsData[card.valueKey]}
-                <span className="text-base font-normal">SUCURSALES</span>
+                <span className="ml-1.5 text-base font-normal">SUCURSALES</span>
               </>
             }
           />
