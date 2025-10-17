@@ -188,14 +188,6 @@ export default function BranchesTable() {
 
   return (
     <>
-      <div className="flex justify-end">
-        <button
-          onClick={() => setShowModal(true)}
-          className="border border-gray-500 hover:bg-orange-400 text-gray px-4 py-2 rounded-sm text-sm font-medium"
-        >
-          + Crear Sucursal
-        </button>
-      </div>
       <DataTable
         columns={branchesColumns}
         data={sucursales}
