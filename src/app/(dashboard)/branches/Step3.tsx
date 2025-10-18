@@ -1,0 +1,252 @@
+"use client";
+
+import { Clock } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+
+type StepProps = {
+  formData: any;
+  onChange: (field: string, value: any) => void;
+};
+
+const diasSemana = [
+  { id: "lunes", label: "Lunes" },
+  { id: "martes", label: "Martes" },
+  { id: "miercoles", label: "Miércoles" },
+  { id: "jueves", label: "Jueves" },
+  { id: "viernes", label: "Viernes" },
+  { id: "sabado", label: "Sábado" },
+  { id: "domingo", label: "Domingo" },
+];
+
+const horasApertura = [
+  "6:00 AM",
+  "7:00 AM",
+  "8:00 AM",
+  "9:00 AM",
+  "10:00 AM",
+  "11:00 AM",
+  "12:00 PM",
+];
+
+const horasCierre = [
+  "1:00 PM",
+  "2:00 PM",
+  "3:00 PM",
+  "4:00 PM",
+  "5:00 PM",
+  "6:00 PM",
+  "7:00 PM",
+  "8:00 PM",
+  "9:00 PM",
+  "10:00 PM",
+  "11:00 PM",
+];
+
+export default function Step3({ formData, onChange }: StepProps) {
+  const handleHorarioChange = (dia: string, campo: string, valor: any) => {
+    const horarios = formData.horarios || {};
+    const horarioDia = horarios[dia] || {
+      apertura: "6:00 AM",
+      cierre: "10:00 PM",
+      cerrado: false,
+    };
+
+    onChange("horarios", {
+      ...horarios,
+      [dia]: {
+        ...horarioDia,
+        [campo]: valor,
+      },
+    });
+  };
+
+  const getHorarioDia = (dia: string) => {
+    const horarios = formData.horarios || {};
+    return (
+      horarios[dia] || {
+        apertura: "6:00 AM",
+        cierre: "10:00 PM",
+        cerrado: false,
+      }
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-1">
+          Administración
+        </h3>
+        <p className="text-sm text-gray-600">
+          Asigne el gerente responsable, defina la capacidad y configure los
+          horarios de operación para cada día de la semana
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">
+              Gerente Responsable *
+            </span>
+            <Select
+              value={formData.gerenteResponsable || ""}
+              onValueChange={(value) => onChange("gerenteResponsable", value)}
+            >
+              <SelectTrigger className="mt-1 w-full">
+                <SelectValue placeholder="Seleccione un Gerente" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="juan-perez">Juan Pérez</SelectItem>
+                <SelectItem value="maria-gonzalez">María González</SelectItem>
+                <SelectItem value="carlos-rodriguez">
+                  Carlos Rodríguez
+                </SelectItem>
+                <SelectItem value="ana-martinez">Ana Martínez</SelectItem>
+                <SelectItem value="luis-fernandez">Luis Fernández</SelectItem>
+              </SelectContent>
+            </Select>
+          </label>
+        </div>
+
+        <div>
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">
+              Capacidad de Miembros *
+            </span>
+            <input
+              type="number"
+              value={formData.capacidadMiembros || ""}
+              onChange={(e) => onChange("capacidadMiembros", e.target.value)}
+              placeholder="Ejemplo: 400"
+              min="1"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div className="border border-gray-300 rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">
+                  Día
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-r border-gray-300">
+                  Apertura
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-r border-gray-300">
+                  Cierre
+                </th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                  Cerrado
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {diasSemana.map((dia) => {
+                const horario = getHorarioDia(dia.id);
+                return (
+                  <tr
+                    key={dia.id}
+                    className={horario.cerrado ? "bg-gray-50" : ""}
+                  >
+                    <td className="px-4 py-3 text-sm font-medium text-gray-700 border-r border-gray-200">
+                      {dia.label}
+                    </td>
+                    <td className="px-4 py-3 border-r border-gray-200">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          disabled={horario.cerrado}
+                          className="text-gray-600 hover:text-gray-800 disabled:opacity-30"
+                        >
+                          <Clock className="w-4 h-4" />
+                        </button>
+                        <Select
+                          value={horario.apertura}
+                          onValueChange={(value) =>
+                            handleHorarioChange(dia.id, "apertura", value)
+                          }
+                          disabled={horario.cerrado}
+                        >
+                          <SelectTrigger className="w-28 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {horasApertura.map((hora) => (
+                              <SelectItem
+                                key={hora}
+                                value={hora}
+                                className="text-xs"
+                              >
+                                {hora}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 border-r border-gray-200">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          disabled={horario.cerrado}
+                          className="text-gray-600 hover:text-gray-800 disabled:opacity-30"
+                        >
+                          <Clock className="w-4 h-4" />
+                        </button>
+                        <Select
+                          value={horario.cierre}
+                          onValueChange={(value) =>
+                            handleHorarioChange(dia.id, "cierre", value)
+                          }
+                          disabled={horario.cerrado}
+                        >
+                          <SelectTrigger className="w-28 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {horasCierre.map((hora) => (
+                              <SelectItem
+                                key={hora}
+                                value={hora}
+                                className="text-xs"
+                              >
+                                {hora}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-center">
+                        <Checkbox
+                          checked={horario.cerrado}
+                          onCheckedChange={(checked) =>
+                            handleHorarioChange(dia.id, "cerrado", checked)
+                          }
+                          className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
