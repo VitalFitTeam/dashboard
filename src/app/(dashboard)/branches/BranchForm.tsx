@@ -18,13 +18,30 @@ import {
 import StepForm from "@/app/(dashboard)/branches/StepForm";
 import Image from "next/image";
 
+import {
+  branchSchema,
+  step1Schema,
+  step2Schema,
+  step3Schema,
+  step4Schema,
+} from "@/lib/validation/branchSchema";
+
 export default function BranchFrom({ onClose }: { onClose: () => void }) {
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    razonSocial: "FitnessPlaza",
-    rif: "J-402456896-3",
+    razonSocial: "",
+    rif: "",
     ciudad: "",
-    estatus: "",
+    estadoSucursal: "activa",
+    telefono: "",
+    direccion: "",
+    latitud: "",
+    longitud: "",
+    gerenteResponsable: "",
+    capacidadMiembros: "",
+    horarios: {}, // objeto con días de la semana
+    metodosPago: [], // array de strings
   });
 
   const steps = [
@@ -39,10 +56,61 @@ export default function BranchFrom({ onClose }: { onClose: () => void }) {
     { id: 5, name: "Confirmación", description: "Revisión Final" },
   ];
 
+  const validateStep = () => {
+    let result;
+
+    switch (currentStep) {
+      case 1:
+        result = step1Schema.safeParse(formData);
+        break;
+      case 2:
+        result = step2Schema.safeParse(formData);
+        break;
+      case 3:
+        result = step3Schema.safeParse(formData);
+        break;
+      case 4:
+        result = step4Schema.safeParse(formData);
+        break;
+      default:
+        return true;
+    }
+
+    if (!result.success) {
+      const formattedErrors: Record<string, string> = {};
+      const errorMap = result.error.format();
+      for (const key in errorMap) {
+        if (key !== "_errors") {
+          formattedErrors[key] = errorMap[key]?._errors?.[0] || "";
+        }
+      }
+      setFormErrors(formattedErrors);
+      return false;
+    }
+
+    setFormErrors({});
+    return true;
+  };
+
   const handleNext = () => {
+    if (!validateStep()) {return;}
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
+  };
+
+  const handleSubmit = () => {
+    const result = branchSchema.safeParse(formData);
+
+    if (!result.success) {
+      console.error("Errores de validación:", result.error.format());
+      alert("Por favor completa todos los campos requeridos.");
+      return;
+    }
+
+    console.log("Datos del formulario:", result.data);
+    alert("Sucursal Creada");
+    onClose(); // cerrar modal si todo está bien
   };
 
   const handleBack = () => {
@@ -54,6 +122,8 @@ export default function BranchFrom({ onClose }: { onClose: () => void }) {
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+  const nextStyles =
+    " hover:bg-orange-600 text-white px-8 py-2 rounded-md font-medium flex items-center gap-2 transition-colors";
 
   return (
     <Card
@@ -96,6 +166,7 @@ export default function BranchFrom({ onClose }: { onClose: () => void }) {
           step={currentStep}
           formData={formData}
           onChange={handleInputChange}
+          formErrors={formErrors}
         />
       </CardContent>
 
@@ -107,15 +178,19 @@ export default function BranchFrom({ onClose }: { onClose: () => void }) {
         >
           <span className="flex items-center gap-2">
             <ArrowLeftIcon className="w-4 h-4" />
-            Atrás
+            Anterior
           </span>
         </Button>
         <Button
-          onClick={currentStep === steps.length ? onClose : handleNext}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2 rounded-md font-medium flex items-center gap-2 transition-colors"
+          onClick={currentStep === steps.length ? handleSubmit : handleNext}
+          className={
+            currentStep === steps.length
+              ? "bg-green-500" + nextStyles
+              : "bg-orange-500" + nextStyles
+          }
         >
           {currentStep === steps.length ? (
-            "Finalizar"
+            "Crear Sucursal"
           ) : (
             <span className="flex items-center gap-2">
               Siguiente

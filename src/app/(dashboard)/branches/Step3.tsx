@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 type StepProps = {
   formData: any;
   onChange: (field: string, value: any) => void;
+  formErrors?: Record<string, string>;
 };
 
 const diasSemana = [
@@ -49,7 +50,11 @@ const horasCierre = [
   "11:00 PM",
 ];
 
-export default function Step3({ formData, onChange }: StepProps) {
+export default function Step3({
+  formData,
+  onChange,
+  formErrors = {},
+}: StepProps) {
   const handleHorarioChange = (dia: string, campo: string, valor: any) => {
     const horarios = formData.horarios || {};
     const horarioDia = horarios[dia] || {
@@ -113,6 +118,11 @@ export default function Step3({ formData, onChange }: StepProps) {
                 <SelectItem value="luis-fernandez">Luis Fernández</SelectItem>
               </SelectContent>
             </Select>
+            {formErrors?.["gerenteResponsable"] && (
+              <p className="text-sm text-red-500 mt-1">
+                {formErrors["gerenteResponsable"]}
+              </p>
+            )}
           </label>
         </div>
 
@@ -127,8 +137,17 @@ export default function Step3({ formData, onChange }: StepProps) {
               onChange={(e) => onChange("capacidadMiembros", e.target.value)}
               placeholder="Ejemplo: 400"
               min="1"
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              className={`mt-1 block w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
+                formErrors?.["capacidadMiembros"]
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-orange-500"
+              }`}
             />
+            {formErrors?.["capacidadMiembros"] && (
+              <p className="text-sm text-red-500 mt-1">
+                {formErrors["capacidadMiembros"]}
+              </p>
+            )}
           </label>
         </div>
       </div>
@@ -165,13 +184,7 @@ export default function Step3({ formData, onChange }: StepProps) {
                     </td>
                     <td className="px-4 py-3 border-r border-gray-200">
                       <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          disabled={horario.cerrado}
-                          className="text-gray-600 hover:text-gray-800 disabled:opacity-30"
-                        >
-                          <Clock className="w-4 h-4" />
-                        </button>
+                        <Clock className="w-4 h-4 text-gray-600" />
                         <Select
                           value={horario.apertura}
                           onValueChange={(value) =>
@@ -198,13 +211,7 @@ export default function Step3({ formData, onChange }: StepProps) {
                     </td>
                     <td className="px-4 py-3 border-r border-gray-200">
                       <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          disabled={horario.cerrado}
-                          className="text-gray-600 hover:text-gray-800 disabled:opacity-30"
-                        >
-                          <Clock className="w-4 h-4" />
-                        </button>
+                        <Clock className="w-4 h-4 text-gray-600" />
                         <Select
                           value={horario.cierre}
                           onValueChange={(value) =>

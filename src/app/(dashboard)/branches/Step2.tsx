@@ -6,9 +6,14 @@ import { MapPin } from "lucide-react";
 type StepProps = {
   formData: any;
   onChange: (field: string, value: string) => void;
+  formErrors?: Record<string, string>;
 };
 
-export default function Step2({ formData, onChange }: StepProps) {
+export default function Step2({
+  formData,
+  onChange,
+  formErrors = {},
+}: StepProps) {
   const [mapUrl, setMapUrl] = useState<string>("");
 
   const handleCoordinateChange = () => {
@@ -32,20 +37,7 @@ export default function Step2({ formData, onChange }: StepProps) {
         </p>
       </div>
 
-      <div>
-        <label className="block">
-          <span className="text-sm font-medium text-gray-700">
-            Dirección Completa *
-          </span>
-          <input
-            type="text"
-            value={formData.direccion || ""}
-            onChange={(e) => onChange("direccion", e.target.value)}
-            placeholder="Direccion completa"
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          />
-        </label>
-      </div>
+      {/* Dirección moved to Step1 - removed from Step2 */}
 
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -65,6 +57,9 @@ export default function Step2({ formData, onChange }: StepProps) {
             placeholder="10.458"
             className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           />
+          {formErrors["latitud"] && (
+            <p className="text-sm text-red-500 mt-1">{formErrors["latitud"]}</p>
+          )}
           <input
             type="text"
             value={formData.longitud || ""}
@@ -75,6 +70,11 @@ export default function Step2({ formData, onChange }: StepProps) {
             placeholder="-96.3254S"
             className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           />
+          {formErrors["longitud"] && (
+            <p className="text-sm text-red-500 mt-1">
+              {formErrors["longitud"]}
+            </p>
+          )}
         </div>
       </div>
 
@@ -106,8 +106,6 @@ export default function Step2({ formData, onChange }: StepProps) {
           )}
         </div>
       </div>
-
-      {/* Teléfono field removed per request */}
     </div>
   );
 }
