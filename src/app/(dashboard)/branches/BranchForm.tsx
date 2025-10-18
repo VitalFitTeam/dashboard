@@ -15,6 +15,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import StepForm from "@/app/(dashboard)/branches/StepForm";
 import Image from "next/image";
 
 export default function BranchFrom({ onClose }: { onClose: () => void }) {
@@ -91,6 +92,11 @@ export default function BranchFrom({ onClose }: { onClose: () => void }) {
         </p>
 
         <Wizard steps={steps} currentStep={currentStep} />
+        <StepForm
+          step={currentStep}
+          formData={formData}
+          onChange={handleInputChange}
+        />
       </CardContent>
 
       <CardFooter className="flex justify-between px-6 pb-6">
