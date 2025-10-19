@@ -14,6 +14,7 @@ export type Branches = {
   city?: string;
   country?: string;
   operatingHours?: BranchOperatingHours[];
+  paymethods?: string[] | null;
 };
 
 export type BranchPayload = {
@@ -28,6 +29,7 @@ export type BranchPayload = {
   status: "active" | "inactive" | "maintenance";
   administrator?: string;
   operatingHours: BranchOperatingHours[];
+  paymethods?: string[] | null;
 };
 
 export type CreateBranchPayload = BranchPayload;

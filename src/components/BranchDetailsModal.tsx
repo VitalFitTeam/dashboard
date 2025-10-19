@@ -21,18 +21,28 @@ interface BranchDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   branchData: Branches | null;
+  initialMode: "view" | "edit";
 }
+
+type ArrayChange = {
+  target: {
+    name: string;
+    value: string[];
+  };
+};
 
 export default function BranchDetailsModal({
   isOpen,
   onClose,
   branchData,
+  initialMode,
 }: BranchDetailsModalProps) {
   if (!isOpen || !branchData) {
     return null;
   }
 
   const [formData, setFormData] = useState<Branches>(branchData);
+  const [currentMode, setCurrentMode] = useState(initialMode);
   const defaultSchedule: BranchOperatingHours[] = (
     [
       "Monday",
@@ -56,21 +66,44 @@ export default function BranchDetailsModal({
       : defaultSchedule,
   );
 
-  useEffect(() => {
-    setFormData(branchData);
-    setSchedule(
-      branchData.operatingHours?.length
-        ? branchData.operatingHours
-        : defaultSchedule,
-    );
-  }, [branchData]);
+  const isEditing = currentMode === "edit";
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === "number" ? parseInt(value, 10) || 0 : value,
-    }));
+  useEffect(() => {
+    if (branchData) {
+      setFormData(branchData);
+      setSchedule(
+        branchData.operatingHours?.length
+          ? branchData.operatingHours
+          : defaultSchedule,
+      );
+    }
+    setCurrentMode(initialMode);
+  }, [branchData, initialMode]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement> | ArrayChange,
+  ) => {
+    const { name, value } = e.target;
+
+    setFormData((prevData) => {
+      let finalValue: any;
+
+      if (Array.isArray(value)) {
+        finalValue = value;
+      } else if (
+        typeof value === "string" &&
+        (e as React.ChangeEvent<HTMLInputElement>).target?.type === "number"
+      ) {
+        finalValue = parseInt(value, 10) || 0;
+      } else {
+        finalValue = value;
+      }
+
+      return {
+        ...prevData,
+        [name]: finalValue,
+      };
+    });
   };
 
   const handleScheduleChange = (updatedSchedule: BranchOperatingHours[]) => {
@@ -81,11 +114,25 @@ export default function BranchDetailsModal({
     }));
   };
 
+  const handleSwitchToEdit = () => {
+    setCurrentMode("edit");
+  };
+
+  const handleSave = () => {
+    onClose();
+  };
+
   const tabItems = [
     {
       value: "general",
       label: "General",
-      content: <GeneralPanel formData={formData} handleChange={handleChange} />,
+      content: (
+        <GeneralPanel
+          formData={formData}
+          handleChange={handleChange}
+          mode={currentMode}
+        />
+      ),
     },
     {
       value: "schedule",
@@ -94,6 +141,7 @@ export default function BranchDetailsModal({
         <SchedulePanel
           schedule={schedule}
           onScheduleChange={handleScheduleChange}
+          mode={currentMode}
         />
       ),
     },
@@ -101,7 +149,11 @@ export default function BranchDetailsModal({
       value: "payment",
       label: "Métodos de pago",
       content: (
-        <PaymentMethodPanel formData={formData} handleChange={handleChange} />
+        <PaymentMethodPanel
+          formData={formData}
+          handleChange={handleChange}
+          mode={currentMode}
+        />
       ),
     },
     {
@@ -157,15 +209,32 @@ export default function BranchDetailsModal({
         </CardContent>
 
         <CardFooter className="flex justify-end space-x-3 pt-6 bg-gray-50">
-          <Button
-            variant="outline"
-            className="border-red-600 text-red-600 hover:bg-red-50 hover:text-red-700"
-          >
-            Eliminar sucursal
-          </Button>
-          <Button className="bg-[#F58025] hover:bg-[#E07122] text-white">
-            Modificar
-          </Button>
+          {isEditing ? (
+            <>
+              <Button
+                fullWidth
+                className="bg-[#F58025] hover:bg-[#E07122] text-white"
+                onClick={handleSave}
+              >
+                Guardar cambios
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                className="border-red-600 text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                Eliminar sucursal
+              </Button>
+              <Button
+                className="bg-[#F58025] hover:bg-[#E07122] text-white"
+                onClick={handleSwitchToEdit}
+              >
+                Modificar
+              </Button>
+            </>
+          )}
         </CardFooter>
       </Card>
     </div>

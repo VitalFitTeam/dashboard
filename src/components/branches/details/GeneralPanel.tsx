@@ -5,18 +5,24 @@ import { Branches } from "@/types/branches";
 interface GeneralPanelProps {
   formData: Branches;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  mode: "view" | "edit";
 }
 
 export default function GeneralPanel({
   formData,
   handleChange,
+  mode,
 }: GeneralPanelProps) {
+  const isDisabled = mode === "view";
+
   return (
     <div>
       <div>
         <h2 className="font-semibold text-gray-800">Información General</h2>
         <p className="pt-4 text-sm text-gray-600">
-          Mostrando métodos de pago para {formData.name}
+          {isDisabled
+            ? `Visualizando la información general de la sucursal ${formData.name}.`
+            : `Edita la información general para la sucursal ${formData.name}.`}
         </p>
       </div>
       <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 pt-4">
@@ -26,6 +32,7 @@ export default function GeneralPanel({
           label="Razón social"
           value={formData.name}
           onChange={handleChange}
+          disabled={isDisabled}
         />
         <InputField
           id="taxId"
@@ -33,6 +40,7 @@ export default function GeneralPanel({
           label="RIF"
           value={formData.taxId}
           onChange={handleChange}
+          disabled={isDisabled}
         />
         <div className="col-span-2">
           <InputField
@@ -41,6 +49,7 @@ export default function GeneralPanel({
             label="Dirección"
             value={formData.address || ""}
             onChange={handleChange}
+            disabled={isDisabled}
           />
         </div>
         <InputField
@@ -50,6 +59,7 @@ export default function GeneralPanel({
           type="number"
           value={formData.latitude ?? ""}
           onChange={handleChange}
+          disabled={isDisabled}
         />
         <InputField
           id="longitude"
@@ -58,6 +68,7 @@ export default function GeneralPanel({
           type="number"
           value={formData.longitude ?? ""}
           onChange={handleChange}
+          disabled={isDisabled}
         />
         <InputField
           id="city"
@@ -65,6 +76,7 @@ export default function GeneralPanel({
           label="Ciudad"
           value={formData.city || ""}
           onChange={handleChange}
+          disabled={isDisabled}
         />
         <InputField
           id="administrator"
@@ -72,6 +84,7 @@ export default function GeneralPanel({
           label="Gerente Responsable"
           value={formData.administrator || ""}
           onChange={handleChange}
+          disabled={isDisabled}
         />
         <InputField
           id="phone"
@@ -79,6 +92,7 @@ export default function GeneralPanel({
           label="Teléfono"
           value={formData.phone || ""}
           onChange={handleChange}
+          disabled={isDisabled}
         />
         <InputField
           id="maxCapacity"
@@ -87,6 +101,7 @@ export default function GeneralPanel({
           type="number"
           value={formData.maxCapacity ?? ""}
           onChange={handleChange}
+          disabled={isDisabled}
         />
       </form>
     </div>

@@ -8,11 +8,13 @@ import PanelWrapper from "./PanelWrapper";
 interface SchedulePanelProps {
   schedule: BranchOperatingHours[];
   onScheduleChange: (updatedSchedule: BranchOperatingHours[]) => void;
+  mode: "view" | "edit";
 }
 
 export default function SchedulePanel({
   schedule,
   onScheduleChange,
+  mode,
 }: SchedulePanelProps) {
   return (
     <PanelWrapper

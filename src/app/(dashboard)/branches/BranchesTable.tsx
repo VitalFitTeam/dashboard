@@ -2,7 +2,8 @@
 import { Column, DataTable } from "@/components/table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EyeIcon, PencilIcon } from "@heroicons/react/24/outline";
+import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
+import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { useState } from "react";
 import BranchDetailsModal from "@/components/BranchDetailsModal";
 import { Branches } from "@/types/branches";
@@ -12,9 +13,17 @@ export default function BranchesTable() {
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<Branches | null>(null);
+  const [modalMode, setModalMode] = useState<"view" | "edit">("view");
 
   const handleViewDetails = (branch: Branches) => {
     setSelectedBranch(branch);
+    setModalMode("view");
+    setIsModalOpen(true);
+  };
+
+  const handleEditBranch = (branch: Branches) => {
+    setSelectedBranch(branch);
+    setModalMode("edit");
     setIsModalOpen(true);
   };
 
@@ -81,7 +90,12 @@ export default function BranchesTable() {
         enableFilters
         actions={(row) => (
           <div className="flex items-center justify-center gap-2">
-            <Button size="icon" variant="ghost" title="Editar Sucursal">
+            <Button
+              size="icon"
+              variant="ghost"
+              title="Editar Sucursal"
+              onClick={() => handleEditBranch(row)}
+            >
               <PencilIcon className="h-4 w-4" />
             </Button>
             <Button
@@ -99,6 +113,7 @@ export default function BranchesTable() {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         branchData={selectedBranch}
+        initialMode={modalMode}
       />
     </>
   );
