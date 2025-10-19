@@ -2,210 +2,119 @@
 import { Column, DataTable } from "@/components/table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EyeIcon, PencilIcon } from "@heroicons/react/24/outline";
-import SucursalesForm from "@/app/(dashboard)/branches/BranchForm";
-import { RefreshCcw } from "lucide-react";
+import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
+import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { useState } from "react";
-
-type Branches = {
-  id: string;
-  name: string;
-  rif: string;
-  administrator: string;
-  location: string;
-  country: string;
-  status: "active" | "inactive" | "maintenance";
-};
-
-const branchesColumns: Column<Branches>[] = [
-  {
-    header: "ID",
-    accessor: "id",
-  },
-  {
-    header: "Nombre",
-    accessor: "name",
-    filterType: "text",
-  },
-  {
-    header: "RIF",
-    accessor: "rif",
-  },
-  {
-    header: "Administrador",
-    accessor: "administrator",
-  },
-  {
-    header: "Ubicación",
-    accessor: "location",
-  },
-  {
-    header: "País",
-    accessor: "country",
-    filterType: "select",
-    filterOptions: [
-      { label: "Venezuela", value: "Venezuela" },
-      { label: "Colombia", value: "Colombia" },
-      { label: "Perú", value: "Perú" },
-    ],
-  },
-  {
-    header: "Status",
-    accessor: "status",
-    filterType: "select",
-    filterOptions: [
-      { label: "Activa", value: "active" },
-      { label: "Inactiva", value: "inactive" },
-      { label: "En mantenimiento", value: "maintenance" },
-    ],
-    render: (value) => {
-      let displayText = "";
-      let color = "";
-
-      switch (value) {
-        case "active":
-          displayText = "Activa";
-          color = "text-green-700 border-green-300";
-          break;
-        case "inactive":
-          displayText = "Inactiva";
-          color = "text-red-700 border-red-300";
-          break;
-        case "maintenance":
-          displayText = "En mantenimiento";
-          color = "text-yellow-700 border-yellow-300";
-          break;
-        default:
-          displayText = "Desconocido";
-          color = "bg-gray-100 text-gray-700 border-gray-300";
-      }
-
-      return (
-        <Badge variant="outline" className={`border ${color}`}>
-          {displayText}
-        </Badge>
-      );
-    },
-  },
-];
-
-const sucursales: Branches[] = [
-  {
-    id: "001",
-    name: "VitalFit Centro",
-    rif: "J-12345678-9",
-    administrator: "Ana García",
-    location: "Avenida Principal 123, Caracas",
-    country: "Venezuela",
-    status: "active",
-  },
-  {
-    id: "002",
-    name: "PowerGym Norte",
-    rif: "J-98765432-1",
-    administrator: "Luis Pérez",
-    location: "Calle 45, Bogotá",
-    country: "Colombia",
-    status: "inactive",
-  },
-  {
-    id: "003",
-    name: "FitLife Sur",
-    rif: "J-11112222-3",
-    administrator: "María López",
-    location: "Av. Los Próceres 200, Lima",
-    country: "Perú",
-    status: "maintenance",
-  },
-  {
-    id: "004",
-    name: "GymMax Centro",
-    rif: "J-44445555-6",
-    administrator: "Carlos Fernández",
-    location: "Calle 10, Valencia",
-    country: "Venezuela",
-    status: "active",
-  },
-  {
-    id: "005",
-    name: "Energy Gym Este",
-    rif: "J-66667777-8",
-    administrator: "Laura Gómez",
-    location: "Av. Libertador 50, Medellín",
-    country: "Colombia",
-    status: "inactive",
-  },
-  {
-    id: "006",
-    name: "Health Club Oeste",
-    rif: "J-99990000-1",
-    administrator: "Pedro Martínez",
-    location: "Av. Perú 123, Lima",
-    country: "Perú",
-    status: "active",
-  },
-  {
-    id: "007",
-    name: "Muscle Factory",
-    rif: "J-22223333-4",
-    administrator: "Sofía Ramírez",
-    location: "Av. Bolívar 75, Caracas",
-    country: "Venezuela",
-    status: "maintenance",
-  },
-  {
-    id: "008",
-    name: "Iron Gym Norte",
-    rif: "J-55556666-7",
-    administrator: "Jorge Torres",
-    location: "Calle 7, Bogotá",
-    country: "Colombia",
-    status: "active",
-  },
-  {
-    id: "009",
-    name: "FitWorld",
-    rif: "J-88889999-0",
-    administrator: "Camila Díaz",
-    location: "Av. Lima 321, Lima",
-    country: "Perú",
-    status: "inactive",
-  },
-  {
-    id: "010",
-    name: "VitalFit Sur",
-    rif: "J-10101010-2",
-    administrator: "Andrés Silva",
-    location: "Calle 5, Valencia",
-    country: "Venezuela",
-    status: "active",
-  },
-];
+import BranchDetailsModal from "@/components/BranchDetailsModal";
+import { Branches } from "@/types/branches";
+import { branches } from "./data";
 
 export default function BranchesTable() {
   const [page, setPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBranch, setSelectedBranch] = useState<Branches | null>(null);
+  const [modalMode, setModalMode] = useState<"view" | "edit">("view");
+
+  const handleViewDetails = (branch: Branches) => {
+    setSelectedBranch(branch);
+    setModalMode("view");
+    setIsModalOpen(true);
+  };
+
+  const handleEditBranch = (branch: Branches) => {
+    setSelectedBranch(branch);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedBranch(null);
+  };
+
+  const columns: Column<Branches>[] = [
+    { header: "ID", accessor: "id" },
+    { header: "Nombre", accessor: "name", filterType: "text" },
+    { header: "RIF", accessor: "taxId" },
+    { header: "Administrador", accessor: "administrator" },
+    { header: "Ciudad", accessor: "city" },
+    {
+      header: "País",
+      accessor: "country",
+      filterType: "select",
+      filterOptions: [
+        { label: "Venezuela", value: "Venezuela" },
+        { label: "Colombia", value: "Colombia" },
+        { label: "Perú", value: "Perú" },
+      ],
+    },
+    {
+      header: "Status",
+      accessor: "status",
+      filterType: "select",
+      filterOptions: [
+        { label: "Activa", value: "active" },
+        { label: "Inactiva", value: "inactive" },
+        { label: "En mantenimiento", value: "maintenance" },
+      ],
+      render: (value) => {
+        const statusConfig = {
+          active: { text: "Activa", color: "text-green-700 border-green-300" },
+          inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
+          maintenance: {
+            text: "En mantenimiento",
+            color: "text-yellow-700 border-yellow-300",
+          },
+        };
+        const config = statusConfig[value as keyof typeof statusConfig] ?? {
+          text: "Desconocido",
+          color: "bg-gray-100 text-gray-700 border-gray-300",
+        };
+        return (
+          <Badge variant="outline" className={`border ${config.color}`}>
+            {config.text}
+          </Badge>
+        );
+      },
+    },
+  ];
 
   return (
-    <DataTable
-      columns={branchesColumns}
-      data={sucursales}
-      page={page}
-      pageSize={10}
-      onPageChange={setPage}
-      enableFilters
-      actions={() => (
-        <div className="flex items-center gap-2">
-          <Button size="icon" variant="ghost">
-            <PencilIcon className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="ghost">
-            <EyeIcon className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="ghost">
-            <RefreshCcw className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={branches}
+        page={page}
+        pageSize={10}
+        onPageChange={setPage}
+        enableFilters
+        actions={(row) => (
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              size="icon"
+              variant="ghost"
+              title="Editar Sucursal"
+              onClick={() => handleEditBranch(row)}
+            >
+              <PencilIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              title="Ver Detalles"
+              onClick={() => handleViewDetails(row)}
+            >
+              <EyeIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      />
+      <BranchDetailsModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        branchData={selectedBranch}
+        initialMode={modalMode}
+      />
+    </>
   );
 }
