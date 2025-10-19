@@ -11,9 +11,14 @@ import StepNotification from "./StepNotification";
 type StepProps = {
   formData: any;
   onChange: (field: string, value: string) => void;
+  formErrors?: Record<string, string>;
 };
 
-export default function Step1({ formData, onChange }: StepProps) {
+export default function Step1({
+  formData,
+  onChange,
+  formErrors = {},
+}: StepProps) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -29,6 +34,11 @@ export default function Step1({ formData, onChange }: StepProps) {
               placeholder="Ej: mca2Plaza"
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
+            {formErrors["razonSocial"] && (
+              <p className="text-sm text-red-500 mt-1">
+                {formErrors["razonSocial"]}
+              </p>
+            )}
           </label>
         </div>
 
@@ -42,6 +52,9 @@ export default function Step1({ formData, onChange }: StepProps) {
               placeholder="J-XXXXXXXXX-X"
               className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
+            {formErrors["rif"] && (
+              <p className="text-sm text-red-500 mt-1">{formErrors["rif"]}</p>
+            )}
           </label>
         </div>
       </div>
@@ -70,6 +83,11 @@ export default function Step1({ formData, onChange }: StepProps) {
                 <SelectItem value="merida">Mérida</SelectItem>
               </SelectContent>
             </Select>
+            {formErrors["ciudad"] && (
+              <p className="text-sm text-red-500 mt-1">
+                {formErrors["ciudad"]}
+              </p>
+            )}
           </label>
 
           <div className="mt-4">
@@ -84,6 +102,11 @@ export default function Step1({ formData, onChange }: StepProps) {
                 placeholder="+58424-5978752"
                 className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
+              {formErrors["telefono"] && (
+                <p className="text-sm text-red-500 mt-1">
+                  {formErrors["telefono"]}
+                </p>
+              )}
             </label>
           </div>
         </div>
@@ -105,13 +128,20 @@ export default function Step1({ formData, onChange }: StepProps) {
                 <SelectItem value="suspendida">Suspendida</SelectItem>
               </SelectContent>
             </Select>
+            {formErrors["estadoSucursal"] && (
+              <p className="text-sm text-red-500 mt-1">
+                {formErrors["estadoSucursal"]}
+              </p>
+            )}
           </label>
+          <div className="mt-2">
+            <StepNotification
+              title="Próximos pasos"
+              description="En los siguientes pasos configuraremos la ubicación, contacto, horarios y empleados de la nueva sucursal."
+            />
+          </div>
         </div>
       </div>
-      <StepNotification
-        title="Próximos pasos"
-        description="En los siguientes pasos configuraremos la ubicación, contacto, horarios y empleados de la nueva sucursal."
-      />
     </div>
   );
 }

@@ -6,9 +6,14 @@ import { MapPin } from "lucide-react";
 type StepProps = {
   formData: any;
   onChange: (field: string, value: string) => void;
+  formErrors?: Record<string, string>;
 };
 
-export default function Step2({ formData, onChange }: StepProps) {
+export default function Step2({
+  formData,
+  onChange,
+  formErrors = {},
+}: StepProps) {
   const [mapUrl, setMapUrl] = useState<string>("");
 
   const handleCoordinateChange = () => {
@@ -44,6 +49,11 @@ export default function Step2({ formData, onChange }: StepProps) {
             placeholder="Direccion completa"
             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           />
+          {formErrors["direccion"] && (
+            <p className="text-sm text-red-500 mt-1">
+              {formErrors["direccion"]}
+            </p>
+          )}
         </label>
       </div>
 
@@ -59,22 +69,42 @@ export default function Step2({ formData, onChange }: StepProps) {
             type="text"
             value={formData.latitud || ""}
             onChange={(e) => {
-              onChange("latitud", e.target.value);
+              const sanitized = e.target.value.replace(/-/g, "");
+              onChange("latitud", sanitized);
               handleCoordinateChange();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "-") {
+                e.preventDefault();
+              }
             }}
             placeholder="10.458"
             className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           />
+          {formErrors["latitud"] && (
+            <p className="text-sm text-red-500 mt-1">{formErrors["latitud"]}</p>
+          )}
           <input
             type="text"
             value={formData.longitud || ""}
             onChange={(e) => {
-              onChange("longitud", e.target.value);
+              const sanitized = e.target.value.replace(/-/g, "");
+              onChange("longitud", sanitized);
               handleCoordinateChange();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "-") {
+                e.preventDefault();
+              }
             }}
             placeholder="-96.3254S"
             className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           />
+          {formErrors["longitud"] && (
+            <p className="text-sm text-red-500 mt-1">
+              {formErrors["longitud"]}
+            </p>
+          )}
         </div>
       </div>
 
@@ -106,8 +136,6 @@ export default function Step2({ formData, onChange }: StepProps) {
           )}
         </div>
       </div>
-
-      {/* Teléfono field removed per request */}
     </div>
   );
 }
