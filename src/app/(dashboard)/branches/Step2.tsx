@@ -37,7 +37,25 @@ export default function Step2({
         </p>
       </div>
 
-      {/* Dirección moved to Step1 - removed from Step2 */}
+      <div>
+        <label className="block">
+          <span className="text-sm font-medium text-gray-700">
+            Dirección Completa *
+          </span>
+          <input
+            type="text"
+            value={formData.direccion || ""}
+            onChange={(e) => onChange("direccion", e.target.value)}
+            placeholder="Direccion completa"
+            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          />
+          {formErrors["direccion"] && (
+            <p className="text-sm text-red-500 mt-1">
+              {formErrors["direccion"]}
+            </p>
+          )}
+        </label>
+      </div>
 
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -51,8 +69,14 @@ export default function Step2({
             type="text"
             value={formData.latitud || ""}
             onChange={(e) => {
-              onChange("latitud", e.target.value);
+              const sanitized = e.target.value.replace(/-/g, "");
+              onChange("latitud", sanitized);
               handleCoordinateChange();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "-") {
+                e.preventDefault();
+              }
             }}
             placeholder="10.458"
             className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -64,8 +88,14 @@ export default function Step2({
             type="text"
             value={formData.longitud || ""}
             onChange={(e) => {
-              onChange("longitud", e.target.value);
+              const sanitized = e.target.value.replace(/-/g, "");
+              onChange("longitud", sanitized);
               handleCoordinateChange();
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "-") {
+                e.preventDefault();
+              }
             }}
             placeholder="-96.3254S"
             className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
