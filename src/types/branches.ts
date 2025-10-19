@@ -21,6 +21,8 @@ export type BranchPayload = {
   name: string;
   taxId: string;
   cityId: string;
+  countryId: string;
+  stateId: string;
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;

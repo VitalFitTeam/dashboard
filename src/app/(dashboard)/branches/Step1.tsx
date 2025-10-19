@@ -155,8 +155,7 @@ export default function Step1({
               </p>
             )}
           </label>
-
-          <div className="mt-4">
+          <div className="mt-2">
             <StepNotification
               title="Próximos pasos"
               description="En los siguientes pasos configuraremos la ubicación, contacto, horarios y empleados de la nueva sucursal."
@@ -164,7 +163,6 @@ export default function Step1({
           </div>
         </div>
       </div>
-      {/* StepNotification moved under Estado de Sucursal */}
     </div>
   );
 }

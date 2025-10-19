@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import {
+  BanknotesIcon,
+  CreditCardIcon,
+  BuildingLibraryIcon,
+  DevicePhoneMobileIcon,
+} from "@heroicons/react/24/outline";
 import StepNotification from "./StepNotification";
 import PaymentMethodSelector, {
   ALL_PAYMENT_METHODS,
@@ -11,6 +17,33 @@ type StepProps = {
   onChange: (field: string, value: string[]) => void;
   formErrors?: Record<string, string>;
 };
+
+const paymentMethods = [
+  {
+    id: "efectivo",
+    label: "Efectivo",
+    description: "Pago en efectivo en Sucursal",
+    icon: BanknotesIcon,
+  },
+  {
+    id: "tarjeta",
+    label: "Tarjeta de Crédito/Débito",
+    description: "Visa, MasterCard",
+    icon: CreditCardIcon,
+  },
+  {
+    id: "transferencia",
+    label: "Transferencia Bancaria",
+    description: "Transferencia directa a cuenta bancaria",
+    icon: BuildingLibraryIcon,
+  },
+  {
+    id: "pago-movil",
+    label: "Pago Móvil",
+    description: "Pago móvil Intercambiario",
+    icon: DevicePhoneMobileIcon,
+  },
+];
 
 export default function Step4({
   formData,
@@ -65,7 +98,7 @@ export default function Step4({
                   key={id}
                   className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium border border-orange-300"
                 >
-                  <Icon className="h-4 w-4 text-orange-600" />
+                  <Icon className="h-8 w-4 text-orange-600" />
                   {method.label}
                 </span>
               );
