@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MapPin } from "lucide-react";
+import InputField from "@/components/InputField";
 
 type StepProps = {
   formData: any;
@@ -37,40 +38,78 @@ export default function Step2({
         </p>
       </div>
 
-      <div>
-        <label className="block">
-          <span className="text-sm font-medium text-gray-700">
-            Dirección Completa *
-          </span>
-          <input
-            type="text"
-            value={formData.direccion || ""}
-            onChange={(e) => onChange("direccion", e.target.value)}
-            placeholder="Direccion completa"
-            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+      <div className="grid grid-cols-6 gap-4">
+        <div className="col-span-6">
+          <InputField
+            label="Dirección Completa*"
+            id="address"
+            name="address"
+            value={formData.address || ""}
+            error={formErrors["address"]}
+            onChange={(e) => onChange("address", e.target.value)}
+            placeholder="Clic en el mapa o ingrese coordenadas"
+            helperText="La dirección base se rellenará automáticamente."
+            className="focus:ring-orange-500 focus:border-transparent"
+            readOnly={true}
           />
-          {formErrors["direccion"] && (
-            <p className="text-sm text-red-500 mt-1">
-              {formErrors["direccion"]}
-            </p>
-          )}
-        </label>
-      </div>
+        </div>
 
-      <div>
-        <div className="flex items-center gap-2 mb-2">
+        <div className="col-span-6 md:col-span-2">
+          <InputField
+            label="Ciudad"
+            id="city"
+            name="city"
+            value={formData.city || ""}
+            readOnly={true}
+            placeholder="Se rellena con el mapa"
+            className="bg-gray-50 text-gray-700 focus:ring-0 focus:border-gray-300"
+          />
+        </div>
+
+        <div className="col-span-6 md:col-span-2">
+          <InputField
+            label="Estado"
+            id="state"
+            name="state"
+            value={formData.state || ""}
+            readOnly={true}
+            placeholder="Se rellena con el mapa"
+            className="bg-gray-50 text-gray-700 focus:ring-0 focus:border-gray-300"
+          />
+        </div>
+
+        <div className="col-span-6 md:col-span-2">
+          <InputField
+            label="País"
+            id="country"
+            name="country"
+            value={formData.country || ""}
+            readOnly={true}
+            placeholder="Se rellena con el mapa"
+            className="bg-gray-50 text-gray-700 focus:ring-0 focus:border-gray-300"
+          />
+        </div>
+
+        <div className="col-span-6 flex items-center gap-2 mt-4">
+          {" "}
+          {/* mt-4 para separar */}
           <MapPin className="w-4 h-4 text-gray-700" />
           <span className="text-sm font-medium text-gray-700">
-            Coordenadas GPS
+            Coordenadas GPS (Opcional)
           </span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            value={formData.latitud || ""}
+
+        <div className="col-span-6 md:col-span-3">
+          <InputField
+            label="Latitud"
+            id="latitude"
+            name="latitude"
+            error={formErrors["latitude"]}
+            value={formData.latitude || ""}
+            readOnly={true}
             onChange={(e) => {
               const sanitized = e.target.value.replace(/-/g, "");
-              onChange("latitud", sanitized);
+              onChange("latitude", sanitized);
               handleCoordinateChange();
             }}
             onKeyDown={(e) => {
@@ -78,18 +117,20 @@ export default function Step2({
                 e.preventDefault();
               }
             }}
-            placeholder="10.458"
-            className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="bg-gray-50 text-gray-700 focus:ring-0 focus:border-gray-300"
           />
-          {formErrors["latitud"] && (
-            <p className="text-sm text-red-500 mt-1">{formErrors["latitud"]}</p>
-          )}
-          <input
-            type="text"
-            value={formData.longitud || ""}
+        </div>
+        <div className="col-span-6 md:col-span-3">
+          <InputField
+            label="Longitud"
+            id="longitude"
+            name="longitude"
+            error={formErrors["longitude"]}
+            value={formData.longitude || ""}
+            readOnly={true}
             onChange={(e) => {
               const sanitized = e.target.value.replace(/-/g, "");
-              onChange("longitud", sanitized);
+              onChange("longitude", sanitized);
               handleCoordinateChange();
             }}
             onKeyDown={(e) => {
@@ -97,17 +138,10 @@ export default function Step2({
                 e.preventDefault();
               }
             }}
-            placeholder="-96.3254S"
-            className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            className="bg-gray-50 text-gray-700 focus:ring-0 focus:border-gray-300"
           />
-          {formErrors["longitud"] && (
-            <p className="text-sm text-red-500 mt-1">
-              {formErrors["longitud"]}
-            </p>
-          )}
         </div>
       </div>
-
       <div>
         <div className="w-full h-64 bg-gray-100 border border-gray-300 rounded-md overflow-hidden relative">
           {formData.latitud && formData.longitud ? (

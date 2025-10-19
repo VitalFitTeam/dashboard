@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import {
   BanknotesIcon,
   CreditCardIcon,
   BuildingLibraryIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
-import StepNotification from "./StepNotification";
 import StepNotification from "./StepNotification";
 import PaymentMethodSelector, {
   ALL_PAYMENT_METHODS,
