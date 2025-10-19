@@ -41,6 +41,7 @@ export type DataTableProps<T> = {
   pageSize?: number;
   onPageChange?: (page: number) => void;
   enableFilters?: boolean;
+  enableRowSelection?: boolean;
 };
 
 export function DataTable<T>({
@@ -51,17 +52,12 @@ export function DataTable<T>({
   pageSize = 10,
   onPageChange,
   enableFilters = false,
+  enableRowSelection = true, // <-- Corregido: Ahora es 'true' por defecto
 }: DataTableProps<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
-
-  const exactMatchFilter = (
-    row: Row<T>,
-    columnId: string,
-    filterValue: string,
-  ) => String(row.getValue(columnId)) === filterValue;
 
   const columnDefs = React.useMemo<ColumnDef<T>[]>(
     () =>
@@ -72,7 +68,6 @@ export function DataTable<T>({
           col.render
             ? col.render(getValue() as T[keyof T], row.original)
             : String(getValue() ?? ""),
-        // Aquí usamos directamente la función en vez de un string
         filterFn:
           col.filterType === "select"
             ? (row, columnId, filterValue) =>
@@ -96,14 +91,6 @@ export function DataTable<T>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    filterFns: {
-      exactMatch: (row, columnId, filterValue) =>
-        String(row.getValue(columnId)) === filterValue,
-      includesString: (row, columnId, filterValue) =>
-        String(row.getValue(columnId))
-          .toLowerCase()
-          .includes(String(filterValue).toLowerCase()),
-    },
   });
 
   const startIndex = (page - 1) * pageSize;
@@ -113,56 +100,57 @@ export function DataTable<T>({
   return (
     <div className="space-y-4">
       {enableFilters && (
-        <div className="flex gap-3 mb-4">
-          {columns.map((col) => {
-            const column = table.getColumn(col.accessor as string);
-            if (!column) {
+        <div className="flex flex-wrap gap-3 mb-4">
+          {columns
+            .filter((col) => col.filterType)
+            .map((col) => {
+              const column = table.getColumn(col.accessor as string);
+              if (!column) {
+                return null;
+              }
+              if (col.filterType === "text") {
+                return (
+                  <Input
+                    key={String(col.accessor)}
+                    placeholder={`Filtrar por ${col.header.toLowerCase()}...`}
+                    value={(column.getFilterValue() as string) ?? ""}
+                    onChange={(e) => {
+                      column.setFilterValue(e.target.value);
+                    }}
+                    className="max-w-xs"
+                  />
+                );
+              }
+              if (col.filterType === "select" && col.filterOptions) {
+                return (
+                  <select
+                    key={String(col.accessor)}
+                    className="border rounded-md px-2 py-1 text-sm"
+                    value={(column.getFilterValue() as string) ?? ""}
+                    onChange={(e) => column.setFilterValue(e.target.value)}
+                  >
+                    <option value="">Todos</option>
+                    {col.filterOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                );
+              }
               return null;
-            }
-
-            if (col.filterType === "text") {
-              return (
-                <Input
-                  key={String(col.accessor)}
-                  placeholder={`Filtrar por ${col.header.toLowerCase()}...`}
-                  value={(column.getFilterValue() as string) ?? ""}
-                  onChange={(e) => {
-                    column.setFilterValue(e.target.value);
-                  }}
-                  className="max-w-xs"
-                />
-              );
-            }
-
-            if (col.filterType === "select" && col.filterOptions) {
-              return (
-                <select
-                  key={String(col.accessor)}
-                  className="border rounded-md px-2 py-1 text-sm"
-                  value={(column.getFilterValue() as string) ?? ""}
-                  onChange={(e) => column.setFilterValue(e.target.value)}
-                >
-                  <option value="">Todos</option>
-                  {col.filterOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              );
-            }
-
-            return null;
-          })}
+            })}
         </div>
       )}
 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[35px]">
-              <Checkbox />
-            </TableHead>
+            {enableRowSelection && (
+              <TableHead className="w-[35px]">
+                <Checkbox />
+              </TableHead>
+            )}
             {table.getHeaderGroups().map((headerGroup) =>
               headerGroup.headers.map((header) => (
                 <TableHead
@@ -193,9 +181,11 @@ export function DataTable<T>({
           {pageRows.length ? (
             pageRows.map((row) => (
               <TableRow key={row.id}>
-                <TableCell className="w-[35px]">
-                  <Checkbox />
-                </TableCell>
+                {enableRowSelection && (
+                  <TableCell className="w-[35px]">
+                    <Checkbox />
+                  </TableCell>
+                )}
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -207,7 +197,11 @@ export function DataTable<T>({
           ) : (
             <TableRow>
               <TableCell
-                colSpan={columns.length + (actions ? 2 : 1)}
+                colSpan={
+                  columns.length +
+                  (actions ? 1 : 0) +
+                  (enableRowSelection ? 1 : 0)
+                }
                 className="text-center py-6 text-muted-foreground"
               >
                 No hay datos disponibles

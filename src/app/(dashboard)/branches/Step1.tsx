@@ -60,6 +60,26 @@ export default function Step1({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="md:col-span-2">
+          <label className="block">
+            <span className="text-sm font-medium text-gray-700">
+              Dirección *
+            </span>
+            <input
+              type="text"
+              value={formData.direccion || ""}
+              onChange={(e) => onChange("direccion", e.target.value)}
+              placeholder="Ej: Av. Principal, Edif. Centro, Piso 2"
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+            />
+            {formErrors["direccion"] && (
+              <p className="text-sm text-red-500 mt-1">
+                {formErrors["direccion"]}
+              </p>
+            )}
+          </label>
+        </div>
+
         <div>
           <label className="block">
             <span className="text-sm font-medium text-gray-700">Ciudad *</span>
@@ -110,6 +130,7 @@ export default function Step1({
             </label>
           </div>
         </div>
+
         <div>
           <label className="block">
             <span className="text-sm font-medium text-gray-700">

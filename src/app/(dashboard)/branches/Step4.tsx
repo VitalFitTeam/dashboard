@@ -9,6 +9,10 @@ import {
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
 import StepNotification from "./StepNotification";
+import StepNotification from "./StepNotification";
+import PaymentMethodSelector, {
+  ALL_PAYMENT_METHODS,
+} from "@/components/branches/PaymentMethodSelector";
 
 type StepProps = {
   formData: any;
@@ -52,44 +56,32 @@ export default function Step4({
     formData.metodosPago || [],
   );
 
-  const toggleMethod = (id: string) => {
-    const updated = selected.includes(id)
-      ? selected.filter((m) => m !== id)
-      : [...selected, id];
-    setSelected(updated);
-    onChange("metodosPago", updated);
+  const handleSelectionChange = (updatedMethods: string[]) => {
+    setSelected(updatedMethods);
+    onChange("metodosPago", updatedMethods);
   };
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {paymentMethods.map(({ id, label, description, icon: Icon }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => toggleMethod(id)}
-            className={cn(
-              "border rounded-lg p-4 text-left transition hover:shadow-md flex flex-col items-start gap-2",
-              selected.includes(id)
-                ? "border-orange-500 bg-orange-50"
-                : "border-gray-300 bg-white",
-            )}
-          >
-            <Icon className="h-6 w-6 text-orange-600" />
-            <h3 className="text-md font-semibold text-gray-800">{label}</h3>
-            <p className="text-sm text-gray-600">{description}</p>
-          </button>
-        ))}
-      </div>
+      <h2 className="text-lg font-semibold text-gray-900">
+        Métodos de Pago Aceptados
+      </h2>
+
+      <PaymentMethodSelector
+        selectedMethods={selected}
+        onSelectionChange={handleSelectionChange}
+        mode="edit"
+        formError={formErrors?.["metodosPago"]}
+      />
+
+      <StepNotification
+        title="Importante sobre métodos de pago"
+        description="Los métodos de pago seleccionados estarán disponibles para todos los servicios y membresías en esta sucursal. Puede modificarlos posteriormente desde la configuración de la sucursal."
+      />
 
       {formErrors?.["metodosPago"] && (
         <p className="text-sm text-red-500 mt-2">{formErrors["metodosPago"]}</p>
       )}
-
-      <StepNotification
-        title="Importante sobre métodos de pago"
-        description="Los métodos seleccionados estarán disponibles para todos los servicios y membresías en esta sucursal."
-      />
 
       <div>
         <h4 className="text-sm font-medium text-gray-700 mb-2">
@@ -98,8 +90,10 @@ export default function Step4({
         {selected.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {selected.map((id) => {
-              const method = paymentMethods.find((m) => m.id === id);
-              if (!method) {return null;}
+              const method = ALL_PAYMENT_METHODS.find((m) => m.id === id);
+              if (!method) {
+                return null;
+              }
               const Icon = method.icon;
               return (
                 <span
