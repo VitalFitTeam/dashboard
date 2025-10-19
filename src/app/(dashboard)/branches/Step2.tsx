@@ -63,7 +63,8 @@ export default function Step2({
           />
         </div>
 
-        {/* Estado / País */}
+        {/* Ciudad / Estado / País */}
+
         <div className="col-span-6 md:col-span-2">
           <InputField
             label="Estado"
