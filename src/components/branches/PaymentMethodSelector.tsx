@@ -1,50 +1,14 @@
 "use client";
 
+import { PaymentMethodUI } from "@/app/(dashboard)/branches/page";
 import { cn } from "@/lib/utils";
-import { PaymentMethod } from "@/types/paymentMethod";
-import {
-  BanknotesIcon,
-  CreditCardIcon,
-  BuildingLibraryIcon,
-  DevicePhoneMobileIcon,
-} from "@heroicons/react/24/outline";
-
-export const ALL_PAYMENT_METHODS: PaymentMethod[] = [
-  {
-    id: "efectivo",
-    label: "Efectivo",
-    description: "Pago en efectivo en Sucursal",
-    dbName: "Efectivo",
-    icon: BanknotesIcon,
-  },
-  {
-    id: "tarjeta",
-    label: "Tarjeta de Crédito/Débito",
-    description: "Visa, MasterCard",
-    dbName: "Tarjeta Credito/Debito",
-    icon: CreditCardIcon,
-  },
-  {
-    id: "transferencia",
-    label: "Transferencia Bancaria",
-    description: "Transferencia directa a cuenta bancaria",
-    dbName: "Transferencia Bancaria",
-    icon: BuildingLibraryIcon,
-  },
-  {
-    id: "pago-movil",
-    label: "Pago Móvil",
-    description: "Pago móvil Intercambiario",
-    dbName: "Pago Movil",
-    icon: DevicePhoneMobileIcon,
-  },
-];
 
 type PaymentMethodSelectorProps = {
   selectedMethods: string[];
   onSelectionChange?: (updatedMethods: string[]) => void;
   mode: "edit" | "view";
   formError?: string;
+  availableMethods: PaymentMethodUI[];
 };
 
 export default function PaymentMethodSelector({
@@ -52,6 +16,7 @@ export default function PaymentMethodSelector({
   onSelectionChange,
   mode,
   formError,
+  availableMethods, // <-- RECIBE LA PROP
 }: PaymentMethodSelectorProps) {
   const isEditable = mode === "edit";
 
@@ -68,43 +33,66 @@ export default function PaymentMethodSelector({
   };
 
   return (
-    <div className="space-y-4">
-      {isEditable && (
-        <p className="text-sm text-gray-700">
-          Selecciona los métodos de pago que estarán disponibles en esta
-          sucursal
-        </p>
-      )}
+    <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {ALL_PAYMENT_METHODS.map(({ id, label, description, icon: Icon }) => {
-          const isSelected = selectedMethods.includes(id);
+        {availableMethods.map(
+          ({ id, name, description, icon: IconComponent }) => {
+            const isSelected = selectedMethods.includes(id);
 
-          if (mode === "view" && !isSelected) {
-            return null;
-          }
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={isEditable ? () => toggleMethod(id) : undefined}
-              className={cn(
-                "border rounded-lg p-4 text-left transition flex flex-col items-start gap-2",
-                isSelected
-                  ? "border-orange-500 bg-orange-50"
-                  : "border-gray-300 bg-white",
-                isEditable
-                  ? "hover:shadow-md cursor-pointer"
-                  : "cursor-default",
-              )}
-            >
-              <Icon className="h-6 w-6 text-orange-600" />
-              <h3 className="text-md font-semibold text-gray-800">{label}</h3>
-              <p className="text-sm text-gray-600">{description}</p>
-            </button>
-          );
-        })}
+            if (mode === "view" && !isSelected) {
+              return null;
+            }
+
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={isEditable ? () => toggleMethod(id) : undefined}
+                disabled={!isEditable}
+                className={cn(
+                  "border rounded-lg p-4 text-left transition flex flex-col items-start gap-2 h-full",
+                  isSelected
+                    ? "border-orange-500 bg-orange-50 ring-2 ring-orange-200"
+                    : "border-gray-300 bg-white",
+                  isEditable
+                    ? "hover:shadow-md cursor-pointer"
+                    : "cursor-default",
+                )}
+              >
+                {IconComponent && (
+                  <IconComponent className="h-6 w-6 text-gray-700" />
+                )}
+                <h3 className="text-md font-semibold text-gray-800">{name}</h3>
+                {description && (
+                  <p className="text-sm text-gray-600">{description}</p>
+                )}
+              </button>
+            );
+          },
+        )}
       </div>
       {formError && <p className="text-sm text-red-500 mt-2">{formError}</p>}
+
+      {selectedMethods.length > 0 && (
+        <div className="pt-6 mt-6 border-t">
+          <h4 className="text-sm font-medium text-gray-800 mb-3">
+            Métodos Seleccionados
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {availableMethods
+              .filter((method) => selectedMethods.includes(method.id))
+              .map((method) => (
+                <div
+                  key={method.id}
+                  className="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-md px-3 py-1.5 text-sm text-gray-700"
+                >
+                  {method.icon && <method.icon className="h-4 w-4" />}
+                  <span>{method.name}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

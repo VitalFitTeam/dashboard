@@ -1,7 +1,7 @@
 export type PaymentMethod = {
   id: string;
-  label: string;
-  description: string;
-  icon: React.ElementType;
-  dbName?: string;
+  name: string;
+  type: string;
+  description?: string | null;
+  // global_status?: boolean;
 };

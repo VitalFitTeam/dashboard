@@ -10,6 +10,7 @@ import { BranchOperatingHours, DayOfWeek } from "@/types/branches";
 interface BranchScheduleProps {
   schedule: BranchOperatingHours[];
   onScheduleChange: (updatedSchedule: BranchOperatingHours[]) => void;
+  mode: "view" | "edit";
 }
 
 const dayNameMapping: Record<DayOfWeek, string> = {
@@ -25,7 +26,10 @@ const dayNameMapping: Record<DayOfWeek, string> = {
 export default function BranchSchedule({
   schedule,
   onScheduleChange,
+  mode,
 }: BranchScheduleProps) {
+  const isDisabled = mode === "view";
+
   const handleTimeChange = (
     dayOfWeek: DayOfWeek,
     field: "openTime" | "closeTime",
@@ -65,7 +69,7 @@ export default function BranchSchedule({
             onChange={(e) =>
               handleTimeChange(row.dayOfWeek, "openTime", e.target.value)
             }
-            disabled={row.isClosed}
+            disabled={isDisabled || row.isClosed}
             className="pr-8"
           />
           <Clock className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -83,7 +87,7 @@ export default function BranchSchedule({
             onChange={(e) =>
               handleTimeChange(row.dayOfWeek, "closeTime", e.target.value)
             }
-            disabled={row.isClosed}
+            disabled={isDisabled || row.isClosed}
             className="pr-8"
           />
           <Clock className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -100,6 +104,7 @@ export default function BranchSchedule({
             onCheckedChange={(checked) =>
               handleCheckboxChange(row.dayOfWeek, !!checked)
             }
+            disabled={isDisabled}
           />
         </div>
       ),

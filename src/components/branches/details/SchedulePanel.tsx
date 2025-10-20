@@ -16,12 +16,21 @@ export default function SchedulePanel({
   onScheduleChange,
   mode,
 }: SchedulePanelProps) {
+  const isDisabled = mode === "view";
   return (
     <PanelWrapper
       title="Horario de Operación"
-      description="Gestiona los horarios de apertura y cierre de la sucursal para cada día de la semana."
+      description={
+        isDisabled
+          ? "Horarios de operaciónn de la sucursal."
+          : "Configura los horarios para cada día de la semana."
+      }
     >
-      <BranchSchedule schedule={schedule} onScheduleChange={onScheduleChange} />
+      <BranchSchedule
+        schedule={schedule}
+        onScheduleChange={onScheduleChange}
+        mode={mode}
+      />
     </PanelWrapper>
   );
 }
