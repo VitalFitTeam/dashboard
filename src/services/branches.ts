@@ -61,7 +61,7 @@ export async function fetchBranches({
   }
 
   const res: ApiBranchesResponse = await fetchAPI(
-    `/user/branch-admins?${query.toString()}`,
+    `/branches?${query.toString()}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
