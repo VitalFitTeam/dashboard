@@ -18,17 +18,32 @@ export type BranchesTableRow = {
   administrator: string;
   state: string;
   country: string;
-  status: "active" | "inactive" | "maintenance";
+  status: "Active" | "Inactive" | "Maintenance";
+};
+
+type StatsData = {
+  total: number;
+  active: number;
+  inactive: number;
+  maintenance: number;
 };
 
 export type BranchesFetchResult = {
   data: BranchesTableRow[];
   total: number;
+  stats: StatsData;
 };
 
+interface ApiCount {
+  active: number;
+  inactive: number;
+  maintenance: number;
+  total: number;
+}
+
 interface ApiBranchesResponse {
+  count: ApiCount;
   data: ApiBranch[];
-  total?: number;
 }
 
 interface FetchBranchesParams {
@@ -37,6 +52,7 @@ interface FetchBranchesParams {
   sort: "asc" | "desc";
   search?: string;
   status?: string;
+  token: string | null;
 }
 
 export async function fetchBranches({
@@ -45,6 +61,7 @@ export async function fetchBranches({
   sort,
   search,
   status,
+  token,
 }: FetchBranchesParams): Promise<BranchesFetchResult> {
   const query = new URLSearchParams();
   query.append("limit", limit.toString());
@@ -60,29 +77,45 @@ export async function fetchBranches({
 
   const res: ApiBranchesResponse = await fetchAPI(
     `/branches?${query.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
 
-  if (!res.data) {
-    console.error("Respuesta de API inválida, falta 'data'");
-    return { data: [], total: 0 };
+  if (!res.data || !res.count) {
+    console.error("Respuesta de API inválida, falta 'data' o 'count'");
+    return {
+      data: [],
+      total: 0,
+      stats: { total: 0, active: 0, inactive: 0, maintenance: 0 },
+    };
   }
+
+  const statsResult: StatsData = {
+    total: res.count.total,
+    active: res.count.active,
+    inactive: res.count.inactive,
+    maintenance: res.count.maintenance,
+  };
 
   const mappedData: BranchesTableRow[] = res.data.map((b) => ({
     id: b.branch_id,
     name: b.name,
     taxId: b.tax_id,
-    administrator: `${b.manager_name} ${b.manager_last_name}`,
+    administrator:
+      `${b.manager_name ?? ""} ${b.manager_last_name ?? ""}`.trim(),
     state: b.state_name,
     country: b.country_name,
-    status: b.status as "active" | "inactive" | "maintenance",
+    status: b.status as "Active" | "Inactive" | "Maintenance",
   }));
 
-  const total =
-    res.total ??
-    offset + mappedData.length + (mappedData.length === limit ? 1 : 0);
+  const total = res.count.total;
 
   return {
     data: mappedData,
     total: total,
+    stats: statsResult,
   };
 }

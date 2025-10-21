@@ -4,6 +4,7 @@ import BranchesTable from "./BranchesTable";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import BranchFrom from "./BranchForm";
+import { redirect } from "next/navigation";
 import {
   BanknotesIcon,
   BuildingLibraryIcon,
@@ -104,27 +105,35 @@ export default function HomeBranches() {
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethodUI[]>(
     [],
   );
+  const [filters, setFilters] = useState<Record<string, string | undefined>>(
+    {},
+  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   const [totalBranches, setTotalBranches] = useState(0);
+  const totalPages = Math.ceil(totalBranches / pageSize);
+
+  const handleFilterChange = (key: string, value: string | undefined) => {
+    setPage(1); // Siempre resetear a la página 1 al filtrar
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: value,
+    }));
+  };
 
   useEffect(() => {
     async function loadStaticData() {
       setIsLoadingStatic(true);
       try {
-        setStatsData({ total: 25, active: 15, inactive: 8, maintenance: 2 });
-
-        const paymentMethodsData = await fetchPaymentMethods();
-        console.log("MÉTODOS DE PAGO RECIBIDOS:", paymentMethodsData);
-        const uiPaymentMethods = mapApiPaymentMethodsToUI(paymentMethodsData);
-
-        setAllPaymentMethods(uiPaymentMethods);
-
+        setAllInstructors(MOCK_INSTRUCTORS);
         setAllCities(MOCK_CITIES);
         setAllStates(MOCK_STATES);
         setAllServices(MOCK_SERVICES);
         setAllEquipment(MOCK_EQUIPMENT);
+        setAllPaymentMethods(
+          mapApiPaymentMethodsToUI(MOCK_API_PAYMENT_METHODS),
+        );
       } catch (error) {
         console.error("Error cargando datos estáticos:", error);
       } finally {
@@ -133,6 +142,42 @@ export default function HomeBranches() {
     }
     loadStaticData();
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      redirect("/login");
+    }
+    async function loadBranchesData() {
+      setIsLoadingBranches(true);
+      try {
+        const offset = (page - 1) * pageSize;
+        const searchTerms = filters.name || filters.taxId;
+        const statusFilter = filters.status;
+
+        const result = await fetchBranches({
+          limit: pageSize,
+          offset: offset,
+          sort: sort,
+          token: token,
+          search: searchTerms,
+          status: statusFilter || "Active",
+        });
+
+        console.log("Datos recibidos:", result.data);
+        console.log("Total recibido:", result.total);
+        console.log("Total stats:", result.stats);
+        setBranchesData(result.data);
+        setTotalBranches(result.total);
+        setStatsData(result.stats);
+      } catch (error) {
+        console.error("Error cargando sucursales:", error);
+      } finally {
+        setIsLoadingBranches(false);
+      }
+    }
+    loadBranchesData();
+  }, [page, pageSize, sort, filters]);
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
@@ -162,7 +207,7 @@ export default function HomeBranches() {
         isLoading={isLoadingBranches}
         page={page}
         pageSize={pageSize}
-        totalCount={totalBranches}
+        totalPages={totalPages}
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
         allInstructors={allInstructors}
@@ -171,6 +216,8 @@ export default function HomeBranches() {
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}
+        onFilterChange={handleFilterChange}
+        filterValues={filters}
       />
 
       {showModal && (
