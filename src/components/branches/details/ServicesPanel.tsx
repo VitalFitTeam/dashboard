@@ -1,3 +1,4 @@
+"use client";
 import React, { useMemo, useState } from "react";
 import { Branches, BranchService } from "@/types/branches";
 import PanelWrapper from "./PanelWrapper";
