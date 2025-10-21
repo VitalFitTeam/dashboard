@@ -7,13 +7,43 @@ import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { useState } from "react";
 import BranchDetailsModal from "@/components/BranchDetailsModal";
 import { Branches } from "@/types/branches";
-import { branches } from "./data";
+import { Instructor } from "@/types/instructor";
+import { City, Country, State } from "@/types/location";
+import { Service } from "@/types/service";
+import { Equipment } from "@/types/equipment";
+import { PaymentMethod } from "@/types/paymentMethod";
 
-export default function BranchesTable() {
+interface BranchesTableProps {
+  data: Branches[];
+  isLoading: boolean;
+  allInstructors: Instructor[];
+  allCities: City[];
+  allStates: State[];
+  allServices: Service[];
+  allEquipment: Equipment[];
+  allPaymentMethods: PaymentMethod[];
+  allCountries: Country[];
+}
+
+export default function BranchesTable({
+  data,
+  isLoading,
+  allInstructors,
+  allCities,
+  allStates,
+  allServices,
+  allEquipment,
+  allPaymentMethods,
+  allCountries,
+}: BranchesTableProps) {
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<Branches | null>(null);
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
+
+  if (isLoading) {
+    return <p className="text-center p-4">Cargando sucursales...</p>;
+  }
 
   const handleViewDetails = (branch: Branches) => {
     setSelectedBranch(branch);
@@ -83,7 +113,7 @@ export default function BranchesTable() {
     <>
       <DataTable
         columns={columns}
-        data={branches}
+        data={data}
         page={page}
         pageSize={10}
         onPageChange={setPage}
@@ -114,6 +144,13 @@ export default function BranchesTable() {
         onClose={handleCloseModal}
         branchData={selectedBranch}
         initialMode={modalMode}
+        allInstructors={allInstructors}
+        allCities={allCities}
+        allStates={allStates}
+        allCountries={allCountries}
+        allServices={allServices}
+        allEquipment={allEquipment}
+        allPaymentMethods={allPaymentMethods}
       />
     </>
   );

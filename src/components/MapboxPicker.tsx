@@ -29,7 +29,9 @@ export default function MapboxPicker({
   const marker = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    if (!mapContainer.current) {return;}
+    if (!mapContainer.current) {
+      return;
+    }
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
