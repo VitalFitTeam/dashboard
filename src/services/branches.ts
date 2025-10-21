@@ -18,7 +18,7 @@ export type BranchesTableRow = {
   administrator: string;
   state: string;
   country: string;
-  status: "active" | "inactive" | "maintenance";
+  status: "Active" | "Inactive" | "Maintenance";
 };
 
 export type BranchesFetchResult = {
@@ -37,6 +37,7 @@ interface FetchBranchesParams {
   sort: "asc" | "desc";
   search?: string;
   status?: string;
+  token: string | null;
 }
 
 export async function fetchBranches({
@@ -45,6 +46,7 @@ export async function fetchBranches({
   sort,
   search,
   status,
+  token,
 }: FetchBranchesParams): Promise<BranchesFetchResult> {
   const query = new URLSearchParams();
   query.append("limit", limit.toString());
@@ -59,7 +61,12 @@ export async function fetchBranches({
   }
 
   const res: ApiBranchesResponse = await fetchAPI(
-    `/branches?${query.toString()}`,
+    `/user/branch-admins?${query.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
 
   if (!res.data) {
@@ -74,7 +81,7 @@ export async function fetchBranches({
     administrator: `${b.manager_name} ${b.manager_last_name}`,
     state: b.state_name,
     country: b.country_name,
-    status: b.status as "active" | "inactive" | "maintenance",
+    status: b.status as "Active" | "Inactive" | "Maintenance",
   }));
 
   const total =

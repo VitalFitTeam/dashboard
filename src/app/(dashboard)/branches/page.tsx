@@ -4,6 +4,7 @@ import BranchesTable from "./BranchesTable";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import BranchFrom from "./BranchForm";
+import { redirect } from "next/navigation";
 import {
   BanknotesIcon,
   BuildingLibraryIcon,
@@ -157,6 +158,10 @@ export default function HomeBranches() {
   }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      redirect("/login");
+    }
     async function loadBranchesData() {
       setIsLoadingBranches(true);
       try {
@@ -166,6 +171,8 @@ export default function HomeBranches() {
           limit: pageSize,
           offset,
           sort: sort,
+          token: token,
+          status: "Active",
         });
 
         console.log("Datos recibidos:", result.data);
