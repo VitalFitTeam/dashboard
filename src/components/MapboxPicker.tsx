@@ -68,15 +68,9 @@ export default function MapboxPicker({
         let country = "";
 
         for (const c of place.context || []) {
-          if (c.id.includes("place")) {
-            city = c.text;
-          }
-          if (c.id.includes("region")) {
-            state = c.text;
-          }
-          if (c.id.includes("country")) {
-            country = c.text;
-          }
+          if (c.id.includes("place")) {city = c.text;}
+          if (c.id.includes("region")) {state = c.text;}
+          if (c.id.includes("country")) {country = c.text;}
         }
 
         onSelect({
