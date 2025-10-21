@@ -18,6 +18,7 @@ import {
 import StepForm from "@/app/(dashboard)/branches/StepForm";
 import Image from "next/image";
 import { PaymentMethodUI } from "./page";
+import { createBranch } from "@/services/branches";
 // Importa los tipos de ubicación si StepForm los necesita para otros pasos
 import { Country, State, City } from "@/types/location";
 
@@ -46,6 +47,12 @@ export default function BranchFrom({
     countryId: "",
     stateId: "",
     cityId: "", // Añadido
+    // Campos usados por los Step components (nombres en español)
+    city: "",
+    state: "",
+    country: "",
+    latitud: "",
+    longitud: "",
     status: "active",
     phone: "",
     address: "",
@@ -53,6 +60,9 @@ export default function BranchFrom({
     longitude: 0,
     administrator: "",
     capacity: 0,
+    capacidadMiembros: "",
+    manager_id: "",
+    horarios: {},
     operatingHours: {},
     paymentMethods: [], // Array de IDs
   });
@@ -77,13 +87,121 @@ export default function BranchFrom({
   };
 
   const handleSubmit = () => {
-    // La validación final sí debería quedarse (branchSchema)
-    // const result = branchSchema.safeParse(formData);
-    // if (!result.success) { ... return; }
+    // Helper: convertir horarios a HH:MM:SS
+    const toHHMMSS = (input?: string | null) => {
+      if (!input) {return "00:00:00";}
+      const s = input.trim();
+      // Si ya tiene segundos
+      const hasSeconds = /^\d{1,2}:\d{2}:\d{2}$/.test(s);
+      if (hasSeconds) {return s;}
+      // Formato 24h hh:mm
+      const hm = /^(\d{1,2}):(\d{2})$/.exec(s);
+      if (hm) {
+        const hh = Number(hm[1]).toString().padStart(2, "0");
+        const mm = hm[2];
+        return `${hh}:${mm}:00`;
+      }
+      // Formato 12h con AM/PM
+      const ampm = /^(\d{1,2}):(\d{2})(?:\s*)(AM|PM)$/i.exec(s);
+      if (ampm) {
+        let hh = Number(ampm[1]);
+        const mm = ampm[2];
+        const period = ampm[3].toUpperCase();
+        if (period === "PM" && hh < 12) {hh += 12;}
+        if (period === "AM" && hh === 12) {hh = 0;}
+        return `${hh.toString().padStart(2, "0")}:${mm}:00`;
+      }
+      // Si no podemos parsear, devolver 00:00:00
+      return "00:00:00";
+    };
 
-    console.log("Datos del formulario:", formData);
-    alert("Sucursal Creada (Simulación)");
-    onClose();
+    const dayMap: Record<string, string> = {
+      lunes: "Monday",
+      martes: "Tuesday",
+      miercoles: "Wednesday",
+      jueves: "Thursday",
+      viernes: "Friday",
+      sabado: "Saturday",
+      domingo: "Sunday",
+    };
+
+    // Asegurar que el arreglo tenga los 7 días en orden o mapear los existentes
+    const horariosRecord = (formData.horarios as Record<string, any>) || {};
+    const daysOrder = [
+      "lunes",
+      "martes",
+      "miercoles",
+      "jueves",
+      "viernes",
+      "sabado",
+      "domingo",
+    ];
+
+    const operating_hours = daysOrder.map((dayKey) => {
+      const h = horariosRecord[dayKey] || {
+        apertura: "00:00",
+        cierre: "00:00",
+        cerrado: true,
+      };
+      const isClosed = !!h.cerrado;
+      return {
+        day_of_week: dayMap[dayKey],
+        open_time: isClosed ? "00:00:00" : toHHMMSS(h.apertura),
+        close_time: isClosed ? "00:00:00" : toHHMMSS(h.cierre),
+        is_closed: isClosed,
+      };
+    });
+
+    const statusMap: Record<string, string> = {
+      active: "Active",
+      inactive: "Inactive",
+      maintenance: "Maintenance",
+    };
+
+    const rawStatus = (formData.status || "Active").toString();
+    const normalizedStatus =
+      statusMap[rawStatus.toLowerCase()] ??
+      rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
+
+    const apiPayload: any = {
+      address: formData.address || "",
+      country: formData.country || "",
+      latitude:
+        typeof formData.latitude === "number"
+          ? formData.latitude
+          : formData.latitud
+            ? parseFloat(formData.latitud)
+            : 0,
+      longitude:
+        typeof formData.longitude === "number"
+          ? formData.longitude
+          : formData.longitud
+            ? parseFloat(formData.longitud)
+            : 0,
+      manager_id: formData.manager_id || formData.administrator || "",
+      max_capacity:
+        formData.capacidadMiembros && !isNaN(Number(formData.capacidadMiembros))
+          ? Number(formData.capacidadMiembros)
+          : formData.capacity || 0,
+      name: formData.name || "",
+      operating_hours,
+      payment_methods: formData.paymentMethods || [],
+      phone: formData.phone || "",
+      state: formData.state || "",
+      status: normalizedStatus,
+      tax_id: formData.taxId || "",
+    };
+
+    createBranch(apiPayload)
+      .then((data) => {
+        console.log("Sucursal creada:", data);
+        alert("Sucursal creada correctamente");
+        onClose();
+      })
+      .catch((err) => {
+        console.log("Error creando sucursal:", err);
+        alert("Error al crear sucursal: " + (err?.message || String(err)));
+      });
   };
 
   const handleBack = () => {

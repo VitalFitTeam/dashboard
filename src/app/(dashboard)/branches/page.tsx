@@ -212,6 +212,7 @@ export default function HomeBranches() {
         allInstructors={allInstructors}
         allCities={allCities}
         allStates={allStates}
+        allCountries={allCountries}
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}
