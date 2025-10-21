@@ -6,25 +6,30 @@ import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
 import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { useState } from "react";
 import BranchDetailsModal from "@/components/BranchDetailsModal";
-import { Branches } from "@/types/branches";
 import { Instructor } from "@/types/instructor";
 import { City, Country, State } from "@/types/location";
 import { Service } from "@/types/service";
 import { Equipment } from "@/types/equipment";
 import { PaymentMethod } from "@/types/paymentMethod";
+import { BranchesTableRow } from "@/services/branches";
+import { PaymentMethodUI } from "./page";
 
 interface BranchesTableProps {
-  data: Branches[];
+  data: BranchesTableRow[];
   isLoading: boolean;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
   allInstructors: Instructor[];
   allCities: City[];
   allStates: State[];
+  allCountries: Country[];
   allServices: Service[];
   allEquipment: Equipment[];
-  allPaymentMethods: PaymentMethod[];
-  allCountries: Country[];
+  allPaymentMethods: PaymentMethodUI[];
 }
-
 export default function BranchesTable({
   data,
   isLoading,
@@ -34,24 +39,30 @@ export default function BranchesTable({
   allServices,
   allEquipment,
   allPaymentMethods,
+  page,
+  pageSize,
+  totalCount,
+  onPageChange,
+  onPageSizeChange,
   allCountries,
 }: BranchesTableProps) {
-  const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<Branches | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<BranchesTableRow | null>(
+    null,
+  );
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
 
   if (isLoading) {
     return <p className="text-center p-4">Cargando sucursales...</p>;
   }
 
-  const handleViewDetails = (branch: Branches) => {
+  const handleViewDetails = (branch: BranchesTableRow) => {
     setSelectedBranch(branch);
     setModalMode("view");
     setIsModalOpen(true);
   };
 
-  const handleEditBranch = (branch: Branches) => {
+  const handleEditBranch = (branch: BranchesTableRow) => {
     setSelectedBranch(branch);
     setModalMode("edit");
     setIsModalOpen(true);
@@ -62,12 +73,11 @@ export default function BranchesTable({
     setSelectedBranch(null);
   };
 
-  const columns: Column<Branches>[] = [
+  const columns: Column<BranchesTableRow>[] = [
     { header: "ID", accessor: "id" },
     { header: "Nombre", accessor: "name", filterType: "text" },
     { header: "RIF", accessor: "taxId" },
     { header: "Administrador", accessor: "administrator" },
-    { header: "Ciudad", accessor: "city" },
     {
       header: "País",
       accessor: "country",
@@ -116,7 +126,8 @@ export default function BranchesTable({
         data={data}
         page={page}
         pageSize={10}
-        onPageChange={setPage}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
         enableFilters
         actions={(row) => (
           <div className="flex items-center justify-center gap-2">
@@ -139,10 +150,10 @@ export default function BranchesTable({
           </div>
         )}
       />
-      <BranchDetailsModal
+      {/*<BranchDetailsModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        branchData={selectedBranch}
+        branchData={selectedBranch} // Aquí ya puedes mapear solo los datos que tengas
         initialMode={modalMode}
         allInstructors={allInstructors}
         allCities={allCities}
@@ -151,7 +162,7 @@ export default function BranchesTable({
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}
-      />
+      /> */}
     </>
   );
 }
