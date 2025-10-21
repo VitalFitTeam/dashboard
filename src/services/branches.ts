@@ -21,14 +21,29 @@ export type BranchesTableRow = {
   status: "Active" | "Inactive" | "Maintenance";
 };
 
+type StatsData = {
+  total: number;
+  active: number;
+  inactive: number;
+  maintenance: number;
+};
+
 export type BranchesFetchResult = {
   data: BranchesTableRow[];
   total: number;
+  stats: StatsData;
 };
 
+interface ApiCount {
+  active: number;
+  inactive: number;
+  maintenance: number;
+  total: number;
+}
+
 interface ApiBranchesResponse {
+  count: ApiCount;
   data: ApiBranch[];
-  total?: number;
 }
 
 interface FetchBranchesParams {
@@ -69,10 +84,21 @@ export async function fetchBranches({
     },
   );
 
-  if (!res.data) {
-    console.error("Respuesta de API inválida, falta 'data'");
-    return { data: [], total: 0 };
+  if (!res.data || !res.count) {
+    console.error("Respuesta de API inválida, falta 'data' o 'count'");
+    return {
+      data: [],
+      total: 0,
+      stats: { total: 0, active: 0, inactive: 0, maintenance: 0 },
+    };
   }
+
+  const statsResult: StatsData = {
+    total: res.count.total,
+    active: res.count.active,
+    inactive: res.count.inactive,
+    maintenance: res.count.maintenance,
+  };
 
   const mappedData: BranchesTableRow[] = res.data.map((b) => ({
     id: b.branch_id,
@@ -85,10 +111,11 @@ export async function fetchBranches({
     status: b.status as "Active" | "Inactive" | "Maintenance",
   }));
 
-  const total = res.total ?? mappedData.length;
+  const total = res.count.total;
 
   return {
     data: mappedData,
     total: total,
+    stats: statsResult,
   };
 }

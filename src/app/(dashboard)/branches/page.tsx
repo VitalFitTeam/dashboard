@@ -129,22 +129,27 @@ export default function HomeBranches() {
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethodUI[]>(
     [],
   );
-  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
-  const [detailedBranchData, setDetailedBranchData] = useState<Branches | null>(
-    null,
+  const [filters, setFilters] = useState<Record<string, string | undefined>>(
+    {},
   );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   const [totalBranches, setTotalBranches] = useState(0);
+  const totalPages = Math.ceil(totalBranches / pageSize);
+
+  const handleFilterChange = (key: string, value: string | undefined) => {
+    setPage(1); // Siempre resetear a la página 1 al filtrar
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: value,
+    }));
+  };
 
   useEffect(() => {
     async function loadStaticData() {
       setIsLoadingStatic(true);
       try {
-        setStatsData({ total: 25, active: 15, inactive: 8, maintenance: 2 });
-
-        // CORRECCIÓN #3: Carga los mocks UNA SOLA VEZ
         setAllInstructors(MOCK_INSTRUCTORS);
         setAllCities(MOCK_CITIES);
         setAllStates(MOCK_STATES);
@@ -171,19 +176,24 @@ export default function HomeBranches() {
       setIsLoadingBranches(true);
       try {
         const offset = (page - 1) * pageSize;
+        const searchTerms = filters.name || filters.taxId;
+        const statusFilter = filters.status;
 
         const result = await fetchBranches({
           limit: pageSize,
-          offset,
+          offset: offset,
           sort: sort,
           token: token,
-          status: "Active",
+          search: searchTerms,
+          status: statusFilter || "Active",
         });
 
         console.log("Datos recibidos:", result.data);
         console.log("Total recibido:", result.total);
+        console.log("Total stats:", result.stats);
         setBranchesData(result.data);
         setTotalBranches(result.total);
+        setStatsData(result.stats);
       } catch (error) {
         console.error("Error cargando sucursales:", error);
       } finally {
@@ -191,33 +201,7 @@ export default function HomeBranches() {
       }
     }
     loadBranchesData();
-  }, [page, pageSize, sort]);
-
-  const handleSelectBranchForModal = (branchId: string) => {
-    setDetailedBranchData(null);
-    setSelectedBranchId(branchId);
-    setShowModal(true);
-  };
-
-  /*useEffect(() => {
-    if (!selectedBranchId) return;
-
-    async function loadBranchDetails() {
-      try {
-        const token = localStorage.getItem("token");
-        // ASUME que tienes una función fetchBranchDetails(id, token)
-        const details = await fetchBranchDetails(selectedBranchId, token);
-        setDetailedBranchData(details);
-      } catch (error) {
-        console.error(
-          `Error cargando detalles de sucursal ${selectedBranchId}:`,
-          error,
-        );
-        setDetailedBranchData(null);
-      }
-    }
-    loadBranchDetails();
-  }, [selectedBranchId]);*/
+  }, [page, pageSize, sort, filters]);
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
@@ -247,7 +231,7 @@ export default function HomeBranches() {
         isLoading={isLoadingBranches}
         page={page}
         pageSize={pageSize}
-        totalCount={totalBranches}
+        totalPages={totalPages}
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
         allInstructors={allInstructors}
@@ -256,7 +240,8 @@ export default function HomeBranches() {
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}
-        //onBranchSelect={handleSelectBranchForModal}
+        onFilterChange={handleFilterChange}
+        filterValues={filters}
       />
 
       {showModal && (

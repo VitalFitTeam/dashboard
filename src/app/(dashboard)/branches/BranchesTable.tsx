@@ -14,12 +14,16 @@ import { PaymentMethod } from "@/types/paymentMethod";
 import { BranchesTableRow } from "@/services/branches";
 import { PaymentMethodUI } from "./page";
 
+export type FilterChangeHandler = (
+  key: string,
+  value: string | undefined,
+) => void;
+
 interface BranchesTableProps {
   data: BranchesTableRow[];
   isLoading: boolean;
   page: number;
   pageSize: number;
-  totalCount: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   allInstructors: Instructor[];
@@ -29,7 +33,11 @@ interface BranchesTableProps {
   allServices: Service[];
   allEquipment: Equipment[];
   allPaymentMethods: PaymentMethodUI[];
+  totalPages: number;
+  onFilterChange: FilterChangeHandler;
+  filterValues: Record<string, string | undefined>;
 }
+
 export default function BranchesTable({
   data,
   isLoading,
@@ -41,9 +49,11 @@ export default function BranchesTable({
   allPaymentMethods,
   page,
   pageSize,
-  totalCount,
+  totalPages,
   onPageChange,
   onPageSizeChange,
+  onFilterChange,
+  filterValues,
 }: BranchesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<BranchesTableRow | null>(
@@ -75,17 +85,11 @@ export default function BranchesTable({
   const columns: Column<BranchesTableRow>[] = [
     { header: "ID", accessor: "id" },
     { header: "Nombre", accessor: "name", filterType: "text" },
-    { header: "RIF", accessor: "taxId", filterType: "text" },
+    { header: "RIF", accessor: "taxId" },
     { header: "Administrador", accessor: "administrator" },
     {
       header: "País",
       accessor: "country",
-      filterType: "select",
-      filterOptions: [
-        { label: "Venezuela", value: "Venezuela" },
-        { label: "Colombia", value: "Colombia" },
-        { label: "Perú", value: "Perú" },
-      ],
     },
     {
       header: "Status",
@@ -128,6 +132,9 @@ export default function BranchesTable({
         onPageChange={onPageChange}
         onPageSizeChange={onPageSizeChange}
         enableFilters
+        totalPages={totalPages}
+        onFilterChange={onFilterChange}
+        filterValues={filterValues}
         actions={(row) => (
           <div className="flex items-center justify-center gap-2">
             <Button
