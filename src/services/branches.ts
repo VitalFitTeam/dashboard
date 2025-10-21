@@ -78,15 +78,14 @@ export async function fetchBranches({
     id: b.branch_id,
     name: b.name,
     taxId: b.tax_id,
-    administrator: `${b.manager_name} ${b.manager_last_name}`,
+    administrator:
+      `${b.manager_name ?? ""} ${b.manager_last_name ?? ""}`.trim(),
     state: b.state_name,
     country: b.country_name,
     status: b.status as "Active" | "Inactive" | "Maintenance",
   }));
 
-  const total =
-    res.total ??
-    offset + mappedData.length + (mappedData.length === limit ? 1 : 0);
+  const total = res.total ?? mappedData.length;
 
   return {
     data: mappedData,

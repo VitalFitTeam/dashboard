@@ -75,7 +75,7 @@ export default function BranchesTable({
   const columns: Column<BranchesTableRow>[] = [
     { header: "ID", accessor: "id" },
     { header: "Nombre", accessor: "name", filterType: "text" },
-    { header: "RIF", accessor: "taxId" },
+    { header: "RIF", accessor: "taxId", filterType: "text" },
     { header: "Administrador", accessor: "administrator" },
     {
       header: "País",
@@ -124,7 +124,7 @@ export default function BranchesTable({
         columns={columns}
         data={data}
         page={page}
-        pageSize={10}
+        pageSize={pageSize}
         onPageChange={onPageChange}
         onPageSizeChange={onPageSizeChange}
         enableFilters
@@ -149,15 +149,16 @@ export default function BranchesTable({
           </div>
         )}
       />
-      {/*<BranchDetailsModal
+      {/*
+    
+    <BranchDetailsModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        branchData={selectedBranch} // Aquí ya puedes mapear solo los datos que tengas
+        branchData={selectedBranch}
         initialMode={modalMode}
         allInstructors={allInstructors}
         allCities={allCities}
         allStates={allStates}
-        allCountries={allCountries}
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}

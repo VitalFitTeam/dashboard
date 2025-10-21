@@ -23,6 +23,7 @@ import {
   BranchesTableRow,
   fetchBranches,
 } from "@/services/branches";
+import { Branches } from "@/types/branches";
 
 const MOCK_INSTRUCTORS: Instructor[] = [
   { id: "i1", user_id: "u1", name: "Ana Pérez" },
@@ -128,6 +129,10 @@ export default function HomeBranches() {
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethodUI[]>(
     [],
   );
+  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+  const [detailedBranchData, setDetailedBranchData] = useState<Branches | null>(
+    null,
+  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState<"asc" | "desc">("desc");
@@ -187,6 +192,33 @@ export default function HomeBranches() {
     }
     loadBranchesData();
   }, [page, pageSize, sort]);
+
+  const handleSelectBranchForModal = (branchId: string) => {
+    setDetailedBranchData(null);
+    setSelectedBranchId(branchId);
+    setShowModal(true);
+  };
+
+  /*useEffect(() => {
+    if (!selectedBranchId) return;
+
+    async function loadBranchDetails() {
+      try {
+        const token = localStorage.getItem("token");
+        // ASUME que tienes una función fetchBranchDetails(id, token)
+        const details = await fetchBranchDetails(selectedBranchId, token);
+        setDetailedBranchData(details);
+      } catch (error) {
+        console.error(
+          `Error cargando detalles de sucursal ${selectedBranchId}:`,
+          error,
+        );
+        setDetailedBranchData(null);
+      }
+    }
+    loadBranchDetails();
+  }, [selectedBranchId]);*/
+
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title="SUCURSALES">
@@ -224,6 +256,7 @@ export default function HomeBranches() {
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}
+        //onBranchSelect={handleSelectBranchForModal}
       />
 
       {showModal && (
