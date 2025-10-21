@@ -92,15 +92,15 @@ export default function BranchesTable({
       accessor: "status",
       filterType: "select",
       filterOptions: [
-        { label: "Activa", value: "active" },
-        { label: "Inactiva", value: "inactive" },
-        { label: "En mantenimiento", value: "maintenance" },
+        { label: "Activa", value: "Active" },
+        { label: "Inactiva", value: "Inactive" },
+        { label: "En mantenimiento", value: "Maintenance" },
       ],
       render: (value) => {
         const statusConfig = {
-          active: { text: "Activa", color: "text-green-700 border-green-300" },
-          inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
-          maintenance: {
+          Active: { text: "Activa", color: "text-green-700 border-green-300" },
+          Inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
+          Maintenance: {
             text: "En mantenimiento",
             color: "text-yellow-700 border-yellow-300",
           },
