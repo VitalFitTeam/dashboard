@@ -25,7 +25,7 @@ interface BranchesTableProps {
   allInstructors: Instructor[];
   allCities: City[];
   allStates: State[];
-  //allCountries: Country[];
+  allCountries: Country[];
   allServices: Service[];
   allEquipment: Equipment[];
   allPaymentMethods: PaymentMethodUI[];
@@ -44,6 +44,7 @@ export default function BranchesTable({
   totalCount,
   onPageChange,
   onPageSizeChange,
+  allCountries,
 }: BranchesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<BranchesTableRow | null>(
