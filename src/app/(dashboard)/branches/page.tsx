@@ -14,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { Instructor } from "@/types/instructor";
-import { City, State } from "@/types/location";
+import { City, State, Country } from "@/types/location";
 import { Service } from "@/types/service";
 import { Equipment } from "@/types/equipment";
 import { PaymentMethod } from "@/types/paymentMethod";
@@ -23,7 +23,7 @@ import {
   BranchesTableRow,
   fetchBranches,
 } from "@/services/branches";
-import { Branches } from "@/types/branches";
+import { fetchPaymentMethods } from "@/services/paymentMethods";
 
 const MOCK_INSTRUCTORS: Instructor[] = [
   { id: "i1", user_id: "u1", name: "Ana Pérez" },
@@ -62,32 +62,7 @@ export type PaymentMethodUI = PaymentMethod & {
   icon?: React.ElementType;
 };
 
-const MOCK_API_PAYMENT_METHODS: PaymentMethod[] = [
-  {
-    id: "pm_cash",
-    name: "Efectivo",
-    type: "Cash",
-    description: "Pago en efectivo",
-  },
-  {
-    id: "pm_card",
-    name: "Tarjeta Credito/Debito",
-    type: "Card",
-    description: "Visa/Mastercard",
-  },
-  {
-    id: "pm_transfer",
-    name: "Transferencia Bancaria",
-    type: "Transfer",
-    description: "Directa a cuenta",
-  },
-  {
-    id: "pm_mobile",
-    name: "Pago Movil",
-    type: "Mobile",
-    description: "Interbancario",
-  },
-];
+const MOCK_COUNTRIES: Country[] = [{ id: "co1", name: "Venezuela" }];
 
 function mapApiPaymentMethodsToUI(methods: PaymentMethod[]): PaymentMethodUI[] {
   return methods.map((method) => {
@@ -123,6 +98,7 @@ export default function HomeBranches() {
   const [branchesData, setBranchesData] = useState<BranchesTableRow[]>([]);
   const [allInstructors, setAllInstructors] = useState<Instructor[]>([]);
   const [allCities, setAllCities] = useState<City[]>([]);
+  const [allCountries, setAllCountries] = useState<Country[]>([]);
   const [allStates, setAllStates] = useState<State[]>([]);
   const [allServices, setAllServices] = useState<Service[]>([]);
   const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
@@ -249,7 +225,11 @@ export default function HomeBranches() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={() => setShowModal(false)}
         >
-          <BranchFrom onClose={() => setShowModal(false)} />
+          <BranchFrom
+            onClose={() => setShowModal(false)}
+            onClick={(e) => e.stopPropagation()}
+            allPaymentMethods={allPaymentMethods}
+          />
         </div>
       )}
     </div>

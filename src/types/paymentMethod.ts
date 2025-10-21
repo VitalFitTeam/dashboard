@@ -3,5 +3,4 @@ export type PaymentMethod = {
   name: string;
   type: string;
   description?: string | null;
-  // global_status?: boolean;
 };

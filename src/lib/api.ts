@@ -1,15 +1,26 @@
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   try {
+    const token = localStorage.getItem("token");
+
+    const headers = new Headers(options.headers);
+
+    headers.set("Content-Type", "application/json");
+
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
     const res = await fetch(`https://api-rm8x.onrender.com/v1${endpoint}`, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
+      headers: headers,
     });
 
     if (!res.ok) {
       const errorText = await res.text();
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
       throw new Error(`Error ${res.status}: ${errorText}`);
     }
 

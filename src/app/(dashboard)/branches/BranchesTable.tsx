@@ -37,7 +37,6 @@ interface BranchesTableProps {
   onFilterChange: FilterChangeHandler;
   filterValues: Record<string, string | undefined>;
 }
-
 export default function BranchesTable({
   data,
   isLoading,
@@ -161,7 +160,7 @@ export default function BranchesTable({
     <BranchDetailsModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        branchData={selectedBranch}
+        branchData={selectedBranch} // Aquí ya puedes mapear solo los datos que tengas
         initialMode={modalMode}
         allInstructors={allInstructors}
         allCities={allCities}
