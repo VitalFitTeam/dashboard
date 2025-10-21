@@ -40,8 +40,8 @@ export default function BranchFrom({ onClose }: { onClose: () => void }) {
     longitud: "",
     gerenteResponsable: "",
     capacidadMiembros: "",
-    horarios: {}, // objeto con días de la semana
-    metodosPago: [], // array de strings
+    horarios: {},
+    metodosPago: [],
   });
 
   const steps = [
@@ -93,7 +93,9 @@ export default function BranchFrom({ onClose }: { onClose: () => void }) {
   };
 
   const handleNext = () => {
-    if (!validateStep()) {return;}
+    if (!validateStep()) {
+      return;
+    }
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
@@ -110,7 +112,7 @@ export default function BranchFrom({ onClose }: { onClose: () => void }) {
 
     console.log("Datos del formulario:", result.data);
     alert("Sucursal Creada");
-    onClose(); // cerrar modal si todo está bien
+    onClose();
   };
 
   const handleBack = () => {

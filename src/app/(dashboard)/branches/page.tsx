@@ -12,45 +12,17 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
-import { Branches } from "@/types/branches";
 import { Instructor } from "@/types/instructor";
 import { City, State } from "@/types/location";
 import { Service } from "@/types/service";
 import { Equipment } from "@/types/equipment";
 import { PaymentMethod } from "@/types/paymentMethod";
+import {
+  BranchesFetchResult,
+  BranchesTableRow,
+  fetchBranches,
+} from "@/services/branches";
 
-const MOCK_BRANCHES: Branches[] = [
-  {
-    id: "1",
-    name: "Sucursal Centro",
-    taxId: "J-123456",
-    city: "Caracas",
-    country: "Venezuela",
-    status: "active",
-    cityId: "c1",
-    paymethods: [],
-    operatingHours: [],
-    // Campos añadidos para coincidir con el tipo 'Branches'
-    instructors: [],
-    services: [],
-    inventory: [],
-  },
-  {
-    id: "2",
-    name: "Sucursal Este",
-    taxId: "J-654321",
-    city: "Barquisimeto",
-    country: "Venezuela",
-    status: "inactive",
-    cityId: "c2",
-    paymethods: [],
-    operatingHours: [],
-    // Campos añadidos para coincidir con el tipo 'Branches'
-    instructors: [],
-    services: [],
-    inventory: [],
-  },
-];
 const MOCK_INSTRUCTORS: Instructor[] = [
   { id: "i1", user_id: "u1", name: "Ana Pérez" },
   { id: "i2", user_id: "u2", name: "Carlos Rivas" },
@@ -70,17 +42,19 @@ const MOCK_SERVICES: Service[] = [
 const MOCK_EQUIPMENT: Equipment[] = [
   { id: "eq1", name: "Cinta de correr", category: "Cardio" },
 ];
-const MOCK_STATS = { total: 2, active: 1, inactive: 1, maintenance: 0 };
-
-const statCardsConfig = [
-  { title: "Total", valueKey: "total" as keyof typeof MOCK_STATS },
-  { title: "Activas", valueKey: "active" as keyof typeof MOCK_STATS },
-  { title: "Inactivas", valueKey: "inactive" as keyof typeof MOCK_STATS },
-  {
-    title: "Mantenimiento",
-    valueKey: "maintenance" as keyof typeof MOCK_STATS,
-  },
+const statCardsConfig: { title: string; valueKey: keyof StatsData }[] = [
+  { title: "Total", valueKey: "total" },
+  { title: "Activas", valueKey: "active" },
+  { title: "Inactivas", valueKey: "inactive" },
+  { title: "Mantenimiento", valueKey: "maintenance" },
 ];
+
+type StatsData = {
+  total: number;
+  active: number;
+  inactive: number;
+  maintenance: number;
+};
 
 export type PaymentMethodUI = PaymentMethod & {
   icon?: React.ElementType;
@@ -114,7 +88,6 @@ const MOCK_API_PAYMENT_METHODS: PaymentMethod[] = [
 ];
 
 function mapApiPaymentMethodsToUI(methods: PaymentMethod[]): PaymentMethodUI[] {
-  // <-- Use PaymentMethod here
   return methods.map((method) => {
     let IconComponent: React.ElementType | undefined;
     switch (method.type.toLowerCase()) {
@@ -137,44 +110,76 @@ function mapApiPaymentMethodsToUI(methods: PaymentMethod[]): PaymentMethodUI[] {
 
 export default function HomeBranches() {
   const [showModal, setShowModal] = useState(false);
-
-  const [statsData, setStatsData] = useState(MOCK_STATS);
-  const [branchesData, setBranchesData] = useState<Branches[]>([]);
+  const [isLoadingStatic, setIsLoadingStatic] = useState(true);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(true);
+  const [statsData, setStatsData] = useState<StatsData>({
+    total: 0,
+    active: 0,
+    inactive: 0,
+    maintenance: 0,
+  });
+  const [branchesData, setBranchesData] = useState<BranchesTableRow[]>([]);
   const [allInstructors, setAllInstructors] = useState<Instructor[]>([]);
   const [allCities, setAllCities] = useState<City[]>([]);
   const [allStates, setAllStates] = useState<State[]>([]);
   const [allServices, setAllServices] = useState<Service[]>([]);
   const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethodUI[]>(
     [],
   );
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [sort, setSort] = useState<"asc" | "desc">("desc");
+  const [totalBranches, setTotalBranches] = useState(0);
 
   useEffect(() => {
-    async function loadPageData() {
-      setIsLoading(true);
+    async function loadStaticData() {
+      setIsLoadingStatic(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setBranchesData(MOCK_BRANCHES);
+        setStatsData({ total: 25, active: 15, inactive: 8, maintenance: 2 });
+
+        // CORRECCIÓN #3: Carga los mocks UNA SOLA VEZ
         setAllInstructors(MOCK_INSTRUCTORS);
         setAllCities(MOCK_CITIES);
         setAllStates(MOCK_STATES);
         setAllServices(MOCK_SERVICES);
         setAllEquipment(MOCK_EQUIPMENT);
-        setStatsData(MOCK_STATS);
-        const uiPaymentMethods = mapApiPaymentMethodsToUI(
-          MOCK_API_PAYMENT_METHODS,
+        setAllPaymentMethods(
+          mapApiPaymentMethodsToUI(MOCK_API_PAYMENT_METHODS),
         );
-        setAllPaymentMethods(uiPaymentMethods);
       } catch (error) {
-        console.error("Error cargando los datos:", error);
+        console.error("Error cargando datos estáticos:", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingStatic(false);
       }
     }
-    loadPageData();
+    loadStaticData();
   }, []);
 
+  useEffect(() => {
+    async function loadBranchesData() {
+      setIsLoadingBranches(true);
+      try {
+        const offset = (page - 1) * pageSize;
+
+        const result = await fetchBranches({
+          limit: pageSize,
+          offset,
+          sort: sort,
+        });
+
+        console.log("Datos recibidos:", result.data);
+        console.log("Total recibido:", result.total);
+        setBranchesData(result.data);
+        setTotalBranches(result.total);
+      } catch (error) {
+        console.error("Error cargando sucursales:", error);
+      } finally {
+        setIsLoadingBranches(false);
+      }
+    }
+    loadBranchesData();
+  }, [page, pageSize, sort]);
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title="SUCURSALES">
@@ -200,7 +205,12 @@ export default function HomeBranches() {
       </div>
       <BranchesTable
         data={branchesData}
-        isLoading={isLoading}
+        isLoading={isLoadingBranches}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalBranches}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
         allInstructors={allInstructors}
         allCities={allCities}
         allStates={allStates}

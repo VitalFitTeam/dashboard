@@ -10,8 +10,8 @@ import {
   type ColumnDef,
   type SortingState,
   type ColumnFiltersState,
-  type Row,
 } from "@tanstack/react-table";
+
 import {
   Table,
   TableHeader,
@@ -22,8 +22,8 @@ import {
 } from "../ui/table";
 import { Checkbox } from "../ui/checkbox";
 import { PaginationControls } from "./PaginationControls";
-import { ArrowUp, ArrowDown } from "lucide-react";
 import { Input } from "../Input";
+import { ArrowUp, ArrowDown } from "lucide-react";
 
 export type Column<T> = {
   header: string;
@@ -37,9 +37,10 @@ export type DataTableProps<T> = {
   columns: Column<T>[];
   data: T[];
   actions?: (row: T) => React.ReactNode;
-  page?: number;
+  page?: number; // controlado por el padre
   pageSize?: number;
   onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
   enableFilters?: boolean;
   enableRowSelection?: boolean;
 };
@@ -48,12 +49,37 @@ export function DataTable<T>({
   columns,
   data,
   actions,
-  page = 1,
-  pageSize = 10,
+  page,
+  pageSize,
   onPageChange,
+  onPageSizeChange,
   enableFilters = false,
-  enableRowSelection = true, // <-- Corregido: Ahora es 'true' por defecto
+  enableRowSelection = true,
 }: DataTableProps<T>) {
+  // Estado interno híbrido
+  const [internalPage, setInternalPage] = React.useState(1);
+  const [internalPageSize, setInternalPageSize] = React.useState(10);
+
+  const currentPage = page ?? internalPage;
+  const currentPageSize = pageSize ?? internalPageSize;
+
+  const handlePageChange = (newPage: number) => {
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    } else {
+      setInternalPageSize(newSize);
+    }
+  };
+
+  // Estado para filtros y sorting
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
@@ -93,12 +119,14 @@ export function DataTable<T>({
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
+  // Slice para paginación
+  const startIndex = (currentPage - 1) * currentPageSize;
+  const endIndex = startIndex + currentPageSize;
   const pageRows = table.getRowModel().rows.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-4">
+      {/* FILTROS */}
       {enableFilters && (
         <div className="flex flex-wrap gap-3 mb-4">
           {columns
@@ -108,19 +136,19 @@ export function DataTable<T>({
               if (!column) {
                 return null;
               }
+
               if (col.filterType === "text") {
                 return (
                   <Input
                     key={String(col.accessor)}
                     placeholder={`Filtrar por ${col.header.toLowerCase()}...`}
                     value={(column.getFilterValue() as string) ?? ""}
-                    onChange={(e) => {
-                      column.setFilterValue(e.target.value);
-                    }}
+                    onChange={(e) => column.setFilterValue(e.target.value)}
                     className="max-w-xs"
                   />
                 );
               }
+
               if (col.filterType === "select" && col.filterOptions) {
                 return (
                   <select
@@ -138,11 +166,13 @@ export function DataTable<T>({
                   </select>
                 );
               }
+
               return null;
             })}
         </div>
       )}
 
+      {/* TABLA */}
       <Table>
         <TableHeader>
           <TableRow>
@@ -211,13 +241,12 @@ export function DataTable<T>({
         </TableBody>
       </Table>
 
-      {onPageChange && (
-        <PaginationControls
-          page={page}
-          totalPages={Math.ceil(data.length / pageSize)}
-          onPageChange={onPageChange}
-        />
-      )}
+      {/* PAGINACIÓN */}
+      <PaginationControls
+        page={currentPage}
+        totalPages={Math.ceil(data.length / currentPageSize)}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }
