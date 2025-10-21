@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { debounce } from "@/utils";
 
 export type Column<T> = {
   header: string;
@@ -143,6 +144,13 @@ export function DataTable<T>({
   const endIndex = startIndex + currentPageSize;
   const pageRows = table.getRowModel().rows;
 
+  const debouncedOnFilterChange = React.useCallback(
+    debounce((key: string, value: string | undefined) => {
+      onFilterChange?.(key, value);
+    }, 500),
+    [onFilterChange],
+  );
+
   return (
     <div className="space-y-4">
       {/* FILTROS */}
@@ -162,12 +170,12 @@ export function DataTable<T>({
                     key={String(col.accessor)}
                     placeholder={`Filtrar por ${col.header.toLowerCase()}...`}
                     value={filterValues?.[col.accessor as string] ?? ""}
-                    onChange={(e) =>
-                      onFilterChange?.(
+                    onChange={(e) => {
+                      debouncedOnFilterChange(
                         col.accessor as string,
                         e.target.value || undefined,
-                      )
-                    }
+                      );
+                    }}
                     className="max-w-xs"
                   />
                 );

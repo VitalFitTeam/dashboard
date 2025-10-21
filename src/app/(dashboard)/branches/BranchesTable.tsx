@@ -155,8 +155,7 @@ export default function BranchesTable({
           </div>
         )}
       />
-      {/*
-    
+      {/*    
     <BranchDetailsModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -168,7 +167,8 @@ export default function BranchesTable({
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}
-      /> */}
+      /> 
+      */}
     </>
   );
 }

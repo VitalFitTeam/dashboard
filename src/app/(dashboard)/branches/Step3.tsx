@@ -12,7 +12,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 type StepProps = {
   formData: any;
-  onChange: (field: string, value: any) => void;
+  handleChange?: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => void;
+  handleCustomChange: (field: string, value: any) => void;
   formErrors?: Record<string, string>;
 };
 
@@ -52,7 +57,8 @@ const horasCierre = [
 
 export default function Step3({
   formData,
-  onChange,
+  handleChange,
+  handleCustomChange,
   formErrors = {},
 }: StepProps) {
   const handleHorarioChange = (dia: string, campo: string, valor: any) => {
@@ -63,7 +69,7 @@ export default function Step3({
       cerrado: false,
     };
 
-    onChange("horarios", {
+    handleCustomChange("horarios", {
       ...horarios,
       [dia]: {
         ...horarioDia,
@@ -102,25 +108,21 @@ export default function Step3({
               Gerente Responsable *
             </span>
             <Select
-              value={formData.gerenteResponsable || ""}
-              onValueChange={(value) => onChange("gerenteResponsable", value)}
+              value={formData.manager_id || ""}
+              onValueChange={(value) => handleCustomChange("manager_id", value)}
             >
               <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Seleccione un Gerente" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="juan-perez">Juan Pérez</SelectItem>
-                <SelectItem value="maria-gonzalez">María González</SelectItem>
-                <SelectItem value="carlos-rodriguez">
-                  Carlos Rodríguez
+                <SelectItem value="f715ad5a-30db-462e-9284-3eaab72b2923">
+                  Instructor Prueba
                 </SelectItem>
-                <SelectItem value="ana-martinez">Ana Martínez</SelectItem>
-                <SelectItem value="luis-fernandez">Luis Fernández</SelectItem>
               </SelectContent>
             </Select>
-            {formErrors?.["gerenteResponsable"] && (
+            {formErrors?.["manager_id"] && (
               <p className="text-sm text-red-500 mt-1">
-                {formErrors["gerenteResponsable"]}
+                {formErrors["manager_id"]}
               </p>
             )}
           </label>
@@ -134,7 +136,9 @@ export default function Step3({
             <input
               type="number"
               value={formData.capacidadMiembros || ""}
-              onChange={(e) => onChange("capacidadMiembros", e.target.value)}
+              onChange={(e) =>
+                handleCustomChange("capacidadMiembros", e.target.value)
+              }
               placeholder="Ejemplo: 400"
               min="1"
               className={`mt-1 block w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${

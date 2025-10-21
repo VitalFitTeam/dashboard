@@ -55,6 +55,37 @@ interface FetchBranchesParams {
   token: string | null;
 }
 
+export type CreateBranchPayload = {
+  address?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  manager_id?: string | null;
+  max_capacity?: number | null;
+  name?: string | null;
+  operating_hours?: Array<{
+    close_time?: string | null;
+    day_of_week?: string | null;
+    is_closed?: boolean;
+    open_time?: string | null;
+  }>;
+  payment_methods?: string[] | null;
+  phone?: string | null;
+  state?: string | null;
+  status?: string | null;
+  tax_id?: string | null;
+};
+
+export async function createBranch(payload: CreateBranchPayload) {
+  // Usa fetchAPI que maneja la base URL y headers (incluye Authorization si existe)
+  const res = await fetchAPI("/branches", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return res;
+}
+
 export async function fetchBranches({
   limit,
   offset,

@@ -24,6 +24,7 @@ import {
   fetchBranches,
 } from "@/services/branches";
 import { fetchPaymentMethods } from "@/services/paymentMethods";
+import { debounce } from "@/utils";
 
 const MOCK_INSTRUCTORS: Instructor[] = [
   { id: "i1", user_id: "u1", name: "Ana Pérez" },
@@ -115,7 +116,7 @@ export default function HomeBranches() {
   const totalPages = Math.ceil(totalBranches / pageSize);
 
   const handleFilterChange = (key: string, value: string | undefined) => {
-    setPage(1); // Siempre resetear a la página 1 al filtrar
+    setPage(1);
     setFilters((prevFilters) => ({
       ...prevFilters,
       [key]: value,
@@ -126,14 +127,15 @@ export default function HomeBranches() {
     async function loadStaticData() {
       setIsLoadingStatic(true);
       try {
+        const paymentMethodsData = await fetchPaymentMethods();
+        const uiPaymentMethods = mapApiPaymentMethodsToUI(paymentMethodsData);
+
+        setAllPaymentMethods(uiPaymentMethods);
         setAllInstructors(MOCK_INSTRUCTORS);
         setAllCities(MOCK_CITIES);
         setAllStates(MOCK_STATES);
         setAllServices(MOCK_SERVICES);
         setAllEquipment(MOCK_EQUIPMENT);
-        setAllPaymentMethods(
-          mapApiPaymentMethodsToUI(MOCK_API_PAYMENT_METHODS),
-        );
       } catch (error) {
         console.error("Error cargando datos estáticos:", error);
       } finally {
@@ -164,9 +166,6 @@ export default function HomeBranches() {
           status: statusFilter || "Active",
         });
 
-        console.log("Datos recibidos:", result.data);
-        console.log("Total recibido:", result.total);
-        console.log("Total stats:", result.stats);
         setBranchesData(result.data);
         setTotalBranches(result.total);
         setStatsData(result.stats);
@@ -227,8 +226,10 @@ export default function HomeBranches() {
         >
           <BranchFrom
             onClose={() => setShowModal(false)}
-            onClick={(e) => e.stopPropagation()}
             allPaymentMethods={allPaymentMethods}
+            allCountries={allCountries}
+            allStates={allStates}
+            allCities={allCities}
           />
         </div>
       )}
