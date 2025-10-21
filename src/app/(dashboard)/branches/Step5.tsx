@@ -4,6 +4,7 @@ import StepNotification from "./StepNotification";
 
 type StepProps = {
   formData: any;
+  formErrors?: Record<string, string>;
 };
 
 const defaultPolicies = [

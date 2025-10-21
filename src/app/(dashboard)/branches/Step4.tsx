@@ -1,62 +1,25 @@
 "use client";
-
-import { useState } from "react";
-import {
-  BanknotesIcon,
-  CreditCardIcon,
-  BuildingLibraryIcon,
-  DevicePhoneMobileIcon,
-} from "@heroicons/react/24/outline";
 import StepNotification from "./StepNotification";
-import PaymentMethodSelector, {
-  ALL_PAYMENT_METHODS,
-} from "@/components/branches/PaymentMethodSelector";
+import PaymentMethodSelector from "@/components/branches/PaymentMethodSelector";
+import { PaymentMethodUI } from "./page";
 
 type StepProps = {
   formData: any;
-  onChange: (field: string, value: string[]) => void;
+  handleCustomChange: (field: string, value: unknown) => void;
   formErrors?: Record<string, string>;
+  allPaymentMethods: PaymentMethodUI[];
 };
-
-const paymentMethods = [
-  {
-    id: "efectivo",
-    label: "Efectivo",
-    description: "Pago en efectivo en Sucursal",
-    icon: BanknotesIcon,
-  },
-  {
-    id: "tarjeta",
-    label: "Tarjeta de Crédito/Débito",
-    description: "Visa, MasterCard",
-    icon: CreditCardIcon,
-  },
-  {
-    id: "transferencia",
-    label: "Transferencia Bancaria",
-    description: "Transferencia directa a cuenta bancaria",
-    icon: BuildingLibraryIcon,
-  },
-  {
-    id: "pago-movil",
-    label: "Pago Móvil",
-    description: "Pago móvil Intercambiario",
-    icon: DevicePhoneMobileIcon,
-  },
-];
 
 export default function Step4({
   formData,
-  onChange,
+  handleCustomChange,
   formErrors = {},
+  allPaymentMethods,
 }: StepProps) {
-  const [selected, setSelected] = useState<string[]>(
-    formData.metodosPago || [],
-  );
+  const selectedMethods = (formData.paymentMethods || []) as string[];
 
-  const handleSelectionChange = (updatedMethods: string[]) => {
-    setSelected(updatedMethods);
-    onChange("metodosPago", updatedMethods);
+  const handleSelectionChange = (updatedMethodIds: string[]) => {
+    handleCustomChange("paymentMethods", updatedMethodIds);
   };
 
   return (
@@ -66,29 +29,32 @@ export default function Step4({
       </h2>
 
       <PaymentMethodSelector
-        selectedMethods={selected}
+        selectedMethods={selectedMethods}
         onSelectionChange={handleSelectionChange}
         mode="edit"
-        formError={formErrors?.["metodosPago"]}
+        formError={formErrors?.["paymentMethods"]}
+        availableMethods={allPaymentMethods}
       />
 
       <StepNotification
         title="Importante sobre métodos de pago"
-        description="Los métodos de pago seleccionados estarán disponibles para todos los servicios y membresías en esta sucursal. Puede modificarlos posteriormente desde la configuración de la sucursal."
+        description="Los métodos de pago seleccionados estarán disponibles para los clientes al realizar pagos en esta sucursal." // Example description
       />
 
-      {formErrors?.["metodosPago"] && (
-        <p className="text-sm text-red-500 mt-2">{formErrors["metodosPago"]}</p>
+      {formErrors?.["paymentMethods"] && (
+        <p className="text-sm text-red-500 mt-2">
+          {formErrors["paymentMethods"]}
+        </p>
       )}
 
       <div>
         <h4 className="text-sm font-medium text-gray-700 mb-2">
           Métodos Seleccionados:
         </h4>
-        {selected.length > 0 ? (
+        {selectedMethods.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {selected.map((id) => {
-              const method = ALL_PAYMENT_METHODS.find((m) => m.id === id);
+            {selectedMethods.map((id) => {
+              const method = allPaymentMethods.find((m) => m.id === id);
               if (!method) {
                 return null;
               }
@@ -96,10 +62,10 @@ export default function Step4({
               return (
                 <span
                   key={id}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium border border-orange-300"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-medium border border-orange-200"
                 >
-                  <Icon className="h-8 w-4 text-orange-600" />
-                  {method.label}
+                  {Icon && <Icon className="h-4 w-4 text-orange-600" />}
+                  {method.name}
                 </span>
               );
             })}

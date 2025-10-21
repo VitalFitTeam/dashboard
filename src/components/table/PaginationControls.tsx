@@ -19,9 +19,8 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
   totalPages,
   onPageChange,
 }) => {
-  const delta = 2; // cuántas páginas mostrar antes y después de la actual
+  const delta = 2;
 
-  // Genera las páginas intermedias
   const getPageNumbers = () => {
     const range: number[] = [];
     for (

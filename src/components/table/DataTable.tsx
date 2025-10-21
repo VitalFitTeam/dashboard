@@ -10,8 +10,8 @@ import {
   type ColumnDef,
   type SortingState,
   type ColumnFiltersState,
-  type Row,
 } from "@tanstack/react-table";
+
 import {
   Table,
   TableHeader,
@@ -22,8 +22,17 @@ import {
 } from "../ui/table";
 import { Checkbox } from "../ui/checkbox";
 import { PaginationControls } from "./PaginationControls";
-import { ArrowUp, ArrowDown } from "lucide-react";
 import { Input } from "../Input";
+import { ArrowUp, ArrowDown } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { debounce } from "@/utils";
 
 export type Column<T> = {
   header: string;
@@ -33,41 +42,80 @@ export type Column<T> = {
   filterOptions?: { label: string; value: string }[];
 };
 
+export type FilterChangeHandler = (
+  key: string,
+  value: string | undefined,
+) => void;
+
 export type DataTableProps<T> = {
   columns: Column<T>[];
   data: T[];
   actions?: (row: T) => React.ReactNode;
-  page?: number;
+  page?: number; // controlado por el padre
   pageSize?: number;
   onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
   enableFilters?: boolean;
   enableRowSelection?: boolean;
+  totalPages?: number;
+  onFilterChange?: FilterChangeHandler;
+  filterValues?: Record<string, string | undefined>;
 };
 
 export function DataTable<T>({
   columns,
   data,
   actions,
-  page = 1,
-  pageSize = 10,
+  page,
+  pageSize,
   onPageChange,
+  onPageSizeChange,
+  totalPages,
   enableFilters = false,
-  enableRowSelection = true, // <-- Corregido: Ahora es 'true' por defecto
+  enableRowSelection = true,
+  onFilterChange,
+  filterValues,
 }: DataTableProps<T>) {
+  // Estado interno híbrido
+  const [internalPage, setInternalPage] = React.useState(1);
+  const [internalPageSize, setInternalPageSize] = React.useState(10);
+
+  const currentPage = page ?? internalPage;
+  const currentPageSize = pageSize ?? internalPageSize;
+
+  const handlePageChange = (newPage: number) => {
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    } else {
+      setInternalPageSize(newSize);
+    }
+  };
+
+  // Estado para filtros y sorting
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
 
   const columnDefs = React.useMemo<ColumnDef<T>[]>(
     () =>
       columns.map((col) => ({
         accessorKey: col.accessor as string,
         header: col.header,
-        cell: ({ getValue, row }) =>
-          col.render
-            ? col.render(getValue() as T[keyof T], row.original)
-            : String(getValue() ?? ""),
+        cell: ({ getValue, row }) => {
+          const value = getValue() as T[keyof T];
+          const originalRow = row.original;
+
+          if (col.render) {
+            return col.render(value, originalRow);
+          }
+          return String(value ?? "");
+        },
         filterFn:
           col.filterType === "select"
             ? (row, columnId, filterValue) =>
@@ -85,20 +133,27 @@ export function DataTable<T>({
   const table = useReactTable({
     data,
     columns: columnDefs,
-    state: { sorting, columnFilters },
+    state: { sorting },
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
   });
 
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const pageRows = table.getRowModel().rows.slice(startIndex, endIndex);
+  // Slice para paginación
+  const startIndex = (currentPage - 1) * currentPageSize;
+  const endIndex = startIndex + currentPageSize;
+  const pageRows = table.getRowModel().rows;
+
+  const debouncedOnFilterChange = React.useCallback(
+    debounce((key: string, value: string | undefined) => {
+      onFilterChange?.(key, value);
+    }, 500),
+    [onFilterChange],
+  );
 
   return (
     <div className="space-y-4">
+      {/* FILTROS */}
       {enableFilters && (
         <div className="flex flex-wrap gap-3 mb-4">
           {columns
@@ -108,41 +163,62 @@ export function DataTable<T>({
               if (!column) {
                 return null;
               }
+
               if (col.filterType === "text") {
                 return (
                   <Input
                     key={String(col.accessor)}
                     placeholder={`Filtrar por ${col.header.toLowerCase()}...`}
-                    value={(column.getFilterValue() as string) ?? ""}
+                    value={filterValues?.[col.accessor as string] ?? ""}
                     onChange={(e) => {
-                      column.setFilterValue(e.target.value);
+                      debouncedOnFilterChange(
+                        col.accessor as string,
+                        e.target.value || undefined,
+                      );
                     }}
                     className="max-w-xs"
                   />
                 );
               }
+
               if (col.filterType === "select" && col.filterOptions) {
                 return (
-                  <select
+                  <Select
                     key={String(col.accessor)}
-                    className="border rounded-md px-2 py-1 text-sm"
-                    value={(column.getFilterValue() as string) ?? ""}
-                    onChange={(e) => column.setFilterValue(e.target.value)}
+                    value={filterValues?.[col.accessor as string] ?? "all"}
+                    onValueChange={(newValue) => {
+                      let finalValue: string | undefined = newValue;
+                      if (newValue === "all") {
+                        finalValue = undefined;
+                      }
+                      onFilterChange?.(col.accessor as string, finalValue);
+                    }}
                   >
-                    <option value="">Todos</option>
-                    {col.filterOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="all">Todos</SelectItem>
+
+                        {col.filterOptions.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 );
               }
+
               return null;
             })}
         </div>
       )}
 
+      {/* TABLA */}
       <Table>
         <TableHeader>
           <TableRow>
@@ -211,13 +287,11 @@ export function DataTable<T>({
         </TableBody>
       </Table>
 
-      {onPageChange && (
-        <PaginationControls
-          page={page}
-          totalPages={Math.ceil(data.length / pageSize)}
-          onPageChange={onPageChange}
-        />
-      )}
+      <PaginationControls
+        page={currentPage}
+        totalPages={totalPages ?? Math.ceil(data.length / currentPageSize)}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }

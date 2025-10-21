@@ -1,20 +1,7 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  const router = useRouter();
+  redirect("/login");
 
-  const handleClick = () => {
-    router.push("/login");
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-8">
-      <h1 className="text-6xl font-bold text-center">VITALFIT</h1>
-      <Button variant="primary" onClick={handleClick}>
-        Ir al Login
-      </Button>
-    </div>
-  );
+  return null;
 }

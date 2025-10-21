@@ -6,22 +6,71 @@ import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
 import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { useState } from "react";
 import BranchDetailsModal from "@/components/BranchDetailsModal";
-import { Branches } from "@/types/branches";
-import { branches } from "./data";
+import { Instructor } from "@/types/instructor";
+import { City, Country, State } from "@/types/location";
+import { Service } from "@/types/service";
+import { Equipment } from "@/types/equipment";
+import { PaymentMethod } from "@/types/paymentMethod";
+import { BranchesTableRow } from "@/services/branches";
+import { PaymentMethodUI } from "./page";
 
-export default function BranchesTable() {
-  const [page, setPage] = useState(1);
+export type FilterChangeHandler = (
+  key: string,
+  value: string | undefined,
+) => void;
+
+interface BranchesTableProps {
+  data: BranchesTableRow[];
+  isLoading: boolean;
+  page: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  allInstructors: Instructor[];
+  allCities: City[];
+  allStates: State[];
+  //allCountries: Country[];
+  allServices: Service[];
+  allEquipment: Equipment[];
+  allPaymentMethods: PaymentMethodUI[];
+  totalPages: number;
+  onFilterChange: FilterChangeHandler;
+  filterValues: Record<string, string | undefined>;
+}
+export default function BranchesTable({
+  data,
+  isLoading,
+  allInstructors,
+  allCities,
+  allStates,
+  allServices,
+  allEquipment,
+  allPaymentMethods,
+  page,
+  pageSize,
+  totalPages,
+  onPageChange,
+  onPageSizeChange,
+  onFilterChange,
+  filterValues,
+}: BranchesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<Branches | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<BranchesTableRow | null>(
+    null,
+  );
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
 
-  const handleViewDetails = (branch: Branches) => {
+  if (isLoading) {
+    return <p className="text-center p-4">Cargando sucursales...</p>;
+  }
+
+  const handleViewDetails = (branch: BranchesTableRow) => {
     setSelectedBranch(branch);
     setModalMode("view");
     setIsModalOpen(true);
   };
 
-  const handleEditBranch = (branch: Branches) => {
+  const handleEditBranch = (branch: BranchesTableRow) => {
     setSelectedBranch(branch);
     setModalMode("edit");
     setIsModalOpen(true);
@@ -32,36 +81,29 @@ export default function BranchesTable() {
     setSelectedBranch(null);
   };
 
-  const columns: Column<Branches>[] = [
+  const columns: Column<BranchesTableRow>[] = [
     { header: "ID", accessor: "id" },
     { header: "Nombre", accessor: "name", filterType: "text" },
     { header: "RIF", accessor: "taxId" },
     { header: "Administrador", accessor: "administrator" },
-    { header: "Ciudad", accessor: "city" },
     {
       header: "País",
       accessor: "country",
-      filterType: "select",
-      filterOptions: [
-        { label: "Venezuela", value: "Venezuela" },
-        { label: "Colombia", value: "Colombia" },
-        { label: "Perú", value: "Perú" },
-      ],
     },
     {
       header: "Status",
       accessor: "status",
       filterType: "select",
       filterOptions: [
-        { label: "Activa", value: "active" },
-        { label: "Inactiva", value: "inactive" },
-        { label: "En mantenimiento", value: "maintenance" },
+        { label: "Activa", value: "Active" },
+        { label: "Inactiva", value: "Inactive" },
+        { label: "En mantenimiento", value: "Maintenance" },
       ],
       render: (value) => {
         const statusConfig = {
-          active: { text: "Activa", color: "text-green-700 border-green-300" },
-          inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
-          maintenance: {
+          Active: { text: "Activa", color: "text-green-700 border-green-300" },
+          Inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
+          Maintenance: {
             text: "En mantenimiento",
             color: "text-yellow-700 border-yellow-300",
           },
@@ -83,11 +125,15 @@ export default function BranchesTable() {
     <>
       <DataTable
         columns={columns}
-        data={branches}
+        data={data}
         page={page}
-        pageSize={10}
-        onPageChange={setPage}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
         enableFilters
+        totalPages={totalPages}
+        onFilterChange={onFilterChange}
+        filterValues={filterValues}
         actions={(row) => (
           <div className="flex items-center justify-center gap-2">
             <Button
@@ -109,12 +155,20 @@ export default function BranchesTable() {
           </div>
         )}
       />
-      <BranchDetailsModal
+      {/*    
+    <BranchDetailsModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        branchData={selectedBranch}
+        branchData={selectedBranch} // Aquí ya puedes mapear solo los datos que tengas
         initialMode={modalMode}
-      />
+        allInstructors={allInstructors}
+        allCities={allCities}
+        allStates={allStates}
+        allServices={allServices}
+        allEquipment={allEquipment}
+        allPaymentMethods={allPaymentMethods}
+      /> 
+      */}
     </>
   );
 }

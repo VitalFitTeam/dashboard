@@ -1,31 +1,51 @@
-import React from "react";
+"use client";
+
 import InputField from "@/components/InputField";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Branches } from "@/types/branches";
+import { City, State } from "@/types/location";
 
 interface GeneralPanelProps {
   formData: Branches;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSelectChange: (name: string, value: string) => void;
   mode: "view" | "edit";
+  allCities: City[];
+  allStates: State[];
 }
+
+const statusOptions = [
+  { label: "Activa", value: "active" },
+  { label: "Inactiva", value: "inactive" },
+  { label: "En mantenimiento", value: "maintenance" },
+];
 
 export default function GeneralPanel({
   formData,
   handleChange,
+  handleSelectChange,
   mode,
+  allCities,
+  allStates,
 }: GeneralPanelProps) {
   const isDisabled = mode === "view";
 
   return (
     <div>
-      <div>
-        <h2 className="font-semibold text-gray-800">Información General</h2>
-        <p className="pt-4 text-sm text-gray-600">
-          {isDisabled
-            ? `Visualizando la información general de la sucursal ${formData.name}.`
-            : `Edita la información general para la sucursal ${formData.name}.`}
-        </p>
-      </div>
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 pt-4">
+      <h2 className="text-xl font-semibold text-gray-900">
+        Información Básica
+      </h2>
+      <p className="mt-1 text-sm text-gray-600">
+        Datos legales y básicos de la sucursal
+      </p>
+
+      <form className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
         <InputField
           id="name"
           name="name"
@@ -33,7 +53,9 @@ export default function GeneralPanel({
           value={formData.name}
           onChange={handleChange}
           disabled={isDisabled}
+          placeholder="GymPro Sucursal Centro"
         />
+
         <InputField
           id="taxId"
           name="taxId"
@@ -41,43 +63,9 @@ export default function GeneralPanel({
           value={formData.taxId}
           onChange={handleChange}
           disabled={isDisabled}
+          placeholder="J-12345678-9"
         />
-        <div className="col-span-2">
-          <InputField
-            id="address"
-            name="address"
-            label="Dirección"
-            value={formData.address || ""}
-            onChange={handleChange}
-            disabled={isDisabled}
-          />
-        </div>
-        <InputField
-          id="latitude"
-          name="latitude"
-          label="Latitud GPS"
-          type="number"
-          value={formData.latitude ?? ""}
-          onChange={handleChange}
-          disabled={isDisabled}
-        />
-        <InputField
-          id="longitude"
-          name="longitude"
-          label="Longitud GPS"
-          type="number"
-          value={formData.longitude ?? ""}
-          onChange={handleChange}
-          disabled={isDisabled}
-        />
-        <InputField
-          id="city"
-          name="city"
-          label="Ciudad"
-          value={formData.city || ""}
-          onChange={handleChange}
-          disabled={isDisabled}
-        />
+
         <InputField
           id="administrator"
           name="administrator"
@@ -85,7 +73,9 @@ export default function GeneralPanel({
           value={formData.administrator || ""}
           onChange={handleChange}
           disabled={isDisabled}
+          placeholder="Placeholder"
         />
+
         <InputField
           id="phone"
           name="phone"
@@ -93,7 +83,9 @@ export default function GeneralPanel({
           value={formData.phone || ""}
           onChange={handleChange}
           disabled={isDisabled}
+          placeholder="Placeholder"
         />
+
         <InputField
           id="maxCapacity"
           name="maxCapacity"
@@ -102,7 +94,32 @@ export default function GeneralPanel({
           value={formData.maxCapacity ?? ""}
           onChange={handleChange}
           disabled={isDisabled}
+          placeholder="Placeholder"
         />
+        <div className="flex flex-col space-y-2">
+          <label
+            htmlFor="status"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Estado de la sucursal
+          </label>
+          <Select
+            value={formData.status}
+            onValueChange={(value) => handleSelectChange("status", value)}
+            disabled={isDisabled}
+          >
+            <SelectTrigger id="status">
+              <SelectValue placeholder="Select an item" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </form>
     </div>
   );

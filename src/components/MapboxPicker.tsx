@@ -29,7 +29,9 @@ export default function MapboxPicker({
   const marker = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    if (!mapContainer.current) {return;}
+    if (!mapContainer.current) {
+      return;
+    }
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -66,9 +68,15 @@ export default function MapboxPicker({
         let country = "";
 
         for (const c of place.context || []) {
-          if (c.id.includes("place")) {city = c.text;}
-          if (c.id.includes("region")) {state = c.text;}
-          if (c.id.includes("country")) {country = c.text;}
+          if (c.id.includes("place")) {
+            city = c.text;
+          }
+          if (c.id.includes("region")) {
+            state = c.text;
+          }
+          if (c.id.includes("country")) {
+            country = c.text;
+          }
         }
 
         onSelect({

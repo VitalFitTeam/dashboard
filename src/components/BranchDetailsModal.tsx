@@ -9,33 +9,74 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import React, { useState, useEffect } from "react";
-import { Branches, BranchOperatingHours, DayOfWeek } from "@/types/branches";
+import {
+  Branches,
+  BranchInstructor,
+  BranchInventoryItem,
+  BranchOperatingHours,
+  BranchService,
+  DayOfWeek,
+} from "@/types/branches";
 import GeneralPanel from "./branches/details/GeneralPanel";
 import PaymentMethodPanel from "./branches/details/PaymentMethodsPanel";
 import EquipmentPanel from "./branches/details/EquipmentPanel";
 import InstructorsPanel from "./branches/details/InstructorsPanel";
 import ServicesPanel from "./branches/details/ServicesPanel";
 import SchedulePanel from "./branches/details/SchedulePanel";
+import { Instructor } from "@/types/instructor";
+import { City, State, Country } from "@/types/location";
+import { Service } from "@/types/service";
+import { Equipment } from "@/types/equipment";
+import LocationPanel from "./branches/details/LocationPanel";
+import { PaymentMethodUI } from "@/app/(dashboard)/branches/page";
 
 interface BranchDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   branchData: Branches | null;
   initialMode: "view" | "edit";
+  allInstructors: Instructor[];
+  allCities: City[];
+  allStates: State[];
+  allCountries: Country[];
+  allServices: Service[];
+  allEquipment: Equipment[];
+  allPaymentMethods: PaymentMethodUI[];
 }
 
 type ArrayChange = {
-  target: {
-    name: string;
-    value: string[];
-  };
+  target: { name: string; value: string[] };
 };
+
+const defaultSchedule: BranchOperatingHours[] = (
+  [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ] as DayOfWeek[]
+).map((day) => ({
+  dayOfWeek: day,
+  openTime: "09:00",
+  closeTime: "17:00",
+  isClosed: day === "Sunday",
+}));
 
 export default function BranchDetailsModal({
   isOpen,
   onClose,
   branchData,
   initialMode,
+  allInstructors,
+  allCities,
+  allStates,
+  allCountries,
+  allServices,
+  allEquipment,
+  allPaymentMethods,
 }: BranchDetailsModalProps) {
   if (!isOpen || !branchData) {
     return null;
@@ -43,29 +84,11 @@ export default function BranchDetailsModal({
 
   const [formData, setFormData] = useState<Branches>(branchData);
   const [currentMode, setCurrentMode] = useState(initialMode);
-  const defaultSchedule: BranchOperatingHours[] = (
-    [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday",
-    ] as DayOfWeek[]
-  ).map((day) => ({
-    dayOfWeek: day,
-    openTime: "09:00",
-    closeTime: "17:00",
-    isClosed: day === "Sunday",
-  }));
-
   const [schedule, setSchedule] = useState<BranchOperatingHours[]>(
     branchData.operatingHours?.length
       ? branchData.operatingHours
       : defaultSchedule,
   );
-
   const isEditing = currentMode === "edit";
 
   useEffect(() => {
@@ -81,45 +104,171 @@ export default function BranchDetailsModal({
   }, [branchData, initialMode]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement> | ArrayChange,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
+    const type = e.target.type;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === "number" ? parseInt(value) || 0 : value,
+    }));
+  };
 
-    setFormData((prevData) => {
-      let finalValue: any;
-
-      if (Array.isArray(value)) {
-        finalValue = value;
-      } else if (
-        typeof value === "string" &&
-        (e as React.ChangeEvent<HTMLInputElement>).target?.type === "number"
-      ) {
-        finalValue = parseInt(value, 10) || 0;
-      } else {
-        finalValue = value;
-      }
-
-      return {
-        ...prevData,
-        [name]: finalValue,
-      };
-    });
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    if (name === "countryId") {
+      setFormData((prevData) => ({ ...prevData, stateId: "", cityId: "" }));
+    } else if (name === "stateId") {
+      setFormData((prevData) => ({ ...prevData, cityId: "" }));
+    }
   };
 
   const handleScheduleChange = (updatedSchedule: BranchOperatingHours[]) => {
     setSchedule(updatedSchedule);
     setFormData((prevData) => ({
-      ...prevData!,
+      ...prevData,
       operatingHours: updatedSchedule,
     }));
   };
 
-  const handleSwitchToEdit = () => {
-    setCurrentMode("edit");
+  const handleAssignInstructor = (instructorId: string) => {
+    const instructorInfo = allInstructors.find(
+      (inst) => inst.id === instructorId,
+    );
+    if (!instructorInfo) {
+      return;
+    }
+    if (
+      (formData.instructors ?? []).find(
+        (inst) => inst.instructorId === instructorId,
+      )
+    ) {
+      return console.warn("Instructor ya asignado.");
+    }
+    const newBranchInstructor: BranchInstructor = {
+      instructorId: instructorInfo.id,
+      status: "Active",
+      name: instructorInfo.name,
+      user_id: instructorInfo.user_id,
+      specialty: instructorInfo.specialty ?? undefined,
+    };
+    setFormData((prevData) => ({
+      ...prevData,
+      instructors: [...(prevData.instructors ?? []), newBranchInstructor],
+    }));
   };
 
+  const handleRemoveInstructor = (instructorId: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      instructors: (prevData.instructors ?? []).filter(
+        (inst) => inst.instructorId !== instructorId,
+      ),
+    }));
+  };
+
+  const handleMapSelect = (data: {
+    latitud: string;
+    longitud: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+  }) => {
+    const selectedCountry = allCountries.find((c) => c.name === data.country);
+    const selectedState = allStates.find(
+      (s) => s.name === data.state && s.countryId === selectedCountry?.id,
+    );
+    const selectedCity = allCities.find(
+      (c) => c.name === data.city && c.stateId === selectedState?.id,
+    );
+
+    setFormData((prevData) => ({
+      ...prevData,
+      latitude: parseFloat(data.latitud),
+      longitude: parseFloat(data.longitud),
+      address: data.address,
+      countryId: selectedCountry?.id ?? prevData.countryId,
+      stateId: selectedState?.id ?? prevData.stateId,
+      cityId: selectedCity?.id ?? prevData.cityId,
+      city: data.city,
+      country: data.country,
+    }));
+  };
+
+  const handlePaymentMethodChange = (selectedIds: string[]) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      paymethods: selectedIds,
+    }));
+  };
+
+  const handleSwitchToEdit = () => setCurrentMode("edit");
   const handleSave = () => {
+    console.log("Guardando:", formData);
     onClose();
+  };
+
+  const handleAddService = (
+    serviceData: Omit<BranchService, "name" | "description">,
+  ) => {
+    const serviceInfo = allServices.find((s) => s.id === serviceData.serviceId);
+    const newBranchService: BranchService = {
+      ...serviceData,
+      name: serviceInfo?.name,
+    };
+
+    setFormData((prevData) => ({
+      ...prevData,
+      services: [...(prevData.services ?? []), newBranchService],
+    }));
+  };
+
+  const handleRemoveService = (serviceId: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      services: (prevData.services ?? []).filter(
+        (s) => s.serviceId !== serviceId,
+      ),
+    }));
+  };
+
+  const handleAddInventoryItem = (itemData: {
+    equipmentId: string;
+    quantity: number;
+    status: string;
+    branch_id: string;
+  }) => {
+    const equipmentInfo = allEquipment.find(
+      (eq) => eq.id === itemData.equipmentId,
+    );
+    if (!equipmentInfo) {
+      return;
+    }
+
+    const newItems: BranchInventoryItem[] = Array.from({
+      length: itemData.quantity,
+    }).map((_, index) => ({
+      inventoryId: `temp-${Date.now()}-${index}`,
+      equipmentId: itemData.equipmentId,
+      status: itemData.status as any,
+      name: equipmentInfo.name,
+      category: equipmentInfo.category,
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      inventory: [...(prev.inventory ?? []), ...newItems],
+    }));
+  };
+
+  const handleRemoveInventoryItem = (inventoryId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      inventory: (prev.inventory ?? []).filter(
+        (item) => item.inventoryId !== inventoryId,
+      ),
+    }));
   };
 
   const tabItems = [
@@ -130,7 +279,26 @@ export default function BranchDetailsModal({
         <GeneralPanel
           formData={formData}
           handleChange={handleChange}
+          handleSelectChange={handleSelectChange}
           mode={currentMode}
+          allCities={allCities}
+          allStates={allStates}
+        />
+      ),
+    },
+    {
+      value: "location",
+      label: "Ubicación",
+      content: (
+        <LocationPanel
+          formData={formData}
+          mode={currentMode}
+          handleChange={handleChange}
+          handleSelectChange={handleSelectChange}
+          handleMapSelect={handleMapSelect}
+          allCountries={allCountries}
+          allStates={allStates}
+          allCities={allCities}
         />
       ),
     },
@@ -151,8 +319,9 @@ export default function BranchDetailsModal({
       content: (
         <PaymentMethodPanel
           formData={formData}
-          handleChange={handleChange}
+          handlePaymentMethodChange={handlePaymentMethodChange}
           mode={currentMode}
+          allPaymentMethods={allPaymentMethods}
         />
       ),
     },
@@ -160,27 +329,45 @@ export default function BranchDetailsModal({
       value: "services",
       label: "Servicios",
       content: (
-        <ServicesPanel formData={formData} handleChange={handleChange} />
+        <ServicesPanel
+          formData={formData}
+          mode={currentMode}
+          allServices={allServices}
+          onAddService={handleAddService}
+          onRemoveService={handleRemoveService}
+        />
       ),
     },
     {
       value: "instructors",
       label: "Instructores",
       content: (
-        <InstructorsPanel formData={formData} handleChange={handleChange} />
+        <InstructorsPanel
+          mode={currentMode}
+          assignedInstructors={formData.instructors ?? []}
+          allInstructors={allInstructors}
+          onAdd={handleAssignInstructor}
+          onRemove={handleRemoveInstructor}
+        />
       ),
     },
     {
       value: "equipment",
       label: "Equipamiento",
       content: (
-        <EquipmentPanel formData={formData} handleChange={handleChange} />
+        <EquipmentPanel
+          formData={formData}
+          mode={currentMode}
+          allEquipment={allEquipment}
+          onAddItem={handleAddInventoryItem}
+          onRemoveItem={handleRemoveInventoryItem}
+        />
       ),
     },
   ];
 
   return (
-    <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center z-50 p-4">
+    <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50 p-4">
       <Card className="w-full max-w-4xl max-h-[90vh] flex flex-col shadow-lg border rounded-lg">
         <CardHeader className="flex flex-row justify-between items-start">
           <div>
@@ -212,7 +399,20 @@ export default function BranchDetailsModal({
           {isEditing ? (
             <>
               <Button
-                fullWidth
+                variant="outline"
+                onClick={() => {
+                  setCurrentMode("view");
+                  setFormData(branchData);
+                  setSchedule(
+                    branchData.operatingHours?.length
+                      ? branchData.operatingHours
+                      : defaultSchedule,
+                  );
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
                 className="bg-[#F58025] hover:bg-[#E07122] text-white"
                 onClick={handleSave}
               >
