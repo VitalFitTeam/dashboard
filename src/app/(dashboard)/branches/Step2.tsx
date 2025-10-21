@@ -12,13 +12,19 @@ const MapboxPicker = dynamic(() => import("@/components/MapboxPicker"), {
 
 type StepProps = {
   formData: any;
-  onChange: (field: string, value: string) => void;
+  handleChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => void;
+  handleCustomChange: (field: string, value: unknown) => void;
   formErrors?: Record<string, string>;
 };
 
 export default function Step2({
   formData,
-  onChange,
+  handleChange,
+  handleCustomChange,
   formErrors = {},
 }: StepProps) {
   // ✅ ya no actualizamos "address"
@@ -30,11 +36,20 @@ export default function Step2({
     state: string;
     country: string;
   }) => {
-    onChange("latitud", data.latitud);
-    onChange("longitud", data.longitud);
-    onChange("city", data.city);
-    onChange("state", data.state);
-    onChange("country", data.country);
+    handleCustomChange("latitud", data.latitud);
+    handleCustomChange("longitud", data.longitud);
+    // También guardar valores numéricos para el payload (latitude/longitude)
+    const latNum = parseFloat(data.latitud as unknown as string);
+    const lngNum = parseFloat(data.longitud as unknown as string);
+    if (!isNaN(latNum)) {
+      handleCustomChange("latitude", latNum);
+    }
+    if (!isNaN(lngNum)) {
+      handleCustomChange("longitude", lngNum);
+    }
+    handleCustomChange("city", data.city);
+    handleCustomChange("state", data.state);
+    handleCustomChange("country", data.country);
   };
 
   return (
@@ -57,7 +72,7 @@ export default function Step2({
             name="address"
             value={formData.address || ""}
             error={formErrors["address"]}
-            onChange={(e) => onChange("address", e.target.value)}
+            onChange={handleChange}
             placeholder="Ingrese la dirección manualmente"
             className="focus:ring-orange-500 focus:border-transparent"
           />

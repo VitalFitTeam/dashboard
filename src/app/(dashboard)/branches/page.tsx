@@ -168,6 +168,7 @@ export default function HomeBranches() {
         allInstructors={allInstructors}
         allCities={allCities}
         allStates={allStates}
+        allCountries={allCountries}
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}
@@ -180,8 +181,10 @@ export default function HomeBranches() {
         >
           <BranchFrom
             onClose={() => setShowModal(false)}
-            onClick={(e) => e.stopPropagation()}
             allPaymentMethods={allPaymentMethods}
+            allCountries={allCountries}
+            allStates={allStates}
+            allCities={allCities}
           />
         </div>
       )}
