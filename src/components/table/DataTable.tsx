@@ -56,6 +56,7 @@ export type DataTableProps<T> = {
   data: T[];
   actions?: (row: T) => React.ReactNode;
   page?: number;
+  page?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
@@ -125,6 +126,7 @@ export function DataTable<T extends { id: string }>({
   onFilterChange,
   filterValues,
 }: DataTableProps<T>) {
+  // Paginación interna
   const [internalPage, setInternalPage] = React.useState(1);
   const [internalPageSize, setInternalPageSize] = React.useState(10);
 
@@ -132,6 +134,11 @@ export function DataTable<T extends { id: string }>({
   const currentPageSize = pageSize ?? internalPageSize;
 
   const handlePageChange = (newPage: number) => {
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
     if (onPageChange) {
       onPageChange(newPage);
     } else {
@@ -145,10 +152,16 @@ export function DataTable<T extends { id: string }>({
     } else {
       setInternalPageSize(newSize);
     }
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    } else {
+      setInternalPageSize(newSize);
+    }
   };
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
+  // Columnas configuradas
   // Columnas configuradas
   const columnDefs = React.useMemo<ColumnDef<T>[]>(
     () =>
@@ -158,6 +171,9 @@ export function DataTable<T extends { id: string }>({
         cell: ({ getValue, row }) => {
           const value = getValue() as T[keyof T];
           const originalRow = row.original;
+          return col.render
+            ? col.render(value, originalRow)
+            : String(value ?? "");
           return col.render
             ? col.render(value, originalRow)
             : String(value ?? "");
