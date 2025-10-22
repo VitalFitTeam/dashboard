@@ -29,10 +29,12 @@ interface BranchFromProps {
   allCountries: Country[];
   allStates: State[];
   allCities: City[];
+  onSuccess: () => void;
 }
 
 export default function BranchFrom({
   onClose,
+  onSuccess,
   allPaymentMethods,
   allBranchAdmins,
   allCountries,
@@ -187,9 +189,8 @@ export default function BranchFrom({
 
     createBranch(apiPayload)
       .then((data) => {
-        console.log("Sucursal creada:", data);
-        alert("Sucursal creada correctamente");
         onClose();
+        onSuccess();
       })
       .catch((err) => {
         console.error("Error creando sucursal:", err);
