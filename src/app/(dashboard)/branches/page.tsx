@@ -25,6 +25,8 @@ import {
 } from "@/services/branches";
 import { fetchPaymentMethods } from "@/services/paymentMethods";
 import { debounce } from "@/utils";
+import { BranchAdmin } from "@/types/users";
+import { fetchBranchAdmins } from "@/services/branchAdmin";
 
 const MOCK_INSTRUCTORS: Instructor[] = [
   { id: "i1", user_id: "u1", name: "Ana Pérez" },
@@ -106,6 +108,7 @@ export default function HomeBranches() {
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethodUI[]>(
     [],
   );
+  const [allBranchAdmins, setAllBranchAdmins] = useState<BranchAdmin[]>([]);
   const [filters, setFilters] = useState<Record<string, string | undefined>>(
     {},
   );
@@ -127,10 +130,14 @@ export default function HomeBranches() {
     async function loadStaticData() {
       setIsLoadingStatic(true);
       try {
-        const paymentMethodsData = await fetchPaymentMethods();
-        const uiPaymentMethods = mapApiPaymentMethodsToUI(paymentMethodsData);
+        const [paymentMethodsData, branchAdminsData] = await Promise.all([
+          fetchPaymentMethods(),
+          fetchBranchAdmins({ limit: 1000 }),
+        ]);
 
+        const uiPaymentMethods = mapApiPaymentMethodsToUI(paymentMethodsData);
         setAllPaymentMethods(uiPaymentMethods);
+        setAllBranchAdmins(branchAdminsData);
         setAllInstructors(MOCK_INSTRUCTORS);
         setAllCities(MOCK_CITIES);
         setAllStates(MOCK_STATES);
@@ -230,6 +237,7 @@ export default function HomeBranches() {
             allCountries={allCountries}
             allStates={allStates}
             allCities={allCities}
+            allBranchAdmins={allBranchAdmins}
           />
         </div>
       )}

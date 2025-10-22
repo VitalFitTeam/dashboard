@@ -20,11 +20,12 @@ import Image from "next/image";
 import { PaymentMethodUI } from "./page";
 // Importa los tipos de ubicación si StepForm los necesita para otros pasos
 import { Country, State, City } from "@/types/location";
+import { BranchAdmin } from "@/types/users";
 
 interface BranchFromProps {
   onClose: () => void;
   allPaymentMethods: PaymentMethodUI[];
-  // Añade estas si StepForm las necesita para otros pasos
+  allBranchAdmins: BranchAdmin[];
   allCountries: Country[];
   allStates: State[];
   allCities: City[];
@@ -33,6 +34,7 @@ interface BranchFromProps {
 export default function BranchFrom({
   onClose,
   allPaymentMethods,
+  allBranchAdmins,
   allCountries, // Recibe las props
   allStates,
   allCities,
@@ -77,10 +79,6 @@ export default function BranchFrom({
   };
 
   const handleSubmit = () => {
-    // La validación final sí debería quedarse (branchSchema)
-    // const result = branchSchema.safeParse(formData);
-    // if (!result.success) { ... return; }
-
     console.log("Datos del formulario:", formData);
     alert("Sucursal Creada (Simulación)");
     onClose();
@@ -161,7 +159,7 @@ export default function BranchFrom({
             handleChange={handleChange}
             handleCustomChange={handleCustomChange}
             formErrors={formErrors}
-            // Pasa todas las props necesarias
+            allBranchAdmins={allBranchAdmins}
             allPaymentMethods={allPaymentMethods}
           />
         </div>
