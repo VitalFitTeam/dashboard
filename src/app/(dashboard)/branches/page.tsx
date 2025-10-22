@@ -109,11 +109,11 @@ export default function HomeBranches() {
   const [allServices, setAllServices] = useState<Service[]>([]);
   const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethodUI[]>(
-    [],
+    []
   );
   const [allBranchAdmins, setAllBranchAdmins] = useState<BranchAdmin[]>([]);
   const [filters, setFilters] = useState<Record<string, string | undefined>>(
-    {},
+    {}
   );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -185,6 +185,7 @@ export default function HomeBranches() {
         setBranchesData(result.data);
         setTotalBranches(result.total);
         setStatsData(result.stats);
+
       } catch (error) {
         console.error("Error cargando sucursales:", error);
       } finally {

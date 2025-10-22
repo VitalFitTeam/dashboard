@@ -1,6 +1,6 @@
-import React from "react";
-import { cn } from "@/lib/utils";
-import { AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { cn } from "@/lib/utils"; 
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -9,21 +9,38 @@ interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
-  ({ label, helperText, error, className, ...props }, ref) => {
-    const baseClasses =
-      "w-full rounded-md border px-3 py-2 text-sm transition focus:outline-none focus:ring-2";
-    const borderClasses = error
-      ? "border-red-500 focus:ring-red-500"
-      : "border-gray-300 focus:ring-blue-500";
+  ({ type, label, helperText, error, className, ...props }, ref) => {
+    const [showPassword, setShowPassword] = useState(false);
+
+    const isPasswordType = type === "password";
+
+    const inputType = isPasswordType
+      ? showPassword
+        ? "text"
+        : "password"
+      : type;
+
+    const togglePasswordVisibility = () => {
+      if (isPasswordType) {
+        setShowPassword((prev) => !prev);
+      }
+    };
+
+    let paddingRightClass = "pr-3";
+    if (isPasswordType && error) {
+      paddingRightClass = "pr-14";
+    } else if (isPasswordType || error) {
+      paddingRightClass = "pr-10"; 
+    }
 
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex w-full flex-col gap-1.5">
         {label && (
           <label
             htmlFor={props.id}
             className={cn(
               "text-sm font-medium",
-              error ? "text-red-600" : "text-gray-800",
+              error ? "text-red-600" : "text-gray-800"
             )}
           >
             {label}
@@ -32,20 +49,33 @@ const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
 
         <div className="relative">
           <input
+            type={inputType}
             ref={ref}
             {...props}
             className={cn(
-              "border rounded-md px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-primary pr-10", // <-- pr-10 para espacio del ícono
-              error ? "border-red-500 focus:ring-red-500" : "border-gray-300",
-              className,
+              "w-full rounded-lg border py-2 text-sm transition duration-150 focus:outline-none",
+              "pl-3",
+              paddingRightClass, 
+              error
+                ? "border-red-500 focus:border-red-500" 
+                : "border-gray-300 focus:border-blue-500", 
+              className
             )}
           />
-          {error && (
-            <AlertCircle
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500"
-              size={18}
-            />
-          )}
+
+          <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-3">
+            {isPasswordType && (
+              <button
+                type="button" 
+                onClick={togglePasswordVisibility}
+                className="cursor-pointer text-gray-500 hover:text-gray-700 focus:outline-none"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            )}
+            {error && <AlertCircle className="text-red-500" size={18} />}
+          </div>
         </div>
 
         {error ? (
@@ -55,7 +85,7 @@ const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
         ) : null}
       </div>
     );
-  },
+  }
 );
 
 InputField.displayName = "InputField";
