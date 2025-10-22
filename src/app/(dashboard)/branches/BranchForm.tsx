@@ -190,6 +190,7 @@ export default function BranchFrom({
         console.log("Sucursal creada:", data);
         alert("Sucursal creada correctamente");
         onClose();
+        window.location.reload();
       })
       .catch((err) => {
         console.error("Error creando sucursal:", err);
