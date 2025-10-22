@@ -132,17 +132,24 @@ export function DataTable<T extends { id: string }>({
   const currentPageSize = pageSize ?? internalPageSize;
 
   const handlePageChange = (newPage: number) => {
-    if (onPageChange) {onPageChange(newPage);}
-    else {setInternalPage(newPage);}
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
   };
 
   const handlePageSizeChange = (newSize: number) => {
-    if (onPageSizeChange) {onPageSizeChange(newSize);}
-    else {setInternalPageSize(newSize);}
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    } else {
+      setInternalPageSize(newSize);
+    }
   };
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
+  // Columnas configuradas
   const columnDefs = React.useMemo<ColumnDef<T>[]>(
     () =>
       columns.map((col) => ({
@@ -183,11 +190,15 @@ export function DataTable<T extends { id: string }>({
   const handleDelete = async (row: T) => {
     const name = (row as any).name ?? "esta sucursal";
     const confirmed = window.confirm(`¿Seguro que deseas eliminar ${name}?`);
-    if (!confirmed) {return;}
+    if (!confirmed) {
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {throw new Error("Token no encontrado");}
+      if (!token) {
+        throw new Error("Token no encontrado");
+      }
 
       await deleteBranch(row.id, token);
       toast.success("Sucursal eliminada correctamente ✅");
