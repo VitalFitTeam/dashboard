@@ -27,8 +27,6 @@ interface InstructorPanelProps {
 export default function InstructorsPanel({
   assignedInstructors,
   allInstructors,
-  onAdd,
-  onRemove,
   mode,
 }: InstructorPanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -43,7 +41,7 @@ export default function InstructorsPanel({
 
   const handleAddClick = () => {
     if (selectedId) {
-      onAdd(selectedId);
+      //onAdd(selectedId);
       setSelectedId(null);
     }
   };
@@ -117,7 +115,7 @@ export default function InstructorsPanel({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onRemove(instructor.instructorId);
+                        //onRemove(instructor.instructorId);
                       }}
                       className="rounded-md p-1 text-muted-foreground transition-colors hover:text-red-600"
                       aria-label="Eliminar instructor"

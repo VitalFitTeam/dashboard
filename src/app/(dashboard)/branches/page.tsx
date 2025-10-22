@@ -128,12 +128,19 @@ export default function HomeBranches() {
       [key]: value,
     }));
   };
+  
+
+    const handleDataRefresh = () => {
+    setRefreshKey((prevKey) => prevKey + 1);
+  };
+
 
   const handleFormSuccess = () => {
     setShowModal(false);
     setShowSuccessAlert(true);
-    setRefreshKey((prevKey) => prevKey + 1);
+    handleDataRefresh();
   };
+
 
   useEffect(() => {
     async function loadStaticData() {
@@ -233,6 +240,8 @@ export default function HomeBranches() {
         allPaymentMethods={allPaymentMethods}
         onFilterChange={handleFilterChange}
         filterValues={filters}
+        onBranchDeleted={handleDataRefresh}
+        allBranchAdmins={allBranchAdmins}
       />
 
       {showModal && (

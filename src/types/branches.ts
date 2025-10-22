@@ -35,6 +35,7 @@ export type Branches = {
   stateId: string;
   state: string;
   cityId: string;
+  capacity: number;
   latitude?: number | null;
   longitude?: number | null;
   maxCapacity?: number | null;

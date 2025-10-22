@@ -13,6 +13,7 @@ import { Equipment } from "@/types/equipment";
 import { PaymentMethod } from "@/types/paymentMethod";
 import { BranchesTableRow } from "@/services/branches";
 import { PaymentMethodUI } from "./page";
+import { BranchAdmin } from "@/types/users";
 
 export type FilterChangeHandler = (
   key: string,
@@ -32,6 +33,7 @@ interface BranchesTableProps {
   allServices: Service[];
   allEquipment: Equipment[];
   allPaymentMethods: PaymentMethodUI[];
+  allBranchAdmins: BranchAdmin[];
   totalPages: number;
   onFilterChange: FilterChangeHandler;
   filterValues: Record<string, string | undefined>;
@@ -54,6 +56,8 @@ export default function BranchesTable({
   onPageSizeChange,
   onFilterChange,
   filterValues,
+  onBranchDeleted,
+  allBranchAdmins,
 }: BranchesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<BranchesTableRow | null>(
@@ -160,7 +164,7 @@ export default function BranchesTable({
         <BranchDetailsModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          branchData={selectedBranch as any}
+          branchId={selectedBranch?.id ?? null}
           initialMode={modalMode}
           allInstructors={[]}
           allCities={allCities}
@@ -169,6 +173,8 @@ export default function BranchesTable({
           allServices={allServices}
           allEquipment={allEquipment}
           allPaymentMethods={allPaymentMethods}
+          allBranchAdmins={allBranchAdmins}
+          onBranchDeleted={onBranchDeleted}
         />
       }
     </>

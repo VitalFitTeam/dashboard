@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Branches } from "@/types/branches";
 import { City, State } from "@/types/location";
+import { BranchAdmin } from "@/types/users";
 
 interface GeneralPanelProps {
   formData: Branches;
@@ -18,6 +19,7 @@ interface GeneralPanelProps {
   mode: "view" | "edit";
   allCities: City[];
   allStates: State[];
+  allBranchAdmins: BranchAdmin[];
 }
 
 const statusOptions = [
@@ -33,9 +35,19 @@ export default function GeneralPanel({
   mode,
   allCities,
   allStates,
+  allBranchAdmins
 }: GeneralPanelProps) {
   const isDisabled = mode === "view";
 
+
+  const admin = allBranchAdmins.find(
+    (a) => a.id === formData.administrator,
+  );
+
+  const adminName = admin
+    ? `${admin.firstName} ${admin.lastName}`
+    : formData.administrator || "No asignado";
+    
   return (
     <div>
       <h2 className="text-xl font-semibold text-gray-900">
@@ -70,7 +82,7 @@ export default function GeneralPanel({
           id="administrator"
           name="administrator"
           label="Gerente Responsable"
-          value={formData.administrator || ""}
+          value={adminName || ""}
           onChange={handleChange}
           disabled={isDisabled}
           placeholder="Placeholder"
@@ -91,7 +103,7 @@ export default function GeneralPanel({
           name="maxCapacity"
           label="Capacidad máxima"
           type="number"
-          value={formData.maxCapacity ?? ""}
+          value={formData.capacity ?? ""}
           onChange={handleChange}
           disabled={isDisabled}
           placeholder="Placeholder"

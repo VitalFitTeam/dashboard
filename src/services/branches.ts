@@ -76,6 +76,78 @@ export type CreateBranchPayload = {
   tax_id?: string | null;
 };
 
+interface ApiOperatingHour {
+  day_of_week: string;
+  open_time: string;
+  close_time: string;
+  is_closed: boolean;
+}
+
+interface ApiPaymentMethodLink {
+  method: {
+    method_id: string;
+    name: string;
+    type: string;
+  };
+}
+
+interface ApiBranchDetails {
+  branch_id: string;
+  name: string;
+  tax_id: string;
+  phone: string;
+  status: string;
+  address: string;
+  country: string; 
+  state: string;  
+  latitude: number;
+  longitude: number;
+  manager_first_name: string;
+  manager_last_name: string;
+  max_capacity: number;
+  operating_hours: ApiOperatingHour[];
+  payment_methods: ApiPaymentMethodLink[];
+}
+
+export interface OperatingHour {
+  dayOfWeek: string;
+  openTime: string;
+  closeTime: string;
+  isClosed: boolean;
+}
+
+export interface BranchPaymentMethod {
+  id: string;
+  name: string;
+  type: string;
+}
+
+export interface BranchDetails {
+  id: string;
+  name: string;
+  taxId: string;
+  phone: string;
+  status: string;
+  location: {
+    address: string;
+    country: string;
+    state: string;
+    latitude: number;
+    longitude: number;
+  };
+  manager: {
+    firstName: string;
+    lastName: string;
+  };
+  capacity: number;
+  operatingHours: OperatingHour[];
+  paymentMethods: BranchPaymentMethod[];
+}
+
+interface ApiResponse {
+  data: ApiBranchDetails;
+}
+
 /* ────────────────────────────────
    🔹 Crear Sucursal
 ──────────────────────────────── */
@@ -92,7 +164,6 @@ export async function createBranch(payload: CreateBranchPayload) {
 ──────────────────────────────── */
 export async function deleteBranch(id: string, token: string) {
   const url = `${process.env.NEXT_PUBLIC_API_URL}/branches/${id}`;
-  console.log("🧭 Eliminando sucursal en:", url);
 
   try {
     const res = await fetch(url, {
@@ -108,7 +179,6 @@ export async function deleteBranch(id: string, token: string) {
       throw new Error(`Error ${res.status}: ${errorText}`);
     }
 
-    // ✅ Si la respuesta está vacía (ej. 204 No Content)
     const text = await res.text();
     return text ? JSON.parse(text) : { success: true };
   } catch (error) {
@@ -177,4 +247,91 @@ export async function fetchBranches({
     total: res.count.total,
     stats: statsResult,
   };
+}
+
+
+export async function fetchBranchDetails(
+  branchId: string
+): Promise<BranchDetails> {
+  const data: ApiBranchDetails = await fetchAPI(`/branches/${branchId}`);
+
+  if (!data.branch_id) { 
+    throw new Error("Respuesta de API inválida, faltan datos");
+  }
+
+  const mappedData: BranchDetails = {
+    id: data.branch_id,
+    name: data.name,
+    taxId: data.tax_id,
+    phone: data.phone,
+    status: data.status,
+    location: {
+      address: data.address,
+      country: data.country,
+      state: data.state,
+      latitude: data.latitude,
+      longitude: data.longitude,
+    },
+    manager: {
+      firstName: data.manager_first_name,
+      lastName: data.manager_last_name,
+    },
+    capacity: data.max_capacity,
+    operatingHours: data.operating_hours.map((h) => ({
+      dayOfWeek: h.day_of_week,
+      openTime: h.open_time,
+      closeTime: h.close_time,
+      isClosed: h.is_closed,
+    })),
+    paymentMethods: data.payment_methods.map((pm) => ({
+      id: pm.method.method_id,
+      name: pm.method.name,
+      type: pm.method.type,
+    })),
+  };
+
+  return mappedData;
+}
+
+function mapFormDataToApi(data: Branches): CreateBranchPayload {
+  return {
+    name: data.name,
+    tax_id: data.taxId,
+    status: data.status,
+    phone: data.phone,
+    address: data.address,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    max_capacity: data.capacity,
+    manager_id: data.administrator, // Mapea 'administrator' a 'manager_id'
+    
+    // Asumo que la API de PUT espera los NOMBRES (como en create)
+    // Si espera los IDs, usa: data.countryId, data.stateId
+    country: data.country, 
+    state: data.state,
+    
+    payment_methods: data.paymethods,
+    
+    operating_hours: data.operatingHours.map(h => ({
+      day_of_week: h.dayOfWeek,
+      open_time: h.openTime,
+      close_time: h.closeTime,
+      is_closed: h.isClosed,
+    })),
+    
+    // (Añade 'services' e 'inventory' si también se actualizan aquí)
+  };
+}
+
+
+export async function updateBranch(id: string, formData: Branches) {
+  // 1. Convierte los datos del formulario al formato de la API
+  const payload = mapFormDataToApi(formData);
+
+  // 2. Llama a la API con PUT
+  const res = await fetchAPI(`/branches/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+  return res;
 }
