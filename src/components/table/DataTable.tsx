@@ -5,11 +5,9 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
   flexRender,
   type ColumnDef,
   type SortingState,
-  type ColumnFiltersState,
 } from "@tanstack/react-table";
 
 import {
@@ -34,6 +32,9 @@ import {
 } from "../ui/select";
 import { debounce } from "@/utils";
 
+/* ────────────────────────────────
+   🔹 Tipos
+──────────────────────────────── */
 export type Column<T> = {
   header: string;
   accessor: keyof T;
@@ -51,7 +52,7 @@ export type DataTableProps<T> = {
   columns: Column<T>[];
   data: T[];
   actions?: (row: T) => React.ReactNode;
-  page?: number; // controlado por el padre
+  page?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
@@ -62,6 +63,53 @@ export type DataTableProps<T> = {
   filterValues?: Record<string, string | undefined>;
 };
 
+/* ────────────────────────────────
+   🔹 Input de filtro optimizado
+──────────────────────────────── */
+function TextFilterInput({
+  columnKey,
+  label,
+  value,
+  onDebouncedChange,
+}: {
+  columnKey: string;
+  label: string;
+  value?: string;
+  onDebouncedChange: (key: string, value: string | undefined) => void;
+}) {
+  const [localValue, setLocalValue] = React.useState(value ?? "");
+
+  // Mantener sincronía con valor externo (cuando cambia desde el padre)
+  React.useEffect(() => {
+    setLocalValue(value ?? "");
+  }, [value]);
+
+  // Debounce real (solo se ejecuta luego de 500ms sin teclear)
+  const debouncedChange = React.useMemo(
+    () =>
+      debounce((val: string) => {
+        onDebouncedChange(columnKey, val || undefined);
+      }, 500),
+    [columnKey, onDebouncedChange],
+  );
+
+  return (
+    <Input
+      placeholder={`Filtrar por ${label.toLowerCase()}...`}
+      value={localValue}
+      onChange={(e) => {
+        const val = e.target.value;
+        setLocalValue(val);
+        debouncedChange(val);
+      }}
+      className="max-w-xs"
+    />
+  );
+}
+
+/* ────────────────────────────────
+   🔹 DataTable principal
+──────────────────────────────── */
 export function DataTable<T>({
   columns,
   data,
@@ -76,7 +124,7 @@ export function DataTable<T>({
   onFilterChange,
   filterValues,
 }: DataTableProps<T>) {
-  // Estado interno híbrido
+  // Paginación interna
   const [internalPage, setInternalPage] = React.useState(1);
   const [internalPageSize, setInternalPageSize] = React.useState(10);
 
@@ -84,24 +132,19 @@ export function DataTable<T>({
   const currentPageSize = pageSize ?? internalPageSize;
 
   const handlePageChange = (newPage: number) => {
-    if (onPageChange) {
-      onPageChange(newPage);
-    } else {
-      setInternalPage(newPage);
-    }
+    if (onPageChange) {onPageChange(newPage);}
+    else {setInternalPage(newPage);}
   };
 
   const handlePageSizeChange = (newSize: number) => {
-    if (onPageSizeChange) {
-      onPageSizeChange(newSize);
-    } else {
-      setInternalPageSize(newSize);
-    }
+    if (onPageSizeChange) {onPageSizeChange(newSize);}
+    else {setInternalPageSize(newSize);}
   };
 
-  // Estado para filtros y sorting
+  // Sorting
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
+  // Columnas configuradas
   const columnDefs = React.useMemo<ColumnDef<T>[]>(
     () =>
       columns.map((col) => ({
@@ -110,11 +153,9 @@ export function DataTable<T>({
         cell: ({ getValue, row }) => {
           const value = getValue() as T[keyof T];
           const originalRow = row.original;
-
-          if (col.render) {
-            return col.render(value, originalRow);
-          }
-          return String(value ?? "");
+          return col.render
+            ? col.render(value, originalRow)
+            : String(value ?? "");
         },
         filterFn:
           col.filterType === "select"
@@ -139,11 +180,7 @@ export function DataTable<T>({
     getSortedRowModel: getSortedRowModel(),
   });
 
-  // Slice para paginación
-  const startIndex = (currentPage - 1) * currentPageSize;
-  const endIndex = startIndex + currentPageSize;
-  const pageRows = table.getRowModel().rows;
-
+  // Debounce global de cambio de filtros
   const debouncedOnFilterChange = React.useCallback(
     debounce((key: string, value: string | undefined) => {
       onFilterChange?.(key, value);
@@ -151,6 +188,12 @@ export function DataTable<T>({
     [onFilterChange],
   );
 
+  // Filas visibles actuales
+  const pageRows = table.getRowModel().rows;
+
+  /* ────────────────────────────────
+     RENDER
+  ───────────────────────────────── */
   return (
     <div className="space-y-4">
       {/* FILTROS */}
@@ -160,23 +203,16 @@ export function DataTable<T>({
             .filter((col) => col.filterType)
             .map((col) => {
               const column = table.getColumn(col.accessor as string);
-              if (!column) {
-                return null;
-              }
+              if (!column) {return null;}
 
               if (col.filterType === "text") {
                 return (
-                  <Input
+                  <TextFilterInput
                     key={String(col.accessor)}
-                    placeholder={`Filtrar por ${col.header.toLowerCase()}...`}
-                    value={filterValues?.[col.accessor as string] ?? ""}
-                    onChange={(e) => {
-                      debouncedOnFilterChange(
-                        col.accessor as string,
-                        e.target.value || undefined,
-                      );
-                    }}
-                    className="max-w-xs"
+                    columnKey={col.accessor as string}
+                    label={col.header}
+                    value={filterValues?.[col.accessor as string]}
+                    onDebouncedChange={debouncedOnFilterChange}
                   />
                 );
               }
@@ -188,20 +224,16 @@ export function DataTable<T>({
                     value={filterValues?.[col.accessor as string] ?? "all"}
                     onValueChange={(newValue) => {
                       let finalValue: string | undefined = newValue;
-                      if (newValue === "all") {
-                        finalValue = undefined;
-                      }
+                      if (newValue === "all") {finalValue = undefined;}
                       onFilterChange?.(col.accessor as string, finalValue);
                     }}
                   >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Todos" />
                     </SelectTrigger>
-
                     <SelectContent>
                       <SelectGroup>
                         <SelectItem value="all">Todos</SelectItem>
-
                         {col.filterOptions.map((opt) => (
                           <SelectItem key={opt.value} value={opt.value}>
                             {opt.label}
