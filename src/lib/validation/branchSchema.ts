@@ -15,7 +15,9 @@ export const branchSchema = z.object({
   direccion: z.string().min(1, "La dirección es obligatoria"),
   latitud: z.string().min(1, "La latitud es obligatoria"),
   longitud: z.string().min(1, "La longitud es obligatoria"),
-  manager_id: z.string().min(1, "El gerente responsable es obligatorio"),
+  gerenteResponsable: z
+    .string()
+    .min(1, "El gerente responsable es obligatorio"),
   capacidadMiembros: z
     .string()
     .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
@@ -42,7 +44,9 @@ export const step2Schema = z.object({
 });
 
 export const step3Schema = z.object({
-  manager_id: z.string().min(1, "El gerente responsable es obligatorio"),
+  gerenteResponsable: z
+    .string()
+    .min(1, "El gerente responsable es obligatorio"),
   capacidadMiembros: z
     .string()
     .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
