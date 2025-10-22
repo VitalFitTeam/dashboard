@@ -29,14 +29,15 @@ interface BranchesTableProps {
   allInstructors: Instructor[];
   allCities: City[];
   allStates: State[];
-  //allCountries: Country[];
   allServices: Service[];
   allEquipment: Equipment[];
   allPaymentMethods: PaymentMethodUI[];
   totalPages: number;
   onFilterChange: FilterChangeHandler;
   filterValues: Record<string, string | undefined>;
+  onBranchDeleted?: () => void | Promise<void>; // 👈 NUEVO callback
 }
+
 export default function BranchesTable({
   data,
   isLoading,
