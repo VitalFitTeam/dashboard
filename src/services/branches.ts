@@ -76,15 +76,50 @@ export type CreateBranchPayload = {
   tax_id?: string | null;
 };
 
+/* ────────────────────────────────
+   🔹 Crear Sucursal
+──────────────────────────────── */
 export async function createBranch(payload: CreateBranchPayload) {
   const res = await fetchAPI("/branches", {
     method: "POST",
     body: JSON.stringify(payload),
   });
-
   return res;
 }
 
+/* ────────────────────────────────
+   🔹 Eliminar Sucursal
+──────────────────────────────── */
+export async function deleteBranch(id: string, token: string) {
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/branches/${id}`;
+  console.log("🧭 Eliminando sucursal en:", url);
+
+  try {
+    const res = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Error ${res.status}: ${errorText}`);
+    }
+
+    // ✅ Si la respuesta está vacía (ej. 204 No Content)
+    const text = await res.text();
+    return text ? JSON.parse(text) : { success: true };
+  } catch (error) {
+    console.error("❌ Error eliminando sucursal:", error);
+    throw error;
+  }
+}
+
+/* ────────────────────────────────
+   🔹 Obtener Sucursales
+──────────────────────────────── */
 export async function fetchBranches({
   limit,
   offset,
@@ -98,12 +133,8 @@ export async function fetchBranches({
   query.append("offset", offset.toString());
   query.append("sort", sort);
 
-  if (search) {
-    query.append("search", search);
-  }
-  if (status) {
-    query.append("status", status);
-  }
+  if (search) {query.append("search", search);}
+  if (status) {query.append("status", status);}
 
   const res: ApiBranchesResponse = await fetchAPI(
     `/branches?${query.toString()}`,
@@ -115,7 +146,7 @@ export async function fetchBranches({
   );
 
   if (!res.data || !res.count) {
-    console.error("Respuesta de API inválida, falta 'data' o 'count'");
+    console.error("⚠️ Respuesta inválida: falta 'data' o 'count'");
     return {
       data: [],
       total: 0,
@@ -141,11 +172,9 @@ export async function fetchBranches({
     status: b.status as "Active" | "Inactive" | "Maintenance",
   }));
 
-  const total = res.count.total;
-
   return {
     data: mappedData,
-    total: total,
+    total: res.count.total,
     stats: statsResult,
   };
 }

@@ -130,9 +130,9 @@ export default function HomeBranches() {
   };
 
   const handleFormSuccess = () => {
-    setShowModal(false); 
-    setShowSuccessAlert(true); 
-    setRefreshKey((prevKey) => prevKey + 1); 
+    setShowModal(false);
+    setShowSuccessAlert(true);
+    setRefreshKey((prevKey) => prevKey + 1);
   };
 
   useEffect(() => {
@@ -254,14 +254,14 @@ export default function HomeBranches() {
       )}
 
       <GeneralAlertDialog
-        open={showSuccessAlert}
-        onOpenChange={setShowSuccessAlert}
-        trigger={<span />} 
-        type="info"
-        title="¡Sucursal Creada!"
-        description="La nueva sucursal ha sido guardada exitosamente."
-        actionText="Continuar"
-      />
+        open={showSuccessAlert}
+        onOpenChange={setShowSuccessAlert}
+        trigger={<span />}
+        type="info"
+        title="¡Sucursal Creada!"
+        description="La nueva sucursal ha sido guardada exitosamente."
+        actionText="Continuar"
+      />
     </div>
   );
 }

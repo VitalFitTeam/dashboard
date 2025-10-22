@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 interface GeneralAlertDialogProps {
   trigger: React.ReactNode;
   title: string;
-  description: string; 
+  description: string;
   type?: "confirmation" | "info";
   actionText: string;
   onAction?: () => void;
@@ -60,7 +60,7 @@ export function GeneralAlertDialog({
                 buttonVariants({
                   variant:
                     actionVariant === "destructive" ? "destructive" : "default",
-                })
+                }),
               )}
             >
               {actionText}
@@ -72,7 +72,7 @@ export function GeneralAlertDialog({
                 onClick={onAction}
                 className={cn(
                   actionVariant === "destructive" &&
-                    buttonVariants({ variant: "destructive" })
+                    buttonVariants({ variant: "destructive" }),
                 )}
               >
                 {actionText}

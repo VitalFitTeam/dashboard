@@ -21,7 +21,7 @@ import {
 import { Checkbox } from "../ui/checkbox";
 import { PaginationControls } from "./PaginationControls";
 import { Input } from "../Input";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -31,6 +31,9 @@ import {
   SelectValue,
 } from "../ui/select";
 import { debounce } from "@/utils";
+import { Button } from "../ui/button";
+import { deleteBranch } from "@/services/branches";
+import { toast } from "sonner";
 
 /* ────────────────────────────────
    🔹 Tipos
@@ -52,6 +55,7 @@ export type DataTableProps<T> = {
   columns: Column<T>[];
   data: T[];
   actions?: (row: T) => React.ReactNode;
+  page?: number;
   page?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
@@ -79,12 +83,10 @@ function TextFilterInput({
 }) {
   const [localValue, setLocalValue] = React.useState(value ?? "");
 
-  // Mantener sincronía con valor externo (cuando cambia desde el padre)
   React.useEffect(() => {
     setLocalValue(value ?? "");
   }, [value]);
 
-  // Debounce real (solo se ejecuta luego de 500ms sin teclear)
   const debouncedChange = React.useMemo(
     () =>
       debounce((val: string) => {
@@ -110,7 +112,7 @@ function TextFilterInput({
 /* ────────────────────────────────
    🔹 DataTable principal
 ──────────────────────────────── */
-export function DataTable<T>({
+export function DataTable<T extends { id: string }>({
   columns,
   data,
   actions,
@@ -132,18 +134,34 @@ export function DataTable<T>({
   const currentPageSize = pageSize ?? internalPageSize;
 
   const handlePageChange = (newPage: number) => {
-    if (onPageChange) {onPageChange(newPage);}
-    else {setInternalPage(newPage);}
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
   };
 
   const handlePageSizeChange = (newSize: number) => {
-    if (onPageSizeChange) {onPageSizeChange(newSize);}
-    else {setInternalPageSize(newSize);}
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    } else {
+      setInternalPageSize(newSize);
+    }
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    } else {
+      setInternalPageSize(newSize);
+    }
   };
 
-  // Sorting
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
+  // Columnas configuradas
   // Columnas configuradas
   const columnDefs = React.useMemo<ColumnDef<T>[]>(
     () =>
@@ -156,17 +174,10 @@ export function DataTable<T>({
           return col.render
             ? col.render(value, originalRow)
             : String(value ?? "");
+          return col.render
+            ? col.render(value, originalRow)
+            : String(value ?? "");
         },
-        filterFn:
-          col.filterType === "select"
-            ? (row, columnId, filterValue) =>
-                String(row.getValue(columnId)) === filterValue
-            : col.filterType === "text"
-              ? (row, columnId, filterValue) =>
-                  String(row.getValue(columnId))
-                    .toLowerCase()
-                    .includes(String(filterValue).toLowerCase())
-              : undefined,
       })),
     [columns],
   );
@@ -180,7 +191,6 @@ export function DataTable<T>({
     getSortedRowModel: getSortedRowModel(),
   });
 
-  // Debounce global de cambio de filtros
   const debouncedOnFilterChange = React.useCallback(
     debounce((key: string, value: string | undefined) => {
       onFilterChange?.(key, value);
@@ -188,11 +198,39 @@ export function DataTable<T>({
     [onFilterChange],
   );
 
-  // Filas visibles actuales
   const pageRows = table.getRowModel().rows;
 
   /* ────────────────────────────────
-     RENDER
+     🔹 Eliminar sucursal y refrescar
+  ───────────────────────────────── */
+  const handleDelete = async (row: T) => {
+    const name = (row as any).name ?? "esta sucursal";
+    const confirmed = window.confirm(`¿Seguro que deseas eliminar ${name}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Token no encontrado");
+      }
+
+      await deleteBranch(row.id, token);
+      toast.success("Sucursal eliminada correctamente ✅");
+
+      // 🔄 Refrescar la página completamente (como F5)
+      setTimeout(() => {
+        window.location.reload();
+      }, 800);
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      toast.error("No se pudo eliminar la sucursal ❌");
+    }
+  };
+
+  /* ────────────────────────────────
+     🔹 Render principal
   ───────────────────────────────── */
   return (
     <div className="space-y-4">
@@ -201,52 +239,15 @@ export function DataTable<T>({
         <div className="flex flex-wrap gap-3 mb-4">
           {columns
             .filter((col) => col.filterType)
-            .map((col) => {
-              const column = table.getColumn(col.accessor as string);
-              if (!column) {return null;}
-
-              if (col.filterType === "text") {
-                return (
-                  <TextFilterInput
-                    key={String(col.accessor)}
-                    columnKey={col.accessor as string}
-                    label={col.header}
-                    value={filterValues?.[col.accessor as string]}
-                    onDebouncedChange={debouncedOnFilterChange}
-                  />
-                );
-              }
-
-              if (col.filterType === "select" && col.filterOptions) {
-                return (
-                  <Select
-                    key={String(col.accessor)}
-                    value={filterValues?.[col.accessor as string] ?? "all"}
-                    onValueChange={(newValue) => {
-                      let finalValue: string | undefined = newValue;
-                      if (newValue === "all") {finalValue = undefined;}
-                      onFilterChange?.(col.accessor as string, finalValue);
-                    }}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Todos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="all">Todos</SelectItem>
-                        {col.filterOptions.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                );
-              }
-
-              return null;
-            })}
+            .map((col) => (
+              <TextFilterInput
+                key={String(col.accessor)}
+                columnKey={col.accessor as string}
+                label={col.header}
+                value={filterValues?.[col.accessor as string]}
+                onDebouncedChange={debouncedOnFilterChange}
+              />
+            ))}
         </div>
       )}
 
@@ -281,7 +282,7 @@ export function DataTable<T>({
                 </TableHead>
               )),
             )}
-            {actions && <TableHead>Acciones</TableHead>}
+            <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -299,17 +300,24 @@ export function DataTable<T>({
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-                {actions && <TableCell>{actions(row.original)}</TableCell>}
+
+                <TableCell className="flex justify-end gap-2">
+                  {actions && actions(row.original)}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(row.original)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Eliminar
+                  </Button>
+                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
               <TableCell
-                colSpan={
-                  columns.length +
-                  (actions ? 1 : 0) +
-                  (enableRowSelection ? 1 : 0)
-                }
+                colSpan={columns.length + 1 + (enableRowSelection ? 1 : 0)}
                 className="text-center py-6 text-muted-foreground"
               >
                 No hay datos disponibles
@@ -319,6 +327,7 @@ export function DataTable<T>({
         </TableBody>
       </Table>
 
+      {/* PAGINACIÓN */}
       <PaginationControls
         page={currentPage}
         totalPages={totalPages ?? Math.ceil(data.length / currentPageSize)}
