@@ -19,6 +19,7 @@ import StepForm from "@/app/(dashboard)/branches/StepForm";
 import Image from "next/image";
 import { PaymentMethodUI } from "./page";
 import { createBranch } from "@/services/branches";
+import { createBranch } from "@/services/branches";
 import { Country, State, City } from "@/types/location";
 import { BranchAdmin } from "@/types/users";
 
@@ -71,27 +72,41 @@ export default function BranchFrom({
   ];
 
   const handleNext = () => {
-    if (currentStep < steps.length) {setCurrentStep(currentStep + 1);}
+    if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {setCurrentStep(currentStep - 1);}
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
   const handleSubmit = () => {
     const toHHMMSS = (input?: string | null) => {
-      if (!input) {return "00:00:00";}
+      if (!input) {
+        return "00:00:00";
+      }
       const s = input.trim();
-      if (/^\d{1,2}:\d{2}:\d{2}$/.test(s)) {return s;}
+      if (/^\d{1,2}:\d{2}:\d{2}$/.test(s)) {
+        return s;
+      }
       const hm = /^(\d{1,2}):(\d{2})$/.exec(s);
-      if (hm) {return `${hm[1].padStart(2, "0")}:${hm[2]}:00`;}
+      if (hm) {
+        return `${hm[1].padStart(2, "0")}:${hm[2]}:00`;
+      }
       const ampm = /^(\d{1,2}):(\d{2})(?:\s*)(AM|PM)$/i.exec(s);
       if (ampm) {
         let hh = Number(ampm[1]);
         const mm = ampm[2];
         const period = ampm[3].toUpperCase();
-        if (period === "PM" && hh < 12) {hh += 12;}
-        if (period === "AM" && hh === 12) {hh = 0;}
+        if (period === "PM" && hh < 12) {
+          hh += 12;
+        }
+        if (period === "AM" && hh === 12) {
+          hh = 0;
+        }
         return `${hh.toString().padStart(2, "0")}:${mm}:00`;
       }
       return "00:00:00";

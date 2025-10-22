@@ -56,6 +56,7 @@ export type DataTableProps<T> = {
   data: T[];
   actions?: (row: T) => React.ReactNode;
   page?: number;
+  page?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
@@ -125,6 +126,7 @@ export function DataTable<T extends { id: string }>({
   onFilterChange,
   filterValues,
 }: DataTableProps<T>) {
+  // Paginación interna
   const [internalPage, setInternalPage] = React.useState(1);
   const [internalPageSize, setInternalPageSize] = React.useState(10);
 
@@ -132,17 +134,34 @@ export function DataTable<T extends { id: string }>({
   const currentPageSize = pageSize ?? internalPageSize;
 
   const handlePageChange = (newPage: number) => {
-    if (onPageChange) {onPageChange(newPage);}
-    else {setInternalPage(newPage);}
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
   };
 
   const handlePageSizeChange = (newSize: number) => {
-    if (onPageSizeChange) {onPageSizeChange(newSize);}
-    else {setInternalPageSize(newSize);}
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    } else {
+      setInternalPageSize(newSize);
+    }
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize);
+    } else {
+      setInternalPageSize(newSize);
+    }
   };
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
+  // Columnas configuradas
   const columnDefs = React.useMemo<ColumnDef<T>[]>(
     () =>
       columns.map((col) => ({
@@ -151,6 +170,9 @@ export function DataTable<T extends { id: string }>({
         cell: ({ getValue, row }) => {
           const value = getValue() as T[keyof T];
           const originalRow = row.original;
+          return col.render
+            ? col.render(value, originalRow)
+            : String(value ?? "");
           return col.render
             ? col.render(value, originalRow)
             : String(value ?? "");
@@ -183,11 +205,15 @@ export function DataTable<T extends { id: string }>({
   const handleDelete = async (row: T) => {
     const name = (row as any).name ?? "esta sucursal";
     const confirmed = window.confirm(`¿Seguro que deseas eliminar ${name}?`);
-    if (!confirmed) {return;}
+    if (!confirmed) {
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {throw new Error("Token no encontrado");}
+      if (!token) {
+        throw new Error("Token no encontrado");
+      }
 
       await deleteBranch(row.id, token);
       toast.success("Sucursal eliminada correctamente ✅");
