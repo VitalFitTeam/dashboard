@@ -27,6 +27,7 @@ import { fetchPaymentMethods } from "@/services/paymentMethods";
 import { debounce } from "@/utils";
 import { BranchAdmin } from "@/types/users";
 import { fetchBranchAdmins } from "@/services/branchAdmin";
+import { GeneralAlertDialog } from "@/components/GeneralAlertDialog";
 
 const MOCK_INSTRUCTORS: Instructor[] = [
   { id: "i1", user_id: "u1", name: "Ana Pérez" },
@@ -90,6 +91,8 @@ function mapApiPaymentMethodsToUI(methods: PaymentMethod[]): PaymentMethodUI[] {
 
 export default function HomeBranches() {
   const [showModal, setShowModal] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [isLoadingStatic, setIsLoadingStatic] = useState(true);
   const [isLoadingBranches, setIsLoadingBranches] = useState(true);
   const [statsData, setStatsData] = useState<StatsData>({
@@ -106,11 +109,11 @@ export default function HomeBranches() {
   const [allServices, setAllServices] = useState<Service[]>([]);
   const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethodUI[]>(
-    [],
+    []
   );
   const [allBranchAdmins, setAllBranchAdmins] = useState<BranchAdmin[]>([]);
   const [filters, setFilters] = useState<Record<string, string | undefined>>(
-    {},
+    {}
   );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -124,6 +127,12 @@ export default function HomeBranches() {
       ...prevFilters,
       [key]: value,
     }));
+  };
+
+  const handleFormSuccess = () => {
+    setShowModal(false); 
+    setShowSuccessAlert(true); 
+    setRefreshKey((prevKey) => prevKey + 1); 
   };
 
   useEffect(() => {
@@ -176,6 +185,7 @@ export default function HomeBranches() {
         setBranchesData(result.data);
         setTotalBranches(result.total);
         setStatsData(result.stats);
+
       } catch (error) {
         console.error("Error cargando sucursales:", error);
       } finally {
@@ -183,7 +193,7 @@ export default function HomeBranches() {
       }
     }
     loadBranchesData();
-  }, [page, pageSize, sort, filters]);
+  }, [page, pageSize, sort, filters, refreshKey]);
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
@@ -238,9 +248,20 @@ export default function HomeBranches() {
             allStates={allStates}
             allCities={allCities}
             allBranchAdmins={allBranchAdmins}
+            onSuccess={handleFormSuccess}
           />
         </div>
       )}
+
+      <GeneralAlertDialog
+        open={showSuccessAlert}
+        onOpenChange={setShowSuccessAlert}
+        trigger={<span />} 
+        type="info"
+        title="¡Sucursal Creada!"
+        description="La nueva sucursal ha sido guardada exitosamente."
+        actionText="Continuar"
+      />
     </div>
   );
 }
