@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { BranchAdmin } from "@/types/users";
 
 type StepProps = {
   formData: any;
@@ -19,6 +20,7 @@ type StepProps = {
   ) => void;
   handleCustomChange: (field: string, value: any) => void;
   formErrors?: Record<string, string>;
+  allBranchAdmins?: BranchAdmin[];
 };
 
 const diasSemana = [
@@ -60,6 +62,7 @@ export default function Step3({
   handleChange,
   handleCustomChange,
   formErrors = {},
+  allBranchAdmins = [],
 }: StepProps) {
   const handleHorarioChange = (dia: string, campo: string, valor: any) => {
     const horarios = formData.horarios || {};
@@ -108,21 +111,25 @@ export default function Step3({
               Gerente Responsable *
             </span>
             <Select
-              value={formData.manager_id || ""}
-              onValueChange={(value) => handleCustomChange("manager_id", value)}
+              value={formData.administrator || ""}
+              onValueChange={(value) =>
+                handleCustomChange("administrator", value)
+              }
             >
               <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Seleccione un Gerente" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="f715ad5a-30db-462e-9284-3eaab72b2923">
-                  Instructor Prueba
-                </SelectItem>
+                {allBranchAdmins.map((admin) => (
+                  <SelectItem key={admin.id} value={admin.id}>
+                    {`${admin.firstName} ${admin.lastName}`}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-            {formErrors?.["manager_id"] && (
+            {formErrors?.["administrator"] && (
               <p className="text-sm text-red-500 mt-1">
-                {formErrors["manager_id"]}
+                {formErrors["administrator"]}
               </p>
             )}
           </label>

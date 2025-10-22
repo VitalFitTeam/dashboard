@@ -1,5 +1,6 @@
 "use client";
 
+import { BranchAdmin } from "@/types/users";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
@@ -20,15 +21,17 @@ type StepProps = {
   handleCustomChange: (field: string, value: unknown) => void; // <-- Añade handleCustomChange
   formErrors?: Record<string, string>;
   allPaymentMethods?: PaymentMethodUI[]; // <-- Añade allPaymentMethods (opcional)
+  allBranchAdmins: BranchAdmin[];
 };
 
 export default function StepForm({
   step,
   formData,
   handleChange, // <-- Recibe handleChange
-  handleCustomChange, // <-- Recibe handleCustomChange
+  handleCustomChange,
   formErrors,
-  allPaymentMethods = [], // <-- Recibe allPaymentMethods
+  allPaymentMethods = [],
+  allBranchAdmins = [],
 }: StepProps) {
   switch (step) {
     case 1:
@@ -56,6 +59,7 @@ export default function StepForm({
           handleChange={handleChange} // <-- Pasa handleChange
           handleCustomChange={handleCustomChange} // <-- Pasa handleCustomChange
           formErrors={formErrors}
+          allBranchAdmins={allBranchAdmins}
         />
       );
     case 4:

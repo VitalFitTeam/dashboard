@@ -77,7 +77,6 @@ export type CreateBranchPayload = {
 };
 
 export async function createBranch(payload: CreateBranchPayload) {
-  // Usa fetchAPI que maneja la base URL y headers (incluye Authorization si existe)
   const res = await fetchAPI("/branches", {
     method: "POST",
     body: JSON.stringify(payload),
