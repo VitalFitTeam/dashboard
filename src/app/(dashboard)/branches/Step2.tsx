@@ -31,25 +31,24 @@ export default function Step2({
   const handleMapSelect = (data: {
     latitud: string;
     longitud: string;
-    address: string; // sigue existiendo, pero no la usamos
+    address: string;
     city: string;
     state: string;
     country: string;
   }) => {
     handleCustomChange("latitud", data.latitud);
     handleCustomChange("longitud", data.longitud);
-    // También guardar valores numéricos para el payload (latitude/longitude)
-    const latNum = parseFloat(data.latitud as unknown as string);
-    const lngNum = parseFloat(data.longitud as unknown as string);
-    if (!isNaN(latNum)) {
-      handleCustomChange("latitude", latNum);
-    }
-    if (!isNaN(lngNum)) {
-      handleCustomChange("longitude", lngNum);
-    }
-    handleCustomChange("city", data.city);
-    handleCustomChange("state", data.state);
-    handleCustomChange("country", data.country);
+
+    // Guardar también los numéricos
+    const latNum = parseFloat(data.latitud);
+    const lngNum = parseFloat(data.longitud);
+    if (!isNaN(latNum)) {handleCustomChange("latitude", latNum);}
+    if (!isNaN(lngNum)) {handleCustomChange("longitude", lngNum);}
+
+    // ✅ CAMBIO AQUÍ: usa los campos que tu handleSubmit espera
+    handleCustomChange("cityId", data.city);
+    handleCustomChange("stateId", data.state);
+    handleCustomChange("countryId", data.country);
   };
 
   return (
@@ -80,22 +79,20 @@ export default function Step2({
 
         {/* Ciudad / Estado / País */}
 
-        <div className="col-span-6 md:col-span-2">
-          <InputField
-            label="Estado"
-            id="state"
-            name="state"
-            value={formData.state || ""}
-            readOnly
-            className="bg-gray-50 text-gray-700"
-          />
-        </div>
+        <InputField
+          label="Estado"
+          id="stateId"
+          name="stateId"
+          value={formData.stateId || ""}
+          readOnly
+          className="bg-gray-50 text-gray-700"
+        />
         <div className="col-span-6 md:col-span-2">
           <InputField
             label="País"
-            id="country"
-            name="country"
-            value={formData.country || ""}
+            id="countryId"
+            name="countryId"
+            value={formData.countryId || ""}
             readOnly
             className="bg-gray-50 text-gray-700"
           />

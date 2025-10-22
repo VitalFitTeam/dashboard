@@ -18,7 +18,7 @@ import {
 import StepForm from "@/app/(dashboard)/branches/StepForm";
 import Image from "next/image";
 import { PaymentMethodUI } from "./page";
-// Importa los tipos de ubicación si StepForm los necesita para otros pasos
+import { createBranch } from "@/services/branches";
 import { Country, State, City } from "@/types/location";
 import { BranchAdmin } from "@/types/users";
 
@@ -35,28 +35,31 @@ export default function BranchFrom({
   onClose,
   allPaymentMethods,
   allBranchAdmins,
-  allCountries, // Recibe las props
+  allCountries,
   allStates,
   allCities,
 }: BranchFromProps) {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [currentStep, setCurrentStep] = useState(1); // Empieza en el paso 1
+  const [currentStep, setCurrentStep] = useState(1);
 
   const [formData, setFormData] = useState({
     name: "",
     taxId: "",
     countryId: "",
     stateId: "",
-    cityId: "", // Añadido
+    cityId: "",
     status: "active",
     phone: "",
     address: "",
     latitude: 0,
     longitude: 0,
     administrator: "",
+    manager_id: "",
     capacity: 0,
+    capacidadMiembros: "",
+    horarios: {},
     operatingHours: {},
-    paymentMethods: [], // Array de IDs
+    paymentMethods: [],
   });
 
   const steps = [
@@ -67,27 +70,131 @@ export default function BranchFrom({
     { id: 5, name: "Confirmación", description: "Revisión" },
   ];
 
-  // --- VALIDACIÓN ELIMINADA TEMPORALMENTE ---
-  // La función validateStep ya no es necesaria aquí para avanzar
-  // const validateStep = () => { ... };
-
   const handleNext = () => {
-    // --- YA NO LLAMA A validateStep() ---
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handleSubmit = () => {
-    console.log("Datos del formulario:", formData);
-    alert("Sucursal Creada (Simulación)");
-    onClose();
+    if (currentStep < steps.length) {setCurrentStep(currentStep + 1);}
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    if (currentStep > 1) {setCurrentStep(currentStep - 1);}
+  };
+
+  const handleSubmit = () => {
+    const toHHMMSS = (input?: string | null) => {
+      if (!input) {return "00:00:00";}
+      const s = input.trim();
+      if (/^\d{1,2}:\d{2}:\d{2}$/.test(s)) {return s;}
+      const hm = /^(\d{1,2}):(\d{2})$/.exec(s);
+      if (hm) {return `${hm[1].padStart(2, "0")}:${hm[2]}:00`;}
+      const ampm = /^(\d{1,2}):(\d{2})(?:\s*)(AM|PM)$/i.exec(s);
+      if (ampm) {
+        let hh = Number(ampm[1]);
+        const mm = ampm[2];
+        const period = ampm[3].toUpperCase();
+        if (period === "PM" && hh < 12) {hh += 12;}
+        if (period === "AM" && hh === 12) {hh = 0;}
+        return `${hh.toString().padStart(2, "0")}:${mm}:00`;
+      }
+      return "00:00:00";
+    };
+
+    const dayMap: Record<string, string> = {
+      lunes: "Monday",
+      martes: "Tuesday",
+      miercoles: "Wednesday",
+      jueves: "Thursday",
+      viernes: "Friday",
+      sabado: "Saturday",
+      domingo: "Sunday",
+    };
+
+    const horariosRecord = (formData.horarios as Record<string, any>) || {};
+    const daysOrder = [
+      "lunes",
+      "martes",
+      "miercoles",
+      "jueves",
+      "viernes",
+      "sabado",
+      "domingo",
+    ];
+
+    const operating_hours = daysOrder.map((dayKey) => {
+      const h = horariosRecord[dayKey] || {
+        apertura: "00:00",
+        cierre: "00:00",
+        cerrado: true,
+      };
+      const isClosed = !!h.cerrado;
+      return {
+        day_of_week: dayMap[dayKey],
+        open_time: isClosed ? "00:00:00" : toHHMMSS(h.apertura),
+        close_time: isClosed ? "00:00:00" : toHHMMSS(h.cierre),
+        is_closed: isClosed,
+      };
+    });
+
+    const statusMap: Record<string, string> = {
+      active: "Active",
+      inactive: "Inactive",
+      maintenance: "Maintenance",
+    };
+
+    const rawStatus = (formData.status || "Active").toString();
+    const normalizedStatus =
+      statusMap[rawStatus.toLowerCase()] ??
+      rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
+
+    // ✅ Ajuste principal: usar nombres y formato exacto que el backend espera
+    const apiPayload: any = {
+      name: formData.name?.trim() || "",
+      tax_id: formData.taxId?.trim() || "",
+      address: formData.address?.trim() || "",
+      phone: formData.phone?.trim() || "",
+      country: formData.countryId?.trim() || "",
+      state: formData.stateId?.trim() || "",
+      latitude:
+        typeof formData.latitude === "number"
+          ? formData.latitude
+          : parseFloat(formData.latitude as any) || 0,
+      longitude:
+        typeof formData.longitude === "number"
+          ? formData.longitude
+          : parseFloat(formData.longitude as any) || 0,
+      manager_id: formData.manager_id || "",
+      max_capacity:
+        formData.capacidadMiembros && !isNaN(Number(formData.capacidadMiembros))
+          ? Number(formData.capacidadMiembros)
+          : formData.capacity || 0,
+      operating_hours: operating_hours,
+      payment_methods: formData.paymentMethods || [],
+      status: normalizedStatus,
+    };
+
+    console.log("📤 Payload enviado:", apiPayload);
+
+    // Validación rápida antes de enviar
+    if (
+      !apiPayload.name ||
+      !apiPayload.tax_id ||
+      !apiPayload.country ||
+      !apiPayload.state
+    ) {
+      alert(
+        "Por favor completa los campos obligatorios: Nombre, Tax ID, País y Estado.",
+      );
+      return;
     }
+
+    createBranch(apiPayload)
+      .then((data) => {
+        console.log("Sucursal creada:", data);
+        alert("Sucursal creada correctamente");
+        onClose();
+      })
+      .catch((err) => {
+        console.error("Error creando sucursal:", err);
+        alert("Error al crear sucursal: " + (err?.message || String(err)));
+      });
   };
 
   const handleChange = (
@@ -104,74 +211,60 @@ export default function BranchFrom({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Puedes borrar handleInputChange y nextStyles si ya no los usas
-
   return (
     <Card
       className="w-full max-w-4xl max-h-[90vh] mx-auto my-auto overflow-y-auto border"
-      onClick={(e) => e.stopPropagation()} // <-- Correcto para no cerrar modal
+      onClick={(e) => e.stopPropagation()}
     >
       <CardHeader className="sticky top-0 bg-white z-10 pt-6 pb-4 border-b">
-        {/* ... (Tu CardTitle, Imagen, Botón Cerrar) ... */}
         <div className="flex items-center justify-between w-full">
-                   {" "}
           <CardTitle className="text-2xl font-bold text-gray-800">
-                        CREAR NUEVA SUCURSAL          {" "}
+            CREAR NUEVA SUCURSAL
           </CardTitle>
           <div className="flex items-center gap-4">
-                       {" "}
             <Image
-              src="/images/logo-vitalfit.png" // Ajusta la ruta si es necesario
+              src="/images/logo-vitalfit.png"
               alt="Logo Vitalfit"
               width={148}
-              height={40} // Ajusta el alto si es necesario
+              height={40}
               priority
             />
-                       {" "}
             <Button
               onClick={onClose}
               size="icon"
               variant="ghost"
               className="text-gray-400 hover:text-gray-700"
             >
-                            <XMarkIcon className="h-6 w-6" />           {" "}
+              <XMarkIcon className="h-6 w-6" />
             </Button>
-                     {" "}
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-6 pt-4">
-        {" "}
-        {/* Ajuste de padding */}
         <p className="text-sm text-gray-600 mb-6">
-          {" "}
-          {/* Ajuste de margen */}
           Complete los siguientes pasos para crear una nueva sucursal
         </p>
         <Wizard steps={steps} currentStep={currentStep} />
+
         <div className="mt-8">
-          {" "}
-          {/* Añadido margen superior */}
           <StepForm
             step={currentStep}
             formData={formData}
             handleChange={handleChange}
             handleCustomChange={handleCustomChange}
             formErrors={formErrors}
-            allBranchAdmins={allBranchAdmins}
+            allBranchAdmins={allBranchAdmins} // ✅ lista de gerentes dinámica
             allPaymentMethods={allPaymentMethods}
           />
         </div>
       </CardContent>
 
       <CardFooter className="flex justify-between px-6 pb-6 border-t pt-6">
-        {" "}
-        {/* Añadido border y padding top */}
         <Button
           onClick={handleBack}
           disabled={currentStep === 1}
-          variant="outline" // Estilo más estándar
+          variant="outline"
           className="flex items-center gap-2"
         >
           <ArrowLeftIcon className="w-4 h-4" />

@@ -111,10 +111,8 @@ export default function Step3({
               Gerente Responsable *
             </span>
             <Select
-              value={formData.administrator || ""}
-              onValueChange={(value) =>
-                handleCustomChange("administrator", value)
-              }
+              value={formData.manager_id || ""}
+              onValueChange={(value) => handleCustomChange("manager_id", value)}
             >
               <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Seleccione un Gerente" />
@@ -127,9 +125,9 @@ export default function Step3({
                 ))}
               </SelectContent>
             </Select>
-            {formErrors?.["administrator"] && (
+            {formErrors?.["manager_id"] && (
               <p className="text-sm text-red-500 mt-1">
-                {formErrors["administrator"]}
+                {formErrors["manager_id"]}
               </p>
             )}
           </label>
