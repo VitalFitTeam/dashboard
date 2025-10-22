@@ -156,20 +156,21 @@ export default function BranchesTable({
           </div>
         )}
       />
-      {/*    
-    <BranchDetailsModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        branchData={selectedBranch} // Aquí ya puedes mapear solo los datos que tengas
-        initialMode={modalMode}
-        allInstructors={allInstructors}
-        allCities={allCities}
-        allStates={allStates}
-        allServices={allServices}
-        allEquipment={allEquipment}
-        allPaymentMethods={allPaymentMethods}
-      /> 
-      */}
+      {
+        <BranchDetailsModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          branchData={selectedBranch as any}
+          initialMode={modalMode}
+          allInstructors={[]}
+          allCities={allCities}
+          allStates={allStates}
+          allCountries={[]}
+          allServices={allServices}
+          allEquipment={allEquipment}
+          allPaymentMethods={allPaymentMethods}
+        />
+      }
     </>
   );
 }
