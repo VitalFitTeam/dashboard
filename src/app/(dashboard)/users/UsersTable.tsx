@@ -1,12 +1,14 @@
 "use client";
-import { Column, DataTable } from "@/components/table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
 import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { useState } from "react";
-import { Users } from "@/types/users";
+import { Users } from "@/models/users";
 import { UsersData } from "./data";
+import { Column, DataTable } from "@/components/ui/table/DataTable";
+import { deleteBranch } from "@/services/branches";
+import { Trash2 } from "lucide-react";
 
 export default function UsersTable() {
   const [page, setPage] = useState(1);
@@ -15,16 +17,47 @@ export default function UsersTable() {
   const handleEditUser = (user: Users) => {
     setSelectedUser(user);
     alert("Editar detalles del usuario");
-    // Lógica para abrir el modal de edición
   };
   const handleViewDetails = (user: Users) => {
     setSelectedUser(user);
     alert("Ver detalles del usuario");
-    // Lógica para abrir el modal de detalles
   };
 
+  /*const handleDeleteBranch = async (branch: Branch) => { // 'Branch' es tu tipo de dato
+    const confirmed = window.confirm(`¿Seguro que deseas eliminar la sucursal "${branch.name}"?`);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Error de autenticación. Intenta iniciar sesión de nuevo.");
+        return;
+      }
+
+      await deleteBranch(branch.id, token);
+      to.success("Sucursal eliminada correctamente ✅");
+
+      // ✅ Usa el router de Next.js para refrescar la data sin recargar
+      router.refresh(); 
+
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      toast.error("No se pudo eliminar la sucursal ❌");
+    }
+  };*/
+
   const columns: Column<Users>[] = [
-    { header: "ID", accessor: "id" },
+    {
+      header: "ID",
+      accessor: "id",
+      render: (id) => (
+        <div className="w-28 truncate" title={id as string}>
+          {id as string}
+        </div>
+      ),
+    },
     { header: "Nombre", accessor: "name", filterType: "text" },
     { header: "Email", accessor: "email" },
     {
@@ -95,6 +128,14 @@ export default function UsersTable() {
               onClick={() => handleViewDetails(row)}
             >
               <EyeIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              title="Eliminar Sucursal"
+              //onClick={() => handleDeleteBranch(row)}
+            >
+              <Trash2 className="text-white" />
             </Button>
           </div>
         )}

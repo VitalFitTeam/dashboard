@@ -3,9 +3,9 @@
 import React from "react";
 import { Clock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DataTable, type Column } from "@/components/table/DataTable";
-import { Input } from "@/components/Input";
-import { BranchOperatingHours, DayOfWeek } from "@/types/branches";
+import { BranchOperatingHours, DayOfWeek } from "@/models/branches";
+import { Column, DataTable } from "@/components/ui/table/DataTable";
+import { Input } from "@/components/ui/Input";
 
 interface BranchScheduleProps {
   schedule: BranchOperatingHours[];

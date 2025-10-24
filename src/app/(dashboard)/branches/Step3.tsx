@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BranchAdmin } from "@/types/users";
+import { BranchAdmin } from "@/models/users";
 
 type StepProps = {
   formData: any;

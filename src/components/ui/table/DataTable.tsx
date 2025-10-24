@@ -10,34 +10,20 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "../ui/table";
-import { Checkbox } from "../ui/checkbox";
 import { PaginationControls } from "./PaginationControls";
 import { Input } from "../Input";
-import { ArrowUp, ArrowDown, Trash2 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { ArrowUp, ArrowDown } from "lucide-react";
 import { debounce } from "@/utils";
-import { Button } from "../ui/button";
-import { deleteBranch } from "@/services/branches";
-import { toast } from "sonner";
+import { Checkbox } from "../checkbox";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../table";
 
-/* ────────────────────────────────
-   🔹 Tipos
-──────────────────────────────── */
 export type Column<T> = {
   header: string;
   accessor: keyof T;
@@ -56,7 +42,6 @@ export type DataTableProps<T> = {
   data: T[];
   actions?: (row: T) => React.ReactNode;
   page?: number;
-  page?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
@@ -67,19 +52,16 @@ export type DataTableProps<T> = {
   filterValues?: Record<string, string | undefined>;
 };
 
-/* ────────────────────────────────
-   🔹 Input de filtro optimizado
-──────────────────────────────── */
 function TextFilterInput({
   columnKey,
   label,
   value,
-  onDebouncedChange,
+  onFilterChange,
 }: {
   columnKey: string;
   label: string;
   value?: string;
-  onDebouncedChange: (key: string, value: string | undefined) => void;
+  onFilterChange: FilterChangeHandler;
 }) {
   const [localValue, setLocalValue] = React.useState(value ?? "");
 
@@ -90,9 +72,9 @@ function TextFilterInput({
   const debouncedChange = React.useMemo(
     () =>
       debounce((val: string) => {
-        onDebouncedChange(columnKey, val || undefined);
+        onFilterChange(columnKey, val || undefined);
       }, 500),
-    [columnKey, onDebouncedChange],
+    [columnKey, onFilterChange],
   );
 
   return (
@@ -109,9 +91,6 @@ function TextFilterInput({
   );
 }
 
-/* ────────────────────────────────
-   🔹 DataTable principal
-──────────────────────────────── */
 export function DataTable<T extends { id: string }>({
   columns,
   data,
@@ -139,11 +118,6 @@ export function DataTable<T extends { id: string }>({
     } else {
       setInternalPage(newPage);
     }
-    if (onPageChange) {
-      onPageChange(newPage);
-    } else {
-      setInternalPage(newPage);
-    }
   };
 
   const handlePageSizeChange = (newSize: number) => {
@@ -152,89 +126,79 @@ export function DataTable<T extends { id: string }>({
     } else {
       setInternalPageSize(newSize);
     }
-    if (onPageSizeChange) {
-      onPageSizeChange(newSize);
-    } else {
-      setInternalPageSize(newSize);
-    }
   };
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = React.useState({});
 
-  // Columnas configuradas
-  // Columnas configuradas
-  const columnDefs = React.useMemo<ColumnDef<T>[]>(
-    () =>
-      columns.map((col) => ({
+  const columnDefs = React.useMemo<ColumnDef<T>[]>(() => {
+    const cols: ColumnDef<T>[] = [];
+
+    if (enableRowSelection) {
+      cols.push({
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={table.getIsAllRowsSelected()}
+            onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
+            aria-label="Seleccionar todas las filas"
+            className="translate-y-[2px]"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Seleccionar fila"
+            className="translate-y-[2px]"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      });
+    }
+
+    cols.push(
+      ...columns.map((col) => ({
         accessorKey: col.accessor as string,
         header: col.header,
-        cell: ({ getValue, row }) => {
+        cell: ({ getValue, row }: { getValue: any; row: any }) => {
           const value = getValue() as T[keyof T];
           const originalRow = row.original;
           return col.render
             ? col.render(value, originalRow)
             : String(value ?? "");
-          return col.render
-            ? col.render(value, originalRow)
-            : String(value ?? "");
         },
       })),
-    [columns],
-  );
+    );
+
+    if (actions) {
+      cols.push({
+        id: "actions",
+        header: "Acciones",
+        cell: ({ row }) => (
+          <div className="flex justify-end gap-2">{actions(row.original)}</div>
+        ),
+      });
+    }
+
+    return cols;
+  }, [columns, actions, enableRowSelection]);
 
   const table = useReactTable({
     data,
     columns: columnDefs,
-    state: { sorting },
+    state: { sorting, rowSelection },
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const debouncedOnFilterChange = React.useCallback(
-    debounce((key: string, value: string | undefined) => {
-      onFilterChange?.(key, value);
-    }, 500),
-    [onFilterChange],
-  );
-
   const pageRows = table.getRowModel().rows;
 
-  /* ────────────────────────────────
-     🔹 Eliminar sucursal y refrescar
-  ───────────────────────────────── */
-  const handleDelete = async (row: T) => {
-    const name = (row as any).name ?? "esta sucursal";
-    const confirmed = window.confirm(`¿Seguro que deseas eliminar ${name}?`);
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token no encontrado");
-      }
-
-      await deleteBranch(row.id, token);
-      toast.success("Sucursal eliminada correctamente ✅");
-
-      // 🔄 Refrescar la página completamente (como F5)
-      setTimeout(() => {
-        window.location.reload();
-      }, 800);
-    } catch (error) {
-      console.error("Error al eliminar:", error);
-      toast.error("No se pudo eliminar la sucursal ❌");
-    }
-  };
-
-  /* ────────────────────────────────
-     🔹 Render principal
-  ───────────────────────────────── */
   return (
     <div className="space-y-4">
-      {/* FILTROS */}
       {enableFilters && (
         <div className="flex flex-wrap gap-3 mb-4">
           {columns
@@ -245,23 +209,17 @@ export function DataTable<T extends { id: string }>({
                 columnKey={col.accessor as string}
                 label={col.header}
                 value={filterValues?.[col.accessor as string]}
-                onDebouncedChange={debouncedOnFilterChange}
+                onFilterChange={onFilterChange!}
               />
             ))}
         </div>
       )}
 
-      {/* TABLA */}
-      <Table>
+      <Table className="w-full table-fixed">
         <TableHeader>
-          <TableRow>
-            {enableRowSelection && (
-              <TableHead className="w-[35px]">
-                <Checkbox />
-              </TableHead>
-            )}
-            {table.getHeaderGroups().map((headerGroup) =>
-              headerGroup.headers.map((header) => (
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
@@ -280,44 +238,29 @@ export function DataTable<T extends { id: string }>({
                     )}
                   </span>
                 </TableHead>
-              )),
-            )}
-            <TableHead>Acciones</TableHead>
-          </TableRow>
+              ))}
+            </TableRow>
+          ))}
         </TableHeader>
 
         <TableBody>
           {pageRows.length ? (
             pageRows.map((row) => (
-              <TableRow key={row.id}>
-                {enableRowSelection && (
-                  <TableCell className="w-[35px]">
-                    <Checkbox />
-                  </TableCell>
-                )}
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-
-                <TableCell className="flex justify-end gap-2">
-                  {actions && actions(row.original)}
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete(row.original)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
-                  </Button>
-                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
               <TableCell
-                colSpan={columns.length + 1 + (enableRowSelection ? 1 : 0)}
+                colSpan={columnDefs.length}
                 className="text-center py-6 text-muted-foreground"
               >
                 No hay datos disponibles
@@ -326,8 +269,6 @@ export function DataTable<T extends { id: string }>({
           )}
         </TableBody>
       </Table>
-
-      {/* PAGINACIÓN */}
       <PaginationControls
         page={currentPage}
         totalPages={totalPages ?? Math.ceil(data.length / currentPageSize)}

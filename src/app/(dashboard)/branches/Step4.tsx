@@ -1,6 +1,6 @@
 "use client";
 import StepNotification from "./StepNotification";
-import PaymentMethodSelector from "@/components/branches/PaymentMethodSelector";
+import PaymentMethodSelector from "@/components/features/branches/PaymentMethodSelector";
 import { PaymentMethodUI } from "./page";
 
 type StepProps = {

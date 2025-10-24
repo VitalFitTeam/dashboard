@@ -19,8 +19,8 @@ import StepForm from "@/app/(dashboard)/branches/StepForm";
 import Image from "next/image";
 import { PaymentMethodUI } from "./page";
 import { createBranch } from "@/services/branches";
-import { Country, State, City } from "@/types/location";
-import { BranchAdmin } from "@/types/users";
+import { Country, State, City } from "@/models/location";
+import { BranchAdmin } from "@/models/users";
 
 interface BranchFromProps {
   onClose: () => void;

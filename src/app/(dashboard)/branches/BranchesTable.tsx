@@ -1,18 +1,18 @@
 "use client";
-import { Column, DataTable } from "@/components/table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
 import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { useState } from "react";
-import BranchDetailsModal from "@/components/BranchDetailsModal";
-import { Instructor } from "@/types/instructor";
-import { City, Country, State } from "@/types/location";
-import { Service } from "@/types/service";
-import { Equipment } from "@/types/equipment";
-import { PaymentMethod } from "@/types/paymentMethod";
+import { Instructor } from "@/models/instructor";
+import { City, Country, State } from "@/models/location";
+import { Service } from "@/models/service";
+import { Equipment } from "@/models/equipment";
+import { PaymentMethod } from "@/models/paymentMethod";
 import { BranchesTableRow } from "@/services/branches";
 import { PaymentMethodUI } from "./page";
+import { Column, DataTable } from "@/components/ui/table/DataTable";
+import BranchDetailsModal from "@/components/features/branches/BranchDetailsModal";
 
 export type FilterChangeHandler = (
   key: string,

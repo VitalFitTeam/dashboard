@@ -1,13 +1,11 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { Branches, BranchService } from "@/types/branches";
+import { Branches, BranchService } from "@/models/branches";
 import PanelWrapper from "./PanelWrapper";
-import { Service } from "@/types/service";
+import { Service } from "@/models/service";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
-import EntityItem from "@/components/EntityItem";
 import { getInitials } from "@/utils";
-import InputField from "@/components/InputField";
 import {
   Select,
   SelectContent,
@@ -16,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import InputField from "@/components/ui/InputField";
+import EntityItem from "../../EntityItem";
 
 interface ServicesPanelProps {
   formData: Branches;

@@ -1,6 +1,4 @@
 "use client";
-
-import InputField from "@/components/InputField"; // <-- 1. Importa tu componente
 import {
   Select,
   SelectContent,
@@ -10,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import StepNotification from "./StepNotification";
+import InputField from "@/components/ui/InputField";
 
 type StepProps = {
   formData: any; // Considera usar un tipo más específico

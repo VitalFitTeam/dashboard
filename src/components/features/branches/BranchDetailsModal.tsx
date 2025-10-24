@@ -1,6 +1,5 @@
 "use client";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { TabSelector } from "./TabSelector";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,19 +15,20 @@ import {
   BranchOperatingHours,
   BranchService,
   DayOfWeek,
-} from "@/types/branches";
-import GeneralPanel from "./branches/details/GeneralPanel";
-import PaymentMethodPanel from "./branches/details/PaymentMethodsPanel";
-import EquipmentPanel from "./branches/details/EquipmentPanel";
-import InstructorsPanel from "./branches/details/InstructorsPanel";
-import ServicesPanel from "./branches/details/ServicesPanel";
-import SchedulePanel from "./branches/details/SchedulePanel";
-import { Instructor } from "@/types/instructor";
-import { City, State, Country } from "@/types/location";
-import { Service } from "@/types/service";
-import { Equipment } from "@/types/equipment";
-import LocationPanel from "./branches/details/LocationPanel";
+} from "@/models/branches";
+import { Instructor } from "@/models/instructor";
+import { City, State, Country } from "@/models/location";
+import { Service } from "@/models/service";
+import { Equipment } from "@/models/equipment";
 import { PaymentMethodUI } from "@/app/(dashboard)/branches/page";
+import GeneralPanel from "./details/GeneralPanel";
+import LocationPanel from "./details/LocationPanel";
+import SchedulePanel from "./details/SchedulePanel";
+import PaymentMethodPanel from "./details/PaymentMethodsPanel";
+import ServicesPanel from "./details/ServicesPanel";
+import InstructorsPanel from "./details/InstructorsPanel";
+import EquipmentPanel from "./details/EquipmentPanel";
+import { TabSelector } from "@/components/ui/TabSelector";
 
 interface BranchDetailsModalProps {
   isOpen: boolean;

@@ -11,10 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PanelWrapper from "./PanelWrapper";
-import EntityItem from "@/components/EntityItem";
-import { BranchInstructor } from "@/types/branches";
-import { Instructor } from "@/types/instructor";
+import { BranchInstructor } from "@/models/branches";
+import { Instructor } from "@/models/instructor";
 import { getInitials } from "@/utils";
+import EntityItem from "../../EntityItem";
 
 interface InstructorPanelProps {
   assignedInstructors: BranchInstructor[];

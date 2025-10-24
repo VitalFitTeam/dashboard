@@ -1,6 +1,6 @@
 "use client";
-import { StatCard } from "@/components/StatCard";
-import { PageHeader } from "@/components/PageHeader";
+import { StatCard } from "@/components/ui/StatCard";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";

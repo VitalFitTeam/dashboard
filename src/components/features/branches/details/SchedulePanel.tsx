@@ -1,6 +1,6 @@
 "use client";
 
-import { BranchOperatingHours } from "@/types/branches";
+import { BranchOperatingHours } from "@/models/branches";
 import React from "react";
 import BranchSchedule from "./BranchSchedule";
 import PanelWrapper from "./PanelWrapper";

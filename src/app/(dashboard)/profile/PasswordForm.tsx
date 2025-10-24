@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import InputField from "@/components/InputField";
+import InputField from "@/components/ui/InputField";
 
 export const PasswordForm: React.FC = () => {
   const [form, setForm] = React.useState({

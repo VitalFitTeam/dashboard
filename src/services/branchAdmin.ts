@@ -1,5 +1,5 @@
 import { fetchAPI } from "@/lib/api";
-import { ApiBranchAdmin, ApiResponse, BranchAdmin } from "@/types/users";
+import { ApiBranchAdmin, ApiResponse, BranchAdmin } from "@/models/users";
 
 interface GetBranchAdminsParams {
   limit?: number;

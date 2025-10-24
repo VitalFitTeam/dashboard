@@ -1,7 +1,5 @@
 "use client";
-import { StatCard } from "@/components/StatCard";
 import BranchesTable from "./BranchesTable";
-import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import BranchFrom from "./BranchForm";
 import { redirect } from "next/navigation";
@@ -13,11 +11,11 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
-import { Instructor } from "@/types/instructor";
-import { City, State, Country } from "@/types/location";
-import { Service } from "@/types/service";
-import { Equipment } from "@/types/equipment";
-import { PaymentMethod } from "@/types/paymentMethod";
+import { Instructor } from "@/models/instructor";
+import { City, State, Country } from "@/models/location";
+import { Service } from "@/models/service";
+import { Equipment } from "@/models/equipment";
+import { PaymentMethod } from "@/models/paymentMethod";
 import {
   BranchesFetchResult,
   BranchesTableRow,
@@ -25,9 +23,11 @@ import {
 } from "@/services/branches";
 import { fetchPaymentMethods } from "@/services/paymentMethods";
 import { debounce } from "@/utils";
-import { BranchAdmin } from "@/types/users";
+import { BranchAdmin } from "@/models/users";
 import { fetchBranchAdmins } from "@/services/branchAdmin";
-import { GeneralAlertDialog } from "@/components/GeneralAlertDialog";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { StatCard } from "@/components/ui/StatCard";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 
 const MOCK_INSTRUCTORS: Instructor[] = [
   { id: "i1", user_id: "u1", name: "Ana Pérez" },

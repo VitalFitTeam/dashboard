@@ -2,8 +2,8 @@
 
 import React, { useMemo } from "react";
 import dynamic from "next/dynamic";
-import { Branches } from "@/types/branches";
-import { City, State, Country } from "@/types/location";
+import { Branches } from "@/models/branches";
+import { City, State, Country } from "@/models/location";
 import {
   Select,
   SelectContent,
@@ -12,11 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MapPin } from "lucide-react";
-import InputField from "@/components/InputField";
+import InputField from "@/components/ui/InputField";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
-const MapboxPicker = dynamic(() => import("@/components/MapboxPicker"), {
+const MapboxPicker = dynamic(() => import("@/components/ui/MapboxPicker"), {
   ssr: false,
   loading: () => (
     <div className="w-full h-64 rounded-md bg-gray-200 flex items-center justify-center text-gray-500 italic">

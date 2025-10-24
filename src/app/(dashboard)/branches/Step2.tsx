@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { MapPin } from "lucide-react";
-import InputField from "@/components/InputField";
 import dynamic from "next/dynamic";
+import InputField from "@/components/ui/InputField";
 
 // Import dinámico para evitar errores con SSR
-const MapboxPicker = dynamic(() => import("@/components/MapboxPicker"), {
+const MapboxPicker = dynamic(() => import("@/components/ui/MapboxPicker"), {
   ssr: false,
 });
 
@@ -42,8 +42,12 @@ export default function Step2({
     // Guardar también los numéricos
     const latNum = parseFloat(data.latitud);
     const lngNum = parseFloat(data.longitud);
-    if (!isNaN(latNum)) {handleCustomChange("latitude", latNum);}
-    if (!isNaN(lngNum)) {handleCustomChange("longitude", lngNum);}
+    if (!isNaN(latNum)) {
+      handleCustomChange("latitude", latNum);
+    }
+    if (!isNaN(lngNum)) {
+      handleCustomChange("longitude", lngNum);
+    }
 
     // ✅ CAMBIO AQUÍ: usa los campos que tu handleSubmit espera
     handleCustomChange("cityId", data.city);

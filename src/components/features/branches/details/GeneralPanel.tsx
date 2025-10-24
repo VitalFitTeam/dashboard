@@ -1,6 +1,5 @@
 "use client";
-
-import InputField from "@/components/InputField";
+import InputField from "@/components/ui/InputField";
 import {
   Select,
   SelectContent,
@@ -8,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Branches } from "@/types/branches";
-import { City, State } from "@/types/location";
+import { Branches } from "@/models/branches";
+import { City, State } from "@/models/location";
 
 interface GeneralPanelProps {
   formData: Branches;

@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { colors, montserrat } from "@/styles/styles";
 import { fetchAPI } from "@/lib/api";
-import InputField from "@/components/InputField";
+import InputField from "@/components/ui/InputField";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);

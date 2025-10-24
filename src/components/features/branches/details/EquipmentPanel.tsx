@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useMemo } from "react";
-import { Branches, BranchInventoryItem } from "@/types/branches";
-import { Equipment } from "@/types/equipment";
+import { Branches, BranchInventoryItem } from "@/models/branches";
+import { Equipment } from "@/models/equipment";
 import PanelWrapper from "./PanelWrapper";
 import {
   Select,
@@ -10,11 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import InputField from "@/components/InputField";
 import { Button } from "@/components/ui/button";
-import { DataTable, type Column } from "@/components/table/DataTable";
 import { Plus, Trash2, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Column, DataTable } from "@/components/ui/table/DataTable";
+import InputField from "@/components/ui/InputField";
 
 interface EquipmentPanelProps {
   formData: Branches;

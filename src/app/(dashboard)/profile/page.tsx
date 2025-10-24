@@ -1,11 +1,11 @@
 "use client";
-import { TabSelector } from "@/components/TabSelector";
 import { fetchAPI } from "@/lib/api";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PasswordForm } from "./PasswordForm";
 import { AccountForm } from "./AccountForm";
-import UserCard from "@/components/UserCard";
+import UserCard from "@/components/layout/UserCard";
+import { TabSelector } from "@/components/ui/TabSelector";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<{

@@ -1,6 +1,6 @@
 "use client";
 
-import { BranchAdmin } from "@/types/users";
+import { BranchAdmin } from "@/models/users";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";

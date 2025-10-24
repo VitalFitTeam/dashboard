@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Branches } from "@/types/branches";
+import { Branches } from "@/models/branches";
 import PanelWrapper from "./PanelWrapper";
 import PaymentMethodSelector from "../PaymentMethodSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";

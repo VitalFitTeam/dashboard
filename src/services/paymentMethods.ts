@@ -1,5 +1,5 @@
 import { fetchAPI } from "@/lib/api";
-import { PaymentMethod } from "@/types/paymentMethod";
+import { PaymentMethod } from "@/models/paymentMethod";
 
 interface ApiPaymentMethod {
   method_id: string;
