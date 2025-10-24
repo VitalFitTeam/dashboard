@@ -1,0 +1,31 @@
+name: Run Checks on Development Push # Nombre actualizado
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  # Job para ESLint y Tests
+  lint_and_test: # Nombre del job actualizado para reflejar ambas tareas
+    name: Run ESLint & Jest Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm' # o 'yarn'
+
+      - name: Install dependencies
+        run: npm install # o yarn install
+
+      - name: Run ESLint # <-- NUEVO PASO PARA ESLINT
+        run: npm run lint # Ejecuta el script 'lint' de package.json
+
+      - name: Run tests # Paso para Jest
+        run: npm test # Ejecuta el script 'test' de package.json
