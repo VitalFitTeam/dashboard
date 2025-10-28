@@ -9,9 +9,6 @@ export type EntityItemProps = {
   description?: string;
   action?: React.ReactNode;
   className?: string;
-
-  // --- NUEVO: Prop para el clic principal ---
-  /** Una función opcional que se ejecuta al presionar el item principal */
   onClick?: () => void;
 };
 

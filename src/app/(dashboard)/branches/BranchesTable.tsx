@@ -18,7 +18,16 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import { Download, Search, X } from "lucide-react";
+import {
+  CopyIcon,
+  Download,
+  Eye,
+  Pencil,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
+import { RowActions } from "@/components/ui/table/RowActions";
 
 export type FilterChangeHandler = (
   key: string,
@@ -42,6 +51,11 @@ interface BranchesTableProps {
   onBranchDeleted?: () => void | Promise<void>;
 }
 
+interface BranchRow {
+  branch_id: string;
+  name: string;
+}
+
 export default function BranchesTable({
   data,
   isLoading,
@@ -63,16 +77,16 @@ export default function BranchesTable({
     Record<string, string>
   >({});
 
-  const handleViewDetails = (branch: PaginatedBranch) => {
-    setSelectedBranch(branch);
-    setModalMode("view");
-    setIsModalOpen(true);
+  const handleView = (row: BranchRow) => {
+    console.log("Ver detalles de la sucursal:", row.branch_id, row.name);
   };
 
-  const handleEditBranch = (branch: PaginatedBranch) => {
-    setSelectedBranch(branch);
-    setModalMode("edit");
-    setIsModalOpen(true);
+  const handleEdit = (row: BranchRow) => {
+    console.log("Editar sucursal:", row.branch_id, row.name);
+  };
+
+  const handleDelete = (row: BranchRow) => {
+    console.log("Eliminar sucursal:", row.branch_id, row.name);
   };
 
   const columns: Column<PaginatedBranch>[] = [
@@ -200,24 +214,23 @@ export default function BranchesTable({
         totalPages={totalPages}
         rowIdKey="branch_id"
         actions={(row) => (
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              size="icon"
-              variant="ghost"
-              title="Editar Sucursal"
-              onClick={() => handleEditBranch(row)}
-            >
-              <PencilIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              title="Ver Detalles"
-              onClick={() => handleViewDetails(row)}
-            >
-              <EyeIcon className="h-4 w-4" />
-            </Button>
-          </div>
+          <RowActions
+            actions={[
+              { label: "Ver", icon: Eye, onClick: () => handleView(row) },
+              {
+                label: "Modificar",
+                icon: Pencil,
+                onClick: () => handleEdit(row),
+              },
+              {
+                label: "Eliminar",
+                icon: Trash2,
+                onClick: () => handleDelete(row),
+                variant: "danger",
+                separatorBefore: true,
+              },
+            ]}
+          />
         )}
       />
     </>
