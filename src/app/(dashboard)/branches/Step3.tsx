@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BranchAdmin } from "@/models/users";
+import { User, UserApiResponse } from "@vitalfit/sdk";
 
 type StepProps = {
   formData: any;
@@ -20,7 +21,7 @@ type StepProps = {
   ) => void;
   handleCustomChange: (field: string, value: any) => void;
   formErrors?: Record<string, string>;
-  allBranchAdmins?: BranchAdmin[];
+  allBranchAdmins?: User[];
 };
 
 const diasSemana = [
@@ -119,8 +120,8 @@ export default function Step3({
               </SelectTrigger>
               <SelectContent>
                 {allBranchAdmins.map((admin) => (
-                  <SelectItem key={admin.id} value={admin.id}>
-                    {`${admin.firstName} ${admin.lastName}`}
+                  <SelectItem key={admin.user_id} value={admin.user_id}>
+                    {`${admin.first_name} ${admin.last_name}`}
                   </SelectItem>
                 ))}
               </SelectContent>
