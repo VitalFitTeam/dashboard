@@ -32,12 +32,11 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
     }
     return range;
   };
-
-  return (
+  return (    
     <Pagination>
       <PaginationContent>
         {/* Botón Anterior */}
-        <PaginationItem>
+        {page !=1 && <PaginationItem>
           <PaginationPrevious
             href="#"
             onClick={(e) => {
@@ -47,8 +46,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
               }
             }}
           />
-        </PaginationItem>
-
+        </PaginationItem>}
         {/* Primera página */}
         <PaginationItem>
           <PaginationLink

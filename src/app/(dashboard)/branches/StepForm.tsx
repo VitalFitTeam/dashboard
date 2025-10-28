@@ -7,6 +7,7 @@ import Step3 from "./Step3";
 import Step4 from "./Step4";
 import Step5 from "./Step5";
 import { PaymentMethodUI } from "./page"; // Importa el tipo
+import { User, UserApiResponse } from "@vitalfit/sdk";
 
 // --- 1. ACTUALIZA LAS PROPS ---
 type StepProps = {
@@ -21,7 +22,7 @@ type StepProps = {
   handleCustomChange: (field: string, value: unknown) => void; // <-- Añade handleCustomChange
   formErrors?: Record<string, string>;
   allPaymentMethods?: PaymentMethodUI[]; // <-- Añade allPaymentMethods (opcional)
-  allBranchAdmins: BranchAdmin[];
+  allBranchAdmins: User[];
 };
 
 export default function StepForm({

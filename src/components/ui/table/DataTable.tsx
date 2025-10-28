@@ -50,6 +50,7 @@ export type DataTableProps<T> = {
   totalPages?: number;
   onFilterChange?: FilterChangeHandler;
   filterValues?: Record<string, string | undefined>;
+  rowIdKey?: keyof T;
 };
 
 function TextFilterInput({
@@ -91,7 +92,7 @@ function TextFilterInput({
   );
 }
 
-export function DataTable<T extends { id: string }>({
+export function DataTable<T extends object>({
   columns,
   data,
   actions,
@@ -104,6 +105,7 @@ export function DataTable<T extends { id: string }>({
   enableRowSelection = true,
   onFilterChange,
   filterValues,
+  rowIdKey = "id" as keyof T,
 }: DataTableProps<T>) {
   // Paginación interna
   const [internalPage, setInternalPage] = React.useState(1);
@@ -113,11 +115,7 @@ export function DataTable<T extends { id: string }>({
   const currentPageSize = pageSize ?? internalPageSize;
 
   const handlePageChange = (newPage: number) => {
-    if (onPageChange) {
-      onPageChange(newPage);
-    } else {
-      setInternalPage(newPage);
-    }
+    onPageChange ? onPageChange(newPage) : setInternalPage(newPage)
   };
 
   const handlePageSizeChange = (newSize: number) => {
@@ -193,6 +191,7 @@ export function DataTable<T extends { id: string }>({
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getRowId: (originalRow) => originalRow[rowIdKey] as string,
   });
 
   const pageRows = table.getRowModel().rows;

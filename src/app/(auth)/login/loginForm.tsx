@@ -12,8 +12,8 @@ import {
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { colors, montserrat } from "@/styles/styles";
-import { fetchAPI } from "@/lib/api";
 import InputField from "@/components/ui/InputField";
+import { api } from "@/lib/sdk-config";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,16 +38,14 @@ export default function LoginForm() {
     };
 
     try {
-      const result = await fetchAPI("/auth/login", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      const response = await api.auth.login(payload);
+      const token = response.token;
 
-      if (!result.token) {
+      if (!token) {
         throw new Error("Token no recibido");
       }
-
-      localStorage.setItem("token", result.token);
+      api.client.setJWT(token);
+      localStorage.setItem("token", token);
       router.push("/profile");
     } catch (err) {
       console.error("Error al iniciar sesión:", err);

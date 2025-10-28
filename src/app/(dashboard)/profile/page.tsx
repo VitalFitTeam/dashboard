@@ -1,24 +1,15 @@
 "use client";
-import { fetchAPI } from "@/lib/api";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PasswordForm } from "./PasswordForm";
 import { AccountForm } from "./AccountForm";
 import UserCard from "@/components/layout/UserCard";
 import { TabSelector } from "@/components/ui/TabSelector";
+import { api } from "@/lib/sdk-config";
+import { UserApiResponse } from "@vitalfit/sdk";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<{
-    first_name: string;
-    last_name: string;
-    email: string;
-    role: {
-      name: string;
-      description: string;
-      level: number;
-    };
-    profile_picture_url: string;
-  } | null>(null);
+  const [user, setUser] = useState<UserApiResponse["user"] | null>(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -27,17 +18,20 @@ export default function ProfilePage() {
     if (!token) {
       redirect("/login");
     }
-
-    fetchAPI("/user/whoami", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    
+    api.user.WhoAmI(token)
       .then((data) => {
         setUser(data.user);
       })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      .catch((error) => {
+        console.error("Error al obtener datos del usuario:", error);
+        redirect("/login");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+    
+   
   }, []);
 
   if (loading) {

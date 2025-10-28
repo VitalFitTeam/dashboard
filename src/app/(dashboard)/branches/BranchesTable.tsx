@@ -9,10 +9,10 @@ import { City, Country, State } from "@/models/location";
 import { Service } from "@/models/service";
 import { Equipment } from "@/models/equipment";
 import { PaymentMethod } from "@/models/paymentMethod";
-import { BranchesTableRow } from "@/services/branches";
 import { PaymentMethodUI } from "./page";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import BranchDetailsModal from "@/components/features/branches/BranchDetailsModal";
+import { PaginatedBranch } from "@vitalfit/sdk";
 
 export type FilterChangeHandler = (
   key: string,
@@ -20,7 +20,7 @@ export type FilterChangeHandler = (
 ) => void;
 
 interface BranchesTableProps {
-  data: BranchesTableRow[];
+  data: PaginatedBranch[];
   isLoading: boolean;
   page: number;
   pageSize: number;
@@ -54,9 +54,10 @@ export default function BranchesTable({
   onPageSizeChange,
   onFilterChange,
   filterValues,
+  onBranchDeleted,
 }: BranchesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<BranchesTableRow | null>(
+  const [selectedBranch, setSelectedBranch] = useState<PaginatedBranch | null>(
     null,
   );
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
@@ -65,13 +66,13 @@ export default function BranchesTable({
     return <p className="text-center p-4">Cargando sucursales...</p>;
   }
 
-  const handleViewDetails = (branch: BranchesTableRow) => {
+  const handleViewDetails = (branch: PaginatedBranch) => {
     setSelectedBranch(branch);
     setModalMode("view");
     setIsModalOpen(true);
   };
 
-  const handleEditBranch = (branch: BranchesTableRow) => {
+  const handleEditBranch = (branch: PaginatedBranch) => {
     setSelectedBranch(branch);
     setModalMode("edit");
     setIsModalOpen(true);
@@ -82,14 +83,18 @@ export default function BranchesTable({
     setSelectedBranch(null);
   };
 
-  const columns: Column<BranchesTableRow>[] = [
-    { header: "ID", accessor: "id" },
+  const columns: Column<PaginatedBranch>[] = [
+    { header: "ID", accessor: "branch_id" },
     { header: "Nombre", accessor: "name", filterType: "text" },
-    { header: "RIF", accessor: "taxId" },
-    { header: "Administrador", accessor: "administrator" },
+    { header: "RIF", accessor: "tax_id" },
+    {
+      header: "Administrador",
+      accessor: "manager_name", // Usamos un accessor, pero el render lo sobreescribe
+      render: (_, row) => `${row.manager_name} ${row.manager_last_name}`,
+    },
     {
       header: "País",
-      accessor: "country",
+      accessor: "country_name",
     },
     {
       header: "Status",
@@ -133,6 +138,7 @@ export default function BranchesTable({
         onPageSizeChange={onPageSizeChange}
         enableFilters
         totalPages={totalPages}
+        rowIdKey="branch_id"
         onFilterChange={onFilterChange}
         filterValues={filterValues}
         actions={(row) => (
