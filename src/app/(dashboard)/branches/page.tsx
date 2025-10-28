@@ -1,8 +1,14 @@
 "use client";
 import BranchesTable from "./BranchesTable";
 import { Button } from "@/components/ui/button";
-import {api} from "@/lib/sdk-config";
-import { PaginatedBranch, BranchStatusCount, Pagination, UserApiResponse, PaymentMethod, User} from "@vitalfit/sdk";
+import { api } from "@/lib/sdk-config";
+import {
+  PaginatedBranch,
+  BranchStatusCount,
+  Pagination,
+  PaymentMethod,
+  User,
+} from "@vitalfit/sdk";
 import BranchFrom from "./BranchForm";
 import { redirect } from "next/navigation";
 import {
@@ -17,10 +23,6 @@ import { Instructor } from "@/models/instructor";
 import { City, State, Country } from "@/models/location";
 import { Service } from "@/models/service";
 import { Equipment } from "@/models/equipment";
-import { fetchPaymentMethods } from "@/services/paymentMethods";
-import { debounce } from "@/utils";
-import { BranchAdmin } from "@/models/users";
-import { fetchBranchAdmins } from "@/services/branchAdmin";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
@@ -44,7 +46,10 @@ const MOCK_SERVICES: Service[] = [
 const MOCK_EQUIPMENT: Equipment[] = [
   { id: "eq1", name: "Cinta de correr", category: "Cardio" },
 ];
-const statCardsConfig: { title: string; valueKey: keyof BranchStatusCount | "Total" }[] = [
+const statCardsConfig: {
+  title: string;
+  valueKey: keyof BranchStatusCount | "Total";
+}[] = [
   { title: "Total", valueKey: "Total" },
   { title: "Activas", valueKey: "Active" },
   { title: "Inactivas", valueKey: "Inactive" },
@@ -92,10 +97,10 @@ export default function HomeBranches() {
   const [isLoadingStatic, setIsLoadingStatic] = useState(true);
   const [isLoadingBranches, setIsLoadingBranches] = useState(true);
   const [statsData, setStatsData] = useState<BranchStatusCount>({
-    Active:0,
-    Inactive:0,
-    Maintenance:0,
-    Total:0
+    Active: 0,
+    Inactive: 0,
+    Maintenance: 0,
+    Total: 0,
   });
   const [branchesData, setBranchesData] = useState<PaginatedBranch[]>([]);
   const [allInstructors, setAllInstructors] = useState<Instructor[]>([]);
@@ -115,7 +120,8 @@ export default function HomeBranches() {
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   const [totalBranches, setTotalBranches] = useState(0);
-  const totalPages = pageSize > 0 ? Math.max(1, Math.ceil(totalBranches / pageSize)) : 1;
+  const totalPages =
+    pageSize > 0 ? Math.max(1, Math.ceil(totalBranches / pageSize)) : 1;
 
   const handleFilterChange = (key: string, value: string | undefined) => {
     setPage(1);
@@ -141,11 +147,12 @@ export default function HomeBranches() {
           api.user.getBranchAdmins(token || ""),
         ]);
 
-
         console.log("METODOS DE PAGO", paymentMethodsData.data);
         console.log("GERENTES", branchAdminsData.data);
 
-        const uiPaymentMethods = mapApiPaymentMethodsToUI(paymentMethodsData.data);
+        const uiPaymentMethods = mapApiPaymentMethodsToUI(
+          paymentMethodsData.data,
+        );
         setAllPaymentMethods(uiPaymentMethods);
         setAllBranchAdmins(branchAdminsData.data);
         setAllInstructors(MOCK_INSTRUCTORS);
@@ -167,27 +174,34 @@ export default function HomeBranches() {
     if (!token) {
       redirect("/login");
     }
-    
 
     async function loadBranchesData() {
       setIsLoadingBranches(true);
       try {
-        const searchTerms = filters.name || filters.taxId;
+        const searchTerms = filters.name || filters.tax_id;
         const statusFilter = filters.status;
 
-        const branchesResult: Pagination<PaginatedBranch[]> = await api.branch.getBranches(
-          { limit: pageSize, page, sort, search: searchTerms, status: statusFilter },
-          token || "",
-        )
+        const branchesResult: Pagination<PaginatedBranch[]> =
+          await api.branch.getBranches(
+            {
+              limit: pageSize,
+              page,
+              sort,
+              search: searchTerms,
+              status: statusFilter,
+            },
+            token || "",
+          );
         setBranchesData(branchesResult.data);
-        
-        api.branch.getBranchStatusCount(token || "")
-        .then((data) => {
+
+        api.branch.getBranchStatusCount(token || "").then((data) => {
           setStatsData(data.data);
-          const hasActiveFilters = Object.values(filters).some(f => f);
-          const total = hasActiveFilters ? branchesResult.count : data.data.Total;
+          const hasActiveFilters = Object.values(filters).some((f) => f);
+          const total = hasActiveFilters
+            ? branchesResult.count
+            : data.data.Total;
           setTotalBranches(total);
-        })      
+        });
       } catch (error) {
         console.error("Error cargando sucursales:", error);
       } finally {
@@ -213,7 +227,11 @@ export default function HomeBranches() {
             title={card.title}
             value={
               <>
-                {card.valueKey === "Total" ? (statsData.Active + statsData.Inactive + statsData.Maintenance) : (statsData[card.valueKey] ?? 0)}
+                {card.valueKey === "Total"
+                  ? statsData.Active +
+                    statsData.Inactive +
+                    statsData.Maintenance
+                  : (statsData[card.valueKey] ?? 0)}
                 <span className="ml-1.5 text-base font-normal">SUCURSALES</span>
               </>
             }
@@ -229,13 +247,11 @@ export default function HomeBranches() {
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
         allInstructors={allInstructors}
-        allCities={allCities}
-        allStates={allStates}
         allServices={allServices}
         allEquipment={allEquipment}
         allPaymentMethods={allPaymentMethods}
         onFilterChange={handleFilterChange}
-        onBranchDeleted={() => setRefreshKey(prev => prev + 1)}
+        onBranchDeleted={() => setRefreshKey((prev) => prev + 1)}
         filterValues={filters}
       />
 

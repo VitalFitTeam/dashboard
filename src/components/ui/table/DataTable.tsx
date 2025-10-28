@@ -8,12 +8,13 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
+  ColumnFiltersState,
+  VisibilityState,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 
 import { PaginationControls } from "./PaginationControls";
-import { Input } from "../Input";
 import { ArrowUp, ArrowDown } from "lucide-react";
-import { debounce } from "@/utils";
 import { Checkbox } from "../checkbox";
 import {
   Table,
@@ -23,19 +24,16 @@ import {
   TableHeader,
   TableRow,
 } from "../table";
+import { Input } from "../Input";
 
 export type Column<T> = {
   header: string;
   accessor: keyof T;
   render?: (value: T[keyof T], row: T) => React.ReactNode;
+  filterable?: boolean;
   filterType?: "text" | "select";
   filterOptions?: { label: string; value: string }[];
 };
-
-export type FilterChangeHandler = (
-  key: string,
-  value: string | undefined,
-) => void;
 
 export type DataTableProps<T> = {
   columns: Column<T>[];
@@ -45,52 +43,11 @@ export type DataTableProps<T> = {
   pageSize?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
-  enableFilters?: boolean;
-  enableRowSelection?: boolean;
   totalPages?: number;
-  onFilterChange?: FilterChangeHandler;
-  filterValues?: Record<string, string | undefined>;
+  enableRowSelection?: boolean;
   rowIdKey?: keyof T;
+  onFilterChange?: (key: string, value: string) => void;
 };
-
-function TextFilterInput({
-  columnKey,
-  label,
-  value,
-  onFilterChange,
-}: {
-  columnKey: string;
-  label: string;
-  value?: string;
-  onFilterChange: FilterChangeHandler;
-}) {
-  const [localValue, setLocalValue] = React.useState(value ?? "");
-
-  React.useEffect(() => {
-    setLocalValue(value ?? "");
-  }, [value]);
-
-  const debouncedChange = React.useMemo(
-    () =>
-      debounce((val: string) => {
-        onFilterChange(columnKey, val || undefined);
-      }, 500),
-    [columnKey, onFilterChange],
-  );
-
-  return (
-    <Input
-      placeholder={`Filtrar por ${label.toLowerCase()}...`}
-      value={localValue}
-      onChange={(e) => {
-        const val = e.target.value;
-        setLocalValue(val);
-        debouncedChange(val);
-      }}
-      className="max-w-xs"
-    />
-  );
-}
 
 export function DataTable<T extends object>({
   columns,
@@ -99,35 +56,16 @@ export function DataTable<T extends object>({
   page,
   pageSize,
   onPageChange,
-  onPageSizeChange,
   totalPages,
-  enableFilters = false,
   enableRowSelection = true,
-  onFilterChange,
-  filterValues,
   rowIdKey = "id" as keyof T,
+  onFilterChange,
 }: DataTableProps<T>) {
-  // Paginación interna
-  const [internalPage, setInternalPage] = React.useState(1);
-  const [internalPageSize, setInternalPageSize] = React.useState(10);
-
-  const currentPage = page ?? internalPage;
-  const currentPageSize = pageSize ?? internalPageSize;
-
-  const handlePageChange = (newPage: number) => {
-    onPageChange ? onPageChange(newPage) : setInternalPage(newPage)
-  };
-
-  const handlePageSizeChange = (newSize: number) => {
-    if (onPageSizeChange) {
-      onPageSizeChange(newSize);
-    } else {
-      setInternalPageSize(newSize);
-    }
-  };
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [filters, setFilters] = React.useState<Record<string, string>>({});
 
   const columnDefs = React.useMemo<ColumnDef<T>[]>(() => {
     const cols: ColumnDef<T>[] = [];
@@ -186,91 +124,146 @@ export function DataTable<T extends object>({
   const table = useReactTable({
     data,
     columns: columnDefs,
-    state: { sorting, rowSelection },
+    state: { sorting, rowSelection, columnVisibility },
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getRowId: (originalRow) => originalRow[rowIdKey] as string,
+    getFilteredRowModel: getFilteredRowModel(),
+    getRowId: (row) => String(row[rowIdKey]),
   });
 
+  //Paginación
   const pageRows = table.getRowModel().rows;
+  const [internalPage, setInternalPage] = React.useState(1);
+  const [internalPageSize, setInternalPageSize] = React.useState(10);
+
+  const currentPage = page ?? internalPage;
+  const currentPageSize = pageSize ?? internalPageSize;
+
+  const handlePageChange = (newPage: number) => {
+    onPageChange ? onPageChange(newPage) : setInternalPage(newPage);
+  };
+
+  const renderFilters = () => (
+    <div className="flex flex-wrap gap-4 mb-4">
+      {columns
+        .filter((col) => col.filterable)
+        .map((col) => (
+          <div key={String(col.accessor)} className="flex flex-col">
+            <label className="text-sm font-medium">{col.header}</label>
+
+            {col.filterType === "select" && col.filterOptions ? (
+              <select
+                value={filters[col.accessor as string] || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFilters((prev) => ({
+                    ...prev,
+                    [col.accessor as string]: value,
+                  }));
+                  onFilterChange?.(col.accessor as string, value); // avisamos al padre
+                }}
+                className="border rounded p-2 text-sm"
+              >
+                <option value="">Todos</option>
+                {col.filterOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <Input
+                placeholder={`Buscar ${col.header}`}
+                value={filters[col.accessor as string] || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFilters((prev) => ({
+                    ...prev,
+                    [col.accessor as string]: value,
+                  }));
+                  onFilterChange?.(col.accessor as string, value); // avisamos al padre
+                }}
+              />
+            )}
+          </div>
+        ))}
+    </div>
+  );
 
   return (
-    <div className="space-y-4">
-      {enableFilters && (
-        <div className="flex flex-wrap gap-3 mb-4">
-          {columns
-            .filter((col) => col.filterType)
-            .map((col) => (
-              <TextFilterInput
-                key={String(col.accessor)}
-                columnKey={col.accessor as string}
-                label={col.header}
-                value={filterValues?.[col.accessor as string]}
-                onFilterChange={onFilterChange!}
-              />
-            ))}
-        </div>
-      )}
+    <div className="w-full">
+      {renderFilters()}
 
-      <Table className="w-full table-fixed">
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  onClick={header.column.getToggleSortingHandler()}
-                  className="cursor-pointer select-none"
-                >
-                  <span className="inline-flex items-center">
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}
+                    className="cursor-pointer select-none"
+                  >
+                    {header.isPlaceholder ? null : (
+                      <span className="inline-flex items-center">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {header.column.getIsSorted() === "asc" && (
+                          <ArrowUp className="ml-1 h-4 w-4" />
+                        )}
+                        {header.column.getIsSorted() === "desc" && (
+                          <ArrowDown className="ml-1 h-4 w-4" />
+                        )}
+                      </span>
                     )}
-                    {header.column.getIsSorted() === "asc" && (
-                      <ArrowUp className="ml-1 h-4 w-4 inline" />
-                    )}
-                    {header.column.getIsSorted() === "desc" && (
-                      <ArrowDown className="ml-1 h-4 w-4 inline" />
-                    )}
-                  </span>
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-
-        <TableBody>
-          {pageRows.length ? (
-            pageRows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={columnDefs.length}
-                className="text-center py-6 text-muted-foreground"
-              >
-                No hay datos disponibles
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {pageRows.length ? (
+              pageRows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No hay datos disponibles
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
       <PaginationControls
         page={currentPage}
-        totalPages={totalPages ?? Math.ceil(data.length / currentPageSize)}
+        totalPages={
+          totalPages ?? Math.ceil(renderFilters.length / currentPageSize)
+        }
         onPageChange={handlePageChange}
       />
     </div>
