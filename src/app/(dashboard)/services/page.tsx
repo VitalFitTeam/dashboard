@@ -1,10 +1,12 @@
 "use client";
+
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import ServicesTable from "./ServicesTable";
 import { StatCard } from "@/components/ui/StatCard";
+import CreateServiceForm from "./CreateServiceForm";
 
 const statsData = {
   total: 6,
@@ -31,6 +33,12 @@ const statCardsConfig = [
 ];
 
 export default function Services() {
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
+  if (showCreateForm) {
+    return <CreateServiceForm onBack={() => setShowCreateForm(false)} />;
+  }
+
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -43,7 +51,7 @@ export default function Services() {
                 {card.valueKey === "total"
                   ? statsData.active + statsData.featured + statsData.total
                   : (statsData[card.valueKey] ?? 0)}
-                <span className={`ml-1.5 font-normal ${card.fontColor} `}>
+                <span className={`ml-1.5 font-normal ${card.fontColor}`}>
                   SERVICIOS
                 </span>
               </>
@@ -53,8 +61,8 @@ export default function Services() {
       </div>
 
       <PageHeader title="SERVICIOS">
-        <Button variant="primary">
-          <PlusIcon className="h-5 w-5" />
+        <Button variant="default" onClick={() => setShowCreateForm(true)}>
+          <PlusIcon className="h-5 w-5 mr-2" />
           Agregar Servicios
         </Button>
       </PageHeader>
