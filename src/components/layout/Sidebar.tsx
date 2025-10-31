@@ -81,6 +81,11 @@ export default function SidebarDashboard() {
         title: "Dashboard Principal",
         items: [
           {
+            name: "Home",
+            icon: BuildingStorefrontIcon,
+            href: "/",
+          },
+          {
             name: "Sucursales",
             icon: BuildingStorefrontIcon,
             href: "/branches",
@@ -90,6 +95,7 @@ export default function SidebarDashboard() {
             name: "Usuarios y Seguridad",
             icon: UsersIcon,
             subitems: [
+              { name: "Usuarios", href: "/users" },
               { name: "Políticas de seguridad", href: "/users/management" },
               { name: "Configuración de roles", href: "/users/audit" },
             ],
@@ -132,7 +138,7 @@ export default function SidebarDashboard() {
   const sections = sidebarMenusByRole[currentUserRole] || [];
 
   return (
-    <Sidebar className="bg-white border-r border-gray-200 shadow-lg w-64">
+    <Sidebar>
       <SidebarContent className="flex flex-col h-full overflow-y-auto">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 bg-gray-50">
           <Image
@@ -151,9 +157,7 @@ export default function SidebarDashboard() {
         {sections.map((section, i) => (
           <SidebarGroup key={i} className="mt-2">
             {section.title && (
-              <SidebarGroupLabel className="text-gray-400 uppercase text-xs font-semibold px-3 py-2">
-                {section.title}
-              </SidebarGroupLabel>
+              <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
             )}
             <SidebarMenu className="space-y-1 px-1">
               {section.items.map((item) => {
@@ -191,7 +195,7 @@ export default function SidebarDashboard() {
                                   href={sub.href}
                                   className={`block px-2 py-1 rounded-md text-sm transition-colors ${
                                     pathname === sub.href
-                                      ? "bg-orange-50 text-orange-600 font-medium"
+                                      ? " text-orange-400 font-medium"
                                       : "text-gray-700 hover:bg-gray-100"
                                   }`}
                                 >

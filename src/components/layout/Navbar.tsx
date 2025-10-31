@@ -2,26 +2,20 @@ import React from "react";
 import {
   BellIcon,
   MagnifyingGlassIcon,
-  Squares2X2Icon,
   SunIcon,
 } from "@heroicons/react/24/outline";
 import { typography, colors } from "@/styles/styles";
 
+import { DynamicBreadcrumb } from "./DynamicBreadcrumb";
+
 const Navbar: React.FC = () => {
   return (
     <div
-      className={`h-14 border-b-gray-300 flex items-center justify-between px-6 bg-white ${colors.complementary.white}`}
+      className={
+        "h-14 border-b border-gray-300 flex items-center justify-between px-6 bg-white"
+      }
     >
-      <div className="flex items-center space-x-2 text-sm">
-        <Squares2X2Icon className="w-5 h-5 text-gray-700" />
-        <span
-          className={`${typography.body} text-gray-500`}
-          style={{ color: colors.complementary.black }}
-        >
-          Dashboards
-        </span>
-        <span className="text-gray-800 font-medium">/ Default</span>
-      </div>
+      <DynamicBreadcrumb />
 
       <div className="flex items-center gap-4">
         <button
