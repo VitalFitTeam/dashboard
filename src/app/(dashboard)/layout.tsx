@@ -1,7 +1,6 @@
-import Navbar from "@/components/layout/Navbar";
 import SidebarDashboard from "@/components/layout/Sidebar";
-
 import { SidebarProvider } from "@/components/ui/sidebar";
+import MainContent from "@/components/layout/MainContent";
 
 export default function DashboardLayout({
   children,
@@ -12,10 +11,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen ">
       <SidebarProvider>
         <SidebarDashboard />
-        <div className="flex-1 flex flex-col ml-64">
-          <Navbar />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
-        </div>
+        <MainContent>{children}</MainContent>
       </SidebarProvider>
     </div>
   );

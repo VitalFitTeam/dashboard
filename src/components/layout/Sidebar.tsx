@@ -1,17 +1,7 @@
 "use client";
 
+import { Calendar, ChartBar, UserIcon } from "lucide-react";
 import {
-  ArrowRightCircle,
-  Building2,
-  Calendar,
-  ChartBar,
-  Home,
-  Layers,
-  User,
-  UserIcon,
-} from "lucide-react";
-import {
-  Cog6ToothIcon,
   CurrencyDollarIcon,
   BuildingStorefrontIcon,
   UsersIcon,
@@ -138,7 +128,10 @@ export default function SidebarDashboard() {
   const sections = sidebarMenusByRole[currentUserRole] || [];
 
   return (
-    <Sidebar>
+    <Sidebar
+      collapsible="offcanvas"
+      className="bg-white border-r border-gray-200 shadow-lg"
+    >
       <SidebarContent className="flex flex-col h-full overflow-y-auto">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 bg-gray-50">
           <Image
