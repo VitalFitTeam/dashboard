@@ -18,23 +18,18 @@ import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
-export default function EquipmentTable() {
+interface EquipmentTableProps {
+  onView: (equipment: Equipment) => void;
+  onEdit: (equipment: Equipment) => void;
+}
+
+export default function EquipmentTable({
+  onView,
+  onEdit,
+}: EquipmentTableProps) {
   const [page, setPage] = useState(1);
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(
-    null,
-  );
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
-
-  const handleEdit = (row: Equipment) => {
-    setSelectedEquipment(row);
-    console.warn("editar equipo", selectedEquipment);
-  };
-
-  const handleView = (row: Equipment) => {
-    setSelectedEquipment(row);
-    console.warn("ver detalles", selectedEquipment);
-  };
 
   const handleDelete = (row: Equipment) => {
     console.warn("Equipo Eliminado ", row.id);
@@ -107,11 +102,11 @@ export default function EquipmentTable() {
           <div className="flex flex-col items-center justify-center w-full">
             <RowActions
               actions={[
-                { label: "Ver", icon: Eye, onClick: () => handleView(row) },
+                { label: "Ver", icon: Eye, onClick: () => onView(row) },
                 {
                   label: "Modificar",
                   icon: Pencil,
-                  onClick: () => handleEdit(row),
+                  onClick: () => onEdit(row),
                 },
                 {
                   label: "Eliminar",
