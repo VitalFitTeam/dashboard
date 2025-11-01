@@ -1,23 +1,14 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
-import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
-import StarIconOutline from "@heroicons/react/24/outline/StarIcon";
-import StarIconSolid from "@heroicons/react/24/solid/StarIcon";
-import EllipsisVerticalIcon from "@heroicons/react/24/outline/EllipsisVerticalIcon";
 import { useState } from "react";
 import { Service } from "@/models/service";
 import { ServicesData } from "./data";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
-import { Trash2 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { RowActions } from "@/components/ui/table/RowActions";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { json } from "zod";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import StarIconOutline from "@heroicons/react/24/outline/StarIcon";
+import StarIconSolid from "@heroicons/react/24/solid/StarIcon";
 
 type ServiceRow = Service & { featured?: boolean | null };
 
@@ -28,37 +19,18 @@ export default function ServicesTable() {
 
   const handleEditService = (service: Service) => {
     setSelectedService(service);
-    alert("Editar detalles del servicio " + JSON.stringify(service));
-  };
-  const handleViewDetails = (service: Service) => {
-    setSelectedService(service);
-    alert("Ver detalles del servicio" + JSON.stringify(service));
+    console.warn("editar servicio: ", selectedService);
   };
 
-  /*const handleDeleteService = async (Service: Service) => { // 'Service' es tu tipo de dato
-    const confirmed = window.confirm(`¿Seguro que deseas eliminar la Promo "${Service.name}"?`);
-    if (!confirmed) {
-      return;
-    }
-  
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Error de autenticación. Intenta iniciar sesión de nuevo.");
-        return;
-      }
-  
-      await deleteService(Service.id, token);
-      to.success("Servicio eliminado correctamente ✅");
-  
-      // ✅ Usa el router de Next.js para refrescar la data sin recargar
-      router.refresh(); 
-  
-    } catch (error) {
-      console.error("Error al eliminar:", error);
-      toast.error("No se pudo eliminar el Servicio ❌");
-    }
-  };*/
+  const handleViewDetails = (service: Service) => {
+    setSelectedService(service);
+    console.warn("ver detalles de servicio: ", selectedService);
+  };
+
+  const handleDeleteService = (service: Service) => {
+    console.warn("eliminar servicio: ", service.id);
+    setDeleteRowId(null);
+  };
 
   const columns: Column<ServiceRow>[] = [
     {
@@ -78,7 +50,7 @@ export default function ServicesTable() {
       render: (v) => <div className="text-center">{v as string}</div>,
     },
     {
-      header: "Categoria",
+      header: "Categoría",
       accessor: "categoryId",
       filterType: "text",
       filterable: true,
@@ -118,29 +90,27 @@ export default function ServicesTable() {
         onPageChange={setPage}
         actions={(row) => (
           <div className="flex flex-col items-center justify-center w-full">
-            <div className="flex items-center justify-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="ghost" title="Acciones">
-                    <EllipsisVerticalIcon className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleViewDetails(row)}>
-                    <EyeIcon className="h-4 w-4" />
-                    <span className="ml-2">Ver Detalles</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleEditService(row)}>
-                    <PencilIcon className="h-4 w-4" />
-                    <span className="ml-2">Modificar</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setDeleteRowId(row.id)}>
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                    <span className="ml-2 text-red-500">Eliminar</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <RowActions
+              actions={[
+                {
+                  label: "Ver Detalles",
+                  icon: Eye,
+                  onClick: () => handleViewDetails(row),
+                },
+                {
+                  label: "Modificar",
+                  icon: Pencil,
+                  onClick: () => handleEditService(row),
+                },
+                {
+                  label: "Eliminar",
+                  icon: Trash2,
+                  onClick: () => setDeleteRowId(row.id),
+                  variant: "danger",
+                  separatorBefore: true,
+                },
+              ]}
+            />
             {deleteRowId === row.id && (
               <Alert className="mt-2 w-full max-w-md">
                 <AlertTitle className="text-black">
@@ -161,10 +131,7 @@ export default function ServicesTable() {
                   <Button
                     variant="destructive"
                     className="text-white"
-                    onClick={() => {
-                      setDeleteRowId(null);
-                      alert(`Servicio eliminado: ${row.name}`);
-                    }}
+                    onClick={() => handleDeleteService(row)}
                   >
                     <Trash2 className="h-4 w-4 text-white" />
                     Eliminar

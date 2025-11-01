@@ -9,3 +9,9 @@ export type Service = {
   categoryId: string;
   durationMinutes?: number | null;
 };
+
+export interface SortableImage {
+  id: string;
+  file: File;
+  description: string;
+}
