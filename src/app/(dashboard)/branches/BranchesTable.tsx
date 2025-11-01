@@ -22,6 +22,7 @@ import { SelectValue } from "@radix-ui/react-select";
 import { Download, Eye, Pencil, Search, Trash2, X } from "lucide-react";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { deleteBranch } from "@/services/branches";
+import { api } from "@/lib/sdk-config";
 
 export type FilterChangeHandler = (
   key: string,
@@ -87,31 +88,35 @@ export default function BranchesTable({
 
   const confirmDelete = (row: BranchRow) => {
     setPendingRow(row);
-    setDeleteRowId(row.branch_id); // activa el Alert
+    setDeleteRowId(row.branch_id);
   };
 
   const handleDelete = async () => {
-    if (!pendingRow) {return;}
+    if (!pendingRow) {
+      return;
+    }
 
     const token = localStorage.getItem("token");
     if (!token) {
       setDeleteError("Token no disponible. No se pudo eliminar la sucursal.");
       return;
     }
-
-    try {
-      await deleteBranch(pendingRow.branch_id, token);
-      setDeleteSuccess(`Sucursal eliminada: ${pendingRow.name}`);
-      if (typeof onBranchDeleted === "function") {
-        await onBranchDeleted();
-      }
-    } catch (error) {
-      setDeleteError("Error al eliminar la sucursal. Intenta nuevamente.");
-      console.error("Error al eliminar:", error);
-    } finally {
-      setDeleteRowId(null);
-      setPendingRow(null);
-    }
+    api.branch
+      .delete(pendingRow.branch_id, token)
+      .then(() => {
+        setDeleteSuccess(`Sucursal eliminada: ${pendingRow.name}`);
+        if (typeof onBranchDeleted === "function") {
+          onBranchDeleted();
+        }
+      })
+      .catch((error) => {
+        setDeleteError("Error al eliminar la sucursal. Intenta nuevamente.");
+        console.error("Error al eliminar (directo del SDK):", error);
+      })
+      .finally(() => {
+        setDeleteRowId(null);
+        setPendingRow(null);
+      });
   };
 
   const columns: Column<PaginatedBranch>[] = [
