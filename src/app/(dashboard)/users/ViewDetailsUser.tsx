@@ -1,5 +1,6 @@
 "use client";
 import type { Users } from "@/models/users";
+import { roleLabels } from "@/models/users";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
@@ -45,9 +46,9 @@ export default function ViewDetailsUser({
               <strong>Nombre Completo:</strong> {user.name} {user.lastname}
             </div>
             <div>
-              <strong>Rol Asignado:</strong>{" "}
-              <span className="px-2 py-1 rounded-full border border-orange-100 text-orange-700 text-xs capitalize">
-                {user.rol}
+              <strong>Rol Asignado:</strong>
+              <span className="px-2 py-1 rounded-full border border-orange-100 text-orange-700 text-xs">
+                {roleLabels[user.rol] ?? "Rol desconocido"}
               </span>
             </div>
             <div>

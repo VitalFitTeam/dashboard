@@ -18,40 +18,66 @@ export default function UsersForm({
 }: UsersFormProps) {
   const roles = [
     {
-      id: "admin",
-      title: "Admin Franquicia",
+      id: "super_admin",
+      title: "Super Administrador",
       description: [
         "Acceso total al sistema con permisos de configuración",
-        "Gestión de Sucursales",
-        "Configuración del Sistema",
-        "Gestión de todas las Sucursales",
+        "Gestión de todas las sedes",
+        "Configuración avanzada del sistema",
       ],
     },
     {
-      id: "recepcionista",
-      title: "Recepcionista",
+      id: "branch_admin",
+      title: "Administrador de sede",
       description: [
-        "Acceso limitado a una o más sucursales asignadas",
-        "Gestión de Sucursal asignada",
-        "Gestión de miembros",
+        "Gestión de una sede específica",
+        "Control de personal y operaciones locales",
+        "Acceso limitado a configuraciones generales",
       ],
     },
     {
-      id: "analista",
-      title: "Analista de Datos",
-      description: [
-        "Acceso solo a dashboards y reportes",
-        "Reportes contables",
-        "Generación de Reportes",
-      ],
-    },
-    {
-      id: "contador",
+      id: "accountant",
       title: "Contador",
       description: [
         "Gestión financiera y contable del sistema",
-        "Gestión contable",
-        "Control de pagos",
+        "Control de pagos y facturación",
+        "Acceso a reportes contables",
+      ],
+    },
+    {
+      id: "data_analyst",
+      title: "Analista de datos",
+      description: [
+        "Acceso a dashboards y reportes",
+        "Análisis de métricas y KPIs",
+        "Generación de reportes estratégicos",
+      ],
+    },
+    {
+      id: "instructor",
+      title: "Instructor",
+      description: [
+        "Gestión de horarios de entrenamiento",
+        "Control de rutinas y asistencia",
+        "Seguimiento de progreso de miembros",
+      ],
+    },
+    {
+      id: "recepcionist",
+      title: "Recepcionista",
+      description: [
+        "Gestión de miembros y asistencia",
+        "Atención al cliente en sede",
+        "Acceso limitado a funciones administrativas",
+      ],
+    },
+    {
+      id: "client",
+      title: "Cliente",
+      description: [
+        "Acceso a su perfil personal",
+        "Consulta de rutinas y horarios",
+        "Gestión de pagos y asistencia",
       ],
     },
   ];

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Users } from "@/models/users";
+import { Users, roleLabels } from "@/models/users";
 import { UsersData } from "./data";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
@@ -52,25 +52,26 @@ export default function UsersTable({ onView, onEdit }: UsersTableProps) {
       header: "Rol",
       accessor: "rol",
       filterType: "select",
-      filterOptions: [
-        { label: "Administrador", value: "admin" },
-        { label: "Editor", value: "editor" },
-        { label: "Viewer", value: "viewer" },
-      ],
+      filterOptions: Object.entries(roleLabels).map(([value, label]) => ({
+        value,
+        label,
+      })),
+      render: (value) => roleLabels[value as Users["rol"]] ?? "Desconocido",
     },
+
     {
       header: "Status",
       accessor: "status",
       filterType: "select",
       filterOptions: [
-        { label: "Activa", value: "active" },
-        { label: "Inactiva", value: "inactive" },
+        { label: "Activo", value: "active" },
+        { label: "Inactivo", value: "inactive" },
         { label: "En mantenimiento", value: "maintenance" },
       ],
       render: (value) => {
         const statusConfig = {
-          active: { text: "Activa", color: "text-green-700 border-green-300" },
-          inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
+          active: { text: "Activo", color: "text-green-700 border-green-300" },
+          inactive: { text: "Inactivo", color: "text-red-700 border-red-300" },
           maintenance: {
             text: "En mantenimiento",
             color: "text-yellow-700 border-yellow-300",

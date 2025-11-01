@@ -19,7 +19,7 @@ export default function CreateUser({ onBack }: CreateUsersProps) {
     document: "",
     date: "",
     gender: "",
-    rol: "",
+    rol: "client",
     status: "active",
     uacceso: "",
   });

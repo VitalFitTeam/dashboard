@@ -7,9 +7,26 @@ export type Users = {
   document: string;
   date: string;
   gender: string;
-  rol: string;
-  status: "active" | "inactive" | "maintenance";
+  rol:
+    | "super_admin"
+    | "branch_admin"
+    | "accountant"
+    | "data_analyst"
+    | "instructor"
+    | "recepcionist"
+    | "client";
+  status: "active" | "inactive" | "maintenance" | "blocked";
   uacceso?: string;
+};
+
+export const roleLabels: Record<Users["rol"], string> = {
+  super_admin: "Super Administrador",
+  branch_admin: "Administrador de sede",
+  accountant: "Contador",
+  data_analyst: "Analista de Datos",
+  instructor: "Instructor",
+  recepcionist: "Recepcionista",
+  client: "Cliente",
 };
 
 export interface BranchAdmin {
