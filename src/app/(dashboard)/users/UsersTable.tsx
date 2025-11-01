@@ -19,24 +19,20 @@ import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
-export default function UsersTable() {
+interface UsersTableProps {
+  onView: (user: Users) => void;
+  onEdit: (user: Users) => void;
+}
+
+export default function UsersTable({ onView, onEdit }: UsersTableProps) {
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<Users | null>(null);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
 
-  const handleEditUser = (user: Users) => {
-    setSelectedUser(user);
-    console.warn("editar usuario", selectedUser);
-  };
-
-  const handleViewDetails = (user: Users) => {
-    setSelectedUser(user);
-    console.warn("ver detalles", selectedUser);
-  };
-
   const handleDeleteUser = (user: Users) => {
-    console.warn("Usuario Eliminado", user.id);
+    setSelectedUser(user);
+    console.warn("Usuario Eliminado", selectedUser);
     setDeleteRowId(null);
   };
 
@@ -145,12 +141,12 @@ export default function UsersTable() {
                 {
                   label: "Ver Detalles",
                   icon: Eye,
-                  onClick: () => handleViewDetails(row),
+                  onClick: () => onView(row),
                 },
                 {
                   label: "Modificar",
                   icon: Pencil,
-                  onClick: () => handleEditUser(row),
+                  onClick: () => onEdit(row),
                 },
                 {
                   label: "Eliminar",

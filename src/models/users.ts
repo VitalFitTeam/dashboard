@@ -1,7 +1,12 @@
 export type Users = {
   id: string;
   name: string;
+  lastname: string;
   email: string;
+  phone: string;
+  document: string;
+  date: string;
+  gender: string;
   rol: string;
   status: "active" | "inactive" | "maintenance";
   uacceso?: string;
