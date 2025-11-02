@@ -9,6 +9,7 @@ import {
   BuildingStorefrontIcon,
   UsersIcon,
   ChartBarIcon,
+  TicketIcon,
   Cog6ToothIcon,
   QuestionMarkCircleIcon,
   ArrowRightCircleIcon,
@@ -42,6 +43,16 @@ const navigationSections: NavSection[] = [
         icon: CurrencyDollarIcon,
       },
       { name: "Clientes", href: "/dashboard/anuncios", icon: UserIcon },
+    ],
+  },
+  {
+    title: "Marketing",
+    items: [
+      {
+        name: "Promociones y Descuentos",
+        href: "/promotions",
+        icon: TicketIcon,
+      },
     ],
   },
   {
