@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Users } from "@/models/users";
+import { Users, roleLabels } from "@/models/users";
 import { UsersData } from "./data";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
@@ -19,24 +19,20 @@ import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
-export default function UsersTable() {
+interface UsersTableProps {
+  onView: (user: Users) => void;
+  onEdit: (user: Users) => void;
+}
+
+export default function UsersTable({ onView, onEdit }: UsersTableProps) {
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<Users | null>(null);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
 
-  const handleEditUser = (user: Users) => {
-    setSelectedUser(user);
-    console.warn("editar usuario", selectedUser);
-  };
-
-  const handleViewDetails = (user: Users) => {
-    setSelectedUser(user);
-    console.warn("ver detalles", selectedUser);
-  };
-
   const handleDeleteUser = (user: Users) => {
-    console.warn("Usuario Eliminado", user.id);
+    setSelectedUser(user);
+    console.warn("Usuario Eliminado", selectedUser);
     setDeleteRowId(null);
   };
 
@@ -56,25 +52,26 @@ export default function UsersTable() {
       header: "Rol",
       accessor: "rol",
       filterType: "select",
-      filterOptions: [
-        { label: "Administrador", value: "admin" },
-        { label: "Editor", value: "editor" },
-        { label: "Viewer", value: "viewer" },
-      ],
+      filterOptions: Object.entries(roleLabels).map(([value, label]) => ({
+        value,
+        label,
+      })),
+      render: (value) => roleLabels[value as Users["rol"]] ?? "Desconocido",
     },
+
     {
       header: "Status",
       accessor: "status",
       filterType: "select",
       filterOptions: [
-        { label: "Activa", value: "active" },
-        { label: "Inactiva", value: "inactive" },
+        { label: "Activo", value: "active" },
+        { label: "Inactivo", value: "inactive" },
         { label: "En mantenimiento", value: "maintenance" },
       ],
       render: (value) => {
         const statusConfig = {
-          active: { text: "Activa", color: "text-green-700 border-green-300" },
-          inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
+          active: { text: "Activo", color: "text-green-700 border-green-300" },
+          inactive: { text: "Inactivo", color: "text-red-700 border-red-300" },
           maintenance: {
             text: "En mantenimiento",
             color: "text-yellow-700 border-yellow-300",
@@ -145,12 +142,12 @@ export default function UsersTable() {
                 {
                   label: "Ver Detalles",
                   icon: Eye,
-                  onClick: () => handleViewDetails(row),
+                  onClick: () => onView(row),
                 },
                 {
                   label: "Modificar",
                   icon: Pencil,
-                  onClick: () => handleEditUser(row),
+                  onClick: () => onEdit(row),
                 },
                 {
                   label: "Eliminar",
