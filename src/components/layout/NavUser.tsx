@@ -1,4 +1,5 @@
 "use client";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,18 +22,43 @@ import {
   MessageCircle,
   UserIcon,
 } from "lucide-react";
+import { useAuth, User } from "@/context/AuthContext";
+import Image from "next/image";
+import Link from "next/link";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar?: string;
-  };
-}) {
+interface NavUserProps {
+  user: User;
+}
+
+export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
-  const initial = user.name?.[0] ?? "U";
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const fullName = `${user.first_name} ${user.last_name}`;
+  const initial = user.first_name?.[0]?.toUpperCase() ?? "U";
+  const avatarUrl = user.profile_picture_url || "/logo/isotipo.png";
+
+  const UserAvatar = () => (
+    <>
+      {user.profile_picture_url ? (
+        <Image
+          src={user.profile_picture_url}
+          alt={fullName}
+          width={40}
+          height={40}
+          className="rounded-full object-cover"
+        />
+      ) : (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-700">
+          {initial}
+        </div>
+      )}
+    </>
+  );
 
   return (
     <SidebarMenu>
@@ -43,11 +69,9 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-700">
-                {initial}
-              </div>
+              <UserAvatar />
               <div className="grid flex-1 text-left text-sm leading-tight ml-2">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{fullName}</span>
                 <span className="text-muted-foreground truncate text-xs">
                   {user.email}
                 </span>
@@ -64,11 +88,9 @@ export function NavUser({
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-700">
-                  {initial}
-                </div>
+                <UserAvatar />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{fullName}</span>
                   <span className="text-muted-foreground truncate text-xs">
                     {user.email}
                   </span>
@@ -79,15 +101,17 @@ export function NavUser({
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserIcon className="mr-2" />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <UserIcon className="mr-2" />
+                  Account
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <CreditCard className="mr-2" />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem disabled>
                 <MessageCircle className="mr-2" />
                 Notifications
               </DropdownMenuItem>
@@ -95,7 +119,7 @@ export function NavUser({
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2" />
               Log out
             </DropdownMenuItem>

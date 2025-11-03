@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -9,15 +10,16 @@ import {
   LoginPayload,
   loginSchema,
 } from "@/lib/validation/loginSchema";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { colors, montserrat } from "@/styles/styles";
 import InputField from "@/components/ui/InputField";
 import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { login } = useAuth();
   const router = useRouter();
 
   const {
@@ -44,14 +46,19 @@ export default function LoginForm() {
       if (!token) {
         throw new Error("Token no recibido");
       }
-      api.client.setJWT(token);
-      localStorage.setItem("token", token);
-      router.push("/profile");
+      login(token);
+      router.replace("/");
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
-      setErrorMessage(
-        "Fallo en el inicio de sesión. Credenciales no válidas o acceso restringido.",
-      );
+      if (err instanceof Error) {
+        if ("status" in err && err.status === 401) {
+          setErrorMessage("Credenciales no válidas. Por favor, verifícalas.");
+        } else {
+          setErrorMessage("Ocurrió un error inesperado. Inténtalo de nuevo.");
+        }
+      } else {
+        setErrorMessage("Fallo en el inicio de sesión.");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+
 export const metadata: Metadata = {
   title: "GymApp Dashboard",
   description: "Administra tus reservas, entrenadores y sucursales de gimnasio",
@@ -12,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
