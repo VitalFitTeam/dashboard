@@ -17,6 +17,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
   SidebarMenuSub,
   SidebarMenuSubItem,
 } from "../ui/sidebar";
@@ -27,15 +28,12 @@ import {
 } from "../ui/collapsible";
 import Image from "next/image";
 import { NavUser } from "./NavUser";
+import { useAuth } from "@/context/AuthContext";
 
 interface SubItem {
   name: string;
   href: string;
 }
-const currentUser = {
-  name: "Albani Barragán",
-  email: "albani@gmail.com",
-};
 
 interface NavItemWithSub {
   name: string;
@@ -60,70 +58,79 @@ function isNavItemWithSub(item: NavItem): item is NavItemWithSub {
   return (item as NavItemWithSub).subitems !== undefined;
 }
 
-const currentUserRole = "SuperAdmin";
+const sidebarMenusByRole: Record<string, NavSection[]> = {
+  super_admin: [
+    {
+      title: "Dashboard Principal",
+      items: [
+        {
+          name: "Home",
+          icon: BuildingStorefrontIcon,
+          href: "/",
+        },
+        {
+          name: "Sucursales",
+          icon: BuildingStorefrontIcon,
+          href: "/branches",
+        },
+        { name: "Clientes", icon: UserIcon, href: "/clients" },
+        {
+          name: "Usuarios y Seguridad",
+          icon: UsersIcon,
+          subitems: [
+            { name: "Usuarios", href: "/users" },
+            { name: "Políticas de seguridad", href: "/users/management" },
+            { name: "Configuración de roles", href: "/users/audit" },
+          ],
+        },
+        {
+          name: "Membresías y Servicios",
+          icon: CurrencyDollarIcon,
+          subitems: [
+            { name: "Membresías", href: "/memberships" },
+            { name: "Servicios", href: "/services" },
+            { name: "Instructores", href: "/instructors" },
+            { name: "Equipamiento", href: "/equipament" },
+            { name: "Promociones y descuentos", href: "/promotions" },
+            { name: "Métodos de pago globales", href: "/payment-methods" },
+            { name: "Tipos de documentos fiscales", href: "/tax-documents" },
+          ],
+        },
+        {
+          name: "Clases y Reservas",
+          icon: Calendar,
+          subitems: [{ name: "Calendario", href: "/classes" }],
+        },
+        {
+          name: "Finanzas y Reportes",
+          icon: ChartBar,
+          subitems: [
+            { name: "Facturación", href: "/finance/billing" },
+            { name: "Reportes", href: "/finance/reports" },
+            {
+              name: "Reconciliación de pagos",
+              href: "/finance/reconciliation",
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 export default function SidebarDashboard() {
   const pathname = usePathname();
+  const { user, loading } = useAuth();
 
-  const sidebarMenusByRole: Record<string, NavSection[]> = {
-    SuperAdmin: [
-      {
-        title: "Dashboard Principal",
-        items: [
-          {
-            name: "Home",
-            icon: BuildingStorefrontIcon,
-            href: "/",
-          },
-          {
-            name: "Sucursales",
-            icon: BuildingStorefrontIcon,
-            href: "/branches",
-          },
-          { name: "Clientes", icon: UserIcon, href: "/clients" },
-          {
-            name: "Usuarios y Seguridad",
-            icon: UsersIcon,
-            subitems: [
-              { name: "Usuarios", href: "/users" },
-              { name: "Políticas de seguridad", href: "/users/management" },
-              { name: "Configuración de roles", href: "/users/audit" },
-            ],
-          },
-          {
-            name: "Membresías y Servicios",
-            icon: CurrencyDollarIcon,
-            subitems: [
-              { name: "Membresías", href: "/memberships" },
-              { name: "Servicios", href: "/services" },
-              { name: "Instructores", href: "/instructors" },
-              { name: "Equipamiento", href: "/equipament" },
-              { name: "Promociones y descuentos", href: "/promotions" },
-              { name: "Métodos de pago globales", href: "/payment-methods" },
-              { name: "Tipos de documentos fiscales", href: "/tax-documents" },
-            ],
-          },
-          {
-            name: "Clases y Reservas",
-            icon: Calendar,
-            subitems: [{ name: "Calendario", href: "/classes" }],
-          },
-          {
-            name: "Finanzas y Reportes",
-            icon: ChartBar,
-            subitems: [
-              { name: "Facturación", href: "/finance/billing" },
-              { name: "Reportes", href: "/finance/reports" },
-              {
-                name: "Reconciliación de pagos",
-                href: "/finance/reconciliation",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  };
+  if (loading) {
+    return <SidebarMenuSkeleton />;
+  }
+
+  if (!user) {
+    return <SidebarMenuSkeleton />;
+  }
+
+  const currentUserRole = user?.role?.toLowerCase() || "guest";
 
   const sections = sidebarMenusByRole[currentUserRole] || [];
 
@@ -230,7 +237,7 @@ export default function SidebarDashboard() {
           </SidebarGroup>
         ))}
         <div className="mt-auto border-t border-gray-200 px-3 py-4">
-          <NavUser user={currentUser} />
+          <NavUser user={user} />
         </div>
       </SidebarContent>
     </Sidebar>
