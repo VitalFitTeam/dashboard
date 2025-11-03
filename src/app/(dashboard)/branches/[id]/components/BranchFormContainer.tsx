@@ -9,11 +9,73 @@ import BranchInstructorPanel from "./BranchInstructorsPanel";
 import BranchEquipmentPanel from "./BranchEquipmentPanel";
 import BranchPaymentMethodPanel from "./BranchPaymentMethodsPanel";
 import { Button } from "@/components/ui/button";
-import { BranchDetails } from "@vitalfit/sdk";
+import {
+  BranchDetails,
+  UpdateBranchRequest,
+  UpdateOperatingHour,
+} from "@vitalfit/sdk";
+import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
 
 interface BranchFormContainerProps {
   mode?: "view" | "edit";
   branch: BranchDetails;
+}
+
+const toHHMMSS = (input?: string | null) => {
+  if (!input) {
+    return "00:00:00";
+  }
+  const s = input.trim();
+
+  if (/^\d{1,2}:\d{2}:\d{2}$/.test(s)) {
+    return s;
+  }
+  const hm = /^(\d{1,2}):(\d{2})$/.exec(s);
+  if (hm) {
+    return `${hm[1].padStart(2, "0")}:${hm[2]}:00`;
+  }
+  const ampm = /^(\d{1,2}):(\d{2})(?:\s*)(AM|PM)$/i.exec(s);
+  if (ampm) {
+    let hh = Number(ampm[1]);
+    const mm = ampm[2];
+    const period = ampm[3].toUpperCase();
+    if (period === "PM" && hh < 12) {
+      hh += 12;
+    }
+    if (period === "AM" && hh === 12) {
+      hh = 0;
+    }
+    return `${hh.toString().padStart(2, "0")}:${mm}:00`;
+  }
+  return "00:00:00";
+};
+
+function transformDataForAPI(data: BranchDetails): UpdateBranchRequest {
+  const opHours: UpdateOperatingHour[] = data.operating_hours.map((h) => ({
+    day_of_week: h.day_of_week,
+    open_time: h.is_closed ? "00:00:00" : toHHMMSS(h.open_time),
+    close_time: h.is_closed ? "00:00:00" : toHHMMSS(h.close_time),
+    is_closed: h.is_closed,
+  }));
+
+  const payMethods: string[] = data.payment_methods.map((p) => p.method_id);
+
+  return {
+    name: data.name,
+    tax_id: data.tax_id,
+    address: data.address,
+    phone: data.phone,
+    status: data.status,
+    state: data.state,
+    country: data.country,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    max_capacity: data.max_capacity,
+    manager_id: data.manager,
+    operating_hours: opHours,
+    payment_methods: payMethods,
+  };
 }
 
 export default function BranchFormContainer({
@@ -22,9 +84,28 @@ export default function BranchFormContainer({
 }: BranchFormContainerProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<BranchDetails>(branch);
+  const [isSaving, setIsSaving] = useState(false);
+  const { token } = useAuth();
 
-  const handleSave = () => {
-    console.log("Guardando...", formData);
+  const handleSave = async () => {
+    if (!token) {
+      alert("Error: Sesión no válida.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const transformedData = transformDataForAPI(formData);
+      await api.branch.updateBranch(branch.branch_id, transformedData, token);
+      alert("Sucursal guardada con éxito");
+      router.push(`/branches/${branch.branch_id}`);
+      router.refresh();
+    } catch (err) {
+      console.error("Error al guardar la sucursal:", err);
+      alert("Error: No se pudo guardar la sucursal.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const tabs = [
@@ -61,10 +142,6 @@ export default function BranchFormContainer({
     },
   ];
 
-  if (!formData) {
-    return <p>No se encontró la sucursal.</p>;
-  }
-
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
@@ -87,10 +164,17 @@ export default function BranchFormContainer({
           )}
           {mode === "edit" && (
             <>
-              <Button variant="outline" onClick={() => router.back()}>
+              <Button
+                variant="outline"
+                onClick={() => router.back()}
+                disabled={isSaving}
+              >
                 Cancelar
               </Button>
-              <Button onClick={handleSave}>Guardar</Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Guardando..." : "Guardar"}{" "}
+                {/* 6. Texto de carga */}
+              </Button>
             </>
           )}
         </div>

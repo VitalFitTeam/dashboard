@@ -21,7 +21,6 @@ import {
 import { SelectValue } from "@radix-ui/react-select";
 import { Download, Eye, Pencil, Search, Trash2, X } from "lucide-react";
 import { RowActions } from "@/components/ui/table/RowActions";
-import { deleteBranch } from "@/services/branches";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
