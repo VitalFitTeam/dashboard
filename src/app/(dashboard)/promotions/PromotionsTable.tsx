@@ -9,21 +9,46 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { SelectValue } from "@radix-ui/react-select";
 import { Download, Eye, Pencil, Trash2, Search } from "lucide-react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 
-// Tipo de datos para una promoción (ajústalo según tu API)
+// Tipos de datos para promociones
 export interface Promotion {
   promotion_id: string;
   code: string;
   name: string;
-  type: string;
-  discount: string;
+  description?: string;
+  type: "percentage" | "fixed_amount";
+  discount: number;
+  min_amount?: number;
+  max_discount?: number;
+  start_date: string;
   end_date: string;
+  usage_limit?: number;
+  used_count: number;
   status: "Active" | "Inactive" | "Expired";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreatePromotionDTO {
+  code: string;
+  name: string;
+  description?: string;
+  type: "percentage" | "fixed_amount";
+  discount: number;
+  min_amount?: number;
+  max_discount?: number;
+  start_date: string;
+  end_date: string;
+  usage_limit?: number;
+}
+
+export interface UpdatePromotionDTO extends Partial<CreatePromotionDTO> {
+  status?: "Active" | "Inactive";
 }
 
 // Props del componente
@@ -37,6 +62,9 @@ interface PromotionsTableProps {
   onPageSizeChange: (size: number) => void;
   onFilterChange: (key: string, value: string | undefined) => void;
   filterValues: Record<string, string | undefined>;
+  onEdit?: (promotion: Promotion) => void;
+  onDelete?: (promotion: Promotion) => void;
+  onView?: (promotion: Promotion) => void;
 }
 
 export default function PromotionsTable({
@@ -49,31 +77,65 @@ export default function PromotionsTable({
   onPageSizeChange,
   onFilterChange,
   filterValues,
+  onEdit,
+  onDelete,
+  onView,
 }: PromotionsTableProps) {
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
 
   // Acciones de la tabla
   const handleView = (row: Promotion) => {
-    console.log("Ver promoción:", row.code);
+    onView?.(row);
   };
 
   const handleEdit = (row: Promotion) => {
-    console.log("Editar promoción:", row.code);
+    onEdit?.(row);
   };
 
   const handleDelete = (row: Promotion) => {
-    console.log("Eliminar promoción:", row.code);
+    onDelete?.(row);
+  };
+
+  // Función para formatear el descuento
+  const formatDiscount = (promotion: Promotion) => {
+    if (promotion.type === "percentage") {
+      return `${promotion.discount}%`;
+    } else {
+      return `$${promotion.discount.toFixed(2)}`;
+    }
   };
 
   // Definición de columnas
   const columns: Column<Promotion>[] = [
     { header: "Código", accessor: "code" },
     { header: "Nombre", accessor: "name" },
-    { header: "Tipo", accessor: "type" },
-    { header: "Descuento", accessor: "discount" },
+    {
+      header: "Tipo",
+      accessor: "type",
+      render: (value) => (value === "percentage" ? "Porcentaje" : "Monto Fijo"),
+    },
+    {
+      header: "Descuento",
+      accessor: "discount",
+      render: (value, row) => formatDiscount(row),
+    },
+    {
+      header: "Fecha de inicio",
+      accessor: "start_date",
+      render: (value) => {
+        if (!value) {return "-";}
+        const date = new Date(value);
+        if (isNaN(date.getTime())) {return "Fecha inválida";}
+        return date.toLocaleDateString("es-VE", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      },
+    },
     {
       header: "Fecha de finalización",
-      accessor: "endDate",
+      accessor: "end_date",
       render: (value) => {
         if (!value) {return "-";}
         const date = new Date(value);
@@ -90,16 +152,22 @@ export default function PromotionsTable({
       accessor: "status",
       render: (value) => {
         const statusConfig = {
-          Active: { text: "Activa", color: "text-green-700 border-green-300" },
-          Inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
+          Active: {
+            text: "Activa",
+            color: "text-green-700 border-green-300 bg-green-50",
+          },
+          Inactive: {
+            text: "Inactiva",
+            color: "text-red-700 border-red-300 bg-red-50",
+          },
           Expired: {
             text: "Expirada",
-            color: "text-yellow-700 border-yellow-300",
+            color: "text-yellow-700 border-yellow-300 bg-yellow-50",
           },
         };
         const config = statusConfig[value as keyof typeof statusConfig] ?? {
           text: "Desconocido",
-          color: "text-gray-700 border-gray-300",
+          color: "text-gray-700 border-gray-300 bg-gray-50",
         };
         return (
           <Badge variant="outline" className={`border ${config.color}`}>
@@ -114,15 +182,17 @@ export default function PromotionsTable({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputFilters.search) {
-        onFilterChange?.("name", inputFilters.search);
-        onFilterChange?.("code", inputFilters.search);
+        onFilterChange?.("search", inputFilters.search);
       } else {
-        onFilterChange?.("name", undefined);
-        onFilterChange?.("code", undefined);
+        onFilterChange?.("search", undefined);
       }
 
       if (inputFilters.status) {
         onFilterChange?.("status", inputFilters.status);
+      }
+
+      if (inputFilters.dateRange) {
+        onFilterChange?.("dateRange", inputFilters.dateRange);
       }
     }, 500);
 
@@ -137,8 +207,8 @@ export default function PromotionsTable({
         <div className="relative w-full sm:w-[250px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar por código o nombre"
-            className="pl-9"
+            placeholder="Buscar por nombre o código"
+            className="pl-9 w-90"
             value={inputFilters.search || ""}
             onChange={(e) =>
               setInputFilters((prev) => ({ ...prev, search: e.target.value }))
@@ -153,7 +223,7 @@ export default function PromotionsTable({
             setInputFilters((prev) => ({ ...prev, status: value }))
           }
         >
-          <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Estatus" />
           </SelectTrigger>
           <SelectContent>
@@ -163,14 +233,14 @@ export default function PromotionsTable({
           </SelectContent>
         </Select>
 
-        {/* 🗓️ Fecha de finalización */}
+        {/* Fecha de finalización */}
         <Select
           value={inputFilters.dateRange || ""}
           onValueChange={(value) =>
             setInputFilters((prev) => ({ ...prev, dateRange: value }))
           }
         >
-          <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Fecha de finalización" />
           </SelectTrigger>
           <SelectContent>
@@ -182,14 +252,16 @@ export default function PromotionsTable({
         </Select>
 
         {/* Limpiar filtros */}
-        {(filterValues.name || filterValues.code || filterValues.status) && (
+        {(filterValues.search ||
+          filterValues.status ||
+          filterValues.dateRange) && (
           <Button
             variant="outline"
-            className="mt-2 sm:mt-0 border-gray-300 text-gray-700 hover:bg-gray-100"
+            className="mt-2 sm:mt-0"
             onClick={() => {
-              onFilterChange("name", undefined);
-              onFilterChange("code", undefined);
+              onFilterChange("search", undefined);
               onFilterChange("status", undefined);
+              onFilterChange("dateRange", undefined);
               setInputFilters({});
             }}
           >
@@ -212,15 +284,19 @@ export default function PromotionsTable({
         data={data}
         page={page}
         pageSize={pageSize}
-        totalPages={totalPages}
         onPageChange={onPageChange}
         onPageSizeChange={onPageSizeChange}
+        totalPages={totalPages}
         rowIdKey="promotion_id"
         actions={(row) => (
           <RowActions
             actions={[
               { label: "Ver", icon: Eye, onClick: () => handleView(row) },
-              { label: "Editar", icon: Pencil, onClick: () => handleEdit(row) },
+              {
+                label: "Modificar",
+                icon: Pencil,
+                onClick: () => handleEdit(row),
+              },
               {
                 label: "Eliminar",
                 icon: Trash2,
