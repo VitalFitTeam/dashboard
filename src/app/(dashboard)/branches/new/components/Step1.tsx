@@ -7,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import StepNotification from "./StepNotification";
 import InputField from "@/components/ui/InputField";
+import StepNotification from "../../StepNotification";
 
 type StepProps = {
   formData: any; // Considera usar un tipo más específico

@@ -21,8 +21,9 @@ import {
 import { SelectValue } from "@radix-ui/react-select";
 import { Download, Eye, Pencil, Search, Trash2, X } from "lucide-react";
 import { RowActions } from "@/components/ui/table/RowActions";
-import { deleteBranch } from "@/services/branches";
 import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export type FilterChangeHandler = (
   key: string,
@@ -36,10 +37,6 @@ interface BranchesTableProps {
   pageSize: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
-  allInstructors: Instructor[];
-  allServices: Service[];
-  allEquipment: Equipment[];
-  allPaymentMethods: PaymentMethodUI[];
   totalPages: number;
   onFilterChange: FilterChangeHandler;
   filterValues: Record<string, string | undefined>;
@@ -63,27 +60,21 @@ export default function BranchesTable({
   onPageSizeChange,
   onBranchDeleted,
 }: BranchesTableProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<PaginatedBranch | null>(
-    null,
-  );
-  const [modalMode, setModalMode] = useState<"view" | "edit">("view");
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
-  const [debouncedFilters, setDebouncedFilters] = useState<
-    Record<string, string>
-  >({});
 
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [pendingRow, setPendingRow] = useState<BranchRow | null>(null);
   const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { token } = useAuth();
+  const router = useRouter();
 
   const handleView = (row: BranchRow) => {
-    console.log("Ver detalles de la sucursal:", row.branch_id, row.name);
+    router.push(`/branches/${row.branch_id}`);
   };
 
   const handleEdit = (row: BranchRow) => {
-    console.log("Editar sucursal:", row.branch_id, row.name);
+    router.push(`/branches/${row.branch_id}/edit`);
   };
 
   const confirmDelete = (row: BranchRow) => {
@@ -95,14 +86,8 @@ export default function BranchesTable({
     if (!pendingRow) {
       return;
     }
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setDeleteError("Token no disponible. No se pudo eliminar la sucursal.");
-      return;
-    }
     api.branch
-      .delete(pendingRow.branch_id, token)
+      .delete(pendingRow.branch_id, token || "")
       .then(() => {
         setDeleteSuccess(`Sucursal eliminada: ${pendingRow.name}`);
         if (typeof onBranchDeleted === "function") {

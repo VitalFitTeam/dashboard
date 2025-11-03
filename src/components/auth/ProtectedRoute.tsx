@@ -31,12 +31,6 @@ export default function ProtectedRoute({
     }
   }, [loading, isAuthenticated, hasRole, allowedRoles, router, user]);
 
-  console.log(
-    "ProtectedRoute: loading, isAuthenticated, user:",
-    loading,
-    isAuthenticated,
-    user,
-  );
   if (loading) {
     return <Loading />;
   }
