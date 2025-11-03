@@ -88,36 +88,6 @@ export async function createBranch(payload: CreateBranchPayload) {
 }
 
 /* ────────────────────────────────
-   🔹 Eliminar Sucursal
-──────────────────────────────── */
-export async function deleteBranch(id: string, token: string) {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/branches/${id}`;
-  console.log("🧭 Eliminando sucursal en:", url);
-
-  try {
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Error ${res.status}: ${errorText}`);
-    }
-
-    // ✅ Si la respuesta está vacía (ej. 204 No Content)
-    const text = await res.text();
-    return text ? JSON.parse(text) : { success: true };
-  } catch (error) {
-    console.error("❌ Error eliminando sucursal:", error);
-    throw error;
-  }
-}
-
-/* ────────────────────────────────
    🔹 Obtener Sucursales
 ──────────────────────────────── */
 export async function fetchBranches({
@@ -133,8 +103,12 @@ export async function fetchBranches({
   query.append("offset", offset.toString());
   query.append("sort", sort);
 
-  if (search) {query.append("search", search);}
-  if (status) {query.append("status", status);}
+  if (search) {
+    query.append("search", search);
+  }
+  if (status) {
+    query.append("status", status);
+  }
 
   const res: ApiBranchesResponse = await fetchAPI(
     `/branches?${query.toString()}`,

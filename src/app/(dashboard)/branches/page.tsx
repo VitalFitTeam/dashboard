@@ -26,6 +26,7 @@ import { Equipment } from "@/models/equipment";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import { useAuth } from "@/context/AuthContext";
 
 const MOCK_INSTRUCTORS: Instructor[] = [
   { id: "i1", user_id: "u1", name: "Ana Pérez" },
@@ -91,6 +92,7 @@ function mapApiPaymentMethodsToUI(methods: PaymentMethod[]): PaymentMethodUI[] {
 }
 
 export default function HomeBranches() {
+  const { token } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -140,15 +142,11 @@ export default function HomeBranches() {
   useEffect(() => {
     async function loadStaticData() {
       setIsLoadingStatic(true);
-      const token = localStorage.getItem("token");
       try {
         const [paymentMethodsData, branchAdminsData] = await Promise.all([
           api.paymentMethod.getPaymentMethods(token || ""),
           api.user.getBranchAdmins(token || ""),
         ]);
-
-        console.log("METODOS DE PAGO", paymentMethodsData.data);
-        console.log("GERENTES", branchAdminsData.data);
 
         const uiPaymentMethods = mapApiPaymentMethodsToUI(
           paymentMethodsData.data,
@@ -170,11 +168,6 @@ export default function HomeBranches() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      redirect("/login");
-    }
-
     async function loadBranchesData() {
       setIsLoadingBranches(true);
       try {
@@ -209,7 +202,7 @@ export default function HomeBranches() {
       }
     }
     loadBranchesData();
-  }, [page, pageSize, sort, filters, refreshKey]);
+  }, [page, pageSize, sort, filters, refreshKey, token]);
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">

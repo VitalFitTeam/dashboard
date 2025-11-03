@@ -3,17 +3,17 @@
 import React from "react";
 import { Clock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BranchOperatingHours, DayOfWeek } from "@/models/branches";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { Input } from "@/components/ui/Input";
+import { OperatingHour } from "@vitalfit/sdk";
 
 interface BranchScheduleProps {
-  schedule: BranchOperatingHours[];
-  onScheduleChange: (updatedSchedule: BranchOperatingHours[]) => void;
+  schedule: OperatingHour[];
+
+  onScheduleChange: (updatedSchedule: OperatingHour[]) => void;
   mode: "view" | "edit";
 }
-
-const dayNameMapping: Record<DayOfWeek, string> = {
+const dayNameMapping: Record<string, string> = {
   Monday: "Lunes",
   Tuesday: "Martes",
   Wednesday: "Miércoles",
@@ -31,45 +31,45 @@ export default function BranchSchedule({
   const isDisabled = mode === "view";
 
   const handleTimeChange = (
-    dayOfWeek: DayOfWeek,
-    field: "openTime" | "closeTime",
+    day_of_week: string,
+    field: "open_time" | "close_time",
     value: string,
   ) => {
     const updatedSchedule = schedule.map((day) =>
-      day.dayOfWeek === dayOfWeek
-        ? { ...day, [field]: value, isClosed: false }
+      day.day_of_week === day_of_week
+        ? { ...day, [field]: value, is_closed: false }
         : day,
     );
     onScheduleChange(updatedSchedule);
   };
 
-  const handleCheckboxChange = (dayOfWeek: DayOfWeek, checked: boolean) => {
+  const handleCheckboxChange = (day_of_week: string, checked: boolean) => {
     const updatedSchedule = schedule.map((day) =>
-      day.dayOfWeek === dayOfWeek
-        ? { ...day, isClosed: checked, openTime: null, closeTime: null }
+      day.day_of_week === day_of_week
+        ? { ...day, is_closed: checked, open_time: "", close_time: "" }
         : day,
     );
     onScheduleChange(updatedSchedule);
   };
 
-  const columns: Column<BranchOperatingHours>[] = [
+  const columns: Column<OperatingHour>[] = [
     {
       header: "Día",
-      accessor: "dayOfWeek",
-      render: (value) => dayNameMapping[value as DayOfWeek],
+      accessor: "day_of_week", // <-- snake_case
+      render: (value) => dayNameMapping[value as string],
     },
     {
       header: "Apertura",
-      accessor: "openTime",
+      accessor: "open_time",
       render: (value, row) => (
         <div className="relative w-36">
           <Input
             type="time"
             value={(value as string | null) ?? ""}
             onChange={(e) =>
-              handleTimeChange(row.dayOfWeek, "openTime", e.target.value)
+              handleTimeChange(row.day_of_week, "open_time", e.target.value)
             }
-            disabled={isDisabled || row.isClosed}
+            disabled={isDisabled || row.is_closed}
             className="pr-8"
           />
           <Clock className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -78,16 +78,16 @@ export default function BranchSchedule({
     },
     {
       header: "Cierre",
-      accessor: "closeTime",
+      accessor: "close_time",
       render: (value, row) => (
         <div className="relative w-36">
           <Input
             type="time"
             value={(value as string | null) ?? ""}
             onChange={(e) =>
-              handleTimeChange(row.dayOfWeek, "closeTime", e.target.value)
+              handleTimeChange(row.day_of_week, "close_time", e.target.value)
             }
-            disabled={isDisabled || row.isClosed}
+            disabled={isDisabled || row.is_closed}
             className="pr-8"
           />
           <Clock className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -96,13 +96,13 @@ export default function BranchSchedule({
     },
     {
       header: "Cerrado",
-      accessor: "isClosed",
+      accessor: "is_closed",
       render: (value, row) => (
         <div className="flex justify-center">
           <Checkbox
             checked={value as boolean}
             onCheckedChange={(checked) =>
-              handleCheckboxChange(row.dayOfWeek, !!checked)
+              handleCheckboxChange(row.day_of_week, !!checked)
             }
             disabled={isDisabled}
           />
@@ -113,7 +113,12 @@ export default function BranchSchedule({
 
   return (
     <div className="pt-4">
-      <DataTable columns={columns} data={schedule} enableRowSelection={false} />
+      <DataTable
+        columns={columns}
+        data={schedule}
+        enableRowSelection={false}
+        rowIdKey="hour_id"
+      />
     </div>
   );
 }

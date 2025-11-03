@@ -21,9 +21,8 @@ import { PaymentMethodUI } from "./page";
 import { createBranch } from "@/services/branches";
 import { Country, State, City } from "@/models/location";
 import { BranchAdmin } from "@/models/users";
-import {api} from "@/lib/sdk-config";
+import { api } from "@/lib/sdk-config";
 import { CreateBranchRequest, User, UserApiResponse } from "@vitalfit/sdk";
-
 
 interface BranchFromProps {
   onClose: () => void;
@@ -163,7 +162,6 @@ export default function BranchFrom({
       statusMap[rawStatus.toLowerCase()] ??
       rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
 
-   
     const apiPayload: CreateBranchRequest = {
       name: formData.name?.trim() || "",
       tax_id: formData.taxId?.trim() || "",
@@ -206,16 +204,16 @@ export default function BranchFrom({
 
     const token = localStorage.getItem("token");
 
-    api.branch.createBranch(apiPayload, token || "")
-    .then((data)=>{
-      onClose();
-      window.location.reload();
-    })
-    .catch((err)=>{
-      console.error("Error creando sucursal:", err);
-      alert("Error al crear sucursal: " + (err?.message || String(err)));
-    })
- 
+    api.branch
+      .createBranch(apiPayload, token || "")
+      .then((data) => {
+        onClose();
+        window.location.reload();
+      })
+      .catch((err) => {
+        console.error("Error creando sucursal:", err);
+        alert("Error al crear sucursal: " + (err?.message || String(err)));
+      });
   };
 
   const handleChange = (
@@ -275,7 +273,7 @@ export default function BranchFrom({
             handleChange={handleChange}
             handleCustomChange={handleCustomChange}
             formErrors={formErrors}
-            allBranchAdmins={allBranchAdmins} // ✅ lista de gerentes dinámica
+            allBranchAdmins={allBranchAdmins}
             allPaymentMethods={allPaymentMethods}
           />
         </div>
