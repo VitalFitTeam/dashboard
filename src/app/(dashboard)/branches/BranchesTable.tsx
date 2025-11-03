@@ -9,6 +9,7 @@ import { Service } from "@/models/service";
 import { Equipment } from "@/models/equipment";
 import { PaymentMethodUI } from "./page";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { PaginatedBranch } from "@vitalfit/sdk";
 import { Input } from "@/components/ui/Input";
 import {
@@ -18,16 +19,10 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import {
-  CopyIcon,
-  Download,
-  Eye,
-  Pencil,
-  Search,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Download, Eye, Pencil, Search, Trash2, X } from "lucide-react";
 import { RowActions } from "@/components/ui/table/RowActions";
+import { deleteBranch } from "@/services/branches";
+import { api } from "@/lib/sdk-config";
 
 export type FilterChangeHandler = (
   key: string,
@@ -66,6 +61,7 @@ export default function BranchesTable({
   totalPages,
   onPageChange,
   onPageSizeChange,
+  onBranchDeleted,
 }: BranchesTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<PaginatedBranch | null>(
@@ -77,6 +73,11 @@ export default function BranchesTable({
     Record<string, string>
   >({});
 
+  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
+  const [pendingRow, setPendingRow] = useState<BranchRow | null>(null);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const handleView = (row: BranchRow) => {
     console.log("Ver detalles de la sucursal:", row.branch_id, row.name);
   };
@@ -85,8 +86,37 @@ export default function BranchesTable({
     console.log("Editar sucursal:", row.branch_id, row.name);
   };
 
-  const handleDelete = (row: BranchRow) => {
-    console.log("Eliminar sucursal:", row.branch_id, row.name);
+  const confirmDelete = (row: BranchRow) => {
+    setPendingRow(row);
+    setDeleteRowId(row.branch_id);
+  };
+
+  const handleDelete = async () => {
+    if (!pendingRow) {
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setDeleteError("Token no disponible. No se pudo eliminar la sucursal.");
+      return;
+    }
+    api.branch
+      .delete(pendingRow.branch_id, token)
+      .then(() => {
+        setDeleteSuccess(`Sucursal eliminada: ${pendingRow.name}`);
+        if (typeof onBranchDeleted === "function") {
+          onBranchDeleted();
+        }
+      })
+      .catch((error) => {
+        setDeleteError("Error al eliminar la sucursal. Intenta nuevamente.");
+        console.error("Error al eliminar (directo del SDK):", error);
+      })
+      .finally(() => {
+        setDeleteRowId(null);
+        setPendingRow(null);
+      });
   };
 
   const columns: Column<PaginatedBranch>[] = [
@@ -151,6 +181,16 @@ export default function BranchesTable({
     return () => clearTimeout(timer);
   }, [inputFilters]);
 
+  useEffect(() => {
+    if (deleteSuccess || deleteError) {
+      const timer = setTimeout(() => {
+        setDeleteSuccess(null);
+        setDeleteError(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [deleteSuccess, deleteError]);
+
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -204,6 +244,50 @@ export default function BranchesTable({
         </div>
       </div>
 
+      {deleteRowId && pendingRow && (
+        <Alert className="mt-2 w-full max-w-md">
+          <AlertTitle className="text-black">Confirmar Eliminación</AlertTitle>
+          <AlertDescription className="text-gray-900">
+            ¿Estás seguro de que deseas eliminar este servicio? Esta acción no
+            se puede deshacer.
+          </AlertDescription>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              className="border-white"
+              onClick={() => {
+                setDeleteRowId(null);
+                setPendingRow(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              className="text-white"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4 text-white" />
+              Eliminar
+            </Button>
+          </div>
+        </Alert>
+      )}
+
+      {deleteSuccess && (
+        <Alert className="w-full max-w-md border-green-300 bg-white text-green-800 mb-4">
+          <AlertTitle>Eliminación exitosa</AlertTitle>
+          <AlertDescription>{deleteSuccess}</AlertDescription>
+        </Alert>
+      )}
+
+      {deleteError && (
+        <Alert className="w-full max-w-md border-red-300 bg-white text-red-800 mb-4">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{deleteError}</AlertDescription>
+        </Alert>
+      )}
+
       <DataTable
         columns={columns}
         data={data}
@@ -225,7 +309,7 @@ export default function BranchesTable({
               {
                 label: "Eliminar",
                 icon: Trash2,
-                onClick: () => handleDelete(row),
+                onClick: () => confirmDelete(row),
                 variant: "danger",
                 separatorBefore: true,
               },

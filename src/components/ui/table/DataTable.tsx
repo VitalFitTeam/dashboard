@@ -113,7 +113,9 @@ export function DataTable<T extends object>({
         id: "actions",
         header: "Acciones",
         cell: ({ row }) => (
-          <div className="flex justify-end gap-2">{actions(row.original)}</div>
+          <div className="flex justify-center gap-2">
+            {actions(row.original)}
+          </div>
         ),
       });
     }
