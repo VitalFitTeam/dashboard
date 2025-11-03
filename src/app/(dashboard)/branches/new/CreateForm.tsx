@@ -268,7 +268,7 @@ export default function CreateForm({
     api.branch
       .createBranch(apiPayload, token || "")
       .then((data) => {
-        router.push("/dashboard/branches?status=success");
+        router.push("/branches?status=success");
       })
       .catch((err) => {
         console.error("Error creando sucursal:", err);

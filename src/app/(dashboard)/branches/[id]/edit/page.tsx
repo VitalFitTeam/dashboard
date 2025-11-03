@@ -44,7 +44,7 @@ export default function EditBranchPage() {
         }
         const status = err?.response?.status ?? err?.status ?? null;
         if (status === 404) {
-          router.replace("/dashboard/branches");
+          router.replace("/branches");
         } else {
           console.error("Error cargando sucursal:", err);
           setError("No se pudo cargar la información de la sucursal.");

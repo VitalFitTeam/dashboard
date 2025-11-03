@@ -142,6 +142,17 @@ export default function HomeBranches() {
     loadBranchesData();
   }, [page, pageSize, sort, filters, refreshKey, token]);
 
+  useEffect(() => {
+    const status = searchParams.get("status");
+
+    if (status === "success") {
+      setShowSuccessAlert(true);
+      setRefreshKey((prev) => prev + 1);
+
+      router.replace("/branches", undefined);
+    }
+  }, [searchParams, router]);
+
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title="SUCURSALES">

@@ -44,17 +44,14 @@ export function GeneralAlertDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>     {" "}
+            <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>     
       <AlertDialogContent>
-               {" "}
         <AlertDialogHeader>
-                    <AlertDialogTitle>{title}</AlertDialogTitle>         {" "}
+                    <AlertDialogTitle>{title}</AlertDialogTitle>   
           <AlertDialogDescription>{description}</AlertDialogDescription>     
-           {" "}
         </AlertDialogHeader>
-               {" "}
+
         <AlertDialogFooter>
-                   {" "}
           {isInfoOrSuccess ? (
             <AlertDialogAction
               onClick={onAction}
@@ -64,12 +61,11 @@ export function GeneralAlertDialog({
                 }),
               )}
             >
-                            {actionText}           {" "}
+                            {actionText}         
             </AlertDialogAction>
           ) : (
             <>
                             <AlertDialogCancel>{cancelText}</AlertDialogCancel> 
-                         {" "}
               <AlertDialogAction
                 onClick={onAction}
                 className={cn(
@@ -77,16 +73,12 @@ export function GeneralAlertDialog({
                     buttonVariants({ variant: "destructive" }),
                 )}
               >
-                                {actionText}             {" "}
+                                {actionText}             
               </AlertDialogAction>
-                         {" "}
             </>
           )}
-                 {" "}
         </AlertDialogFooter>
-             {" "}
       </AlertDialogContent>
-         {" "}
     </AlertDialog>
   );
 }
