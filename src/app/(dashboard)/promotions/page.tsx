@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import AlertConfirm from "@/components/ui/alertConfirm";
 
 // Mock service - reemplaza con tu API real
 const promotionService = {
@@ -170,14 +171,14 @@ type PromotionStatusCount = {
 
 export default function PromotionsPage() {
   const [showForm, setShowForm] = useState(false);
-  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(
-    null,
-  );
+  const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isViewer, setIsViewer] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
 
   const [statsData, setStatsData] = useState<PromotionStatusCount>({
     Active: 0,
@@ -236,18 +237,15 @@ export default function PromotionsPage() {
   };
 
   const handleUpdate = async (data: UpdatePromotionDTO) => {
-    if (!editingPromotion) {return;}
+    if (!promotion) {return;}
 
     setIsSubmitting(true);
     try {
-      await promotionService.updatePromotion(
-        editingPromotion.promotion_id,
-        data,
-      );
+      await promotionService.updatePromotion(promotion.promotion_id, data);
       setSuccessMessage("Promoción actualizada exitosamente");
       setShowSuccessAlert(true);
       setRefreshKey((prev) => prev + 1);
-      setEditingPromotion(null);
+      setPromotion(null);
       setShowForm(false);
     } catch (error) {
       console.error("Error updating promotion:", error);
@@ -258,33 +256,47 @@ export default function PromotionsPage() {
   };
 
   const handleEdit = (promotion: Promotion) => {
-    setEditingPromotion(promotion);
+    setPromotion(promotion);
     setShowForm(true);
+    setIsViewer(false);
+  };
+  const handleDelete = (promotion: Promotion) => {
+    setPromotion(promotion);
+    setAlertOpen(true);
+    setShowForm(false);
+    setIsViewer(false);
   };
 
-  const handleDelete = async (promotion: Promotion) => {
-    if (confirm(`¿Estás seguro de eliminar la promoción ${promotion.code}?`)) {
-      try {
-        await promotionService.deletePromotion(promotion.promotion_id);
-        setSuccessMessage("Promoción eliminada exitosamente");
-        setShowSuccessAlert(true);
-        setRefreshKey((prev) => prev + 1);
-      } catch (error) {
-        console.error("Error deleting promotion:", error);
-        alert("Error al eliminar la promoción");
-      }
+  const handleConfirmDelete = async (promotion: Promotion) => {
+    try {
+      await promotionService.deletePromotion(promotion.promotion_id);
+      setAlertOpen(false);
+      setSuccessMessage("Promoción eliminada exitosamente");
+      setShowSuccessAlert(true);
+      setRefreshKey((prev) => prev + 1);
+    } catch (error) {
+      console.error("Error deleting promotion:", error);
+      alert("Error al eliminar la promoción");
     }
+  };
+
+  const handleCancelDelete = () => {
+    setPromotion(null);
+    setAlertOpen(false);
+    setShowForm(false);
+    setIsViewer(false);
   };
 
   const handleView = (promotion: Promotion) => {
     console.log("Viewing promotion:", promotion);
-    // Aquí puedes implementar la vista detallada
-    alert(`Vista de promoción: ${promotion.name}\nCódigo: ${promotion.code}`);
+    setPromotion(promotion);
+    setIsViewer(true);
+    setShowForm(true);
   };
 
   const handleFormClose = () => {
     setShowForm(false);
-    setEditingPromotion(null);
+    setPromotion(null);
   };
 
   const handleFilterChange = (key: string, value: string | undefined) => {
@@ -293,7 +305,7 @@ export default function PromotionsPage() {
   };
 
   const handleFormSubmit = (data: CreatePromotionDTO | UpdatePromotionDTO) => {
-    if (editingPromotion) {
+    if (promotion) {
       return handleUpdate(data as UpdatePromotionDTO);
     } else {
       return handleCreate(data as CreatePromotionDTO);
@@ -370,12 +382,13 @@ export default function PromotionsPage() {
           onClick={() => setShowModal(false)}
         >
           <PromotionForm
-            promotion={editingPromotion || undefined}
+            promotion={promotion || undefined}
             isOpen={showForm}
             onClose={handleFormClose}
             onSubmit={handleFormSubmit}
             isSubmitting={isSubmitting}
             onSuccess={handleFormSuccess}
+            isViewer={isViewer}
           />
         </div>
       )}
@@ -388,6 +401,17 @@ export default function PromotionsPage() {
         title="¡Operación Exitosa!"
         description={successMessage}
         actionText="Continuar"
+      />
+
+      <AlertConfirm
+        isOpen={alertOpen}
+        title="¿Eliminar registro?"
+        message="Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar este registro permanentemente?"
+        confirmText="Sí, eliminar"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        type="danger"
       />
     </div>
   );

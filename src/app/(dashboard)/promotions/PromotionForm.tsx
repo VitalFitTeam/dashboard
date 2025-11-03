@@ -27,6 +27,7 @@ interface PromotionFormProps {
   onSuccess: () => void;
   onSubmit: (data: CreatePromotionDTO | UpdatePromotionDTO) => Promise<void>;
   isSubmitting?: boolean;
+  isViewer?: boolean;
 }
 
 export default function PromotionForm({
@@ -35,6 +36,7 @@ export default function PromotionForm({
   onSuccess,
   onSubmit,
   isSubmitting = false,
+  isViewer = false,
 }: PromotionFormProps) {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
@@ -136,7 +138,8 @@ export default function PromotionForm({
                   value={formData.name || ""}
                   onChange={handleChange}
                   placeholder="Nombre de la promoción"
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={isViewer}
                 />
                 {formErrors["name"] && (
                   <p className="text-sm text-red-500 mt-1">
@@ -152,7 +155,8 @@ export default function PromotionForm({
                   name="type"
                   value={formData.type || ""}
                   onChange={handleChange}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={isViewer}
                 >
                   <option value="">Seleccionar tipo</option>
                   <option value="percentage">Porcentaje (%)</option>
@@ -176,7 +180,8 @@ export default function PromotionForm({
                   onChange={handleChange}
                   min="0"
                   step={formData.type === "percentage" ? "0.1" : "0.01"}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={isViewer}
                 />
                 {formErrors["discount"] && (
                   <p className="text-sm text-red-500 mt-1">
@@ -195,7 +200,8 @@ export default function PromotionForm({
                   value={formData.start_date || ""}
                   onChange={handleChange}
                   min={new Date().toISOString().split("T")[0]}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={isViewer}
                 />
                 {formErrors["start_date"] && (
                   <p className="text-sm text-red-500 mt-1">
@@ -217,7 +223,8 @@ export default function PromotionForm({
                     formData.start_date ||
                     new Date().toISOString().split("T")[0]
                   }
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={isViewer}
                 />
                 {formErrors["end_date"] && (
                   <p className="text-sm text-red-500 mt-1">
@@ -241,7 +248,11 @@ export default function PromotionForm({
         <CardHeader className="sticky top-0 bg-white z-10 pt-6 pb-4 border-b">
           <div className="flex items-center justify-between w-full">
             <CardTitle className="text-2xl font-bold text-gray-800">
-              {promotion ? "EDITAR PROMOCIÓN" : "CREAR NUEVA PROMOCIÓN"}
+              {isViewer && promotion
+                ? "VER PROMOCIÓN"
+                : promotion
+                  ? "EDITAR PROMOCIÓN"
+                  : "CREAR NUEVA PROMOCIÓN"}
             </CardTitle>
             <div className="flex items-center gap-4">
               <Image
@@ -265,34 +276,38 @@ export default function PromotionForm({
 
         <CardContent className="p-6 pt-4">
           <p className="text-sm text-gray-600 mb-6">
-            {promotion
-              ? "Modifica la información de la promoción"
-              : "Agrega la información de la promoción"}
+            {isViewer
+              ? "Información de la promoción"
+              : promotion
+                ? "Modifica la información de la promoción"
+                : "Agrega la información de la promoción"}
           </p>
           <div className="mt-8">{renderCurrentStep()}</div>
         </CardContent>
 
         <CardFooter className="flex justify-end px-6 pb-6 border-t pt-6">
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="flex items-center gap-2 bg-[#F27F2A] hover:bg-[#E57225]"
-          >
-            {currentStep === steps.length ? (
-              isSubmitting ? (
-                "Guardando..."
-              ) : promotion ? (
-                "Actualizar Promoción"
+          {!isViewer && (
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="flex items-center gap-2 bg-[#F27F2A] hover:bg-[#E57225]"
+            >
+              {currentStep === steps.length ? (
+                isSubmitting ? (
+                  "Guardando..."
+                ) : promotion ? (
+                  "Actualizar Promoción"
+                ) : (
+                  "Crear Promoción"
+                )
               ) : (
-                "Crear Promoción"
-              )
-            ) : (
-              <>
-                Siguiente
-                <ArrowRightIcon className="w-4 h-4" />
-              </>
-            )}
-          </Button>
+                <>
+                  Siguiente
+                  <ArrowRightIcon className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>
