@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import Wizard from "@/app/(dashboard)/branches/Wizard";
 import {
-  Card,
   CardHeader,
   CardTitle,
   CardContent,
@@ -17,34 +16,29 @@ import {
 } from "@/components/ui/card";
 import StepForm from "@/app/(dashboard)/branches/StepForm";
 import Image from "next/image";
-import { PaymentMethodUI } from "./page";
-import { createBranch } from "@/services/branches";
 import { Country, State, City } from "@/models/location";
-import { BranchAdmin } from "@/models/users";
 import { api } from "@/lib/sdk-config";
-import { CreateBranchRequest, User, UserApiResponse } from "@vitalfit/sdk";
+import { CreateBranchRequest, User } from "@vitalfit/sdk";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 interface BranchFromProps {
-  onClose: () => void;
-  allPaymentMethods: PaymentMethodUI[];
-  allBranchAdmins: User[];
   allCountries: Country[];
   allStates: State[];
   allCities: City[];
-  onSuccess: () => void;
 }
 
-export default function BranchFrom({
-  onClose,
-  onSuccess,
-  allPaymentMethods,
-  allBranchAdmins,
+export default function CreateForm({
   allCountries,
   allStates,
   allCities,
 }: BranchFromProps) {
+  const router = useRouter();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
+  const [allBranchAdmins, setAllBranchAdmins] = useState<User[]>([]);
+  const { token } = useAuth();
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -70,13 +64,84 @@ export default function BranchFrom({
     { id: 1, name: "Información Básica", description: "Datos" },
     { id: 2, name: "Ubicación", description: "Dirección" },
     { id: 3, name: "Administración", description: "Gestión" },
-    { id: 4, name: "Comercial", description: "Métodos de Pago" },
-    { id: 5, name: "Confirmación", description: "Revisión" },
+    { id: 4, name: "Confirmación", description: "Revisión" },
   ];
 
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    async function loadAdmins() {
+      setIsDataLoading(true);
+      try {
+        const adminsRes = await api.user.getBranchAdmins(token || "");
+        setAllBranchAdmins(adminsRes.data || []);
+      } catch (error) {
+        console.error("Error cargando administradores:", error);
+      } finally {
+        setIsDataLoading(false);
+      }
+    }
+    loadAdmins();
+  }, [token]);
+
+  const validateStep = (stepToValidate: number) => {
+    const errors: Record<string, string> = {};
+    let isValid = true;
+
+    if (stepToValidate === 1) {
+      if (!formData.name?.trim()) {
+        errors.name = "La Razón Social es obligatoria.";
+        isValid = false;
+      }
+      if (!formData.taxId?.trim()) {
+        errors.taxId = "El ID Fiscal es obligatorio.";
+        isValid = false;
+      }
+      if (!formData.status?.trim()) {
+        errors.status = "El estado de sucursal es obligatorio.";
+        isValid = false;
+      }
+    } else if (stepToValidate === 2) {
+      if (!formData.address?.trim()) {
+        errors.address = "La Dirección Completa es obligatoria.";
+        isValid = false;
+      }
+      if (formData.latitude === 0 || formData.longitude === 0) {
+        errors.latitude = "Debe seleccionar la ubicación en el mapa.";
+        errors.longitude = "Debe seleccionar la ubicación en el mapa.";
+        isValid = false;
+      }
+      if (!formData.countryId?.trim()) {
+        errors.countryId = "El País es obligatorio.";
+      }
+      if (!formData.stateId?.trim()) {
+        errors.stateId = "El Estado es obligatorio.";
+      }
+    } else if (stepToValidate === 3) {
+      if (!formData.manager_id?.trim()) {
+        errors.manager_id = "Debe asignar un Gerente Responsable.";
+        isValid = false;
+      }
+      if (
+        !formData.capacidadMiembros ||
+        Number(formData.capacidadMiembros) <= 0
+      ) {
+        errors.capacidadMiembros =
+          "La capacidad debe ser un número válido (> 0).";
+        isValid = false;
+      }
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
   const handleNext = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+    if (validateStep(currentStep)) {
+      if (currentStep < steps.length) {
+        setCurrentStep(currentStep + 1);
+      }
     }
   };
 
@@ -188,8 +253,6 @@ export default function BranchFrom({
     };
 
     console.log("📤 Payload enviado:", apiPayload);
-
-    // Validación rápida antes de enviar
     if (
       !apiPayload.name ||
       !apiPayload.tax_id ||
@@ -202,13 +265,10 @@ export default function BranchFrom({
       return;
     }
 
-    const token = localStorage.getItem("token");
-
     api.branch
       .createBranch(apiPayload, token || "")
       .then((data) => {
-        onClose();
-        window.location.reload();
+        router.push("/dashboard/branches?status=success");
       })
       .catch((err) => {
         console.error("Error creando sucursal:", err);
@@ -231,10 +291,7 @@ export default function BranchFrom({
   };
 
   return (
-    <Card
-      className="w-full max-w-4xl max-h-[90vh] mx-auto my-auto overflow-y-auto border"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div className="w-full max-w-4xl mx-auto overflow-y-auto ">
       <CardHeader className="sticky top-0 bg-white z-10 pt-6 pb-4 border-b">
         <div className="flex items-center justify-between w-full">
           <CardTitle className="text-2xl font-bold text-gray-800">
@@ -248,14 +305,6 @@ export default function BranchFrom({
               height={40}
               priority
             />
-            <Button
-              onClick={onClose}
-              size="icon"
-              variant="ghost"
-              className="text-gray-400 hover:text-gray-700"
-            >
-              <XMarkIcon className="h-6 w-6" />
-            </Button>
           </div>
         </div>
       </CardHeader>
@@ -274,7 +323,6 @@ export default function BranchFrom({
             handleCustomChange={handleCustomChange}
             formErrors={formErrors}
             allBranchAdmins={allBranchAdmins}
-            allPaymentMethods={allPaymentMethods}
           />
         </div>
       </CardContent>
@@ -303,6 +351,6 @@ export default function BranchFrom({
           )}
         </Button>
       </CardFooter>
-    </Card>
+    </div>
   );
 }

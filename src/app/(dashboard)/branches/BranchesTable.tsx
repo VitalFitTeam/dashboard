@@ -37,10 +37,6 @@ interface BranchesTableProps {
   pageSize: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
-  allInstructors: Instructor[];
-  allServices: Service[];
-  allEquipment: Equipment[];
-  allPaymentMethods: PaymentMethodUI[];
   totalPages: number;
   onFilterChange: FilterChangeHandler;
   filterValues: Record<string, string | undefined>;

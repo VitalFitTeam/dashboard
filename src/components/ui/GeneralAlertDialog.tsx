@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-// Importa los componentes que ya tienes
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,20 +12,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // Asegúrate que esta ruta sea correcta
-// Importa utilidades necesarias
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+} from "./alert-dialog";
+import { buttonVariants } from "./button";
 
-// Define las propiedades que recibirá tu componente general
 interface GeneralAlertDialogProps {
   trigger: React.ReactNode;
   title: string;
   description: string;
-  type?: "confirmation" | "info";
+  type?: "confirmation" | "info" | "success";
   actionText: string;
   onAction?: () => void;
-  actionVariant?: "default" | "destructive";
+  actionVariant?: "default" | "destructive" | "primary";
   cancelText?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -43,31 +40,36 @@ export function GeneralAlertDialog({
   open,
   onOpenChange,
 }: GeneralAlertDialogProps) {
+  const isInfoOrSuccess = type === "info" || type === "success";
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-
+            <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>     {" "}
       <AlertDialogContent>
+               {" "}
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+                    <AlertDialogTitle>{title}</AlertDialogTitle>         {" "}
+          <AlertDialogDescription>{description}</AlertDialogDescription>     
+           {" "}
         </AlertDialogHeader>
+               {" "}
         <AlertDialogFooter>
-          {type === "info" ? (
-            <AlertDialogCancel
+                   {" "}
+          {isInfoOrSuccess ? (
+            <AlertDialogAction
               onClick={onAction}
               className={cn(
                 buttonVariants({
-                  variant:
-                    actionVariant === "destructive" ? "destructive" : "default",
+                  variant: "default",
                 }),
               )}
             >
-              {actionText}
-            </AlertDialogCancel>
+                            {actionText}           {" "}
+            </AlertDialogAction>
           ) : (
             <>
-              <AlertDialogCancel>{cancelText}</AlertDialogCancel>
+                            <AlertDialogCancel>{cancelText}</AlertDialogCancel> 
+                         {" "}
               <AlertDialogAction
                 onClick={onAction}
                 className={cn(
@@ -75,12 +77,16 @@ export function GeneralAlertDialog({
                     buttonVariants({ variant: "destructive" }),
                 )}
               >
-                {actionText}
+                                {actionText}             {" "}
               </AlertDialogAction>
+                         {" "}
             </>
           )}
+                 {" "}
         </AlertDialogFooter>
+             {" "}
       </AlertDialogContent>
+         {" "}
     </AlertDialog>
   );
 }

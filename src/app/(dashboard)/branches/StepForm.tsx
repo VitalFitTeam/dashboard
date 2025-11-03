@@ -1,37 +1,30 @@
 "use client";
 
-import { BranchAdmin } from "@/models/users";
-import Step1 from "./Step1";
-import Step2 from "./Step2";
-import Step3 from "./Step3";
-import Step4 from "./Step4";
-import Step5 from "./Step5";
-import { PaymentMethodUI } from "./page"; // Importa el tipo
-import { User, UserApiResponse } from "@vitalfit/sdk";
+import Step1 from "./new/components/Step1";
+import Step2 from "./new/components/Step2";
+import { User } from "@vitalfit/sdk";
+import Step3 from "./new/components/Step3";
+import Step4 from "./new/components/Step4";
 
-// --- 1. ACTUALIZA LAS PROPS ---
 type StepProps = {
   step: number;
-  formData: any; // (Considera usar un tipo más específico para formData)
+  formData: any;
   handleChange: (
-    // <-- Cambia a handleChange
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => void;
-  handleCustomChange: (field: string, value: unknown) => void; // <-- Añade handleCustomChange
+  handleCustomChange: (field: string, value: unknown) => void;
   formErrors?: Record<string, string>;
-  allPaymentMethods?: PaymentMethodUI[]; // <-- Añade allPaymentMethods (opcional)
   allBranchAdmins: User[];
 };
 
 export default function StepForm({
   step,
   formData,
-  handleChange, // <-- Recibe handleChange
+  handleChange,
   handleCustomChange,
   formErrors,
-  allPaymentMethods = [],
   allBranchAdmins = [],
 }: StepProps) {
   switch (step) {
@@ -39,8 +32,8 @@ export default function StepForm({
       return (
         <Step1
           formData={formData}
-          handleChange={handleChange} // <-- Pasa handleChange
-          handleCustomChange={handleCustomChange} // <-- Pasa handleCustomChange
+          handleChange={handleChange}
+          handleCustomChange={handleCustomChange}
           formErrors={formErrors}
         />
       );
@@ -48,8 +41,8 @@ export default function StepForm({
       return (
         <Step2
           formData={formData}
-          handleChange={handleChange} // <-- Pasa handleChange
-          handleCustomChange={handleCustomChange} // <-- Pasa handleCustomChange
+          handleChange={handleChange}
+          handleCustomChange={handleCustomChange}
           formErrors={formErrors}
         />
       );
@@ -57,23 +50,16 @@ export default function StepForm({
       return (
         <Step3
           formData={formData}
-          handleChange={handleChange} // <-- Pasa handleChange
-          handleCustomChange={handleCustomChange} // <-- Pasa handleCustomChange
+          handleChange={handleChange}
+          handleCustomChange={handleCustomChange}
           formErrors={formErrors}
           allBranchAdmins={allBranchAdmins}
         />
       );
     case 4:
-      return (
-        <Step4
-          formData={formData}
-          handleCustomChange={handleCustomChange}
-          formErrors={formErrors}
-          allPaymentMethods={allPaymentMethods}
-        />
-      );
+      return <Step4 formData={formData} formErrors={formErrors} />;
     case 5:
-      return <Step5 formData={formData} formErrors={formErrors} />;
+
     default:
       return null;
   }

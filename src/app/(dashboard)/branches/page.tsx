@@ -9,8 +9,6 @@ import {
   PaymentMethod,
   User,
 } from "@vitalfit/sdk";
-import BranchFrom from "./BranchForm";
-import { redirect } from "next/navigation";
 import {
   BanknotesIcon,
   BuildingLibraryIcon,
@@ -27,26 +25,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter, useSearchParams } from "next/navigation";
 
-const MOCK_INSTRUCTORS: Instructor[] = [
-  { id: "i1", user_id: "u1", name: "Ana Pérez" },
-  { id: "i2", user_id: "u2", name: "Carlos Rivas" },
-];
-const MOCK_CITIES: City[] = [
-  { id: "c1", name: "Caracas", stateId: "s1" },
-  { id: "c2", name: "Barquisimeto", stateId: "s2" },
-];
-const MOCK_STATES: State[] = [
-  { id: "s1", name: "Distrito Capital", countryId: "co1" },
-  { id: "s2", name: "Lara", countryId: "co1" },
-];
-const MOCK_SERVICES: Service[] = [
-  { id: "srv1", name: "Yoga", categoryId: "cat1" },
-  { id: "srv2", name: "Pesas", categoryId: "cat1" },
-];
-const MOCK_EQUIPMENT: Equipment[] = [
-  { id: "eq1", name: "Cinta de correr", category: "Cardio" },
-];
 const statCardsConfig: {
   title: string;
   valueKey: keyof BranchStatusCount | "Total";
@@ -93,10 +73,10 @@ function mapApiPaymentMethodsToUI(methods: PaymentMethod[]): PaymentMethodUI[] {
 
 export default function HomeBranches() {
   const { token } = useAuth();
-  const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
+  const [isLoadingStatic, setIsLoadingStatic] = useState(true);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [isLoadingStatic, setIsLoadingStatic] = useState(true);
   const [isLoadingBranches, setIsLoadingBranches] = useState(true);
   const [statsData, setStatsData] = useState<BranchStatusCount>({
     Active: 0,
@@ -105,16 +85,7 @@ export default function HomeBranches() {
     Total: 0,
   });
   const [branchesData, setBranchesData] = useState<PaginatedBranch[]>([]);
-  const [allInstructors, setAllInstructors] = useState<Instructor[]>([]);
-  const [allCities, setAllCities] = useState<City[]>([]);
-  const [allCountries, setAllCountries] = useState<Country[]>([]);
-  const [allStates, setAllStates] = useState<State[]>([]);
-  const [allServices, setAllServices] = useState<Service[]>([]);
-  const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
-  const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethodUI[]>(
-    [],
-  );
-  const [allBranchAdmins, setAllBranchAdmins] = useState<User[]>();
+
   const [filters, setFilters] = useState<Record<string, string | undefined>>(
     {},
   );
@@ -124,6 +95,7 @@ export default function HomeBranches() {
   const [totalBranches, setTotalBranches] = useState(0);
   const totalPages =
     pageSize > 0 ? Math.max(1, Math.ceil(totalBranches / pageSize)) : 1;
+  const searchParams = useSearchParams();
 
   const handleFilterChange = (key: string, value: string | undefined) => {
     setPage(1);
@@ -132,40 +104,6 @@ export default function HomeBranches() {
       [key]: value,
     }));
   };
-
-  const handleFormSuccess = () => {
-    setShowModal(false);
-    setShowSuccessAlert(true);
-    setRefreshKey((prevKey) => prevKey + 1);
-  };
-
-  useEffect(() => {
-    async function loadStaticData() {
-      setIsLoadingStatic(true);
-      try {
-        const [paymentMethodsData, branchAdminsData] = await Promise.all([
-          api.paymentMethod.getPaymentMethods(token || ""),
-          api.user.getBranchAdmins(token || ""),
-        ]);
-
-        const uiPaymentMethods = mapApiPaymentMethodsToUI(
-          paymentMethodsData.data,
-        );
-        setAllPaymentMethods(uiPaymentMethods);
-        setAllBranchAdmins(branchAdminsData.data);
-        setAllInstructors(MOCK_INSTRUCTORS);
-        setAllCities(MOCK_CITIES);
-        setAllStates(MOCK_STATES);
-        setAllServices(MOCK_SERVICES);
-        setAllEquipment(MOCK_EQUIPMENT);
-      } catch (error) {
-        console.error("Error cargando datos estáticos:", error);
-      } finally {
-        setIsLoadingStatic(false);
-      }
-    }
-    loadStaticData();
-  }, []);
 
   useEffect(() => {
     async function loadBranchesData() {
@@ -207,7 +145,7 @@ export default function HomeBranches() {
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title="SUCURSALES">
-        <Button variant="primary" onClick={() => setShowModal(true)}>
+        <Button variant="primary" onClick={() => router.push("/branches/new")}>
           <PlusIcon className="h-5 w-5" />
           Crear Sucursal
         </Button>
@@ -239,31 +177,10 @@ export default function HomeBranches() {
         totalPages={totalPages}
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
-        allInstructors={allInstructors}
-        allServices={allServices}
-        allEquipment={allEquipment}
-        allPaymentMethods={allPaymentMethods}
         onFilterChange={handleFilterChange}
         onBranchDeleted={() => setRefreshKey((prev) => prev + 1)}
         filterValues={filters}
       />
-
-      {showModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          onClick={() => setShowModal(false)}
-        >
-          <BranchFrom
-            onClose={() => setShowModal(false)}
-            allPaymentMethods={allPaymentMethods}
-            allCountries={allCountries}
-            allStates={allStates}
-            allCities={allCities}
-            allBranchAdmins={allBranchAdmins || []}
-            onSuccess={handleFormSuccess}
-          />
-        </div>
-      )}
 
       <GeneralAlertDialog
         open={showSuccessAlert}
@@ -271,8 +188,8 @@ export default function HomeBranches() {
         trigger={<span />}
         type="info"
         title="¡Sucursal Creada!"
-        description="La nueva sucursal ha sido guardada exitosamente."
-        actionText="Continuar"
+        description="La nueva sucursal ha sido registrada exitosamente en el sistema."
+        actionText="Entendido"
       />
     </div>
   );

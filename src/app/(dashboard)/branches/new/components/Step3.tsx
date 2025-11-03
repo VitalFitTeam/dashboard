@@ -9,8 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BranchAdmin } from "@/models/users";
-import { User, UserApiResponse } from "@vitalfit/sdk";
+import { User } from "@vitalfit/sdk";
+import { api } from "@/lib/sdk-config";
 
 type StepProps = {
   formData: any;
@@ -60,7 +60,6 @@ const horasCierre = [
 
 export default function Step3({
   formData,
-  handleChange,
   handleCustomChange,
   formErrors = {},
   allBranchAdmins = [],
