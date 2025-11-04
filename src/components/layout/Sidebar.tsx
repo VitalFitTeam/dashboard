@@ -5,6 +5,11 @@ import {
   CurrencyDollarIcon,
   BuildingStorefrontIcon,
   UsersIcon,
+  ChartBarIcon,
+  TicketIcon,
+  Cog6ToothIcon,
+  QuestionMarkCircleIcon,
+  ArrowRightCircleIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
