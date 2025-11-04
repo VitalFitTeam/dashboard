@@ -270,6 +270,7 @@ export default function PromotionsPage() {
   const handleConfirmDelete = async (promotion: Promotion) => {
     try {
       await promotionService.deletePromotion(promotion.promotion_id);
+      setPromotion(null);
       setAlertOpen(false);
       setSuccessMessage("Promoción eliminada exitosamente");
       setShowSuccessAlert(true);
