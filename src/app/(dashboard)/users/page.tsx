@@ -1,49 +1,44 @@
 "use client";
-import { StatCard } from "@/components/ui/StatCard";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Users } from "@/models/users";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import CreateUser from "./CreateUser";
+import ViewDetailsUser from "./ViewDetailsUser";
+import EditUser from "./EditUser";
+import { useState } from "react";
 import UsersTable from "./UsersTable";
 
-const statsData = {
-  total: 100,
-  active: 70,
-  inactive: 20,
-  maintenance: 10,
-};
+export default function User() {
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<Users | null>(null);
+  const [viewUser, setViewUser] = useState<Users | null>(null);
 
-const statCardsConfig = [
-  {
-    title: "Total",
-    valueKey: "total" as keyof typeof statsData,
-  },
-  {
-    title: "Activas",
-    valueKey: "active" as keyof typeof statsData,
-  },
-  {
-    title: "Inactivas",
-    valueKey: "inactive" as keyof typeof statsData,
-  },
-  {
-    title: "Mantenimiento",
-    valueKey: "maintenance" as keyof typeof statsData,
-  },
-];
+  if (showCreateForm) {
+    return <CreateUser onBack={() => setShowCreateForm(false)} />;
+  }
 
-export default function Usuarios() {
-  const [showModal, setShowModal] = useState(false);
+  if (editingUser) {
+    return <EditUser user={editingUser} onBack={() => setEditingUser(null)} />;
+  }
+
+  if (viewUser) {
+    return <ViewDetailsUser user={viewUser} onBack={() => setViewUser(null)} />;
+  }
+
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <PageHeader title="USUARIOS ADMINISTRATIVOS">
-        <Button variant="primary" onClick={() => setShowModal(true)}>
+      <PageHeader title="USUARIOS">
+        <Button variant="primary" onClick={() => setShowCreateForm(true)}>
           <PlusIcon className="h-5 w-5" />
           Agregar Usuario
         </Button>
       </PageHeader>
 
-      <UsersTable />
+      <UsersTable
+        onView={(user) => setViewUser(user)}
+        onEdit={(user) => setEditingUser(user)}
+      />
     </div>
   );
 }

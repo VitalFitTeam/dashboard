@@ -7,6 +7,11 @@ export type Service = {
   id: string;
   name: string;
   categoryId: string;
-  description?: string | null;
   durationMinutes?: number | null;
 };
+
+export interface SortableImage {
+  id: string;
+  file: File;
+  description: string;
+}
