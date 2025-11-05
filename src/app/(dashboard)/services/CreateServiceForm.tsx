@@ -39,13 +39,7 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
   const [localBanners, setLocalBanners] = useState<SortableImageLocal[]>([]);
   const [serviceImages, setServiceImages] = useState<CreateServiceImage[]>([]);
   const [showNotification, setShowNotification] = useState(false);
-  const [localServiceImages, setLocalServiceImages] = useState<
-    SortableImageLocal[]
-  >([]);
-  const [availableBanners, setAvailableBanners] = useState<Banner[]>([]);
-
-  const [categories, setCategories] = useState<ServiceCategoryInfo[]>([]);
-  const { token } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -54,115 +48,59 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
     duration: "",
     priority: "",
     featured: "",
-    selectedBannerId: "",
-    serviceImages: [] as File[],
   });
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        if (!token) {
-          return;
-        }
-        const response = await api.products.getCategories(token);
-        console.log("Categorías:", response.data);
-        setCategories(response.data);
-      } catch (err) {
-        console.error("Error cargando categorías:", err);
-      }
-    };
-
-    fetchCategories();
-  }, [token]);
-
-  useEffect(() => {
-    const fetchBanners = async () => {
-      if (!token) {
-        return;
-      }
-      try {
-        const bannerRes = await api.marketing.getBanner(token);
-        setAvailableBanners(
-          bannerRes.data.map((b: any) => ({
-            banner_id: b.banner_id,
-            name: b.name || "Sin nombre",
-            image_url: b.image_url || "",
-          })),
-        );
-      } catch (err) {
-        console.error("Error cargando banners:", err);
-      }
-    };
-    fetchBanners();
-  }, [token]);
-
+  // ✅ Nueva versión del handleSubmit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      if (!token) {
-        throw new Error("Usuario no autenticado");
-      }
+      // 🔸 Subir imágenes a Cloudinary aquí
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
 
-      let banner_id = formData.selectedBannerId;
-      if (!banner_id && localBanners.length > 0) {
-        const firstLocalBanner = localBanners[0];
+      const uploadToCloudinary = async (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
 
-        // 🚨 Subir archivo de banner y obtener URL (REQUERIDO) 🚨
-        let newBannerImageUrl = firstLocalBanner.imageUrl || ""; // Asume que la URL ya existe o usa la URL temporal
-
-        if (firstLocalBanner.file) {
-          // Aquí DEBE ir tu llamada a la API para subir firstLocalBanner.file y obtener la URL final.
-          console.warn("Simulando subida de archivo para nuevo banner.");
-          newBannerImageUrl = URL.createObjectURL(firstLocalBanner.file); // PLACHOLDER
-        }
-
-        if (newBannerImageUrl) {
-          const bannerData: CreateBanner = {
-            name: formData.name,
-            image_url: newBannerImageUrl,
-            link_url: "",
-            is_active: true,
-          };
-
-          const newBanner = await api.marketing.createBanners(
-            bannerData,
-            token,
-          );
-        }
-      }
-
-      const service_images = serviceImages.map((img, index) => ({
-        image_url: DEFAULT_IMAGE_URL,
-        alt_text: img.alt_text || "",
-        display_order: index,
-        is_primary: index === 0,
-      }));
-
-      const priorityMap: { [key: string]: number } = {
-        Alta: 3,
-        Media: 2,
-        Baja: 1,
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          { method: "POST", body: formData },
+        );
+        const data = await res.json();
+        return data.secure_url;
       };
 
-      const apiPayload: CreateService = {
-        banner_id: banner_id, // Usará el del Select O el recién creado
-        category_id: formData.category,
-        description: formData.description,
-        duration: parseInt(formData.duration, 10),
-        is_featured: formData.featured === "1",
-        name: formData.name,
-        priority: priorityMap[formData.priority] || 2,
-        service_images,
+      // Subir banner (solo uno)
+      const uploadedBanner =
+        bannerImages.length > 0
+          ? await uploadToCloudinary(bannerImages[0].file)
+          : null;
+
+      // Subir todas las imágenes del servicio
+      const uploadedServiceImages = await Promise.all(
+        serviceImages.map((img) => uploadToCloudinary(img.file)),
+      );
+
+      // 🧠 Crear payload final
+      const payload = {
+        ...formData,
+        bannerUrl: uploadedBanner,
+        serviceImageUrls: uploadedServiceImages,
       };
 
-      const data = await api.products.createService(apiPayload, token);
-      console.log("Servicio creado:", data);
+      console.log("📤 Datos listos para enviar:", payload);
+
+      // Aquí podrías hacer un POST real a tu backend, por ejemplo:
+      // await fetch("/api/services", { method: "POST", body: JSON.stringify(payload) });
 
       setShowNotification(true);
-      setTimeout(() => onBack(), 1000);
-    } catch (err: any) {
-      console.error("Error creando servicio:", err);
-      alert("Error al crear servicio: " + (err?.message || String(err)));
+    } catch (error) {
+      console.error("❌ Error al crear el servicio:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -227,13 +165,12 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
         <div className="space-y-2">
           <Label htmlFor="description">Descripción *</Label>
           <Textarea
-            id="description"
             placeholder="Escribe una descripcion aqui..."
             value={formData.description}
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }
-            required
+            className="bg-white"
           />
         </div>
 
@@ -243,7 +180,7 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
             <Input
               id="duration"
               className="bg-white"
-              placeholder="Duración en minutos"
+              placeholder="Introduce la duración"
               value={formData.duration}
               onChange={(e) =>
                 setFormData({ ...formData, duration: e.target.value })
@@ -251,6 +188,7 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
               required
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="priority">Prioridad *</Label>
             <Select
@@ -308,19 +246,23 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
           </Select>
         </div>
 
+        {/* 📸 Banner del servicio */}
         <ImageUploader
           label="Banner del servicio"
           images={localBanners}
           inputId="banner-upload"
-          onUpload={(newFiles) =>
-            setLocalBanners([...localBanners, ...newFiles])
-          }
+          onUpload={(newFiles) => {
+            if (newFiles.length > 0) {
+              setBannerImages([newFiles[0]]);
+            }
+          }}
           onRemove={(id) =>
             setLocalBanners(localBanners.filter((img) => img.id !== id))
           }
           onReorder={setLocalBanners}
         />
 
+        {/* 📸 Imágenes del servicio */}
         <ImageUploader
           label="Imágenes del servicio"
           images={localServiceImages}
@@ -336,12 +278,14 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
           onReorder={setLocalServiceImages}
         />
 
+        {/* 🟠 Botón Crear */}
         <div className="flex justify-center">
           <Button
             type="submit"
+            disabled={isSubmitting}
             className="bg-primary hover:bg-orange-600 text-white my-4 px-8"
           >
-            Crear
+            {isSubmitting ? "Subiendo imágenes..." : "Crear"}
           </Button>
         </div>
 

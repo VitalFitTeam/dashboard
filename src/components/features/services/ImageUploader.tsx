@@ -8,12 +8,16 @@ import {
   EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
 
+interface UploadableImage extends SortableImage {
+  url?: string;
+}
+
 interface ImageUploaderProps {
   label: string;
-  images: SortableImage[];
-  onUpload: (files: SortableImage[]) => void;
+  images: UploadableImage[];
+  onUpload: (files: UploadableImage[]) => void;
   onRemove: (id: string) => void;
-  onReorder: (newOrder: SortableImage[]) => void;
+  onReorder: (newOrder: UploadableImage[]) => void;
   inputId: string;
 }
 
@@ -28,14 +32,16 @@ export default function ImageUploader({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files).map((file) => ({
+    if (!e.target.files) {return;}
+    const newImages: UploadableImage[] = Array.from(e.target.files).map(
+      (file) => ({
         id: `${file.name}-${Date.now()}-${Math.random()}`,
         file,
         description: "",
-      }));
-      onUpload(newFiles);
-    }
+        url: URL.createObjectURL(file), // solo preview local
+      }),
+    );
+    onUpload(newImages);
   };
 
   const handleDescriptionChange = (id: string, value: string) => {
@@ -77,7 +83,7 @@ export default function ImageUploader({
           setList={onReorder}
           className="flex flex-col gap-4"
         >
-          {images.map(({ id, file, description }, index) => (
+          {images.map(({ id, file, description, url }, index) => (
             <div
               key={id}
               className="border rounded-lg p-4 bg-gray-50 space-y-2"
@@ -88,11 +94,13 @@ export default function ImageUploader({
                     <EllipsisVerticalIcon className="h-4 w-4" />
                     <EllipsisVerticalIcon className="h-4 w-4" />
                   </div>
+
                   <img
-                    src={URL.createObjectURL(file)}
+                    src={url}
                     alt={`Preview ${index + 1}`}
                     className="w-24 h-24 object-cover rounded border"
                   />
+
                   <div className="text-sm text-gray-700">
                     <p className="font-medium">{file.name}</p>
                     <p className="text-xs text-gray-500">
@@ -100,12 +108,11 @@ export default function ImageUploader({
                     </p>
                   </div>
                 </div>
+
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() =>
-                      window.open(URL.createObjectURL(file), "_blank")
-                    }
+                    onClick={() => window.open(url, "_blank")}
                     className="rounded-full p-1"
                   >
                     <EyeIcon className="h-6 w-6" />
