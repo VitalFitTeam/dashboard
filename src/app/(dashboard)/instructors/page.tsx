@@ -8,90 +8,150 @@ import InstructorTable from "./InstructorTable";
 import ViewDetailsInstructor from "./ViewDetailsInstructor";
 import { StatCard } from "@/components/ui/StatCard";
 import CreateInstructor from "./CreateInstructor";
-import { useState } from "react";
+import { api } from "@/lib/sdk-config";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Instructor() {
-
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingInstructor, setEditingInstructor] = useState<Instructor | null>(null);
-  const [viewInstructor, setViewInstructor] = useState<Instructor | null>(null);
-
-  if (showCreateForm) {
-    return <CreateInstructor onBack={() => setShowCreateForm(false)} />;
-  }
-
-  if (editingInstructor) {
-    return (
-      <EditInstructor
-        instructor={editingInstructor}
-        onBack={() => setEditingInstructor(null)}
-      />
-    );
-  }
-
-  if (viewInstructor) {
-    return (
-      <ViewDetailsInstructor
-        instructor={viewInstructor}
-        onBack={() => setViewInstructor(null)}
-      />
-    );
-  }
-
-  const statsData = {
-    total: 4,
-    active: 3,
-    blocked: 1,
+  type InstructorDataList = {
+    biography: string;
+    birth_date: string;
+    email: string;
+    first_name: string;
+    gender: string;
+    identity_document: string;
+    instructor_id: string;
+    last_name: string;
+    phone: string;
+    profile_picture_url: string;
+    user_id: string;
   };
 
-  const statCardsConfig = [
-    {
-      title: "Total",
-      valueKey: "total" as keyof typeof statsData,
-      fontColor: "text-black-600",
-    },
-    {
-      title: "Activos",
-      valueKey: "active" as keyof typeof statsData,
-      fontColor: "text-green-600",
-    },
-    {
-      title: "Bloqueados",
-      valueKey: "blocked" as keyof typeof statsData,
-      fontColor: "text-red-600",
-    },
-  ];
+  type DataResponse<T> = {
+    data: T;
+    message?: string;
+    success?: boolean;
+    count?: number;
+  };
+
+  const { token } = useAuth();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingInstructor, setEditingInstructor] = useState<Instructor | null>(
+    null,
+  );
+  const [viewInstructor, setViewInstructor] = useState<Instructor | null>(null);
+
+  const [isLoadingInstructor, setIsLoadingInstructor] = useState(true);
+  const [InstructorData, setInstructorData] = useState<Instructor[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const [filters, setFilters] = useState<Record<string, string | undefined>>(
+    {},
+  );
+
+  const [page, setPage] = useState(2);
+  const [pageSize, setPageSize] = useState(10);
+  const [sort, setSort] = useState<"asc" | "desc">("desc");
+  const [totalInstructor, setTotalInstructor] = useState(0);
+
+  useEffect(() => {
+    async function loadInstructorData() {
+      setIsLoadingInstructor(true);
+      try {
+        const searchTerms = filters.name || filters.tax_id;
+        const response: DataResponse<InstructorDataList[]> =
+          await api.instructor.getInstructors(
+            {
+              limit: pageSize,
+              page,
+              sort,
+              search: searchTerms,
+            },
+            token || "",
+          );
+
+        const mapped: Instructor[] = response.data.map((item) => ({
+          id: item.instructor_id,
+          instructor_id: item.instructor_id,
+          user_id: item.user_id,
+          first_name: item.first_name,
+          last_name: item.last_name,
+          email: item.email,
+          phone: item.phone,
+          birth_date: item.birth_date,
+          gender: item.gender,
+          identity_document: item.identity_document,
+          biography: item.biography,
+          profile_picture_url: item.profile_picture_url,
+        }));
+
+        setInstructorData(mapped);
+        setTotalInstructor(response.count ?? mapped.length);
+        console.log(mapped);
+      } catch (error) {
+        console.error("Error cargando instructores:", error);
+      } finally {
+        setIsLoadingInstructor(false);
+      }
+    }
+
+    loadInstructorData();
+  }, [page, pageSize, sort, filters, refreshKey, token]);
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {statCardsConfig.map((card) => (
-          <StatCard
-            key={card.title}
-            title={card.title}
-            value={
-              <>
-                {card.valueKey === "total"
-                  ? statsData.active + statsData.blocked
-                  : (statsData[card.valueKey] ?? 0)}
-                <span className={`ml-1.5 font-normal ${card.fontColor}`}>
-                  INSTRUCTORES
-                </span>
-              </>
-            }
+      {showCreateForm ? (
+        <CreateInstructor
+          onBack={() => {
+            setShowCreateForm(false);
+            setFilters({}); // limpia filtros
+            setPage(1); // vuelve a la primera página
+            setRefreshKey((prev) => prev + 1); // recarga datos
+          }}
+        />
+      ) : editingInstructor ? (
+        <EditInstructor
+          instructor={editingInstructor}
+          onBack={() => setEditingInstructor(null)}
+        />
+      ) : viewInstructor ? (
+        <ViewDetailsInstructor
+          instructor={viewInstructor}
+          onBack={() => setViewInstructor(null)}
+        />
+      ) : (
+        <>
+          <PageHeader title="INSTRUCTORES">
+            <Button variant="primary" onClick={() => setShowCreateForm(true)}>
+              <PlusIcon className="h-5 w-5" />
+              Agregar Instructor
+            </Button>
+          </PageHeader>
+          {/* <InstructorTable
+            data={InstructorData}
+            isLoading={isLoadingInstructor}
+            onView={(instructor) => setViewInstructor(instructor)}
+            onEdit={(instructor) => setEditingInstructor(instructor)}
+          /> */}
+          <InstructorTable
+            data={InstructorData}
+            isLoading={isLoadingInstructor}
+            onView={(instructor) => setViewInstructor(instructor)}
+            onEdit={(instructor) => setEditingInstructor(instructor)}
+            filters={filters}
+            setFilters={setFilters}
+            page={page}
+            setPage={setPage}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            sort={sort}
+            setSort={setSort}
+            totalInstructor={totalInstructor}
+            refreshKey={refreshKey}
+            setRefreshKey={setRefreshKey}
           />
-        ))}
-      </div>
-      <PageHeader title="INSTRUCTORES">
-        <Button variant="primary" onClick={() => setShowCreateForm(true)}>
-          <PlusIcon className="h-5 w-5" />
-          Agregar Instructor
-        </Button>
-      </PageHeader>
-      <InstructorTable
-        onView={(instructor) => setViewInstructor(instructor)}
-        onEdit={(instructor) => setEditingInstructor(instructor)}
-      />
+        </>
+      )}
     </div>
   );
 }

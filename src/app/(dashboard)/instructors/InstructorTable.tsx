@@ -1,88 +1,95 @@
 "use client";
 import { useState } from "react";
 import type { Instructor } from "@/models/instructor";
-import { InstructorData } from "./data";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import {
-  Alert,
-  AlertTitle,
-  AlertDescription,
-} from "@/components/ui/alert";
+import { Notification } from "@/components/ui/Notification";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
-import { SelectValue } from "@radix-ui/react-select";
+import { api } from "@/lib/sdk-config";
 
 interface InstructorTableProps {
+  data: Instructor[];
+  isLoading: boolean;
   onView: (instructor: Instructor) => void;
   onEdit: (instructor: Instructor) => void;
+  filters: Record<string, string | undefined>;
+  setFilters: React.Dispatch<
+    React.SetStateAction<Record<string, string | undefined>>
+  >;
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  pageSize: number;
+  setPageSize: React.Dispatch<React.SetStateAction<number>>;
+  sort: "asc" | "desc";
+  setSort: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
+  totalInstructor: number;
+  refreshKey: number;
+  setRefreshKey: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export default function PaymentTable({ onView,onEdit }: InstructorTableProps) {
-  const [page, setPage] = useState(1);
+export default function InstructorTable({
+  data,
+  isLoading,
+  onView,
+  onEdit,
+  filters,
+  setFilters,
+  page,
+  setPage,
+  pageSize,
+  setPageSize,
+  sort,
+  setSort,
+  totalInstructor,
+  refreshKey,
+  setRefreshKey,
+}: InstructorTableProps) {
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
+  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+  const [showErrorNotification, setShowErrorNotification] = useState(false);
 
-  const handleDelete = (row: Instructor) => {
+  const handleDelete = async (row: Instructor) => {
     console.warn("Instructor Eliminado ", row.id);
     setDeleteRowId(null);
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      console.error("Token no disponible");
+      return;
+    }
+
+    try {
+      const response = await api.instructor.deleteInstructor(row.id, token);
+      console.log("Instructor borrado:", response);
+      setShowSuccessNotification(true);
+      setRefreshKey((prev) => prev + 1);
+      setTimeout(() => {
+        setShowSuccessNotification(false);
+      }, 4000);
+    } catch (err) {
+      console.error("Error eliminando instructor:", err);
+      setShowErrorNotification(true);
+    }
   };
 
-  const columns: Column<Instructor>[] = [
-    {
-      header: "ID",
-      accessor: "id",
-      render: (id) => (
-        <div className="w-28 truncate" title={id as string}>
-          {id as string}
-        </div>
-      ),
-    },
-    { header: "Nombre", accessor: "name", filterType: "text" },
+  const visibleColumns: Column<Instructor>[] = [
+    { header: "ID", accessor: "id", render: (id) => <div>{id}</div> },
+    { header: "Nombre", accessor: "first_name", filterType: "text" },
     { header: "Email", accessor: "email", filterType: "text" },
-    { header: "Especialidad", accessor: "specialty", filterType: "text" },
-    {
-      header: "Status",
-      accessor: "status",
-      filterType: "select",
-      filterOptions: [
-        { label: "Activa", value: "active" },
-        { label: "Inactiva", value: "inactive" },
-        { label: "En mantenimiento", value: "maintenance" },
-        { label: "Bloqueado", value: "blocked" },
-      ],
-      render: (value) => {
-        const statusConfig = {
-          active: { text: "Activa", color: "text-green-700 border-green-300" },
-          inactive: { text: "Inactiva", color: "text-red-700 border-red-300" },
-          maintenance: {
-            text: "En mantenimiento",
-            color: "text-yellow-700 border-yellow-300",
-          },
-          blocked: { text: "Bloqueado", color: "text-red-700 border-red-300" },
-        };
-        const config = statusConfig[value as keyof typeof statusConfig] ?? {
-          text: "Desconocido",
-          color: "bg-gray-100 text-gray-700 border-gray-300",
-        };
-        return (
-          <Badge variant="outline" className={`border ${config.color}`}>
-            {config.text}
-          </Badge>
-        );
-      },
-    },
-    { header: "Ultimo Acceso", accessor: "uacceso", filterType: "text" },
+  ];
+
+  const invisibleColumns: Column<Instructor>[] = [
+    { header: "Teléfono", accessor: "phone" },
+    { header: "Fecha de nacimiento", accessor: "birth_date" },
+    { header: "Género", accessor: "gender" },
+    { header: "Documento", accessor: "identity_document" },
+    { header: "Biografía", accessor: "biography" },
+    { header: "Foto", accessor: "profile_picture_url" },
   ];
 
   return (
@@ -93,43 +100,12 @@ export default function PaymentTable({ onView,onEdit }: InstructorTableProps) {
           <Input
             placeholder="Filtrar por nombre o email"
             className="pl-9"
-            value={inputFilters.search || ""}
+            value={filters?.email || ""}
             onChange={(e) =>
-              setInputFilters((prev) => ({ ...prev, search: e.target.value }))
+              setFilters((prev) => ({ ...prev, name: e.target.value }))
             }
           />
         </div>
-        <Select
-          value={inputFilters.type || ""}
-          onValueChange={(value) =>
-            setInputFilters((prev) => ({ ...prev, type: value }))
-          }
-        >
-          <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <SelectValue placeholder="Tipo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Entrenador">Entrenador</SelectItem>
-            <SelectItem value="Yoga">Yoga</SelectItem>
-            <SelectItem value="Pilates">Pilates</SelectItem>
-            <SelectItem value="Crosfit">Crosfit</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={inputFilters.type || ""}
-          onValueChange={(value) =>
-            setInputFilters((prev) => ({ ...prev, type: value }))
-          }
-        >
-          <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <SelectValue placeholder="Rol" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Admin">Administrador</SelectItem>
-            <SelectItem value="user">Usuario</SelectItem>
-          </SelectContent>
-        </Select>
 
         <div className="flex items-center gap-4">
           <Button variant="outline">
@@ -139,18 +115,40 @@ export default function PaymentTable({ onView,onEdit }: InstructorTableProps) {
         </div>
       </div>
 
+      {showSuccessNotification && (
+        <Notification
+          variant="success"
+          title="Eliminacion exitosa"
+          description="El instructor ha sido eliminado."
+          onClose={() => setShowSuccessNotification(false)}
+        />
+      )}
+
+      {showErrorNotification && (
+        <Notification
+          variant="destructive"
+          title="Error al eliminar"
+          description="No se pudo eliminar el instructor. Intenta nuevamente."
+          onClose={() => setShowErrorNotification(false)}
+        />
+      )}
+
       <DataTable<Instructor>
-        columns={columns}
-        data={InstructorData}
+        columns={visibleColumns}
+        data={data}
         page={page}
-        pageSize={10}
+        pageSize={pageSize}
         onPageChange={setPage}
         actions={(row) => (
           <div className="flex flex-col items-center justify-center w-full">
             <RowActions
               actions={[
                 { label: "Ver", icon: Eye, onClick: () => onView(row) },
-                { label: "Modificar", icon: Pencil, onClick: () => onEdit(row) },
+                {
+                  label: "Modificar",
+                  icon: Pencil,
+                  onClick: () => onEdit(row),
+                },
                 {
                   label: "Eliminar",
                   icon: Trash2,
@@ -162,12 +160,19 @@ export default function PaymentTable({ onView,onEdit }: InstructorTableProps) {
             />
             {deleteRowId === row.id && (
               <Alert className="mt-2 w-full max-w-md">
-                <AlertTitle className="text-black">Confirmar Eliminación</AlertTitle>
+                <AlertTitle className="text-black">
+                  Confirmar Eliminación
+                </AlertTitle>
                 <AlertDescription className="text-gray-900">
-                  ¿Estás seguro de que deseas eliminar este metodo? Esta acción no se puede deshacer.
+                  ¿Estás seguro de que deseas eliminar este metodo? Esta acción
+                  no se puede deshacer.
                 </AlertDescription>
                 <div className="flex justify-end gap-2 mt-4">
-                  <Button variant="outline" className="border-white" onClick={() => setDeleteRowId(null)}>
+                  <Button
+                    variant="outline"
+                    className="border-white"
+                    onClick={() => setDeleteRowId(null)}
+                  >
                     Cancelar
                   </Button>
                   <Button
