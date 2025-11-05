@@ -25,6 +25,7 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
   const [bannerImages, setBannerImages] = useState<SortableImage[]>([]);
   const [serviceImages, setServiceImages] = useState<SortableImage[]>([]);
   const [showNotification, setShowNotification] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -33,13 +34,60 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
     duration: "",
     priority: "",
     featured: "",
-    bannerImages: [] as File[],
-    serviceImages: [] as File[],
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ Nueva versión del handleSubmit
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowNotification(true);
+    setIsSubmitting(true);
+
+    try {
+      // 🔸 Subir imágenes a Cloudinary aquí
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
+
+      const uploadToCloudinary = async (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
+
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          { method: "POST", body: formData },
+        );
+        const data = await res.json();
+        return data.secure_url;
+      };
+
+      // Subir banner (solo uno)
+      const uploadedBanner =
+        bannerImages.length > 0
+          ? await uploadToCloudinary(bannerImages[0].file)
+          : null;
+
+      // Subir todas las imágenes del servicio
+      const uploadedServiceImages = await Promise.all(
+        serviceImages.map((img) => uploadToCloudinary(img.file)),
+      );
+
+      // 🧠 Crear payload final
+      const payload = {
+        ...formData,
+        bannerUrl: uploadedBanner,
+        serviceImageUrls: uploadedServiceImages,
+      };
+
+      console.log("📤 Datos listos para enviar:", payload);
+
+      // Aquí podrías hacer un POST real a tu backend, por ejemplo:
+      // await fetch("/api/services", { method: "POST", body: JSON.stringify(payload) });
+
+      setShowNotification(true);
+    } catch (error) {
+      console.error("❌ Error al crear el servicio:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -90,9 +138,17 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
             </Select>
           </div>
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="description">Descripción *</Label>
-          <Textarea placeholder="Escribe una descripcion aqui..."></Textarea>
+          <Textarea
+            placeholder="Escribe una descripcion aqui..."
+            value={formData.description}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
+            className="bg-white"
+          />
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -101,13 +157,14 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
             <Input
               id="duration"
               className="bg-white"
-              placeholder="Introduce el barrio"
+              placeholder="Introduce la duración"
               value={formData.duration}
               onChange={(e) =>
                 setFormData({ ...formData, duration: e.target.value })
               }
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="priority">Categoría del Servicio *</Label>
             <Select value={formData.priority || "0"}>
@@ -132,19 +189,24 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
             </SelectContent>
           </Select>
         </div>
+
+        {/* 📸 Banner del servicio */}
         <ImageUploader
           label="Banner del servicio"
           images={bannerImages}
           inputId="banner-upload"
-          onUpload={(newFiles) =>
-            setBannerImages((prev) => [...prev, ...newFiles])
-          }
+          onUpload={(newFiles) => {
+            if (newFiles.length > 0) {
+              setBannerImages([newFiles[0]]);
+            }
+          }}
           onRemove={(id) =>
             setBannerImages((prev) => prev.filter((img) => img.id !== id))
           }
           onReorder={(newOrder) => setBannerImages(newOrder)}
         />
 
+        {/* 📸 Imágenes del servicio */}
         <ImageUploader
           label="Imágenes del servicio"
           images={serviceImages}
@@ -158,14 +220,17 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
           onReorder={(newOrder) => setServiceImages(newOrder)}
         />
 
+        {/* 🟠 Botón Crear */}
         <div className="flex justify-center">
           <Button
             type="submit"
+            disabled={isSubmitting}
             className="bg-primary hover:bg-orange-600 text-white my-4 px-8"
           >
-            Crear
+            {isSubmitting ? "Subiendo imágenes..." : "Crear"}
           </Button>
         </div>
+
         {showNotification && (
           <Notification
             variant="success"
