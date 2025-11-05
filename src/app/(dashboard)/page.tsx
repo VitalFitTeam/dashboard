@@ -1,10 +1,24 @@
 "use client";
 
+import { useAuth } from "@/context/AuthContext";
+
 export default function DashboardHome() {
+  const { user, hasRole } = useAuth();
+
+  if (!user) {
+    return <p>Cargando...</p>;
+  }
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Bienvenido al Dashboard</h1>
-      <p className="mt-2 text-gray-600">Selecciona una opción del menú.</p>
+    <div>
+      <h1>Bienvenido, {user.first_name}</h1>
+      <p>Tu rol: {user.role_label}</p>
+
+      {hasRole(["super_admin", "branch_admin"]) && (
+        <button>Gestionar usuarios</button>
+      )}
+
+      {hasRole("accountant") && <button>Ver reportes financieros</button>}
     </div>
   );
 }

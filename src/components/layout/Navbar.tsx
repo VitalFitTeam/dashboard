@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-20">
+    <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -45,6 +45,7 @@ const Navbar: React.FC = () => {
             }}
           />
         </div>
+
         <button
           type="button"
           className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"

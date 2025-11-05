@@ -24,9 +24,28 @@ export interface User {
   first_name: string;
   last_name: string;
   email: string;
-  role?: string;
+  role: string;
+  role_label?: string;
   [k: string]: any;
 }
+
+const ALLOWED_ROLES = [
+  "super_admin",
+  "branch_admin",
+  "accountant",
+  "data_analyst",
+  "instructor",
+  "recepcionist",
+];
+
+const ROLE_LABELS: Record<string, string> = {
+  super_admin: "Super Administrador",
+  branch_admin: "Administrador de sede",
+  accountant: "Contador",
+  data_analyst: "Analista de datos",
+  instructor: "Instructor",
+  recepcionist: "Recepcionista",
+};
 
 interface AuthContextType {
   token: string | null;
@@ -66,6 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+
   const getUserProfile = useCallback(
     async (token: string): Promise<User | null> => {
       const decoded = decodeToken(token);
@@ -83,9 +103,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const userData = profileResponse.user;
         const userRole = userData.role?.name?.toLowerCase();
-        if (!["super_admin"].includes(userRole)) {
+
+        if (!ALLOWED_ROLES.includes(userRole)) {
           console.error(
-            `Acceso denegado: El rol '${userRole}' no tiene permisos para este dashboard.`,
+            `Acceso denegado: El rol '${userRole}' no tiene permisos para este sistema.`,
           );
           return null;
         }
@@ -96,6 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           last_name: userData.last_name,
           email: userData.email,
           role: userRole,
+          role_label: ROLE_LABELS[userRole] ?? userRole,
           is_validated: userData.is_validated ?? false,
           profile_picture_url: userData.profile_picture_url,
           phone: userData.phone,
@@ -181,11 +203,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const hasRole = useCallback(
     (roles: string | string[]) => {
-      if (!user || !user.role) {
+      if (!user?.role) {
         return false;
       }
-      const wanted = Array.isArray(roles) ? roles : [roles];
-      return wanted.includes(user.role);
+      const allowed = Array.isArray(roles) ? roles : [roles];
+      return allowed.includes(user.role);
     },
     [user],
   );

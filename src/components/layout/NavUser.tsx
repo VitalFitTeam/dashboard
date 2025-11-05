@@ -34,23 +34,27 @@ export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
-  };
+  const handleLogout = () => logout();
 
-  const fullName = `${user.first_name} ${user.last_name}`;
+  // ✅ Nombre completo y letra inicial
+  const fullName = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim();
   const initial = user.first_name?.[0]?.toUpperCase() ?? "U";
-  const avatarUrl = user.profile_picture_url || "/logo/isotipo.png";
+
+  // ✅ Si el backend provee imagen, úsala; si no, genera una dinámica de DiceBear
+  const imageSrc = user.profile_picture_url
+    ? "/logo/isotipo.png"
+    : `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(fullName || initial)}`;
 
   const UserAvatar = () => (
     <>
-      {user.profile_picture_url ? (
+      {imageSrc ? (
         <Image
-          src={user.profile_picture_url}
-          alt={fullName}
+          src={imageSrc}
+          alt={`${fullName}'s avatar`}
           width={40}
           height={40}
           className="rounded-full object-cover"
+          unoptimized
         />
       ) : (
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-700">
