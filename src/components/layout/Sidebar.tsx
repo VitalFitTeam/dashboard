@@ -11,6 +11,7 @@ import {
   QuestionMarkCircleIcon,
   ArrowRightCircleIcon,
   ChevronDownIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -35,6 +36,7 @@ import Image from "next/image";
 import { NavUser } from "./NavUser";
 import { useAuth } from "@/context/AuthContext";
 
+// 🔹 Tipos
 interface SubItem {
   name: string;
   href: string;
@@ -64,28 +66,20 @@ function isNavItemWithSub(item: NavItem): item is NavItemWithSub {
 }
 
 const sidebarMenusByRole: Record<string, NavSection[]> = {
+  // 🟠 SUPER ADMIN
   super_admin: [
     {
       title: "Dashboard Principal",
       items: [
-        {
-          name: "Home",
-          icon: BuildingStorefrontIcon,
-          href: "/",
-        },
-        {
-          name: "Sucursales",
-          icon: BuildingStorefrontIcon,
-          href: "/branches",
-        },
+        { name: "Inicio", icon: HomeIcon, href: "/" },
+        { name: "Sucursales", icon: BuildingStorefrontIcon, href: "/branches" },
         { name: "Clientes", icon: UserIcon, href: "/clients" },
         {
           name: "Usuarios y Seguridad",
           icon: UsersIcon,
           subitems: [
             { name: "Usuarios", href: "/users" },
-            { name: "Políticas de seguridad", href: "/users/management" },
-            { name: "Configuración de roles", href: "/users/audit" },
+            { name: "Roles y permisos", href: "/users/audit" },
           ],
         },
         {
@@ -94,57 +88,115 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
           subitems: [
             { name: "Membresías", href: "/memberships" },
             { name: "Servicios", href: "/services" },
-            { name: "Instructores", href: "/instructors" },
             { name: "Equipamiento", href: "/equipment" },
-            { name: "Promociones y descuentos", href: "/promotions" },
-            { name: "Métodos de pago globales", href: "/payment-methods" },
-            { name: "Tipos de documentos fiscales", href: "/tax-documents" },
+            { name: "Instructores", href: "/instructors" },
+            { name: "Promociones", href: "/promotions" },
           ],
         },
         {
-          name: "Clases y Reservas",
-          icon: Calendar,
-          subitems: [{ name: "Calendario", href: "/classes" }],
-        },
-        {
-          name: "Finanzas y Reportes",
+          name: "Reportes y Finanzas",
           icon: ChartBar,
           subitems: [
             { name: "Facturación", href: "/finance/billing" },
             { name: "Reportes", href: "/finance/reports" },
-            {
-              name: "Reconciliación de pagos",
-              href: "/finance/reconciliation",
-            },
           ],
         },
       ],
     },
   ],
+
+  // 🟢 BRANCH ADMIN
+  branch_admin: [
+    {
+      title: "Gestión de Sede",
+      items: [
+        { name: "Inicio", icon: HomeIcon, href: "/" },
+        { name: "Clientes", icon: UserIcon, href: "/clients" },
+        { name: "Membresías", icon: CurrencyDollarIcon, href: "/memberships" },
+        { name: "Servicios", icon: TicketIcon, href: "/services" },
+        { name: "Instructores", icon: UsersIcon, href: "/instructors" },
+        { name: "Clases y Reservas", icon: Calendar, href: "/classes" },
+      ],
+    },
+  ],
+
+  // 🧑‍🏫 INSTRUCTOR
+  instructor: [
+    {
+      title: "Panel del Instructor",
+      items: [
+        { name: "Mis Clases", icon: Calendar, href: "/instructor/classes" },
+        { name: "Asistencia", icon: UsersIcon, href: "/instructor/attendance" },
+        {
+          name: "Evaluaciones",
+          icon: ChartBarIcon,
+          href: "/instructor/reports",
+        },
+      ],
+    },
+  ],
+
+  // 🧾 ACCOUNTANT
+  accountant: [
+    {
+      title: "Finanzas",
+      items: [
+        {
+          name: "Facturación",
+          icon: CurrencyDollarIcon,
+          href: "/finance/billing",
+        },
+        { name: "Reportes", icon: ChartBarIcon, href: "/finance/reports" },
+      ],
+    },
+  ],
+
+  // 📊 DATA ANALYST
+  data_analyst: [
+    {
+      title: "Análisis de Datos",
+      items: [
+        { name: "Reportes", icon: ChartBarIcon, href: "/analytics/reports" },
+        { name: "Tendencias", icon: ChartBar, href: "/analytics/trends" },
+      ],
+    },
+  ],
+
+  // 💁‍♀️ RECEPCIONIST
+  recepcionist: [
+    {
+      title: "Panel de Recepción",
+      items: [
+        { name: "Inicio", icon: HomeIcon, href: "/" },
+        { name: "Clientes", icon: UsersIcon, href: "/clients" },
+        { name: "Reservas", icon: Calendar, href: "/reservations" },
+        { name: "Pagos", icon: CurrencyDollarIcon, href: "/payments" },
+      ],
+    },
+  ],
 };
 
+// =========================
+// 🔸 Componente Principal
+// =========================
 export default function SidebarDashboard() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
 
-  if (loading) {
+  if (loading || !user) {
     return <SidebarMenuSkeleton />;
   }
 
-  if (!user) {
-    return <SidebarMenuSkeleton />;
-  }
-
-  const currentUserRole = user?.role?.toLowerCase() || "guest";
-
+  const currentUserRole = user.role?.toLowerCase() || "guest";
   const sections = sidebarMenusByRole[currentUserRole] || [];
 
   return (
     <Sidebar
       collapsible="offcanvas"
-      className="bg-white border-r border-gray-200 shadow-lg"
+      className="bg-white border-r border-gray-200 shadow-lg w-64"
     >
       <SidebarContent className="flex flex-col h-full overflow-y-auto">
+        {/* LOGO + ROLE */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 bg-gray-50">
           <Image
             src="/images/isotipo.png"
@@ -155,10 +207,14 @@ export default function SidebarDashboard() {
           />
           <div className="flex flex-col">
             <span className="text-sm font-bold text-gray-900">VITALFIT</span>
-            <span className="text-xs text-gray-500">{currentUserRole}</span>
+            <span className="text-xs text-gray-500">
+              {user.role_name || currentUserRole}
+            </span>
           </div>
           <ChevronDownIcon className="ml-auto h-5 w-5 text-gray-400" />
         </div>
+
+        {/* MENÚ */}
         {sections.map((section, i) => (
           <SidebarGroup key={i} className="mt-2">
             {section.title && (
@@ -170,13 +226,8 @@ export default function SidebarDashboard() {
                   const isAnySubActive = item.subitems.some(
                     (sub) => sub.href === pathname,
                   );
-
                   return (
-                    <Collapsible
-                      key={item.name}
-                      defaultOpen={isAnySubActive}
-                      className="group/collapsible"
-                    >
+                    <Collapsible key={item.name} defaultOpen={isAnySubActive}>
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
@@ -187,7 +238,11 @@ export default function SidebarDashboard() {
                             }`}
                           >
                             <item.icon
-                              className={`h-4 w-4 ${isAnySubActive ? "text-orange-400" : "text-gray-600"}`}
+                              className={`h-4 w-4 ${
+                                isAnySubActive
+                                  ? "text-orange-400"
+                                  : "text-gray-600"
+                              }`}
                             />
                             <span className="flex-1">{item.name}</span>
                           </SidebarMenuButton>
@@ -230,7 +285,11 @@ export default function SidebarDashboard() {
                         className="flex items-center gap-2 w-full"
                       >
                         <item.icon
-                          className={`h-4 w-4 ${item.href === pathname ? "text-orange-600" : "text-gray-600"}`}
+                          className={`h-4 w-4 ${
+                            item.href === pathname
+                              ? "text-orange-600"
+                              : "text-gray-600"
+                          }`}
                         />
                         <span>{item.name}</span>
                       </Link>
@@ -241,6 +300,8 @@ export default function SidebarDashboard() {
             </SidebarMenu>
           </SidebarGroup>
         ))}
+
+        {/* USUARIO */}
         <div className="mt-auto border-t border-gray-200 px-3 py-4">
           <NavUser user={user} />
         </div>

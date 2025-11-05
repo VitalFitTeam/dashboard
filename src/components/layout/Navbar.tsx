@@ -15,7 +15,8 @@ const Navbar: React.FC = () => {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-20">
+    <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+      {/* IZQUIERDA */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -31,6 +32,7 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
+      {/* DERECHA */}
       <div className="flex items-center gap-4">
         <div className="relative hidden lg:block">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -45,6 +47,7 @@ const Navbar: React.FC = () => {
             }}
           />
         </div>
+
         <button
           type="button"
           className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
