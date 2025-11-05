@@ -1,7 +1,5 @@
 "use client";
-import { useState } from "react";
-import { Equipment } from "@/models/equipment";
-import { EquipmentData } from "./data";
+import { useMemo, useState } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
@@ -14,38 +12,82 @@ import {
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, Trash2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/sdk-config";
+import { Equipment } from "@vitalfit/sdk";
 
+// 1. CRÍTICO: Definimos TODAS las props de paginación.
 interface EquipmentTableProps {
   onView: (equipment: Equipment) => void;
   onEdit: (equipment: Equipment) => void;
-}
+  data: Equipment[];
+  onReload: () => void;
 
+  // Props de paginación externa/controlada
+  page: number;
+  pageSize: number;
+  totalPages: number; // <--- Esta prop es VITAL
+  onPageChange: (page: number) => void;
+}
 export default function EquipmentTable({
   onView,
   onEdit,
+  data,
+  onReload,
+  // 2. Recibir todas las props de paginación
+  page,
+  pageSize,
+  totalPages,
+  onPageChange,
 }: EquipmentTableProps) {
-  const [page, setPage] = useState(1);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
+  const { token } = useAuth();
 
-  const handleDelete = (row: Equipment) => {
-    console.warn("Equipo Eliminado ", row.id);
-    setDeleteRowId(null);
+  // Lógica de eliminación (sin cambios funcionales)
+  const handleDeleteEquipment = async (equipment: Equipment) => {
+    if (!token) {
+      alert("Error: Sesión no autenticada.");
+      setDeleteRowId(null);
+      return;
+    }
+    try {
+      await api.equipment.deleteEquipment(equipment.equipment_id, token);
+      onReload();
+      setDeleteRowId(null);
+    } catch (error) {
+      console.error("Error al eliminar el equipo:", error);
+      alert("Error al eliminar el equipo. Inténtelo de nuevo.");
+      setDeleteRowId(null);
+    }
   };
 
+  const filteredData = useMemo(() => {
+    let currentData = data;
+    const searchText = inputFilters.search?.toLowerCase() || "";
+    const selectedCategory = inputFilters.category || "";
+
+    if (selectedCategory && selectedCategory !== "all") {
+      currentData = currentData.filter(
+        (equipment) => equipment.category === selectedCategory,
+      );
+    }
+
+    if (searchText) {
+      currentData = currentData.filter(
+        (equipment) =>
+          equipment.name.toLowerCase().includes(searchText) ||
+          equipment.model.toLowerCase().includes(searchText) ||
+          equipment.brand.toLowerCase().includes(searchText),
+      );
+    }
+
+    return currentData;
+  }, [data, inputFilters]);
+
   const columns: Column<Equipment>[] = [
-    {
-      header: "ID",
-      accessor: "id",
-      render: (id) => (
-        <div className="w-28 truncate" title={id as string}>
-          {id as string}
-        </div>
-      ),
-    },
     { header: "Equipamiento", accessor: "name", filterType: "text" },
     { header: "Categoría", accessor: "category", filterType: "text" },
     { header: "Modelo", accessor: "model", filterType: "text" },
@@ -67,7 +109,7 @@ export default function EquipmentTable({
           />
         </div>
         <Select
-          value={inputFilters.category || ""}
+          value={inputFilters.category || "all"}
           onValueChange={(value) =>
             setInputFilters((prev) => ({ ...prev, category: value }))
           }
@@ -76,28 +118,31 @@ export default function EquipmentTable({
             <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">Todas las Categorías</SelectItem>
             <SelectItem value="Cardio">Cardio</SelectItem>
-            <SelectItem value="Strength">Fuerza</SelectItem>
-            <SelectItem value="FreeWeight">Peso Libre</SelectItem>
-            <SelectItem value="Functional">Funcional</SelectItem>
+            <SelectItem value="Strength">Strength</SelectItem>
+            <SelectItem value="FreeWeight">FreeWeight</SelectItem>
+            <SelectItem value="Functional">Functional</SelectItem>
             <SelectItem value="Accessory">Accesorio</SelectItem>
           </SelectContent>
         </Select>
 
         <div className="flex items-center gap-4">
           <Button variant="outline">
-            <ArrowDownTray className="mr-2 h-4 w-4" />
-            Descarga
+            <Download className="mr-2 h-4 w-4" />
+            Download CSV
           </Button>
         </div>
       </div>
 
       <DataTable<Equipment>
         columns={columns}
-        data={EquipmentData}
+        data={filteredData}
         page={page}
-        pageSize={10}
-        onPageChange={setPage}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+        totalPages={totalPages}
+        rowIdKey="equipment_id"
         actions={(row) => (
           <div className="flex flex-col items-center justify-center w-full">
             <RowActions
@@ -111,13 +156,13 @@ export default function EquipmentTable({
                 {
                   label: "Eliminar",
                   icon: Trash2,
-                  onClick: () => setDeleteRowId(row.id),
+                  onClick: () => setDeleteRowId(row.equipment_id),
                   variant: "danger",
                   separatorBefore: true,
                 },
               ]}
             />
-            {deleteRowId === row.id && (
+            {deleteRowId === row.equipment_id && (
               <Alert className="mt-2 w-full max-w-md">
                 <AlertTitle className="text-black">
                   Confirmar Eliminación
@@ -137,7 +182,7 @@ export default function EquipmentTable({
                   <Button
                     variant="destructive"
                     className="text-white"
-                    onClick={() => handleDelete(row)}
+                    onClick={() => handleDeleteEquipment(row)}
                   >
                     <Trash2 className="h-4 w-4 text-white" />
                     Eliminar

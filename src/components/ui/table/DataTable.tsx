@@ -11,6 +11,7 @@ import {
   ColumnFiltersState,
   VisibilityState,
   getFilteredRowModel,
+  getPaginationRowModel,
 } from "@tanstack/react-table";
 
 import { PaginationControls } from "./PaginationControls";
@@ -133,6 +134,7 @@ export function DataTable<T extends object>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getRowId: (row) => String(row[rowIdKey]),
   });
 
@@ -147,6 +149,15 @@ export function DataTable<T extends object>({
   const handlePageChange = (newPage: number) => {
     onPageChange ? onPageChange(newPage) : setInternalPage(newPage);
   };
+
+  React.useEffect(() => {
+    if (pageSize) {
+      table.setPageSize(pageSize);
+    }
+    if (page) {
+      table.setPageIndex(page - 1);
+    }
+  }, [table, pageSize, page]);
 
   const renderFilters = () => (
     <div className="flex flex-wrap gap-4 mb-4">

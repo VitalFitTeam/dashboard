@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { TabSelector } from "@/components/ui/TabSelector";
 import BranchBasicDataPanel from "./BranchBasicDataPanel";
@@ -59,8 +59,6 @@ function transformDataForAPI(data: BranchDetails): UpdateBranchRequest {
     is_closed: h.is_closed,
   }));
 
-  const payMethods: string[] = data.payment_methods.map((p) => p.method_id);
-
   return {
     name: data.name,
     tax_id: data.tax_id,
@@ -74,7 +72,7 @@ function transformDataForAPI(data: BranchDetails): UpdateBranchRequest {
     max_capacity: data.max_capacity,
     manager_id: data.manager,
     operating_hours: opHours,
-    payment_methods: payMethods,
+    payment_methods: [],
   };
 }
 
@@ -87,6 +85,11 @@ export default function BranchFormContainer({
   const [isSaving, setIsSaving] = useState(false);
   const { token } = useAuth();
 
+  const serviceSaveRef = useRef<BranchPanelRef | null>(null);
+  const paymentSaveRef = useRef<BranchPanelRef | null>(null);
+  const instructorsSaveRef = useRef<BranchPanelRef | null>(null);
+  const equipmentSaveRef = useRef<BranchPanelRef | null>(null);
+
   const handleSave = async () => {
     if (!token) {
       alert("Error: Sesión no válida.");
@@ -95,13 +98,35 @@ export default function BranchFormContainer({
 
     setIsSaving(true);
     try {
+      // **A. GUARDAR DATOS BÁSICOS (Lógica centralizada)**
+      console.log("1. Guardando datos básicos de la sucursal...");
       const transformedData = transformDataForAPI(formData);
       await api.branch.updateBranch(branch.branch_id, transformedData, token);
+
+      if (serviceSaveRef.current) {
+        console.log("2. Llamando al guardado de Servicios...");
+        await serviceSaveRef.current.saveData();
+      }
+
+      if (paymentSaveRef.current) {
+        console.log("3. Llamando al guardado de Métodos de Pago...");
+        await paymentSaveRef.current.saveData();
+      }
+
+      if (instructorsSaveRef.current) {
+        console.log("4. Llamando al guardado de Instructores...");
+        await instructorsSaveRef.current.saveData();
+      }
+      if (equipmentSaveRef.current) {
+        console.log("4. Llamando al guardado de Instructores...");
+        await instructorsSaveRef.current.saveData();
+      }
+
       alert("Sucursal guardada con éxito");
       router.push(`/branches/${branch.branch_id}`);
       router.refresh();
     } catch (err) {
-      console.error("Error al guardar la sucursal:", err);
+      console.error("Error al guardar la sucursal (un paso falló):", err);
       alert("Error: No se pudo guardar la sucursal.");
     } finally {
       setIsSaving(false);

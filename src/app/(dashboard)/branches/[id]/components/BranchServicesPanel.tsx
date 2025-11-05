@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Branches, BranchService } from "@/models/branches";
-import { Service } from "@/models/service";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { getInitials } from "@/utils";
@@ -15,11 +14,18 @@ import {
 } from "@/components/ui/select";
 import InputField from "@/components/ui/InputField";
 import EntityItem from "@/components/features/EntityItem";
+import {
+  BranchServicePrice,
+  CreateBranchServicePriceItem,
+  ServiceFullDetail,
+} from "@vitalfit/sdk";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/sdk-config";
 
 interface ServicesPanelProps {
   formData: Branches;
   mode: "view" | "edit";
-  allServices: Service[];
+  allServices: ServiceFullDetail[];
   onAddService: (
     serviceData: Omit<BranchService, "name" | "description">,
   ) => void;
@@ -27,13 +33,13 @@ interface ServicesPanelProps {
 }
 
 export default function BranchServicePanel({
-  // Asigna un valor por defecto a formData
-  formData = { services: [] } as unknown as Branches,
+  formData,
   mode = "edit",
   allServices = [],
   onAddService = () => {},
   onRemoveService = () => {},
 }: ServicesPanelProps) {
+  const { token } = useAuth();
   const isDisabled = mode === "view";
   const assignedServices = formData.services ?? [];
 
@@ -41,6 +47,44 @@ export default function BranchServicePanel({
     null,
   );
   const [aforo, setAforo] = useState<number | string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [services, setServices] = useState<BranchServicePrice[]>([]);
+
+  useEffect(() => {
+    const loadServiceBranchData = async () => {
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await api.products.getBranchServices(
+          formData.id,
+          token,
+        );
+
+        if (response && response.data) {
+          console.log("Servicios recibidos de la API:", response.data);
+
+          setServices(response.data);
+        } else {
+          setServices([]);
+        }
+      } catch (err) {
+        console.error("Error al cargar servicios:", err);
+        setError(err as Error);
+        setServices([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadServiceBranchData();
+  }, [token]);
 
   const availableServicesToAdd = useMemo(() => {
     const assignedIds = new Set(assignedServices.map((s) => s.serviceId));
