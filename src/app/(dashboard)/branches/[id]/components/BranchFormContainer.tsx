@@ -153,7 +153,14 @@ export default function BranchFormContainer({
     {
       value: "services",
       label: "Servicios",
-      content: <BranchServicePanel mode={mode} />,
+      content: (
+        <BranchServicePanel
+          mode={mode ?? "view"}
+          formData={formData}
+          setFormData={setFormData}
+          ref={serviceSaveRef}
+        />
+      ),
     },
     {
       value: "instructors",

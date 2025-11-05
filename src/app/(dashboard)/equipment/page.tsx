@@ -107,12 +107,11 @@ export default function Equipment() {
       ) : (
         <EquipmentTable
           data={equipmentData}
-          onReload={loadEquipmentData} // Para la eliminación
-          // PROPS DE PAGINACIÓN CONTROLADA
+          onReload={loadEquipmentData}
           page={page}
           pageSize={pageSize}
           onPageChange={setPage}
-          totalPages={totalPages} // Mandamos el total de páginas calculado
+          totalPages={totalPages}
           onView={(equipment) => setViewEquipment(equipment)}
           onEdit={(equipment) => setEditingEquipment(equipment)}
         />
