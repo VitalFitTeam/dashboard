@@ -66,7 +66,6 @@ function isNavItemWithSub(item: NavItem): item is NavItemWithSub {
 }
 
 const sidebarMenusByRole: Record<string, NavSection[]> = {
-  // 🟠 SUPER ADMIN
   super_admin: [
     {
       title: "Dashboard Principal",
@@ -105,7 +104,6 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  // 🟢 BRANCH ADMIN
   branch_admin: [
     {
       title: "Gestión de Sede",
@@ -120,7 +118,6 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  // 🧑‍🏫 INSTRUCTOR
   instructor: [
     {
       title: "Panel del Instructor",
@@ -136,7 +133,6 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  // 🧾 ACCOUNTANT
   accountant: [
     {
       title: "Finanzas",
@@ -151,7 +147,6 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  // 📊 DATA ANALYST
   data_analyst: [
     {
       title: "Análisis de Datos",
@@ -162,7 +157,6 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  // 💁‍♀️ RECEPCIONIST
   recepcionist: [
     {
       title: "Panel de Recepción",
@@ -176,9 +170,6 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
   ],
 };
 
-// =========================
-// 🔸 Componente Principal
-// =========================
 export default function SidebarDashboard() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
@@ -196,7 +187,6 @@ export default function SidebarDashboard() {
       className="bg-white border-r border-gray-200 shadow-lg w-64"
     >
       <SidebarContent className="flex flex-col h-full overflow-y-auto">
-        {/* LOGO + ROLE */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 bg-gray-50">
           <Image
             src="/images/isotipo.png"
@@ -214,7 +204,6 @@ export default function SidebarDashboard() {
           <ChevronDownIcon className="ml-auto h-5 w-5 text-gray-400" />
         </div>
 
-        {/* MENÚ */}
         {sections.map((section, i) => (
           <SidebarGroup key={i} className="mt-2">
             {section.title && (
@@ -301,7 +290,6 @@ export default function SidebarDashboard() {
           </SidebarGroup>
         ))}
 
-        {/* USUARIO */}
         <div className="mt-auto border-t border-gray-200 px-3 py-4">
           <NavUser user={user} />
         </div>

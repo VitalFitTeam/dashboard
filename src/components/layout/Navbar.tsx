@@ -16,7 +16,6 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-      {/* IZQUIERDA */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -32,7 +31,6 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* DERECHA */}
       <div className="flex items-center gap-4">
         <div className="relative hidden lg:block">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
