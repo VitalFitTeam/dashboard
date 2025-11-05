@@ -57,7 +57,6 @@ export default function CreateForm({
     capacidadMiembros: "",
     horarios: {},
     operatingHours: {},
-    paymentMethods: [],
   });
 
   const steps = [
@@ -248,7 +247,6 @@ export default function CreateForm({
           ? Number(formData.capacidadMiembros)
           : formData.capacity || 0,
       operating_hours: operating_hours,
-      payment_methods: formData.paymentMethods || [],
       status: normalizedStatus,
     };
 

@@ -1,138 +1,183 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { Trash2, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
+import { BranchInstructorInfo } from "@vitalfit/sdk";
 import {
   Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
-
-import { BranchInstructor } from "@/models/branches";
-import { Instructor } from "@/models/instructor";
-import { getInitials } from "@/utils";
+import { Button } from "@/components/ui/button";
 import EntityItem from "@/components/features/EntityItem";
 
-interface InstructorPanelProps {
-  assignedInstructors: BranchInstructor[];
-  allInstructors: Instructor[];
-  onAdd: (instructorId: string) => void;
-  onRemove: (instructorId: string) => void;
-  mode: "view" | "edit";
+interface BranchInstructorPanelProps {
+  branchId: string;
 }
 
 export default function BranchInstructorPanel({
-  assignedInstructors = [],
-  allInstructors = [],
-  onAdd = () => {},
-  onRemove = () => {},
-  mode = "edit",
-}: InstructorPanelProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const isDisabled = mode === "view";
+  branchId,
+}: BranchInstructorPanelProps) {
+  const { token } = useAuth();
+  const [branchInstructors, setBranchInstructors] = useState<
+    BranchInstructorInfo[]
+  >([]);
+  const [allInstructors, setAllInstructors] = useState<BranchInstructorInfo[]>(
+    [],
+  );
+  const [selectedInstructorId, setSelectedInstructorId] = useState<
+    string | null
+  >(null);
+  const [search, setSearch] = useState("");
 
-  const availableInstructors = useMemo(() => {
-    const assignedIds = new Set(
-      assignedInstructors.map((inst) => inst.instructorId),
-    );
-    return allInstructors.filter((inst) => !assignedIds.has(inst.id));
-  }, [allInstructors, assignedInstructors]);
+  // Cargar instructores de la sucursal
+  useEffect(() => {
+    if (!token || !branchId) {
+      return;
+    }
 
-  const handleAddClick = () => {
-    if (selectedId) {
-      onAdd(selectedId);
-      setSelectedId(null);
+    const fetchBranchInstructors = async () => {
+      try {
+        const res = await api.instructor.getBranchInstructors(
+          branchId,
+          { search },
+          token,
+        );
+        const mapped: BranchInstructorInfo[] = (res.data || []).map(
+          (i: any) => ({
+            name: i.instructor_name,
+            instructorID: i.instructor_id,
+            email: i.email,
+            phone: i.phone,
+          }),
+        );
+        setBranchInstructors(mapped);
+      } catch (err) {
+        console.error("Error cargando instructores de la sucursal:", err);
+      }
+    };
+
+    fetchBranchInstructors();
+  }, [branchId, token, search]);
+
+  // Cargar todos los instructores disponibles
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    const fetchAllInstructors = async () => {
+      try {
+        const res = await api.instructor.getInstructors({ search }, token);
+        const mapped: BranchInstructorInfo[] = (res.data || []).map(
+          (i: any) => ({
+            name: i.instructor_name,
+            instructorID: i.instructor_id,
+            email: i.email,
+            phone: i.phone,
+          }),
+        );
+        console.log(mapped);
+        setAllInstructors(mapped);
+      } catch (err) {
+        console.error("Error cargando todos los instructores:", err);
+      }
+    };
+
+    fetchAllInstructors();
+  }, [token, search]);
+
+  const handleAddInstructor = async () => {
+    if (!token || !selectedInstructorId) {
+      return;
+    }
+
+    try {
+      await api.instructor.addBranchInstructor(
+        branchId,
+        [selectedInstructorId],
+        token,
+      );
+
+      // Actualizamos el listado local
+      const instructorToAdd = allInstructors.find(
+        (i) => i.instructorID === selectedInstructorId,
+      );
+      if (instructorToAdd) {
+        setBranchInstructors((prev) => [...prev, instructorToAdd]);
+        setSelectedInstructorId(null);
+      }
+
+      alert("Instructor agregado correctamente");
+    } catch (err) {
+      console.error("Error agregando instructor:", err);
+      alert("No se pudo agregar el instructor");
     }
   };
 
-  return (
-    <div className="space-y-8">
-      {!isDisabled && (
-        <div className="p-4 border rounded-lg bg-gray-50">
-          <h3 className="text-base font-semibold text-gray-800 mb-3">
-            Agregar instructor
-          </h3>
-          <div className="flex flex-col sm:flex-row items-end gap-4">
-            <div className="flex-grow space-y-1.5">
-              <label
-                htmlFor="instructor-select"
-                className="text-sm font-medium text-gray-700"
-              >
-                Instructor
-              </label>
-              <Select
-                value={selectedId ?? ""}
-                onValueChange={(value) => setSelectedId(value)}
-              >
-                <SelectTrigger id="instructor-select">
-                  <SelectValue placeholder="Seleccionar un instructor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableInstructors.length > 0 ? (
-                    availableInstructors.map((inst) => (
-                      <SelectItem key={inst.id} value={inst.id}>
-                        {inst.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>
-                      No hay instructores disponibles
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+  const handleRemoveInstructor = (instructorID: string) => {
+    setBranchInstructors((prev) =>
+      prev.filter((i) => i.instructorID !== instructorID),
+    );
+  };
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddClick}
-              disabled={!selectedId}
-              className="w-full sm:w-auto flex-shrink-0"
-            >
-              <Plus size={16} className="mr-2" />
-              Agregar
-            </Button>
-          </div>
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 items-end">
+        <div className="flex-grow">
+          <label className="text-sm font-medium text-gray-700 mb-1 block">
+            Agregar instructor
+          </label>
+          <Select
+            value={selectedInstructorId ?? ""}
+            onValueChange={setSelectedInstructorId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona un instructor" />
+            </SelectTrigger>
+            <SelectContent>
+              {allInstructors.map((instr) => (
+                <SelectItem key={instr.instructorID} value={instr.instructorID}>
+                  {instr.name || "Error al mostrar nombre"}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      )}
-      <div>
-        <h3 className="text-sm font-medium text-gray-800 mb-4">
-          Instructores de la sucursal
-        </h3>
-        {assignedInstructors.length === 0 ? (
+        <Button
+          type="button"
+          onClick={handleAddInstructor}
+          disabled={!selectedInstructorId}
+          className="sm:mt-0 mt-2"
+        >
+          Agregar
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        {branchInstructors.length === 0 ? (
           <p className="text-sm text-gray-500">
             No hay instructores asignados a esta sucursal.
           </p>
         ) : (
-          <div className="space-y-3">
-            {assignedInstructors.map((inst) => (
-              <EntityItem
-                key={inst.instructorId}
-                initials={getInitials(inst.name ?? "??")}
-                title={inst.name ?? "Instructor sin nombre"}
-                description={`ID: ${inst.instructorId}`}
-                action={
-                  !isDisabled ? (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRemove(inst.instructorId);
-                      }}
-                      className="rounded-md p-1 text-muted-foreground transition-colors hover:text-red-600"
-                      aria-label="Eliminar instructor"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  ) : undefined
-                }
-              />
-            ))}
-          </div>
+          branchInstructors.map((instr) => (
+            <EntityItem
+              key={instr.instructorID}
+              initials={`${instr.name?.split(" ")[0]?.[0] ?? "?"}${instr.name?.split(" ")[1]?.[0] ?? "?"}`}
+              title={instr.name ?? "Sin nombre"}
+              description={instr.email}
+              action={
+                <button
+                  className="text-sm text-red-500 hover:underline"
+                  onClick={() => handleRemoveInstructor(instr.instructorID)}
+                >
+                  Eliminar
+                </button>
+              }
+            />
+          ))
         )}
       </div>
     </div>

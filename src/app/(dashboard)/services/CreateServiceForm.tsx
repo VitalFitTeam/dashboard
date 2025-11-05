@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import { Notification } from "@/components/ui/Notification";
-import ImageUploader from "@/components/features/services/ImageUploader";
+import ImageUploader, {
+  SortableImageLocal,
+} from "@/components/features/services/ImageUploader";
 import {
   Select,
   SelectContent,
@@ -14,16 +16,28 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { SortableImage } from "@/models/service";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/sdk-config";
+import {
+  Banner,
+  CreateBanner,
+  CreateService,
+  CreateServiceImage,
+  ServiceCategoryInfo,
+} from "@vitalfit/sdk";
+
+const DEFAULT_IMAGE_URL =
+  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Z3ltfGVufDB8fDB8fHww&fm=jpg&q=60&w=3000";
 
 interface CreateServiceFormProps {
   onBack: () => void;
 }
 
 export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
-  const [bannerImages, setBannerImages] = useState<SortableImage[]>([]);
-  const [serviceImages, setServiceImages] = useState<SortableImage[]>([]);
+  const [bannerImages, setBannerImages] = useState<Banner[]>([]);
+  const [localBanners, setLocalBanners] = useState<SortableImageLocal[]>([]);
+  const [serviceImages, setServiceImages] = useState<CreateServiceImage[]>([]);
   const [showNotification, setShowNotification] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -128,12 +142,21 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="category">Categoría del Servicio *</Label>
-            <Select value={formData.category || "0"}>
+            <Select
+              value={formData.category}
+              onValueChange={(value) =>
+                setFormData({ ...formData, category: value })
+              }
+            >
               <SelectTrigger id="category" className="mt-1 w-full">
-                <SelectValue placeholder="Selecciona un Item" />
+                <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">Selecciona un Item</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.category_id} value={cat.category_id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -162,17 +185,25 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
               onChange={(e) =>
                 setFormData({ ...formData, duration: e.target.value })
               }
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="priority">Categoría del Servicio *</Label>
-            <Select value={formData.priority || "0"}>
+            <Label htmlFor="priority">Prioridad *</Label>
+            <Select
+              value={formData.priority || "Media"}
+              onValueChange={(val) =>
+                setFormData({ ...formData, priority: val })
+              }
+            >
               <SelectTrigger id="priority" className="mt-1 w-full">
-                <SelectValue placeholder="Selecciona un Item" />
+                <SelectValue placeholder="Selecciona una prioridad" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">Selecciona un Item</SelectItem>
+                <SelectItem value="Alta">Alta</SelectItem>
+                <SelectItem value="Media">Media</SelectItem>
+                <SelectItem value="Baja">Baja</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -180,12 +211,37 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="featured">Destacado</Label>
-          <Select value={formData.featured || "0"}>
+          <Select
+            value={formData.featured || "0"}
+            onValueChange={(val) => setFormData({ ...formData, featured: val })}
+          >
             <SelectTrigger id="featured" className="mt-1 w-full">
               <SelectValue placeholder="Selecciona un Item" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="0">Selecciona un Item</SelectItem>
+              <SelectItem value="0">No</SelectItem>
+              <SelectItem value="1">Sí</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bannerImages">Banner del servicio</Label>
+          <Select
+            value={formData.selectedBannerId}
+            onValueChange={(value) =>
+              setFormData({ ...formData, selectedBannerId: value })
+            }
+          >
+            <SelectTrigger id="bannerSelect" className="mt-1 w-full">
+              <SelectValue placeholder="Selecciona un banner existente" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableBanners.map((b) => (
+                <SelectItem key={b.banner_id} value={b.banner_id}>
+                  {b.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -193,7 +249,7 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
         {/* 📸 Banner del servicio */}
         <ImageUploader
           label="Banner del servicio"
-          images={bannerImages}
+          images={localBanners}
           inputId="banner-upload"
           onUpload={(newFiles) => {
             if (newFiles.length > 0) {
@@ -201,23 +257,25 @@ export default function CreateServiceForm({ onBack }: CreateServiceFormProps) {
             }
           }}
           onRemove={(id) =>
-            setBannerImages((prev) => prev.filter((img) => img.id !== id))
+            setLocalBanners(localBanners.filter((img) => img.id !== id))
           }
-          onReorder={(newOrder) => setBannerImages(newOrder)}
+          onReorder={setLocalBanners}
         />
 
         {/* 📸 Imágenes del servicio */}
         <ImageUploader
           label="Imágenes del servicio"
-          images={serviceImages}
+          images={localServiceImages}
           inputId="service-upload"
           onUpload={(newFiles) =>
-            setServiceImages((prev) => [...prev, ...newFiles])
+            setLocalServiceImages([...localServiceImages, ...newFiles])
           }
           onRemove={(id) =>
-            setServiceImages((prev) => prev.filter((img) => img.id !== id))
+            setLocalServiceImages(
+              localServiceImages.filter((img) => img.id !== id),
+            )
           }
-          onReorder={(newOrder) => setServiceImages(newOrder)}
+          onReorder={setLocalServiceImages}
         />
 
         {/* 🟠 Botón Crear */}
