@@ -102,7 +102,6 @@ export default function Step2({
           />
         </div>
 
-        {/* Coordenadas */}
         <div className="col-span-6 flex items-center gap-2 mt-4">
           <MapPin className="w-4 h-4 text-gray-700" />
           <span className="text-sm font-medium text-gray-700">
@@ -133,7 +132,6 @@ export default function Step2({
         </div>
       </div>
 
-      {/* 🗺️ Mapa interactivo */}
       <MapboxPicker
         lat={formData.latitud}
         lng={formData.longitud}
