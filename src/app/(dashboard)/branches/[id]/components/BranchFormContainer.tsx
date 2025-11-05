@@ -55,7 +55,6 @@ const toHHMMSS = (input?: string | null) => {
   return "00:00:00";
 };
 
-// Transforma datos del formulario a la estructura que espera la API
 function transformDataForAPI(data: BranchDetails): UpdateBranchRequest {
   const opHours: UpdateOperatingHour[] = data.operating_hours.map((h) => ({
     day_of_week: h.day_of_week,
