@@ -27,7 +27,6 @@ export default function Step2({
   handleCustomChange,
   formErrors = {},
 }: StepProps) {
-  // ✅ ya no actualizamos "address"
   const handleMapSelect = (data: {
     latitud: string;
     longitud: string;
@@ -39,7 +38,6 @@ export default function Step2({
     handleCustomChange("latitud", data.latitud);
     handleCustomChange("longitud", data.longitud);
 
-    // Guardar también los numéricos
     const latNum = parseFloat(data.latitud);
     const lngNum = parseFloat(data.longitud);
     if (!isNaN(latNum)) {
@@ -49,7 +47,6 @@ export default function Step2({
       handleCustomChange("longitude", lngNum);
     }
 
-    // ✅ CAMBIO AQUÍ: usa los campos que tu handleSubmit espera
     handleCustomChange("cityId", data.city);
     handleCustomChange("stateId", data.state);
     handleCustomChange("countryId", data.country);
@@ -67,7 +64,6 @@ export default function Step2({
       </div>
 
       <div className="grid grid-cols-6 gap-4">
-        {/* Dirección manual */}
         <div className="col-span-6">
           <InputField
             label="Dirección Completa*"
@@ -80,8 +76,6 @@ export default function Step2({
             className="focus:ring-orange-500 focus:border-transparent"
           />
         </div>
-
-        {/* Ciudad / Estado / País */}
 
         <InputField
           label="Estado"
@@ -102,7 +96,6 @@ export default function Step2({
           />
         </div>
 
-        {/* Coordenadas */}
         <div className="col-span-6 flex items-center gap-2 mt-4">
           <MapPin className="w-4 h-4 text-gray-700" />
           <span className="text-sm font-medium text-gray-700">
@@ -133,7 +126,6 @@ export default function Step2({
         </div>
       </div>
 
-      {/* 🗺️ Mapa interactivo */}
       <MapboxPicker
         lat={formData.latitud}
         lng={formData.longitud}
