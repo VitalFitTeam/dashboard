@@ -27,7 +27,6 @@ export default function Step2({
   handleCustomChange,
   formErrors = {},
 }: StepProps) {
-  // ✅ ya no actualizamos "address"
   const handleMapSelect = (data: {
     latitud: string;
     longitud: string;
@@ -36,23 +35,25 @@ export default function Step2({
     state: string;
     country: string;
   }) => {
+    // Coordenadas
     handleCustomChange("latitud", data.latitud);
     handleCustomChange("longitud", data.longitud);
 
-    // Guardar también los numéricos
+    // Conversión a número
     const latNum = parseFloat(data.latitud);
     const lngNum = parseFloat(data.longitud);
-    if (!isNaN(latNum)) {
-      handleCustomChange("latitude", latNum);
-    }
-    if (!isNaN(lngNum)) {
-      handleCustomChange("longitude", lngNum);
-    }
+    if (!isNaN(latNum)) {handleCustomChange("latitude", latNum);}
+    if (!isNaN(lngNum)) {handleCustomChange("longitude", lngNum);}
 
-    // ✅ CAMBIO AQUÍ: usa los campos que tu handleSubmit espera
+    // IDs geográficos
     handleCustomChange("cityId", data.city);
     handleCustomChange("stateId", data.state);
     handleCustomChange("countryId", data.country);
+
+    // ✅ NUEVO: actualizar automáticamente la dirección
+    if (data.address) {
+      handleCustomChange("address", data.address);
+    }
   };
 
   return (
@@ -67,7 +68,7 @@ export default function Step2({
       </div>
 
       <div className="grid grid-cols-6 gap-4">
-        {/* Dirección manual */}
+        {/* Dirección manual (ahora también se llena automáticamente) */}
         <div className="col-span-6">
           <InputField
             label="Dirección Completa*"
@@ -76,13 +77,12 @@ export default function Step2({
             value={formData.address || ""}
             error={formErrors["address"]}
             onChange={handleChange}
-            placeholder="Ingrese la dirección manualmente"
+            placeholder="Ingrese la dirección manualmente o seleccione en el mapa"
             className="focus:ring-orange-500 focus:border-transparent"
           />
         </div>
 
         {/* Ciudad / Estado / País */}
-
         <InputField
           label="Estado"
           id="stateId"

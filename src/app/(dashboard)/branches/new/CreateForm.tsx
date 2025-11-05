@@ -252,7 +252,7 @@ export default function CreateForm({
       status: normalizedStatus,
     };
 
-    console.log("📤 Payload enviado:", apiPayload);
+    console.log("Payload enviado:", apiPayload);
     if (
       !apiPayload.name ||
       !apiPayload.tax_id ||
