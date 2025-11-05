@@ -4,13 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { TabSelector } from "@/components/ui/TabSelector";
 import BranchBasicDataPanel from "./BranchBasicDataPanel";
-import BranchServicePanel from "./BranchServicesPanel";
+import BranchServicePanel, { BranchPanelRef } from "./BranchServicesPanel";
 import BranchInstructorPanel from "./BranchInstructorsPanel";
 import BranchEquipmentPanel from "./BranchEquipmentPanel";
 import BranchPaymentMethodPanel from "./BranchPaymentMethodsPanel";
 import { Button } from "@/components/ui/button";
 import {
   BranchDetails,
+  BranchServicePrice,
+  ServiceFullDetail,
   UpdateBranchRequest,
   UpdateOperatingHour,
 } from "@vitalfit/sdk";
@@ -35,6 +37,7 @@ const toHHMMSS = (input?: string | null) => {
   if (hm) {
     return `${hm[1].padStart(2, "0")}:${hm[2]}:00`;
   }
+
   const ampm = /^(\d{1,2}):(\d{2})(?:\s*)(AM|PM)$/i.exec(s);
   if (ampm) {
     let hh = Number(ampm[1]);
@@ -48,9 +51,11 @@ const toHHMMSS = (input?: string | null) => {
     }
     return `${hh.toString().padStart(2, "0")}:${mm}:00`;
   }
+
   return "00:00:00";
 };
 
+// Transforma datos del formulario a la estructura que espera la API
 function transformDataForAPI(data: BranchDetails): UpdateBranchRequest {
   const opHours: UpdateOperatingHour[] = data.operating_hours.map((h) => ({
     day_of_week: h.day_of_week,
@@ -77,12 +82,20 @@ function transformDataForAPI(data: BranchDetails): UpdateBranchRequest {
 }
 
 export default function BranchFormContainer({
-  mode,
+  mode = "edit",
   branch,
 }: BranchFormContainerProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState<BranchDetails>(branch);
+  const [formData, setFormData] = useState<
+    BranchDetails & { services: BranchServicePrice[] }
+  >({
+    ...branch,
+    services: [],
+  });
   const [isSaving, setIsSaving] = useState(false);
+  const [allServicesFromApi, setAllServicesFromApi] = useState<
+    ServiceFullDetail[]
+  >([]);
   const { token } = useAuth();
 
   const serviceSaveRef = useRef<BranchPanelRef | null>(null);
@@ -90,43 +103,64 @@ export default function BranchFormContainer({
   const instructorsSaveRef = useRef<BranchPanelRef | null>(null);
   const equipmentSaveRef = useRef<BranchPanelRef | null>(null);
 
-  const handleSave = async () => {
+  useEffect(() => {
+    const fetchServices = async () => {
+      if (!token) {
+        return;
+      }
+      try {
+        const response = await api.products.getServices(token);
+        setAllServicesFromApi(response.data || []);
+      } catch (err) {
+        console.error("❌ Error cargando servicios:", err);
+      }
+    };
+    fetchServices();
+  }, [token]);
+
+  const handleSaveAll = async () => {
     if (!token) {
       alert("Error: Sesión no válida.");
       return;
     }
 
     setIsSaving(true);
+
     try {
-      // **A. GUARDAR DATOS BÁSICOS (Lógica centralizada)**
-      console.log("1. Guardando datos básicos de la sucursal...");
+      // 1️⃣ Guardar datos básicos de la sucursal
+      console.log("1. Guardando datos básicos...");
       const transformedData = transformDataForAPI(formData);
       await api.branch.updateBranch(branch.branch_id, transformedData, token);
 
+      // 2️⃣ Guardar servicios
       if (serviceSaveRef.current) {
-        console.log("2. Llamando al guardado de Servicios...");
+        console.log("2. Guardando servicios...");
         await serviceSaveRef.current.saveData();
       }
 
+      // 3️⃣ Guardar métodos de pago
       if (paymentSaveRef.current) {
-        console.log("3. Llamando al guardado de Métodos de Pago...");
+        console.log("3. Guardando métodos de pago...");
         await paymentSaveRef.current.saveData();
       }
 
+      // 4️⃣ Guardar instructores
       if (instructorsSaveRef.current) {
-        console.log("4. Llamando al guardado de Instructores...");
-        await instructorsSaveRef.current.saveData();
-      }
-      if (equipmentSaveRef.current) {
-        console.log("4. Llamando al guardado de Instructores...");
+        console.log("4. Guardando instructores...");
         await instructorsSaveRef.current.saveData();
       }
 
-      alert("Sucursal guardada con éxito");
+      // 5️⃣ Guardar equipamiento
+      if (equipmentSaveRef.current) {
+        console.log("5. Guardando equipamiento...");
+        await equipmentSaveRef.current.saveData();
+      }
+
+      alert("✅ Sucursal guardada con éxito");
       router.push(`/branches/${branch.branch_id}`);
       router.refresh();
     } catch (err) {
-      console.error("Error al guardar la sucursal (un paso falló):", err);
+      console.error("❌ Error al guardar la sucursal:", err);
       alert("Error: No se pudo guardar la sucursal.");
     } finally {
       setIsSaving(false);
@@ -148,16 +182,17 @@ export default function BranchFormContainer({
     {
       value: "payment",
       label: "Métodos de pago",
-      content: <BranchPaymentMethodPanel mode={mode} />,
+      content: <BranchPaymentMethodPanel mode={mode} ref={paymentSaveRef} />,
     },
     {
       value: "services",
       label: "Servicios",
       content: (
         <BranchServicePanel
-          mode={mode ?? "view"}
           formData={formData}
           setFormData={setFormData}
+          allServices={allServicesFromApi}
+          mode={mode}
           ref={serviceSaveRef}
         />
       ),
@@ -165,12 +200,24 @@ export default function BranchFormContainer({
     {
       value: "instructors",
       label: "Instructores",
-      content: <BranchInstructorPanel mode={mode} />,
+      content: (
+        <BranchInstructorPanel
+          mode={mode}
+          ref={instructorsSaveRef}
+          branchId={branch.branch_id}
+        />
+      ),
     },
     {
       value: "equipment",
       label: "Equipamiento",
-      content: <BranchEquipmentPanel mode={mode} />,
+      content: (
+        <BranchEquipmentPanel
+          mode={mode}
+          ref={equipmentSaveRef}
+          branchId={branch.branch_id}
+        />
+      ),
     },
   ];
 
@@ -203,9 +250,8 @@ export default function BranchFormContainer({
               >
                 Cancelar
               </Button>
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? "Guardando..." : "Guardar"}{" "}
-                {/* 6. Texto de carga */}
+              <Button onClick={handleSaveAll} disabled={isSaving}>
+                {isSaving ? "Guardando..." : "Guardar"}
               </Button>
             </>
           )}
