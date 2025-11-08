@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import CreateEquipment from "./CreateEquipment";
 import EditEquipment from "./EditEquipment";
-import ViewDetailsEquipment from "./EditEquipment";
+import ViewDetailsEquipment from "./ViewDetailsEquipment";
 import EquipmentTable from "./EquipmentTable";
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -45,8 +45,13 @@ export default function Equipment() {
     }
     setIsLoading(true);
     try {
-      const result: EquipmentListResponse =
-        await api.equipment.getEquipment(token);
+      const result: EquipmentListResponse = await api.equipment.getEquipment(
+        token,
+        {
+          limit: pageSize,
+          page,
+        },
+      );
 
       setEquipmentData(result.data);
       setTotalItems(result.data.length); // Usamos la longitud de los datos

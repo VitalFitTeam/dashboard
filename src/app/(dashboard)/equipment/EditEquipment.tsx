@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import type { Equipment } from "@/models/equipment";
+import type { UpdateEquipment } from "@vitalfit/sdk";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import EquipmentForm from "./EquipmentForm";
-import { useState } from "react";
+import { api } from "@/lib/sdk-config";
+import { Notification } from "@/components/ui/Notification";
 
 interface EditEquipmentProps {
   equipment: Equipment;
@@ -16,21 +19,91 @@ export default function EditEquipment({
   onBack,
 }: EditEquipmentProps) {
   const [formData, setFormData] = useState<Equipment>({
-    id: "",
-    name: "",
-    category: "Cardio",
-    description: "",
-    brand: "",
-    model: "",
+    equipment_id: equipment.equipment_id,
+    name: equipment.name ?? "",
+    category: equipment.category ?? "Cardio",
+    description: equipment.description ?? "",
+    brand: equipment.brand ?? "",
+    model: equipment.model ?? "",
   });
+
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof Equipment, string>>
+  >({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showServerError, setShowServerError] = useState({
+    visible: false,
+    message: "",
+  });
+  const [showConnectionError, setShowConnectionError] = useState(false);
 
   const handleChange = (field: keyof Equipment, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validate = () => {
+    const newErrors: Partial<Record<keyof Equipment, string>> = {};
+
+    if (!(formData.name ?? "").trim())
+      {newErrors.name = "El nombre es obligatorio.";}
+    if (!(formData.description ?? "").trim())
+      {newErrors.description = "La descripción es obligatoria.";}
+    if (!(formData.brand ?? "").trim())
+      {newErrors.brand = "La marca es obligatoria.";}
+    if (!(formData.model ?? "").trim())
+      {newErrors.model = "El modelo es obligatorio.";}
+    if (!(formData.category ?? "").trim())
+      {newErrors.category = "La categoría es obligatoria.";}
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.warn("enviar formulario");
+    setShowServerError({ visible: false, message: "" });
+    setShowConnectionError(false);
+
+    if (!validate()) {return;}
+
+    const token = localStorage.getItem("access_token");
+    if (!token || typeof token !== "string" || token.length < 10) {
+      setShowServerError({
+        visible: true,
+        message: "Token de autenticación no encontrado.",
+      });
+      return;
+    }
+
+    const payload: UpdateEquipment = {
+      name: formData.name,
+      description: formData.description ?? "",
+      brand: formData.brand ?? "",
+      model: formData.model ?? "",
+      category: formData.category,
+    };
+
+    setIsLoading(true);
+    try {
+      await api.equipment.updateEquipment(
+        formData.equipment_id,
+        payload,
+        token,
+      );
+      setShowSuccess(true);
+      setTimeout(onBack, 1500);
+    } catch (err: any) {
+      console.error("Error al actualizar equipo:", err);
+      if (err?.response?.data?.error) {
+        setShowServerError({ visible: true, message: err.response.data.error });
+      } else {
+        setShowConnectionError(true);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,16 +113,44 @@ export default function EditEquipment({
           <Button variant="secondary" onClick={onBack}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary">
-            Guardar Cambios
+          <Button type="submit" variant="primary" disabled={isLoading}>
+            {isLoading ? "Guardando..." : "Guardar Cambios"}
           </Button>
         </PageHeader>
         <p className="text-sm text-muted-foreground">
-          Modifica la información de un nuevo equipo
+          Modifica la información del equipo
         </p>
 
-        <EquipmentForm formData={formData} onChange={handleChange} />
+        <EquipmentForm
+          formData={formData}
+          onChange={handleChange}
+          errors={errors}
+        />
       </form>
+
+      {showSuccess && (
+        <Notification
+          variant="success"
+          description="¡Equipo actualizado exitosamente!"
+          onClose={() => setShowSuccess(false)}
+        />
+      )}
+      {showConnectionError && (
+        <Notification
+          variant="destructive"
+          title="Error de conexión"
+          description="No se pudo conectar con el servidor. Intenta más tarde."
+          onClose={() => setShowConnectionError(false)}
+        />
+      )}
+      {showServerError.visible && (
+        <Notification
+          variant="destructive"
+          title="Error al actualizar equipo"
+          description={showServerError.message}
+          onClose={() => setShowServerError({ visible: false, message: "" })}
+        />
+      )}
     </div>
   );
 }

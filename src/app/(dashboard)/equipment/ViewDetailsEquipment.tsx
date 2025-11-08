@@ -15,12 +15,12 @@ export default function ViewDetailsEquipment({
   onBack,
 }: ViewDetailsEquipmentProps) {
   const [formData, setFormData] = useState<Equipment>({
-    id: "",
-    name: "",
-    category: "Cardio",
-    description: "",
-    brand: "",
-    model: "",
+    equipment_id: equipment.equipment_id,
+    name: equipment.name ?? "",
+    category: equipment.category ?? "Cardio",
+    description: equipment.description ?? "",
+    brand: equipment.brand ?? "",
+    model: equipment.model ?? "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -34,9 +34,6 @@ export default function ViewDetailsEquipment({
         <PageHeader title="DETALLES">
           <Button variant="secondary" onClick={onBack}>
             Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleSubmit}>
-            Modificar
           </Button>
         </PageHeader>
         <p className="text-sm text-muted-foreground">
