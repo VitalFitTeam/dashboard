@@ -56,6 +56,21 @@ const BranchServicePanel = forwardRef<BranchPanelRef, ServicesPanelProps>(
 
     const assignedServices: BranchServicePrice[] = formData.services ?? [];
 
+    useEffect(() => {
+      if (!token) {
+        return;
+      }
+      const fetchServices = async () => {
+        try {
+          const response = await api.products.getServices(token);
+          setAllServicesFromApi(response.data || []);
+        } catch (err) {
+          console.error("❌ Error cargando servicios:", err);
+        }
+      };
+      fetchServices();
+    }, [token]);
+
     // Cargar servicios de la sucursal desde la API
     useEffect(() => {
       const loadServices = async () => {

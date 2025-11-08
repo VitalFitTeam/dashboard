@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { TabSelector } from "@/components/ui/TabSelector";
+import { Button } from "@/components/ui/button";
 import BranchBasicDataPanel from "./BranchBasicDataPanel";
 import BranchServicePanel, { BranchPanelRef } from "./BranchServicesPanel";
 import BranchInstructorPanel from "./BranchInstructorsPanel";
 import BranchEquipmentPanel from "./BranchEquipmentPanel";
 import BranchPaymentMethodPanel from "./BranchPaymentMethodsPanel";
-import { Button } from "@/components/ui/button";
 import {
   BranchDetails,
-  BranchServicePrice,
   ServiceFullDetail,
   UpdateBranchRequest,
   UpdateOperatingHour,
@@ -55,6 +54,7 @@ const toHHMMSS = (input?: string | null) => {
   return "00:00:00";
 };
 
+// unicamente datos generales
 function transformDataForAPI(data: BranchDetails): UpdateBranchRequest {
   const opHours: UpdateOperatingHour[] = data.operating_hours.map((h) => ({
     day_of_week: h.day_of_week,
@@ -85,82 +85,75 @@ export default function BranchFormContainer({
   branch,
 }: BranchFormContainerProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState<
-    BranchDetails & { services: BranchServicePrice[] }
-  >({
+  const { token } = useAuth();
+
+  const [formData, setFormData] = useState<BranchDetails>({
     ...branch,
-    services: [],
   });
+
   const [isSaving, setIsSaving] = useState(false);
   const [allServicesFromApi, setAllServicesFromApi] = useState<
     ServiceFullDetail[]
   >([]);
-  const { token } = useAuth();
 
   const serviceSaveRef = useRef<BranchPanelRef | null>(null);
   const paymentSaveRef = useRef<BranchPanelRef | null>(null);
   const instructorsSaveRef = useRef<BranchPanelRef | null>(null);
   const equipmentSaveRef = useRef<BranchPanelRef | null>(null);
 
-  useEffect(() => {
-    const fetchServices = async () => {
-      if (!token) {
-        return;
-      }
-      try {
-        const response = await api.products.getServices(token);
-        setAllServicesFromApi(response.data || []);
-      } catch (err) {
-        console.error("❌ Error cargando servicios:", err);
-      }
-    };
-    fetchServices();
-  }, [token]);
+  const [dirtySections, setDirtySections] = useState({
+    basic: false,
+    services: false,
+    payment: false,
+    instructors: false,
+    equipment: false,
+  });
 
   const handleSaveAll = async () => {
     if (!token) {
-      alert("Error: Sesión no válida.");
-      return;
+      return alert("Error: Sesión no válida.");
     }
-
     setIsSaving(true);
 
     try {
-      // 1️⃣ Guardar datos básicos de la sucursal
-      console.log("1. Guardando datos básicos...");
-      const transformedData = transformDataForAPI(formData);
-      await api.branch.updateBranch(branch.branch_id, transformedData, token);
+      //Guardar datos básicos
+      if (dirtySections.basic) {
+        const transformedData = transformDataForAPI(formData);
+        await api.branch.updateBranch(branch.branch_id, transformedData, token);
+      }
 
-      // 2️⃣ Guardar servicios
-      if (serviceSaveRef.current) {
-        console.log("2. Guardando servicios...");
+      // Guardar servicios
+      if (dirtySections.services && serviceSaveRef.current) {
         await serviceSaveRef.current.saveData();
       }
 
-      // 3️⃣ Guardar métodos de pago
-      if (paymentSaveRef.current) {
-        console.log("3. Guardando métodos de pago...");
+      // Guardar métodos de pago
+      if (dirtySections.payment && paymentSaveRef.current) {
         await paymentSaveRef.current.saveData();
       }
 
-      // 4️⃣ Guardar instructores
-      if (instructorsSaveRef.current) {
-        console.log("4. Guardando instructores...");
+      //  Guardar instructores
+      if (dirtySections.instructors && instructorsSaveRef.current) {
         await instructorsSaveRef.current.saveData();
       }
 
-      // 5️⃣ Guardar equipamiento
-      if (equipmentSaveRef.current) {
-        console.log("5. Guardando equipamiento...");
+      //  Guardar equipamiento
+      if (dirtySections.equipment && equipmentSaveRef.current) {
         await equipmentSaveRef.current.saveData();
       }
 
-      alert("✅ Sucursal guardada con éxito");
-      router.push(`/branches/${branch.branch_id}`);
+      alert("✅ Cambios guardados correctamente");
+      setDirtySections({
+        basic: false,
+        services: false,
+        payment: false,
+        instructors: false,
+        equipment: false,
+      });
       router.refresh();
     } catch (err) {
-      console.error("❌ Error al guardar la sucursal:", err);
-      alert("Error: No se pudo guardar la sucursal.");
+      console.error("❌ Error al guardar:", err);
+      alert("Error: No se pudo guardar los cambios.");
     } finally {
       setIsSaving(false);
     }
@@ -169,23 +162,34 @@ export default function BranchFormContainer({
   const tabs = [
     {
       value: "basic",
-      label: "General",
+      label: `General ${dirtySections.basic ? "•" : ""}`,
       content: (
         <BranchBasicDataPanel
           mode={mode}
           formData={formData}
           setFormData={setFormData}
+          onDirtyChange={(isDirty) =>
+            setDirtySections((prev) => ({ ...prev, basic: isDirty }))
+          }
         />
       ),
     },
     {
       value: "payment",
-      label: "Métodos de pago",
-      content: <BranchPaymentMethodPanel mode={mode} ref={paymentSaveRef} />,
+      label: `Métodos de pago ${dirtySections.payment ? "•" : ""}`,
+      content: (
+        <BranchPaymentMethodPanel
+          mode={mode}
+          ref={paymentSaveRef}
+          onDirtyChange={(isDirty) =>
+            setDirtySections((prev) => ({ ...prev, payment: isDirty }))
+          }
+        />
+      ),
     },
     {
       value: "services",
-      label: "Servicios",
+      label: `Servicios ${dirtySections.services ? "•" : ""}`,
       content: (
         <BranchServicePanel
           formData={formData}
@@ -193,35 +197,46 @@ export default function BranchFormContainer({
           allServices={allServicesFromApi}
           mode={mode}
           ref={serviceSaveRef}
+          onDirtyChange={(isDirty) =>
+            setDirtySections((prev) => ({ ...prev, services: isDirty }))
+          }
         />
       ),
     },
     {
       value: "instructors",
-      label: "Instructores",
+      label: `Instructores ${dirtySections.instructors ? "•" : ""}`,
       content: (
         <BranchInstructorPanel
           mode={mode}
           ref={instructorsSaveRef}
           branchId={branch.branch_id}
+          onDirtyChange={(isDirty) =>
+            setDirtySections((prev) => ({ ...prev, instructors: isDirty }))
+          }
         />
       ),
     },
     {
       value: "equipment",
-      label: "Equipamiento",
+      label: `Equipamiento ${dirtySections.equipment ? "•" : ""}`,
       content: (
         <BranchEquipmentPanel
           mode={mode}
           ref={equipmentSaveRef}
           branchId={branch.branch_id}
+          onDirtyChange={(isDirty) =>
+            setDirtySections((prev) => ({ ...prev, equipment: isDirty }))
+          }
         />
       ),
     },
   ];
 
+  /* 🔹 Renderizado principal */
   return (
     <div className="p-6">
+      {/* Header con acciones */}
       <div className="flex justify-between items-center mb-4">
         <div>
           <h1 className="text-2xl font-bold">
@@ -250,13 +265,14 @@ export default function BranchFormContainer({
                 Cancelar
               </Button>
               <Button onClick={handleSaveAll} disabled={isSaving}>
-                {isSaving ? "Guardando..." : "Guardar"}
+                {isSaving ? "Guardando..." : "Guardar todo"}
               </Button>
             </>
           )}
         </div>
       </div>
 
+      {/* Tabs de contenido */}
       <TabSelector tabs={tabs} defaultValue="basic" />
     </div>
   );

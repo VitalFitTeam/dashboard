@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { BranchInstructorInfo } from "@vitalfit/sdk";
+import { BranchInstructorInfo, InstructorDataList } from "@vitalfit/sdk";
 import {
   Select,
   SelectTrigger,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import EntityItem from "@/components/features/EntityItem";
+import { toast } from "sonner";
 
 interface BranchInstructorPanelProps {
   branchId: string;
@@ -22,106 +23,111 @@ export default function BranchInstructorPanel({
   branchId,
 }: BranchInstructorPanelProps) {
   const { token } = useAuth();
+
   const [branchInstructors, setBranchInstructors] = useState<
     BranchInstructorInfo[]
   >([]);
-  const [allInstructors, setAllInstructors] = useState<BranchInstructorInfo[]>(
+  const [allInstructors, setAllInstructors] = useState<InstructorDataList[]>(
     [],
   );
   const [selectedInstructorId, setSelectedInstructorId] = useState<
     string | null
   >(null);
-  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Cargar instructores de la sucursal
-  useEffect(() => {
+  const fetchBranchInstructors = useCallback(async () => {
     if (!token || !branchId) {
       return;
     }
 
-    const fetchBranchInstructors = async () => {
-      try {
-        const res = await api.instructor.getBranchInstructors(
-          branchId,
-          { search },
-          token,
-        );
-        const mapped: BranchInstructorInfo[] = (res.data || []).map(
-          (i: any) => ({
-            name: i.instructor_name,
-            instructorID: i.instructor_id,
-            email: i.email,
-            phone: i.phone,
-          }),
-        );
-        setBranchInstructors(mapped);
-      } catch (err) {
-        console.error("Error cargando instructores de la sucursal:", err);
-      }
-    };
-
-    fetchBranchInstructors();
-  }, [branchId, token, search]);
-
-  // Cargar todos los instructores disponibles
-  useEffect(() => {
-    if (!token) {
-      return;
+    try {
+      setLoading(true);
+      const res = await api.instructor.getBranchInstructors(
+        branchId,
+        {},
+        token,
+      );
+      const mapped = (res.data || []).map((i: any) => ({
+        instructorID: i.instructor_id,
+        instructorName: i.instructor_name,
+        email: i.email,
+        phone: i.phone,
+      }));
+      setBranchInstructors(mapped);
+    } catch (err) {
+      console.error("Error cargando instructores de la sucursal:", err);
+      toast.error("No se pudieron cargar los instructores de la sucursal");
+    } finally {
+      setLoading(false);
     }
-    const fetchAllInstructors = async () => {
-      try {
-        const res = await api.instructor.getInstructors({ search }, token);
-        const mapped: BranchInstructorInfo[] = (res.data || []).map(
-          (i: any) => ({
-            name: i.instructor_name,
-            instructorID: i.instructor_id,
-            email: i.email,
-            phone: i.phone,
-          }),
-        );
-        console.log(mapped);
-        setAllInstructors(mapped);
-      } catch (err) {
-        console.error("Error cargando todos los instructores:", err);
-      }
-    };
+  }, [token, branchId]);
 
-    fetchAllInstructors();
-  }, [token, search]);
-
-  const handleAddInstructor = async () => {
-    if (!token || !selectedInstructorId) {
+  const fetchAllInstructors = useCallback(async () => {
+    if (!token) {
       return;
     }
 
     try {
+      setLoading(true);
+      const res = await api.instructor.getInstructors({}, token);
+      setAllInstructors(res.data);
+    } catch (err) {
+      console.error("Error cargando instructores:", err);
+      toast.error("No se pudieron cargar los instructores disponibles");
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  const handleAddInstructor = async () => {
+    if (!token || !branchId || !selectedInstructorId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
       await api.instructor.addBranchInstructor(
         branchId,
         [selectedInstructorId],
         token,
       );
-
-      // Actualizamos el listado local
-      const instructorToAdd = allInstructors.find(
-        (i) => i.instructorID === selectedInstructorId,
-      );
-      if (instructorToAdd) {
-        setBranchInstructors((prev) => [...prev, instructorToAdd]);
-        setSelectedInstructorId(null);
-      }
-
-      alert("Instructor agregado correctamente");
+      toast.success("Instructor agregado correctamente");
+      await fetchBranchInstructors();
+      setSelectedInstructorId(null);
     } catch (err) {
       console.error("Error agregando instructor:", err);
-      alert("No se pudo agregar el instructor");
+      toast.error("No se pudo agregar el instructor");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRemoveInstructor = (instructorID: string) => {
-    setBranchInstructors((prev) =>
-      prev.filter((i) => i.instructorID !== instructorID),
-    );
+  const handleRemoveInstructor = async (instructorId: string) => {
+    if (!token || !branchId || !instructorId) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.instructor.removeBranchInstructor(
+        branchId,
+        instructorId,
+        token,
+      );
+      toast.success("Instructor eliminado correctamente");
+      await fetchBranchInstructors();
+    } catch (err) {
+      console.error("❌ Error eliminando instructor:", err);
+      toast.error("No se pudo eliminar el instructor");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchBranchInstructors();
+    fetchAllInstructors();
+  }, [fetchBranchInstructors, fetchAllInstructors]);
 
   return (
     <div className="space-y-4">
@@ -130,6 +136,7 @@ export default function BranchInstructorPanel({
           <label className="text-sm font-medium text-gray-700 mb-1 block">
             Agregar instructor
           </label>
+
           <Select
             value={selectedInstructorId ?? ""}
             onValueChange={setSelectedInstructorId}
@@ -139,25 +146,32 @@ export default function BranchInstructorPanel({
             </SelectTrigger>
             <SelectContent>
               {allInstructors.map((instr) => (
-                <SelectItem key={instr.instructorID} value={instr.instructorID}>
-                  {instr.name || "Error al mostrar nombre"}
+                <SelectItem
+                  key={instr.instructor_id}
+                  value={instr.instructor_id}
+                >
+                  {`${instr.first_name} ${instr.last_name}`}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
+
         <Button
           type="button"
           onClick={handleAddInstructor}
-          disabled={!selectedInstructorId}
+          disabled={!selectedInstructorId || loading}
           className="sm:mt-0 mt-2"
         >
-          Agregar
+          {loading ? "Cargando..." : "Agregar"}
         </Button>
       </div>
 
+      {/* 🔹 Lista de instructores asignados */}
       <div className="space-y-2">
-        {branchInstructors.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-gray-500">Cargando instructores...</p>
+        ) : branchInstructors.length === 0 ? (
           <p className="text-sm text-gray-500">
             No hay instructores asignados a esta sucursal.
           </p>
@@ -165,8 +179,14 @@ export default function BranchInstructorPanel({
           branchInstructors.map((instr) => (
             <EntityItem
               key={instr.instructorID}
-              initials={`${instr.name?.split(" ")[0]?.[0] ?? "?"}${instr.name?.split(" ")[1]?.[0] ?? "?"}`}
-              title={instr.name ?? "Sin nombre"}
+              initials={
+                instr.instructorName
+                  ?.split(" ")
+                  .slice(0, 2)
+                  .map((n) => n[0])
+                  .join("") ?? "?"
+              }
+              title={instr.instructorName ?? "Sin nombre"}
               description={instr.email}
               action={
                 <button
