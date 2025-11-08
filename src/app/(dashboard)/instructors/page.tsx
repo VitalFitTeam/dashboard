@@ -49,7 +49,7 @@ export default function Instructor() {
     {},
   );
 
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   const [totalInstructor, setTotalInstructor] = useState(0);
