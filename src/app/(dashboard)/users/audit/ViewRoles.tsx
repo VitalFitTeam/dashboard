@@ -11,12 +11,14 @@ interface ViewRolesProps {
 }
 
 export default function ViewRoles({ roles, onBack }: ViewRolesProps) {
-  const [formData, setFormData] = useState<Roles>({
+  const [formData] = useState<Roles>({
     id: roles.id,
     name: roles.name,
     description: roles.description,
-    permits: roles.permits,
   });
+
+  const handleChange = () => {};
+  const handlePermissionChange = () => {};
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
@@ -26,7 +28,14 @@ export default function ViewRoles({ roles, onBack }: ViewRolesProps) {
         </Button>
       </PageHeader>
 
-      <RolesForm formData={formData} onChange={() => {}} disabled={true} />
+      <RolesForm 
+        formData={formData} 
+        onChange={handleChange}
+        selectedPermissions={[]}
+        onPermissionChange={handlePermissionChange}
+        disabled={true}
+        errors={{}}
+      />
     </div>
   );
 }
