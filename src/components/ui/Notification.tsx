@@ -66,13 +66,17 @@ const Notification = React.forwardRef<HTMLDivElement, NotificationProps>(
         className={cn(notificationVariants({ variant }), className)}
         {...props}
       >
-        {variant === "success" && <BellIcon className="mr-2 h-6 w-6" />}
+        {variant === "success"}
         {title && (
           <h5 className="mb-1 font-bebas text-xl font-semibold tracking-tight">
             {title}
           </h5>
         )}
-        <p className="text-sm">{description}</p>
+        <p
+          className={`text-sm ${variant === "success" ? "text-green-600 text-left px-2" : ""}`}
+        >
+          {description}
+        </p>
         {onClose && (
           <button onClick={onClose} className="absolute top-2 right-2 p-1">
             <XCircleIcon className="h-5 w-5" />
