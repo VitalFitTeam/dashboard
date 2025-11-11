@@ -6,15 +6,28 @@ import React from "react";
 
 type PageHeaderProps = {
   title: string;
-  children?: React.ReactNode;
+  actionButton?: React.ReactNode;
+  subtitle?: React.ReactNode;
 };
 
-export const PageHeader: React.FC<PageHeaderProps> = ({ title, children }) => {
+export const PageHeader: React.FC<PageHeaderProps> = ({
+  title,
+  actionButton,
+  subtitle,
+}) => {
   return (
-    <div className="flex items-center justify-between pb-4 border-b">
-      <h2 className={cn(typography.heading, "text-4xl")}>{title}</h2>
+    <div className="flex flex-col p-6">
+      <div className="flex items-start justify-between">
+        <h2 className={cn(typography.heading, "text-2xl font-bold uppercase")}>
+          {title}
+        </h2>
 
-      <div className="flex items-center space-x-2">{children}</div>
+        {actionButton && (
+          <div className="flex items-center space-x-2">{actionButton}</div>
+        )}
+      </div>
+
+      {subtitle && <div className="mt-1">{subtitle}</div>}
     </div>
   );
 };

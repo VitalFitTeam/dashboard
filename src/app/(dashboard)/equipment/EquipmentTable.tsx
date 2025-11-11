@@ -66,6 +66,7 @@ export default function EquipmentTable({
   const router = useRouter();
 
   const handleView = (row: EquipmentRow) => {
+    console.log("Ver detalles de:", row.equipment_id);
     router.push(`/equipment/${row.equipment_id}`);
   };
 

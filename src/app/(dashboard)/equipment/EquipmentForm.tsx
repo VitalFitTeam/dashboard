@@ -1,6 +1,6 @@
 "use client";
 
-import { EquipmentCategory, Equipment } from "@/models/equipment";
+import { EquipmentCategory } from "@/models/equipment";
 import { Input } from "@/components/ui/Input";
 import {
   Select,
@@ -12,19 +12,21 @@ import {
 import { Textarea } from "@/components/ui/Textarea";
 import { EquipmentInfo } from "@vitalfit/sdk";
 
+type EquipmentWithBrand = EquipmentInfo & { brand?: string };
+
 interface EquipmentFormProps {
-  formData: EquipmentInfo;
-  onChange: (field: keyof Equipment, value: string) => void;
-  disabled?: boolean;
-  errors?: Partial<Record<keyof Equipment, string>>;
+  equipment: EquipmentWithBrand;
+  onChange?: (field: keyof EquipmentWithBrand, value: string) => void;
+  mode?: "view" | "edit";
 }
 
 export default function EquipmentForm({
-  formData,
-  onChange,
-  disabled = false,
-  errors = {},
+  equipment,
+  onChange = () => {},
+  mode = "view",
 }: EquipmentFormProps) {
+  const disabled = mode === "view";
+
   const categories: EquipmentCategory[] = [
     "Cardio",
     "Strength",
@@ -38,20 +40,17 @@ export default function EquipmentForm({
       <div className="flex flex-col">
         <label className="text-sm font-medium mb-1">Nombre</label>
         <Input
-          value={formData.name}
+          value={equipment.name ?? ""}
           onChange={(e) => onChange("name", e.target.value)}
-          placeholder="agrega un nombre"
+          placeholder="Agrega un nombre"
           disabled={disabled}
         />
-        {errors.name && (
-          <p className="text-sm text-red-500 mt-1">{errors.name}</p>
-        )}
       </div>
 
       <div className="flex flex-col">
         <label className="text-sm font-medium mb-1">Categoría</label>
         <Select
-          value={formData.category}
+          value={equipment.category ?? ""}
           onValueChange={(value) => onChange("category", value)}
           disabled={disabled}
         >
@@ -66,49 +65,37 @@ export default function EquipmentForm({
             ))}
           </SelectContent>
         </Select>
-        {errors.category && (
-          <p className="text-sm text-red-500 mt-1">{errors.category}</p>
-        )}
       </div>
 
       <div className="flex flex-col col-span-1 md:col-span-2">
         <label className="text-sm font-medium mb-1">Descripción</label>
         <Textarea
-          value={formData.description ?? ""}
+          value={equipment.description ?? ""}
           onChange={(e) => onChange("description", e.target.value)}
-          placeholder=""
+          placeholder="Agrega una descripción"
           disabled={disabled}
-          className="min-h-[100px]" // Puedes ajustar la altura mínima si lo deseas
+          className="min-h-[100px]"
         />
-        {errors.description && (
-          <p className="text-sm text-red-500 mt-1">{errors.description}</p>
-        )}
       </div>
 
       <div className="flex flex-col">
         <label className="text-sm font-medium mb-1">Modelo</label>
         <Input
-          value={formData.model ?? ""}
+          value={equipment.model ?? ""}
           onChange={(e) => onChange("model", e.target.value)}
-          placeholder="agrega un modelo"
+          placeholder="Agrega un modelo"
           disabled={disabled}
         />
-        {errors.model && (
-          <p className="text-sm text-red-500 mt-1">{errors.model}</p>
-        )}
       </div>
 
       <div className="flex flex-col">
         <label className="text-sm font-medium mb-1">Marca</label>
         <Input
-          value={formData.brand ?? ""}
+          value={equipment.brand ?? ""}
           onChange={(e) => onChange("brand", e.target.value)}
-          placeholder="agrega una marca"
+          placeholder="Agrega una marca"
           disabled={disabled}
         />
-        {errors.brand && (
-          <p className="text-sm text-red-500 mt-1">{errors.brand}</p>
-        )}
       </div>
     </div>
   );
