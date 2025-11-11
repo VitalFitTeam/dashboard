@@ -47,7 +47,6 @@ export default function EquipmentDetailPage() {
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
-      {/* Encabezado */}
       <PageHeader
         title="DETALLES DE EQUIPAMIENTO"
         subtitle={
@@ -76,7 +75,6 @@ export default function EquipmentDetailPage() {
         }
       />
 
-      {/* Formulario en modo solo lectura */}
       <EquipmentForm equipment={equipment} mode="view" />
     </div>
   );

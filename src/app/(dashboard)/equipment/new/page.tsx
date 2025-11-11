@@ -9,6 +9,7 @@ import { api } from "@/lib/sdk-config";
 import type { CreateEquipment } from "@vitalfit/sdk";
 import { Notification } from "@/components/ui/Notification";
 import { type EquipmentSchema } from "@/lib/validation/equipmentSchema";
+import { useRouter } from "next/navigation";
 
 interface CreateEquipmentProps {
   onBack: () => void;
@@ -23,6 +24,8 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
     model: "",
     category: "Cardio",
   });
+
+  const router = useRouter();
 
   const [errors, setErrors] = useState<
     Partial<Record<keyof Equipment, string>>
@@ -43,16 +46,21 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
   const validate = () => {
     const newErrors: Partial<Record<keyof Equipment, string>> = {};
 
-    if (!(formData.name ?? "").trim())
-      {newErrors.name = "El nombre es obligatorio.";}
-    if (!(formData.description ?? "").trim())
-      {newErrors.description = "La descripción es obligatoria.";}
-    if (!(formData.brand ?? "").trim())
-      {newErrors.brand = "La marca es obligatoria.";}
-    if (!(formData.model ?? "").trim())
-      {newErrors.model = "El modelo es obligatorio.";}
-    if (!(formData.category ?? "").trim())
-      {newErrors.category = "La categoría es obligatoria.";}
+    if (!(formData.name ?? "").trim()) {
+      newErrors.name = "El nombre es obligatorio.";
+    }
+    if (!(formData.description ?? "").trim()) {
+      newErrors.description = "La descripción es obligatoria.";
+    }
+    if (!(formData.brand ?? "").trim()) {
+      newErrors.brand = "La marca es obligatoria.";
+    }
+    if (!(formData.model ?? "").trim()) {
+      newErrors.model = "El modelo es obligatorio.";
+    }
+    if (!(formData.category ?? "").trim()) {
+      newErrors.category = "La categoría es obligatoria.";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -63,7 +71,9 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
     setShowServerError({ visible: false, message: "" });
     setShowConnectionError(false);
 
-    if (!validate()) {return;}
+    if (!validate()) {
+      return;
+    }
 
     const token = localStorage.getItem("access_token");
     if (!token || typeof token !== "string" || token.length < 10) {
@@ -86,7 +96,9 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
     try {
       await api.equipment.createEquipment(payload, token);
       setShowSuccess(true);
-      setTimeout(onBack, 1500);
+      setTimeout(() => {
+        router.push("/equipment");
+      }, 1500);
     } catch (err: any) {
       console.error("Error al crear equipo:", err);
       if (err?.response?.data?.error) {
@@ -108,9 +120,10 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
         </p>
 
         <EquipmentForm
-          formData={formData}
+          equipment={formData}
           onChange={handleChange}
           errors={errors}
+          mode="edit"
         />
         <Button
           type="submit"

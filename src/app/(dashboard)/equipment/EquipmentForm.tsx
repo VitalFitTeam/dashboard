@@ -10,7 +10,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/Textarea";
-import { EquipmentInfo } from "@vitalfit/sdk";
+import { Equipment, EquipmentInfo } from "@vitalfit/sdk";
 
 type EquipmentWithBrand = EquipmentInfo & { brand?: string };
 
@@ -18,10 +18,12 @@ interface EquipmentFormProps {
   equipment: EquipmentWithBrand;
   onChange?: (field: keyof EquipmentWithBrand, value: string) => void;
   mode?: "view" | "edit";
+  errors?: Partial<Record<keyof Equipment, string>>;
 }
 
 export default function EquipmentForm({
   equipment,
+  errors = {},
   onChange = () => {},
   mode = "view",
 }: EquipmentFormProps) {
@@ -45,6 +47,7 @@ export default function EquipmentForm({
           placeholder="Agrega un nombre"
           disabled={disabled}
         />
+        {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
       </div>
 
       <div className="flex flex-col">
@@ -65,6 +68,9 @@ export default function EquipmentForm({
             ))}
           </SelectContent>
         </Select>
+        {errors.category && (
+          <p className="text-sm text-red-500">{errors.category}</p>
+        )}
       </div>
 
       <div className="flex flex-col col-span-1 md:col-span-2">
@@ -76,6 +82,9 @@ export default function EquipmentForm({
           disabled={disabled}
           className="min-h-[100px]"
         />
+        {errors.description && (
+          <p className="text-sm text-red-500">{errors.description}</p>
+        )}
       </div>
 
       <div className="flex flex-col">
@@ -86,6 +95,7 @@ export default function EquipmentForm({
           placeholder="Agrega un modelo"
           disabled={disabled}
         />
+        {errors.model && <p className="text-sm text-red-500">{errors.model}</p>}
       </div>
 
       <div className="flex flex-col">
@@ -96,6 +106,7 @@ export default function EquipmentForm({
           placeholder="Agrega una marca"
           disabled={disabled}
         />
+        {errors.brand && <p className="text-sm text-red-500">{errors.brand}</p>}
       </div>
     </div>
   );

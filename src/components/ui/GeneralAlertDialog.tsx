@@ -44,11 +44,11 @@ export function GeneralAlertDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>     
+      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-                    <AlertDialogTitle>{title}</AlertDialogTitle>   
-          <AlertDialogDescription>{description}</AlertDialogDescription>     
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
@@ -61,11 +61,11 @@ export function GeneralAlertDialog({
                 }),
               )}
             >
-                            {actionText}         
+              {actionText} 
             </AlertDialogAction>
           ) : (
             <>
-                            <AlertDialogCancel>{cancelText}</AlertDialogCancel> 
+              <AlertDialogCancel>{cancelText}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={onAction}
                 className={cn(

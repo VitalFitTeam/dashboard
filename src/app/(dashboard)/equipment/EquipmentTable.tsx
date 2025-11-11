@@ -11,13 +11,13 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Equipment } from "@vitalfit/sdk";
 import { useRouter } from "next/navigation";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 
 interface EquipmentTableProps {
   data: Equipment[];
@@ -86,7 +86,6 @@ export default function EquipmentTable({
       setDeleteRowId(null);
     } catch (error) {
       console.error("Error al eliminar el equipo:", error);
-      alert("Error al eliminar el equipo. Inténtelo de nuevo.");
       setDeleteRowId(null);
     }
   };
@@ -162,32 +161,17 @@ export default function EquipmentTable({
               ]}
             />
             {deleteRowId === row.equipment_id && (
-              <Alert className="mt-2 w-full max-w-md">
-                <AlertTitle className="text-black">
-                  Confirmar Eliminación
-                </AlertTitle>
-                <AlertDescription className="text-gray-900">
-                  ¿Estás seguro de que deseas eliminar este equipo? Esta acción
-                  no se puede deshacer.
-                </AlertDescription>
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    className="border-white"
-                    onClick={() => setDeleteRowId(null)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="text-white"
-                    onClick={() => handleDeleteEquipment(row)}
-                  >
-                    <Trash2 className="h-4 w-4 text-white" />
-                    Eliminar
-                  </Button>
-                </div>
-              </Alert>
+              <GeneralAlertDialog
+                open={deleteRowId === row.equipment_id}
+                onOpenChange={(open) => !open && setDeleteRowId(null)}
+                trigger={null}
+                title="Confirmar eliminación"
+                description="¿Estás seguro de que deseas eliminar este equipo? Esta acción no se puede deshacer."
+                actionText="Eliminar"
+                cancelText="Cancelar"
+                onAction={() => handleDeleteEquipment(row)}
+                actionVariant="destructive"
+              />
             )}
           </div>
         )}
