@@ -14,8 +14,8 @@ const config: Config = {
         foreground: "var(--foreground)",
       },
       fontFamily: {
-        heading: ["var(--font-bebas)", "sans-serif"],
-        sans: ["var(--font-montserrat)", "sans-serif"],
+        sans: ["var(--font-sans)", "sans-serif"],
+        heading: ["var(--font-heading)", "sans-serif"],
       },
     },
   },

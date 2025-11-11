@@ -2,101 +2,89 @@
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import CreateEquipment from "./CreateEquipment";
-import EditEquipment from "./EditEquipment";
-import ViewDetailsEquipment from "./EditEquipment";
 import EquipmentTable from "./EquipmentTable";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { Equipment as EquipmentType } from "@vitalfit/sdk";
-
-// Define el tipo de respuesta esperado de la API
-type EquipmentListResponse = { data: EquipmentType[] };
+import { Equipment as EquipmentType, EquipmentCategory } from "@vitalfit/sdk";
+import { useRouter } from "next/navigation";
 
 export default function Equipment() {
-  // --- Estados de Navegación y Vistas ---
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingEquipment, setEditingEquipment] =
-    useState<EquipmentType | null>(null);
-  const [viewEquipment, setViewEquipment] = useState<EquipmentType | null>(
-    null,
-  );
+  const router = useRouter();
   const { token } = useAuth();
 
-  // --- Estados de Datos y Carga ---
   const [equipmentData, setEquipmentData] = useState<EquipmentType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // --- Estados de Paginación (Controlada por el Padre) ---
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalItems, setTotalItems] = useState(0); // Renombrado de totalUsers a totalItems
+  const [pageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
-  // Cálculo del total de páginas (necesario para la PaginationControls)
-  const totalPages =
-    pageSize > 0 ? Math.max(1, Math.ceil(totalItems / pageSize)) : 1;
+  const [filters, setFilters] = useState({
+    search: "",
+    category: "all",
+  });
 
-  // 1. FUNCIÓN DE CARGA CENTRALIZADA Y CON ENVOLTURA CALLBACK
-  const loadEquipmentData = useCallback(async () => {
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const result: EquipmentListResponse =
-        await api.equipment.getEquipment(token);
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-      setEquipmentData(result.data);
-      setTotalItems(result.data.length); // Usamos la longitud de los datos
-    } catch (error) {
-      console.error("Error cargando equipamiento:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
-
-  // 2. EFECTO: Llama a loadEquipmentData al montar
   useEffect(() => {
-    loadEquipmentData();
-  }, [loadEquipmentData]);
+    const loadEquipmentData = async () => {
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const categoryParam =
+          filters.category !== "all"
+            ? (filters.category as EquipmentCategory)
+            : undefined;
 
-  // 3. FUNCIÓN DE RETORNO Y RECARGA (CRUD)
-  const handleBackAndReload = () => {
-    setShowCreateForm(false);
-    setEditingEquipment(null);
-    setViewEquipment(null);
-    setPage(1); // Siempre volvemos a la primera página tras un cambio/recarga
+        const result = await api.equipment.getEquipment(token, {
+          limit: pageSize,
+          page: page,
+          search: filters.search || undefined,
+          category: categoryParam,
+        });
+
+        console.log(
+          "Datos página",
+          page,
+          ":",
+          result.data?.length,
+          "registros",
+        );
+        setEquipmentData(result.data || []);
+        setTotalItems(result.total || 0);
+      } catch (error) {
+        console.error("Error cargando equipamiento:", error);
+        setEquipmentData([]);
+        setTotalItems(0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     loadEquipmentData();
+  }, [token, pageSize, filters, page]);
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
   };
 
-  // --- Renderizado Condicional de Vistas ---
-
-  if (showCreateForm) {
-    return <CreateEquipment onBack={handleBackAndReload} />;
-  }
-  if (editingEquipment) {
-    return (
-      <EditEquipment
-        equipment={editingEquipment}
-        onBack={handleBackAndReload}
-      />
-    );
-  }
-  if (viewEquipment) {
-    return (
-      <ViewDetailsEquipment
-        equipment={viewEquipment}
-        onBack={handleBackAndReload}
-      />
-    );
-  }
+  const handleFilterChange = (newFilters: {
+    search?: string;
+    category?: string;
+  }) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+  };
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title="EQUIPAMIENTO">
-        <Button variant="primary" onClick={() => setShowCreateForm(true)}>
+        <Button
+          className="bg-transparent text-black border border-gray-100"
+          onClick={() => router.push("/equipment/new")}
+        >
           <PlusIcon className="h-5 w-5" />
           Agregar Equipamiento
         </Button>
@@ -107,13 +95,13 @@ export default function Equipment() {
       ) : (
         <EquipmentTable
           data={equipmentData}
-          onReload={loadEquipmentData}
+          onReload={() => setPage((prev) => prev)}
           page={page}
           pageSize={pageSize}
-          onPageChange={setPage}
+          onPageChange={handlePageChange}
           totalPages={totalPages}
-          onView={(equipment) => setViewEquipment(equipment)}
-          onEdit={(equipment) => setEditingEquipment(equipment)}
+          filters={filters}
+          onFilterChange={handleFilterChange}
         />
       )}
     </div>
