@@ -11,7 +11,7 @@ type PageHeaderProps = {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ title, children }) => {
   return (
-    <div className="flex items-center justify-between pb-4 border-b">
+    <div className="flex items-center justify-between pb-4">
       <h2 className={cn(typography.heading, "text-4xl")}>{title}</h2>
 
       <div className="flex items-center space-x-2">{children}</div>
