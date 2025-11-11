@@ -6,7 +6,7 @@ export type EquipmentCategory =
   | "Accessory";
 
 export type Equipment = {
-  id: string;
+  equipment_id: string;
   name: string;
   category: EquipmentCategory;
   description?: string | null;

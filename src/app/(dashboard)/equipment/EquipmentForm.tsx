@@ -1,4 +1,5 @@
 "use client";
+
 import { EquipmentCategory, Equipment } from "@/models/equipment";
 import { Input } from "@/components/ui/Input";
 import {
@@ -8,17 +9,21 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/Textarea";
+import { EquipmentInfo } from "@vitalfit/sdk";
 
 interface EquipmentFormProps {
-  formData: Equipment;
+  formData: EquipmentInfo;
   onChange: (field: keyof Equipment, value: string) => void;
   disabled?: boolean;
+  errors?: Partial<Record<keyof Equipment, string>>;
 }
 
 export default function EquipmentForm({
   formData,
   onChange,
   disabled = false,
+  errors = {},
 }: EquipmentFormProps) {
   const categories: EquipmentCategory[] = [
     "Cardio",
@@ -35,9 +40,12 @@ export default function EquipmentForm({
         <Input
           value={formData.name}
           onChange={(e) => onChange("name", e.target.value)}
-          placeholder=""
+          placeholder="agrega un nombre"
           disabled={disabled}
         />
+        {errors.name && (
+          <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+        )}
       </div>
 
       <div className="flex flex-col">
@@ -48,7 +56,7 @@ export default function EquipmentForm({
           disabled={disabled}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select an item" />
+            <SelectValue placeholder="Seleccione una categoría" />
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
@@ -58,16 +66,23 @@ export default function EquipmentForm({
             ))}
           </SelectContent>
         </Select>
+        {errors.category && (
+          <p className="text-sm text-red-500 mt-1">{errors.category}</p>
+        )}
       </div>
 
       <div className="flex flex-col col-span-1 md:col-span-2">
         <label className="text-sm font-medium mb-1">Descripción</label>
-        <Input
+        <Textarea
           value={formData.description ?? ""}
           onChange={(e) => onChange("description", e.target.value)}
           placeholder=""
           disabled={disabled}
+          className="min-h-[100px]" // Puedes ajustar la altura mínima si lo deseas
         />
+        {errors.description && (
+          <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+        )}
       </div>
 
       <div className="flex flex-col">
@@ -75,9 +90,12 @@ export default function EquipmentForm({
         <Input
           value={formData.model ?? ""}
           onChange={(e) => onChange("model", e.target.value)}
-          placeholder=""
+          placeholder="agrega un modelo"
           disabled={disabled}
         />
+        {errors.model && (
+          <p className="text-sm text-red-500 mt-1">{errors.model}</p>
+        )}
       </div>
 
       <div className="flex flex-col">
@@ -85,9 +103,12 @@ export default function EquipmentForm({
         <Input
           value={formData.brand ?? ""}
           onChange={(e) => onChange("brand", e.target.value)}
-          placeholder=""
+          placeholder="agrega una marca"
           disabled={disabled}
         />
+        {errors.brand && (
+          <p className="text-sm text-red-500 mt-1">{errors.brand}</p>
+        )}
       </div>
     </div>
   );
