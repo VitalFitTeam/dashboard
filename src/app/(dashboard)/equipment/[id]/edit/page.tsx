@@ -1,215 +1,103 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import type { Equipment } from "@/models/equipment";
-import type { UpdateEquipment } from "@vitalfit/sdk";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import EquipmentForm from "../../EquipmentForm";
-import { api } from "@/lib/sdk-config";
-import { Notification } from "@/components/ui/Notification";
-import { useAuth } from "@/context/AuthContext";
 import { EquipmentInfo } from "@vitalfit/sdk";
-import { useRouter, useParams } from "next/navigation";
-import {
-  equipmentSchema,
-  type EquipmentSchema,
-} from "@/lib/validation/equipmentSchema";
+import { useAuth } from "@/context/AuthContext";
 
-export default function EditEquipment() {
-  const params = useParams();
+export default function EditEquipmentPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { token } = useAuth();
-  const id = params?.id as string | undefined;
 
-  const [loading, setLoading] = useState(true);
   const [equipment, setEquipment] = useState<EquipmentInfo | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof Equipment, string>>
-  >({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
-  const [showConnectionError, setShowConnectionError] = useState(false);
-
-  const [formData, setFormData] = useState<EquipmentSchema>({
-    equipment_id: "",
-    name: "",
-    description: "",
-    brand: "",
-    model: "",
-    category: "Cardio",
-  });
 
   useEffect(() => {
-    if (!id) {
-      router.replace("/equipment");
+    if (!id || !token) {
       return;
     }
-    if (!token) {return;}
 
-    let mounted = true;
-    setLoading(true);
-    setError(null);
-
-    (async () => {
+    const loadEquipment = async () => {
       try {
-        const equipmentData = await api.equipment.getEquipmentByID(id, token);
-        if (!mounted) {return;}
-
-        setEquipment(equipmentData.data);
-      } catch (err: any) {
-        if (!mounted) {return;}
-        const status = err?.response?.status ?? err?.status ?? null;
-        if (status === 404) {
-          router.replace("/equipment");
-        } else {
-          console.error("Error cargando equipo:", err);
-          setError("No se pudo cargar la información del equipo.");
-        }
+        setLoading(true);
+        const response = await api.equipment.getEquipmentByID(id, token);
+        // Verifica si la API devuelve data.data o data directamente
+        setEquipment(response.data ?? response);
+      } catch (err) {
+        console.error("Error cargando equipo:", err);
+        setError("No se pudo cargar el equipo.");
       } finally {
-        if (mounted) {setLoading(false);}
+        setLoading(false);
       }
-    })();
-
-    return () => {
-      mounted = false;
     };
-  }, [id, token, router]);
 
-  useEffect(() => {
-    if (equipment) {
-      setFormData({
-        equipment_id: equipment.equipment_id,
-        name: equipment.name ?? "",
-        description: equipment.description ?? "",
-        brand: equipment.brand ?? "",
-        model: equipment.model ?? "",
-        category: equipment.category ?? "Cardio",
-      });
-    }
-  }, [equipment]);
-
-  const handleChange = (field: keyof Equipment, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
-  };
-
-  const validate = () => {
-    const result = equipmentSchema.safeParse(formData);
-    if (!result.success) {
-      const zodErrors = result.error.flatten().fieldErrors;
-      const formattedErrors: Partial<Record<keyof Equipment, string>> = {};
-
-      for (const key in zodErrors) {
-        const field = key as keyof Equipment;
-        formattedErrors[field] = zodErrors[field]?.[0] ?? "";
-      }
-
-      setErrors(formattedErrors);
-      return false;
-    }
-
-    setErrors({});
-    return true;
-  };
+    loadEquipment();
+  }, [id, token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowServerError({ visible: false, message: "" });
-    setShowConnectionError(false);
-
-    if (!validate()) {return;}
-
-    const token = localStorage.getItem("access_token");
-    if (!token || typeof token !== "string" || token.length < 10) {
-      setShowServerError({
-        visible: true,
-        message: "Token de autenticación no encontrado.",
-      });
+    if (!equipment || !token) {
       return;
     }
 
-    const payload: UpdateEquipment = {
-      name: formData.name,
-      description: formData.description ?? "",
-      brand: formData.brand ?? "",
-      model: formData.model ?? "",
-      category: formData.category,
-    };
-
-    setIsLoading(true);
     try {
       await api.equipment.updateEquipment(
-        formData.equipment_id,
-        payload,
+        equipment.equipment_id,
+        equipment,
         token,
       );
-      setShowSuccess(true);
-      setTimeout(() => router.push("/equipment"), 1500);
-    } catch (err: any) {
-      console.error("Error al actualizar equipo:", err);
-      if (err?.response?.data?.error) {
-        setShowServerError({ visible: true, message: err.response.data.error });
-      } else {
-        setShowConnectionError(true);
-      }
-    } finally {
-      setIsLoading(false);
+      router.push("/equipment");
+    } catch (err) {
+      console.error("Error al guardar cambios:", err);
+      setError("No se pudo guardar la información del equipo.");
     }
   };
 
+  if (loading) {
+    return <div className="p-6">Cargando equipo...</div>;
+  }
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>;
+  }
+  if (!equipment) {
+    return null;
+  }
+
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <PageHeader title="MODIFICAR EQUIPO">
-          <Button variant="secondary" onClick={() => router.push("/equipment")}>
-            Cancelar
-          </Button>
-          <Button type="submit" variant="primary" disabled={isLoading}>
-            {isLoading ? "Guardando..." : "Guardar Cambios"}
-          </Button>
-        </PageHeader>
-        <p className="text-sm text-muted-foreground">
-          Modifica la información del equipo
-        </p>
+    <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <PageHeader
+          title="Editar Equipamiento"
+          subtitle={`Modifica los datos del equipo: ${equipment.name}`}
+          actionButton={
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => router.push("/equipment")}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" variant="primary">
+                Guardar cambios
+              </Button>
+            </div>
+          }
+        />
 
-        {!loading && (
-          <EquipmentForm
-            formData={formData}
-            onChange={handleChange}
-            errors={errors}
-          />
-        )}
+        <EquipmentForm
+          mode="edit"
+          equipment={equipment}
+          onChange={(field, value) =>
+            setEquipment((prev) => (prev ? { ...prev, [field]: value } : prev))
+          }
+        />
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="¡Equipamiento actualizado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-      {showConnectionError && (
-        <Notification
-          variant="destructive"
-          title="Error de conexión"
-          description="No se pudo conectar con el servidor. Intenta más tarde."
-          onClose={() => setShowConnectionError(false)}
-        />
-      )}
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al actualizar equipo"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }
