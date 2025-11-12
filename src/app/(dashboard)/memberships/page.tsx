@@ -1,99 +1,98 @@
 "use client";
+
 import { PageHeader } from "@/components/ui/PageHeader";
-import type { Membership } from "@/models/membership";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
-import { StatCard } from "@/components/ui/StatCard";
-import CreateMembership from "./CreateMembership";
-import EditMembership from "./EditMembership";
-import ViewMembership from "./ViewMembership";
+import { useState, useEffect } from "react";
+import { MembershipType } from "@vitalfit/sdk";
 import MembershipTable from "./MembershipTable";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/sdk-config";
 
 export default function Membership() {
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingMembership, setEditingMembership] = useState<Membership | null>(
-    null,
-  );
-  const [viewMembership, setViewMembership] = useState<Membership | null>(null);
+  const router = useRouter();
+  const { token } = useAuth();
 
-  if (showCreateForm) {
-    return <CreateMembership onBack={() => setShowCreateForm(false)} />;
-  }
+  const [membershipData, setMembershipData] = useState<MembershipType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [reloadFlag, setReloadFlag] = useState(0);
 
-  if (editingMembership) {
-    return (
-      <EditMembership
-        membership={editingMembership}
-        onBack={() => setEditingMembership(null)}
-      />
-    );
-  }
+  const [filters, setFilters] = useState({
+    search: "",
+  });
 
-  if (viewMembership) {
-    return (
-      <ViewMembership
-        membership={viewMembership}
-        onBack={() => setViewMembership(null)}
-      />
-    );
-  }
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-  const statsData = {
-    total: 5,
-    active: 2,
-    inactive: 3,
+  useEffect(() => {
+    const loadMembershipData = async () => {
+      if (!token) {
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const result = await api.membership.getMembershipTypes(token, {
+          page,
+          limit: pageSize,
+          sort: "desc",
+          search: filters.search || undefined,
+        });
+
+        const activeMemberships = result.data?.filter((m) => m.is_active) || [];
+        setMembershipData(activeMemberships);
+        setTotalItems(activeMemberships.length);
+      } catch (error) {
+        console.error("Error cargando membresías:", error);
+        setMembershipData([]);
+        setTotalItems(0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMembershipData();
+  }, [token, page, pageSize, filters.search, reloadFlag]);
+
+  const handlePageChange = (newPage: number) => setPage(newPage);
+
+  const handleFilterChange = (newFilters: { search?: string }) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  const statCardsConfig = [
-    {
-      title: "Total",
-      valueKey: "total" as keyof typeof statsData,
-      fontColor: "text-black-600",
-    },
-    {
-      title: "Activas",
-      valueKey: "active" as keyof typeof statsData,
-      fontColor: "text-green-600",
-    },
-    {
-      title: "Inactivas",
-      valueKey: "inactive" as keyof typeof statsData,
-      fontColor: "text-primary",
-    },
-  ];
+  const handleReload = () => {
+    setReloadFlag((prev) => prev + 1);
+  };
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {statCardsConfig.map((card) => (
-          <StatCard
-            key={card.title}
-            title={card.title}
-            value={
-              <>
-                {card.valueKey === "total"
-                  ? statsData.active + statsData.inactive
-                  : (statsData[card.valueKey] ?? 0)}
-                <span className={`ml-1.5 font-normal ${card.fontColor}`}>
-                  MEMBRESÍAS
-                </span>
-              </>
-            }
-          />
-        ))}
-      </div>
-      <PageHeader title="MEMBRESÍA">
-        <Button variant="primary" onClick={() => setShowCreateForm(true)}>
+      <PageHeader title="MEMBRESÍAS">
+        <Button
+          className="bg-transparent text-black border border-gray-100"
+          onClick={() => router.push("/memberships/new")}
+        >
           <PlusIcon className="h-5 w-5" />
-          Crear
+          Agregar una membresía
         </Button>
       </PageHeader>
 
-      <MembershipTable
-        onView={(membership) => setViewMembership(membership)}
-        onEdit={(membership) => setEditingMembership(membership)}
-      />
+      {isLoading ? (
+        <div className="text-center p-10">Cargando Membresías...</div>
+      ) : (
+        <MembershipTable
+          data={membershipData}
+          page={page}
+          onReload={handleReload}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          totalPages={totalPages}
+          filters={filters}
+          onFilterChange={handleFilterChange}
+        />
+      )}
     </div>
   );
 }
