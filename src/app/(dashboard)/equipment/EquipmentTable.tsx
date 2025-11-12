@@ -62,6 +62,11 @@ export default function EquipmentTable({
   }, [searchInput]);
 
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
+
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [pendingRow, setPendingRow] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const { token } = useAuth();
   const router = useRouter();
 
@@ -75,18 +80,28 @@ export default function EquipmentTable({
   };
 
   const handleDeleteEquipment = async (equipment: Equipment) => {
+    console.log("Eliminando equipo con ID:", equipment.equipment_id);
     if (!token) {
-      alert("Error: Sesión no autenticada.");
-      setDeleteRowId(null);
+      setDeleteError("Error: Sesión no autenticada.");
+      setDeleteError(null);
       return;
     }
+
+    setPendingRow(equipment.equipment_id);
+    setDeleteError(null);
+
     try {
       await api.equipment.deleteEquipment(equipment.equipment_id, token);
+      setShowSuccess(true);
       onReload();
-      setDeleteRowId(null);
+      setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
       console.error("Error al eliminar el equipo:", error);
+      setDeleteError("Error al eliminar el equipamiento. Intenta nuevamente.");
       setDeleteRowId(null);
+    } finally {
+      setDeleteRowId(null);
+      setPendingRow(null);
     }
   };
 
