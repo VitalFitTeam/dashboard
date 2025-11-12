@@ -18,6 +18,7 @@ import { api } from "@/lib/sdk-config";
 import { Equipment } from "@vitalfit/sdk";
 import { useRouter } from "next/navigation";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import { Notification } from "@/components/ui/Notification";
 
 interface EquipmentTableProps {
   data: Equipment[];
@@ -46,6 +47,13 @@ export default function EquipmentTable({
   onFilterChange,
 }: EquipmentTableProps) {
   const [searchInput, setSearchInput] = useState(filters.search);
+  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [pendingRow, setPendingRow] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const { token } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -61,12 +69,7 @@ export default function EquipmentTable({
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const { token } = useAuth();
-  const router = useRouter();
-
   const handleView = (row: EquipmentRow) => {
-    console.log("Ver detalles de:", row.equipment_id);
     router.push(`/equipment/${row.equipment_id}`);
   };
 
@@ -76,17 +79,25 @@ export default function EquipmentTable({
 
   const handleDeleteEquipment = async (equipment: Equipment) => {
     if (!token) {
-      alert("Error: Sesión no autenticada.");
-      setDeleteRowId(null);
+      setDeleteError("Error: Sesión no autenticada.");
       return;
     }
+
+    setPendingRow(equipment.equipment_id);
+    setDeleteError(null);
+
     try {
       await api.equipment.deleteEquipment(equipment.equipment_id, token);
+      setShowSuccess(true);
       onReload();
-      setDeleteRowId(null);
     } catch (error) {
       console.error("Error al eliminar el equipo:", error);
+      setDeleteError("Error al eliminar el equipamiento. Intenta nuevamente.");
+    } finally {
+      setPendingRow(null);
       setDeleteRowId(null);
+      // Ocultar notificación después de 2 seg
+      setTimeout(() => setShowSuccess(false), 2000);
     }
   };
 
@@ -109,6 +120,7 @@ export default function EquipmentTable({
             onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
+
         <Select
           value={filters.category}
           onValueChange={(value) => onFilterChange({ category: value })}
@@ -133,6 +145,22 @@ export default function EquipmentTable({
           </Button>
         </div>
       </div>
+
+      {/* Notification global */}
+      {showSuccess && (
+        <Notification
+          variant="success"
+          description="Equipamiento eliminado correctamente"
+          onClose={() => setShowSuccess(false)}
+        />
+      )}
+      {deleteError && (
+        <Notification
+          variant="destructive"
+          description={deleteError}
+          onClose={() => setDeleteError(null)}
+        />
+      )}
 
       <DataTable<Equipment>
         key={`page-${page}-${data.length}`}
@@ -160,9 +188,10 @@ export default function EquipmentTable({
                 },
               ]}
             />
+
             {deleteRowId === row.equipment_id && (
               <GeneralAlertDialog
-                open={deleteRowId === row.equipment_id}
+                open={true}
                 onOpenChange={(open) => !open && setDeleteRowId(null)}
                 trigger={null}
                 title="Confirmar eliminación"

@@ -14,6 +14,7 @@ import { api } from "@/lib/sdk-config";
 import { useRouter } from "next/navigation";
 import { MembershipType } from "@vitalfit/sdk";
 import { Notification } from "@/components/ui/Notification";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 
 interface MembershipTableProps {
   data: MembershipType[];
@@ -168,29 +169,17 @@ export default function MembershipTable({
               ]}
             />
             {deleteRowId === row.membership_type_id && (
-              <Alert className="mt-2 w-full max-w-md">
-                <AlertTitle className="text-black">
-                  Confirmar Eliminación
-                </AlertTitle>
-                <AlertDescription className="text-gray-900">
-                  ¿Estás seguro de que deseas eliminar esta membresía? Esta
-                  acción no se puede deshacer.
-                </AlertDescription>
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setDeleteRowId(null)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleDelete(row)}
-                  >
-                    <Trash2 className="h-4 w-4" /> Eliminar
-                  </Button>
-                </div>
-              </Alert>
+              <GeneralAlertDialog
+                open={deleteRowId === row.membership_type_id}
+                onOpenChange={(open) => !open && setDeleteRowId(null)}
+                trigger={null}
+                title="Confirmar eliminación"
+                description="¿Estás seguro de que deseas eliminar esta membresía? Esta acción no se puede deshacer."
+                actionText="Eliminar"
+                cancelText="Cancelar"
+                onAction={() => handleDelete(row)}
+                actionVariant="destructive"
+              />
             )}
           </div>
         )}
