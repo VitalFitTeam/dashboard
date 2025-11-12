@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Membership } from "@/models/membership";
 import type { UpdateMembershipType } from "@vitalfit/sdk";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -23,7 +22,7 @@ export default function EditMembership() {
   const [membership, setMembership] = useState<MembershipType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<
-    Partial<Record<keyof Membership, string>>
+    Partial<Record<keyof MembershipType, string>>
   >({});
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -47,7 +46,9 @@ export default function EditMembership() {
       router.replace("/memberships");
       return;
     }
-    if (!token) {return;}
+    if (!token) {
+      return;
+    }
 
     let mounted = true;
     setLoading(true);
@@ -59,10 +60,14 @@ export default function EditMembership() {
           id,
           token,
         );
-        if (!mounted) {return;}
+        if (!mounted) {
+          return;
+        }
         setMembership(membershipData.data);
       } catch (err: any) {
-        if (!mounted) {return;}
+        if (!mounted) {
+          return;
+        }
         const status = err?.response?.status ?? err?.status ?? null;
         if (status === 404) {
           router.replace("/memberships");
@@ -71,7 +76,9 @@ export default function EditMembership() {
           setError("No se pudo cargar la información de la membresía.");
         }
       } finally {
-        if (mounted) {setLoading(false);}
+        if (mounted) {
+          setLoading(false);
+        }
       }
     })();
 
@@ -100,7 +107,7 @@ export default function EditMembership() {
 
   const validate = (
     formData: MembershipType,
-    setErrors: (errors: Partial<Record<keyof Membership, string>>) => void,
+    setErrors: (errors: Partial<Record<keyof MembershipType, string>>) => void,
   ): boolean => {
     const result = membershipSchema.safeParse(formData);
 
@@ -110,11 +117,11 @@ export default function EditMembership() {
       const formattedErrors = Object.entries(zodErrors).reduce(
         (acc, [key, messages]) => {
           if (messages && messages.length > 0) {
-            acc[key as keyof Membership] = messages[0];
+            acc[key as keyof MembershipType] = messages[0];
           }
           return acc;
         },
-        {} as Partial<Record<keyof Membership, string>>,
+        {} as Partial<Record<keyof MembershipType, string>>,
       );
 
       setErrors(formattedErrors);
@@ -131,7 +138,9 @@ export default function EditMembership() {
     setShowConnectionError(false);
 
     const isValid = validate(formData, setErrors);
-    if (!isValid) {return;}
+    if (!isValid) {
+      return;
+    }
 
     const token = localStorage.getItem("access_token");
     if (!token || typeof token !== "string" || token.length < 10) {
@@ -193,7 +202,7 @@ export default function EditMembership() {
           <MembershipForm
             formData={formData}
             onChange={handleChange}
-            edit={true}
+            mode="edit"
             errors={errors}
           />
         )}

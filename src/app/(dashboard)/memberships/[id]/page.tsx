@@ -22,40 +22,49 @@ export default function ViewMembershipPage() {
       return;
     }
     if (!token) {
+      setLoading(false);
       return;
     }
 
     let mounted = true;
+
     setLoading(true);
     setError(null);
+    setmembership(null);
 
-    (async () => {
+    const fetchMembership = async () => {
       try {
         const membershipData: DataResponse<MembershipType> =
           await api.membership.getMembershipTypeByID(id, token);
 
-        if (!mounted) {
-          return;
+        if (mounted) {
+          setmembership(membershipData.data);
         }
-        setmembership(membershipData.data);
       } catch (err: any) {
         if (!mounted) {
           return;
         }
 
         const status = err?.response?.status ?? err?.status ?? null;
+
         if (status === 404) {
           router.replace("/memberships");
+        } else if (status === 401) {
+          setError(
+            "Sesión expirada o no autorizada. Intenta ingresar de nuevo.",
+          );
         } else {
-          console.error("Error cargando membresia:", err);
-          setError("No se pudo cargar la información de la membresia.");
+          console.error("Error cargando membresía:", err);
+          setError("No se pudo cargar la información de la membresía.");
         }
       } finally {
         if (mounted) {
           setLoading(false);
         }
       }
-    })();
+    };
+
+    fetchMembership();
 
     return () => {
       mounted = false;
@@ -71,7 +80,12 @@ export default function ViewMembershipPage() {
   }
 
   if (!membership) {
-    return null;
+    return (
+      <div className="p-6 text-gray-500">
+        Membresía no encontrada o no disponible.
+      </div>
+    );
   }
+
   return <ViewMembership membership={membership} />;
 }

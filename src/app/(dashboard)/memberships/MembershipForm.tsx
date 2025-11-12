@@ -11,7 +11,6 @@ import {
 import { SelectValue } from "@radix-ui/react-select";
 import { MembershipType } from "@vitalfit/sdk";
 
-// Tipo extendido que permite strings en campos numéricos
 type MembershipFormData = Omit<MembershipType, "duration_days" | "price"> & {
   duration_days: number | string;
   price: number | string;
@@ -20,15 +19,15 @@ type MembershipFormData = Omit<MembershipType, "duration_days" | "price"> & {
 interface MembershipFormProps {
   formData: MembershipFormData;
   onChange: (field: keyof MembershipType, value: string) => void;
-  edit: boolean;
   disabled?: boolean;
   errors?: Partial<Record<keyof MembershipType, string>>;
+  mode?: "view" | "edit";
 }
 
 export default function MembershipForm({
   formData,
   onChange,
-  edit = false,
+  mode,
   disabled = false,
   errors = {},
 }: MembershipFormProps) {
@@ -133,7 +132,7 @@ export default function MembershipForm({
         </div>
       </div>
 
-      {edit && (
+      {mode === "edit" && (
         <div className="flex-1">
           <label
             htmlFor="is_active"

@@ -101,7 +101,6 @@ export default function CreateMembership() {
     setShowServerError({ visible: false, message: "" });
     setShowConnectionError(false);
 
-    // Validación con Zod
     const validation = validateMembership(formData);
     if (!validation.success) {
       setErrors(validation.errors || {});
@@ -109,7 +108,6 @@ export default function CreateMembership() {
       return;
     }
 
-    // Validación adicional para asegurar que data no es null
     if (!validation.data) {
       setErrors({
         name: "Error de validación: datos inválidos",
@@ -175,7 +173,7 @@ export default function CreateMembership() {
         <MembershipForm
           formData={formData}
           onChange={handleChange}
-          edit={false}
+          mode="edit"
           errors={errors}
         />
         <Button

@@ -39,7 +39,7 @@ export default function ViewMembership({ membership }: ViewMembershipProps) {
       <MembershipForm
         formData={formData}
         onChange={() => {}}
-        edit={false}
+        mode="view"
         disabled
       />
     </div>

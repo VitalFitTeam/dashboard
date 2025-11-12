@@ -13,14 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { useRouter } from "next/navigation";
 import { MembershipType } from "@vitalfit/sdk";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import { Notification } from "@/components/ui/Notification"; // Asegúrate de importar el componente Notification
+import { Notification } from "@/components/ui/Notification";
 
 interface MembershipTableProps {
   data: MembershipType[];
@@ -29,13 +22,8 @@ interface MembershipTableProps {
   pageSize: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  filters: { search: string; category: string };
-  onFilterChange: (filters: { search?: string; category?: string }) => void;
-}
-
-interface MembershipRow {
-  membership_type_id: string;
-  name: string;
+  filters: { search: string };
+  onFilterChange: (filters: { search?: string }) => void;
 }
 
 export default function MembershipTable({
@@ -49,12 +37,15 @@ export default function MembershipTable({
   onFilterChange,
 }: MembershipTableProps) {
   const [searchInput, setSearchInput] = useState(filters.search);
-  const [statusFilter, setStatusFilter] = useState(filters.category || "all");
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [pendingRow, setPendingRow] = useState<string | null>(null);
+
   const { token } = useAuth();
   const router = useRouter();
 
+  // 🔍 Manejo del campo de búsqueda
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchInput.trim() === "") {
@@ -65,88 +56,56 @@ export default function MembershipTable({
         onFilterChange({ search: searchInput });
       }
     }, 500);
-
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  useEffect(() => {
-    if (statusFilter !== filters.category) {
-      onFilterChange({ category: statusFilter === "all" ? "" : statusFilter });
-    }
-  }, [statusFilter]);
-
-  const handleView = (row: MembershipRow) => {
+  const handleView = (row: MembershipType) => {
     router.push(`/memberships/${row.membership_type_id}`);
   };
 
-  const handleEdit = (row: MembershipRow) => {
+  const handleEdit = (row: MembershipType) => {
     router.push(`/memberships/${row.membership_type_id}/edit`);
   };
 
   const handleDelete = async (membership: MembershipType) => {
+    const membershipId = membership.membership_type_id;
+
     if (!token) {
+      setDeleteError("No estás autenticado para realizar esta acción.");
       setDeleteRowId(null);
       return;
     }
+
+    setPendingRow(membershipId);
+    setDeleteError(null);
+
     try {
-      await api.membership.deleteMembershipType(
-        membership.membership_type_id,
-        token,
-      );
-
-      // Mostrar mensaje de éxito
+      await api.membership.deleteMembershipType(membershipId, token);
       setShowSuccess(true);
-
-      // Recargar los datos de la tabla
       onReload();
-
-      // Cerrar el diálogo de confirmación
-      setDeleteRowId(null);
-
-      // Ocultar automáticamente el mensaje después de 3 segundos
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 3000);
+      setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
       console.error("Error al eliminar la membresía:", error);
-      alert("Error al eliminar la membresía. Inténtelo de nuevo.");
+      setDeleteError("Error al eliminar la membresía. Intenta nuevamente.");
+    } finally {
       setDeleteRowId(null);
+      setPendingRow(null);
     }
   };
 
   const columns: Column<MembershipType>[] = [
-    {
-      header: "ID",
-      accessor: "membership_type_id",
-      render: (id) => (
-        <div className="w-28 truncate" title={id as string}>
-          {id as string}
-        </div>
-      ),
-    },
-    { header: "Nombre", accessor: "name", filterType: "text" },
-    { header: "Descripcion", accessor: "description", filterType: "text" },
-    {
-      header: "Duración (días)",
-      accessor: "duration_days",
-      filterType: "text",
-    },
-    { header: "Precio", accessor: "price", filterType: "text" },
+    { header: "ID", accessor: "membership_type_id" },
+    { header: "Nombre", accessor: "name" },
+    { header: "Descripción", accessor: "description" },
+    { header: "Duración (días)", accessor: "duration_days" },
+    { header: "Precio", accessor: "price" },
     {
       header: "Status",
       accessor: "is_active",
       render: (value) => {
-        const statusConfig = {
-          Active: { text: "Activa", color: "text-green-700 border-green-300" },
-          Inactive: {
-            text: "Inactiva",
-            color: "text-yellow-700 border-yellow-300",
-          },
-        };
-        const config = statusConfig[value ? "Active" : "Inactive"] ?? {
-          text: "Desconocido",
-          color: "bg-gray-100 text-gray-700 border-gray-300",
-        };
+        const config = value
+          ? { text: "Activa", color: "text-green-700 border-green-300" }
+          : { text: "Inactiva", color: "text-yellow-700 border-yellow-300" };
         return (
           <Badge variant="outline" className={`border ${config.color}`}>
             {config.text}
@@ -158,36 +117,17 @@ export default function MembershipTable({
 
   return (
     <>
-      {/* Notificación de éxito */}
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="Membresía desactivada/eliminada correctamente"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        {/* 🔍 Campo de búsqueda */}
         <div className="relative w-full sm:w-[250px]">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Filtrar por nombre"
+            placeholder="Buscar membresía por nombre"
             className="pl-9"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
-
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="active">Activa</SelectItem>
-            <SelectItem value="inactive">Inactiva</SelectItem>
-          </SelectContent>
-        </Select>
 
         <div className="flex items-center gap-4">
           <Button variant="outline">
@@ -239,18 +179,15 @@ export default function MembershipTable({
                 <div className="flex justify-end gap-2 mt-4">
                   <Button
                     variant="outline"
-                    className="border-white"
                     onClick={() => setDeleteRowId(null)}
                   >
                     Cancelar
                   </Button>
                   <Button
                     variant="destructive"
-                    className="text-white"
                     onClick={() => handleDelete(row)}
                   >
-                    <Trash2 className="h-4 w-4 text-white" />
-                    Eliminar
+                    <Trash2 className="h-4 w-4" /> Eliminar
                   </Button>
                 </div>
               </Alert>
@@ -258,6 +195,22 @@ export default function MembershipTable({
           </div>
         )}
       />
+
+      {showSuccess && (
+        <Notification
+          variant="success"
+          description="Membresía eliminada correctamente"
+          onClose={() => setShowSuccess(false)}
+        />
+      )}
+
+      {deleteError && (
+        <Notification
+          variant="destructive"
+          description={deleteError}
+          onClose={() => setDeleteError(null)}
+        />
+      )}
     </>
   );
 }
