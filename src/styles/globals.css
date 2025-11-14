@@ -236,3 +236,37 @@ h5 {
     @apply bg-background text-foreground;
   }
 }
+
+/* Toolbar title */
+.fc .fc-toolbar-title {
+  @apply text-base font-semibold text-gray-800;
+}
+
+/* Botones */
+.fc .fc-button {
+  @apply bg-gray-100 text-gray-800 rounded-md px-3 py-1 font-medium transition-colors;
+}
+
+.fc .fc-button:hover {
+  @apply bg-gray-200;
+}
+
+.fc .fc-button:focus {
+  @apply ring-2 ring-gray-300;
+}
+
+/* Número de día */
+.fc .fc-daygrid-day-number {
+  @apply text-sm text-gray-500 font-normal;
+}
+
+/* Celdas de hora (vista semanal) */
+.fc-timegrid-slot-label {
+  @apply text-xs text-gray-400;
+}
+
+/* General */
+.fc {
+  font-family: "Inter", sans-serif;
+  --fc-small-font-size: 13px;
+}

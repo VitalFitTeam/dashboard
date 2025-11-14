@@ -1,0 +1,48 @@
+import { GymClass } from "./types";
+
+export const mockClasses: GymClass[] = [
+  {
+    id: "c1-hoy-a",
+    title: "Power Yoga (Principiantes)",
+    instructorId: "i-ana-gomez",
+    instructorName: "Ana Gómez",
+    branchId: "b-centro",
+    maxCapacity: 25,
+    type: "Yoga",
+    start: "2025-11-14T18:00:00",
+    end: "2025-11-14T19:00:00",
+  },
+  {
+    id: "c2-hoy-b",
+    title: "Levantamiento Olímpico",
+    instructorId: "i-raul-vidal",
+    instructorName: "Raúl Vidal",
+    branchId: "b-norte",
+    maxCapacity: 10,
+    type: "Weightlifting",
+    start: "2025-11-14T19:30:00",
+    end: "2025-11-14T20:30:00",
+  },
+  {
+    id: "c3-manana",
+    title: "Spinning Extremo",
+    instructorId: "i-carlos-perez",
+    instructorName: "Carlos Pérez",
+    branchId: "b-centro",
+    maxCapacity: 35,
+    type: "Spinning",
+    start: "2025-11-15T10:00:00",
+    end: "2025-11-15T11:00:00",
+  },
+  {
+    id: "c4-lunes",
+    title: "Zumba Fusión",
+    instructorId: "i-ana-gomez",
+    instructorName: "Ana Gómez",
+    branchId: "b-norte",
+    maxCapacity: 30,
+    type: "Zumba",
+    start: "2025-11-17T18:00:00",
+    end: "2025-11-17T19:00:00",
+  },
+];
