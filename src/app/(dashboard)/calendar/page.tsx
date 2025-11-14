@@ -1,16 +1,17 @@
 import { CalendarWrapper } from "@/components/calendar/CalendarWrapper";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 export default function CalendarPage() {
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-semibold">Calendario de Clases</h1>
-      <p className="text-sm text-muted-foreground">
-        Gestiona clases, reservas y horarios del gimnasio.
-      </p>
+    <main className="p-6 space-y-6">
+      <PageHeader
+        title="Calendario de Clases"
+        subtitle="Gestiona clases, reservas y horarios del gimnasio."
+      />
 
-      <div className="bg-white rounded-xl p-4 shadow-sm border">
+      <div className="bg-background p-4 rounded-lg shadow-sm">
         <CalendarWrapper />
       </div>
-    </div>
+    </main>
   );
 }

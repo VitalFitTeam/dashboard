@@ -11,12 +11,17 @@ import { mockClasses } from "./mockData";
 import { ClassDetailsSidebar } from "./ClassDetailsSidebar";
 import { DeleteClassDialog } from "./DeleteClassDialog";
 import { ClassModal } from "./ClassModal";
-
 import { classColors } from "@/styles/eventColors";
+import { useAuth } from "@/context/AuthContext";
 
 export function CalendarWrapper() {
+  const { user, hasRole } = useAuth();
+
   const [events, setEvents] = useState<GymClass[]>([]);
   const [selectedClass, setSelectedClass] = useState<GymClass | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [instructorFilter, setInstructorFilter] = useState<string | null>(null);
+  const [branchFilter, setBranchFilter] = useState<string | null>(null);
 
   const [openModal, setOpenModal] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
@@ -26,15 +31,65 @@ export function CalendarWrapper() {
     setEvents(mockClasses);
   }, []);
 
+  const visibleEvents = events.filter((e) => {
+    if (!user) {
+      return false;
+    }
+
+    let roleFilter = false;
+    switch (user.role) {
+      case "super_admin":
+        roleFilter = true;
+        break;
+      case "branch_admin":
+      case "recepcionist":
+        roleFilter = e.branchId === user.branchId;
+        break;
+      case "instructor":
+        roleFilter = e.instructorId === user.user_id;
+        break;
+      default:
+        roleFilter = false;
+    }
+
+    return (
+      roleFilter &&
+      (!typeFilter || e.type === typeFilter) &&
+      (!instructorFilter || e.instructorId === instructorFilter) &&
+      (!branchFilter || e.branchId === branchFilter)
+    );
+  });
+
+  const canEdit = (gymClass: GymClass) => {
+    if (!user) {
+      return false;
+    }
+    switch (user.role) {
+      case "super_admin":
+        return true;
+      case "branch_admin":
+      case "recepcionist":
+        return gymClass.branchId === user.branchId;
+      case "instructor":
+        return gymClass.instructorId === user.user_id;
+      default:
+        return false;
+    }
+  };
+
   const handleDateClick = (arg: any) => {
+    if (!user || !hasRole(["super_admin", "branch_admin", "recepcionist"])) {
+      return;
+    }
+
     setSelectedClass({
       id: "",
       title: "Nueva Clase",
       instructorId: "",
       start: arg.dateStr,
       end: arg.dateStr,
-      type: "yoga",
-      branchId: "b-default",
+      type: "Yoga",
+      branchId: user.branchId || "b-default",
       maxCapacity: 20,
     });
     setOpenModal(true);
@@ -42,10 +97,12 @@ export function CalendarWrapper() {
 
   const handleEventClick = (info: any) => {
     const event = events.find((e) => e.id === info.event.id);
-    if (event) {
-      setSelectedClass(event);
-      setOpenDetails(true);
+    if (!event) {
+      return;
     }
+
+    setSelectedClass(event);
+    setOpenDetails(true);
   };
 
   const handleSave = (gymClass: GymClass) => {
@@ -68,11 +125,44 @@ export function CalendarWrapper() {
 
   return (
     <>
+      <div className="flex gap-4 mb-4">
+        <select
+          className="border rounded px-2 py-1"
+          value={typeFilter ?? ""}
+          onChange={(e) => setTypeFilter(e.target.value || null)}
+        >
+          <option value="">Todos los tipos</option>
+          <option value="Yoga">Yoga</option>
+          <option value="Spinning">Spinning</option>
+          <option value="Zumba">Zumba</option>
+        </select>
+
+        <select
+          className="border rounded px-2 py-1"
+          value={instructorFilter ?? ""}
+          onChange={(e) => setInstructorFilter(e.target.value || null)}
+        >
+          <option value="">Todos los instructores</option>
+          <option value="i-ana-gomez">Ana Gómez</option>
+          <option value="i-carlos-perez">Carlos Pérez</option>
+        </select>
+
+        <select
+          className="border rounded px-2 py-1"
+          value={branchFilter ?? ""}
+          onChange={(e) => setBranchFilter(e.target.value || null)}
+        >
+          <option value="">Todas las sucursales</option>
+          <option value="b-centro">Centro</option>
+          <option value="b-norte">Norte</option>
+        </select>
+      </div>
+
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         height="90vh"
-        selectable={true}
+        selectable={canEdit({} as GymClass)}
         editable={false}
         displayEventTime={true}
         headerToolbar={{
@@ -81,7 +171,7 @@ export function CalendarWrapper() {
           right: "today prev,next",
         }}
         dayHeaderFormat={{ weekday: "short" }}
-        events={events}
+        events={visibleEvents}
         eventContent={(arg) => {
           const eventData = arg.event.extendedProps as GymClass;
           const color = classColors[eventData.type] ?? "#e2e8f0";
@@ -136,12 +226,16 @@ export function CalendarWrapper() {
         onOpenChange={setOpenDetails}
         data={selectedClass}
         onEdit={() => {
-          setOpenDetails(false);
-          setOpenModal(true);
+          if (selectedClass && canEdit(selectedClass)) {
+            setOpenDetails(false);
+            setOpenModal(true);
+          }
         }}
         onDelete={() => {
-          setOpenDetails(false);
-          setOpenDelete(true);
+          if (selectedClass && canEdit(selectedClass)) {
+            setOpenDetails(false);
+            setOpenDelete(true);
+          }
         }}
       />
 
