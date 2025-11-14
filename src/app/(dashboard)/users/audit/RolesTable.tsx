@@ -14,6 +14,7 @@ import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Notification } from "@/components/ui/Notification";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 
 export default function RolesTable() {
   const [page, setPage] = useState(1);
@@ -99,7 +100,9 @@ export default function RolesTable() {
   const getPermissionsCount = (
     permissions: Permission[] | undefined,
   ): string => {
-    if (!permissions || permissions.length === 0) {return "0 permisos";}
+    if (!permissions || permissions.length === 0) {
+      return "0 permisos";
+    }
     return `${permissions.length} permiso${permissions.length !== 1 ? "s" : ""}`;
   };
 
@@ -319,53 +322,16 @@ export default function RolesTable() {
               ]}
             />
             {deleteRowId === row.id && (
-              <Alert className="mt-2 w-full max-w-md">
-                <AlertTitle className="text-black">
-                  Confirmar Eliminación
-                </AlertTitle>
-                <AlertDescription className="text-gray-900">
-                  ¿Estás seguro de que deseas eliminar el rol "{row.name}"? Esta
-                  acción no se puede deshacer.
-                </AlertDescription>
-
-                {deleteError && (
-                  <Alert variant="destructive" className="mt-2">
-                    <AlertDescription>{deleteError}</AlertDescription>
-                  </Alert>
-                )}
-
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    className="border-white"
-                    onClick={() => {
-                      setDeleteRowId(null);
-                      setDeleteError(null);
-                    }}
-                    disabled={isDeleting}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="text-white"
-                    onClick={() => handleDeleteRole(row)}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? (
-                      <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
-                        Eliminando...
-                      </>
-                    ) : (
-                      <>
-                        <Trash2 className="h-4 w-4 text-white mr-2" />
-                        Eliminar
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </Alert>
+              <GeneralAlertDialog
+                open={true}
+                onOpenChange={(open) => !open && setDeleteRowId(null)}
+                title="Eliminar rol"
+                description="¿Seguro que deseas eliminar este rol? Esta acción no se puede deshacer."
+                type="confirmation"
+                actionText={isDeleting ? "Eliminando..." : "Eliminar"}
+                actionVariant="destructive"
+                onAction={() => handleDeleteRole(row)}
+              />
             )}
           </div>
         )}
