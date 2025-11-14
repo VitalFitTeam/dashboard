@@ -46,6 +46,13 @@ export default function Instructor() {
           token,
         );
 
+        console.log(
+          "Datos página",
+          page,
+          ":",
+          result.data?.length,
+          "registros",
+        );
         setInstructorData(result.data || []);
         setTotalItems(result.total || 0);
       } catch (error) {

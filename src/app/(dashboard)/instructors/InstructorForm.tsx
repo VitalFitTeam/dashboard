@@ -24,7 +24,9 @@ export default function InstructorForm({
   onFieldBlur,
 }: InstructorFormProps) {
   const formatDateForBackend = (dateString: string): string => {
-    if (!dateString) {return "";}
+    if (!dateString) {
+      return "";
+    }
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       return dateString;

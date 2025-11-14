@@ -60,7 +60,6 @@ export default function instructorsTable({
   }, [searchInput]);
 
   const handleView = (row: InstructorDataList) => {
-    console.log("Ver detalles de:", row.instructor_id);
     router.push(`/instructors/${row.instructor_id}`);
   };
 

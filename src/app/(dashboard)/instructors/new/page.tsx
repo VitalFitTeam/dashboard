@@ -174,16 +174,18 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
           mode="edit"
         />
 
-        <div className="flex gap-4 pt-4">
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={isLoading}
-            className="flex-1"
-          >
-            {isLoading ? "Creando..." : "Crear"}
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant="primary"
+          disabled={isLoading}
+          className="flex-1 relative w-full"
+          style={{ position: "relative" }}
+          onClick={() => {
+            handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+          }}
+        >
+          {isLoading ? "Creando..." : "Crear"}
+        </Button>
       </form>
 
       {showSuccess && (

@@ -84,7 +84,7 @@ export const instructorSchema = z.object({
     .string()
     .url({ message: "La URL de la foto debe ser válida" })
     .optional()
-    .or(z.literal(" ")),
+    .or(z.literal("")),
 });
 
 export type InstructorFormData = z.infer<typeof instructorSchema>;
