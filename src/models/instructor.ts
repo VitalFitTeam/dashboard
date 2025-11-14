@@ -1,8 +1,7 @@
 import { UserGender } from "@vitalfit/sdk";
 export type Instructor = {
-  id: string;
   instructor_id: string;
-  user_id: string;
+  user_id?: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -12,4 +11,5 @@ export type Instructor = {
   identity_document: string;
   biography?: string;
   profile_picture_url: string;
+  specialties?: [];
 };
