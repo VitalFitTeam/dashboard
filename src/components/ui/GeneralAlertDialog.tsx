@@ -16,7 +16,7 @@ import {
 import { buttonVariants } from "./button";
 
 interface GeneralAlertDialogProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
   title: string;
   description: string;
   type?: "confirmation" | "info" | "success";
