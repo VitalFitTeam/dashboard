@@ -1,8 +1,9 @@
+import { Permission } from "@vitalfit/sdk";
 export type Roles = {
   id: string;
   name: string;
   description: string;
-  permits: string;
+  Permission: Permission[];
 };
 
 export const PERMITS_ROLES: { key: string; label: string }[] = [
