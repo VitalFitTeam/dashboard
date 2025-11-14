@@ -17,6 +17,8 @@ import { Notification } from "@/components/ui/Notification";
 
 export default function RolesTable() {
   const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
   const [selectedRole, setSelectedRole] = useState<Roles | null>(null);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
@@ -29,6 +31,9 @@ export default function RolesTable() {
   const router = useRouter();
 
   const [rolesData, setRolesData] = useState<Roles[]>([]);
+
+  // Calcular total de páginas
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
   const filteredData = useMemo(() => {
     if (!inputFilters.search) {
@@ -76,9 +81,8 @@ export default function RolesTable() {
       setDeleteRowId(null);
       setSelectedRole(null);
 
-      setTimeout(() => {
-        fetchRoles();
-      }, 2000);
+      // Recargar los datos manteniendo la página actual
+      fetchRoles(page);
     } catch (error) {
       console.error("Error al eliminar rol:", error);
       setDeleteError(
@@ -126,7 +130,7 @@ export default function RolesTable() {
     },
     {
       header: "Permisos",
-      accessor: "Permission", // Cambiado a "Permission" con P mayúscula
+      accessor: "Permission",
       render: (permissions) => (
         <div className="max-w-[100px] truncate">
           {getPermissionsCount(permissions as Permission[])}
@@ -135,7 +139,7 @@ export default function RolesTable() {
     },
   ];
 
-  const fetchRoles = async () => {
+  const fetchRoles = async (currentPage: number = page) => {
     if (!token) {
       console.log("No hay token disponible");
       return;
@@ -143,11 +147,24 @@ export default function RolesTable() {
 
     setIsLoading(true);
     try {
-      const response: DataResponse<RoleResponse[]> =
-        await api.RBAC.getRoles(token);
+      // Llamar a la API con los parámetros de paginación
+      const response = await api.RBAC.getRoles(
+        {
+          page: currentPage,
+          limit: pageSize,
+          search: inputFilters.search || undefined,
+          sort: "desc",
+        },
+        token,
+      );
+
       const rolesArray = response.data || [];
+      const total = response.total || 0;
+
+      setTotalItems(total);
 
       if (Array.isArray(rolesArray)) {
+        // Primero establecer los datos básicos
         const rolesWithoutPermissions = rolesArray.map(
           (role: RoleResponse) => ({
             id: role.role_id,
@@ -159,7 +176,7 @@ export default function RolesTable() {
 
         setRolesData(rolesWithoutPermissions);
 
-        // cargar los permisos en segundo plano ya que el rbac.getRoles no trae los permisos de una
+        // Cargar los permisos en segundo plano
         const rolesWithPermissions = await Promise.all(
           rolesArray.map(async (role: RoleResponse) => {
             try {
@@ -194,20 +211,37 @@ export default function RolesTable() {
       } else {
         console.error("La respuesta no contiene un array de roles:", response);
         setRolesData([]);
+        setTotalItems(0);
       }
     } catch (error) {
       console.error("Error al obtener roles:", error);
       setRolesData([]);
+      setTotalItems(0);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Efecto para cargar datos cuando cambia la página o los filtros
   useEffect(() => {
-    fetchRoles();
-  }, [token]);
+    // Resetear a página 1 cuando cambia el filtro de búsqueda
+    if (inputFilters.search !== undefined) {
+      setPage(1);
+      fetchRoles(1);
+    }
+  }, [inputFilters.search]);
 
-  if (isLoading) {
+  // Efecto para cargar datos cuando cambia la página
+  useEffect(() => {
+    fetchRoles(page);
+  }, [page, token]);
+
+  // Función para manejar cambios en el filtro de búsqueda con debounce
+  const handleSearchChange = (value: string) => {
+    setInputFilters((prev) => ({ ...prev, search: value }));
+  };
+
+  if (isLoading && rolesData.length === 0) {
     return (
       <div className="flex justify-center items-center p-8">
         <div>Cargando roles...</div>
@@ -224,9 +258,7 @@ export default function RolesTable() {
             placeholder="Filtrar por nombre"
             className="pl-9"
             value={inputFilters.search || ""}
-            onChange={(e) =>
-              setInputFilters((prev) => ({ ...prev, search: e.target.value }))
-            }
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
 
@@ -257,8 +289,12 @@ export default function RolesTable() {
         columns={columns}
         data={filteredData}
         page={page}
-        pageSize={10}
-        onPageChange={setPage}
+        pageSize={pageSize}
+        totalPages={totalPages}
+        onPageChange={(newPage) => {
+          setPage(newPage);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
         actions={(row) => (
           <div className="flex flex-col items-center justify-center w-full">
             <RowActions
