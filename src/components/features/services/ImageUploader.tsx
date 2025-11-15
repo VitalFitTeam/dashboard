@@ -8,7 +8,8 @@ import {
   EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
 
-interface UploadableImage extends SortableImage {
+// Exporta la interfaz para que pueda ser importada desde otros componentes
+export interface UploadableImage extends SortableImage {
   url?: string;
 }
 
@@ -32,7 +33,9 @@ export default function ImageUploader({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) {return;}
+    if (!e.target.files) {
+      return;
+    }
     const newImages: UploadableImage[] = Array.from(e.target.files).map(
       (file) => ({
         id: `${file.name}-${Date.now()}-${Math.random()}`,
