@@ -32,9 +32,10 @@ export default function EditPackagePage() {
     message: "",
   });
 
-  // ------------------- CARGAR PAQUETE -------------------
   useEffect(() => {
-    if (!id || !token) {return;}
+    if (!id || !token) {
+      return;
+    }
 
     const loadPackage = async () => {
       try {
@@ -52,9 +53,10 @@ export default function EditPackagePage() {
     loadPackage();
   }, [id, token]);
 
-  // ------------------- CARGAR SERVICIOS DISPONIBLES -------------------
   useEffect(() => {
-    if (!token) {return;}
+    if (!token) {
+      return;
+    }
 
     const loadServices = async () => {
       try {
@@ -79,14 +81,15 @@ export default function EditPackagePage() {
     loadServices();
   }, [token]);
 
-  // ------------------- HANDLERS -------------------
   const handleChange = (data: Partial<PackageDetail>) => {
     setPackageD((prev) => (prev ? { ...prev, ...data } : prev));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!packageD || !token) {return;}
+    if (!packageD || !token) {
+      return;
+    }
 
     setShowServerError({ visible: false, message: "" });
     setIsLoading(true);
@@ -108,10 +111,15 @@ export default function EditPackagePage() {
     }
   };
 
-  // ------------------- RENDERIZADO -------------------
-  if (loading) {return <div className="p-6">Cargando paquete...</div>;}
-  if (error) {return <div className="p-6 text-red-500">{error}</div>;}
-  if (!packageD) {return null;}
+  if (loading) {
+    return <div className="p-6">Cargando paquete...</div>;
+  }
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>;
+  }
+  if (!packageD) {
+    return null;
+  }
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">

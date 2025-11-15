@@ -52,7 +52,6 @@ export default function PackageForm({
         : item,
     );
 
-    // Llamar a la función onChange si existe
     onChange?.({ packageItems: updatedItems });
   };
 
@@ -91,7 +90,6 @@ export default function PackageForm({
 
   return (
     <div className="space-y-4">
-      {/* Nombre y Precio */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium">Nombre</label>
@@ -113,7 +111,6 @@ export default function PackageForm({
         </div>
       </div>
 
-      {/* Descripción */}
       <div>
         <label className="text-sm font-medium">Descripción</label>
         <Textarea
@@ -123,7 +120,6 @@ export default function PackageForm({
         />
       </div>
 
-      {/* Fechas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium">Fecha inicio</label>
@@ -143,7 +139,6 @@ export default function PackageForm({
         </div>
       </div>
 
-      {/* Selector de servicios */}
       {isEditable && services.length > 0 && (
         <div>
           <label className="block text-sm font-medium mb-1">
@@ -163,7 +158,6 @@ export default function PackageForm({
         </div>
       )}
 
-      {/* Lista de servicios */}
       <div className="space-y-2">
         {formData.packageItems.map((item) => {
           const serviceName =

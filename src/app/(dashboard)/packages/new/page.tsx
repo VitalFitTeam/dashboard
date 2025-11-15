@@ -51,9 +51,10 @@ export default function CreatePackagePage() {
     message: "",
   });
 
-  // ---------------- CARGAR SERVICIOS ----------------
   useEffect(() => {
-    if (!token) {return;}
+    if (!token) {
+      return;
+    }
 
     const loadServices = async () => {
       try {
@@ -77,13 +78,14 @@ export default function CreatePackagePage() {
     loadServices();
   }, [token]);
 
-  // ---------------- HANDLERS ----------------
   const handleChange = (data: Partial<PackageFormState>) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
   const handleAddService = (service: { id: string; name: string }) => {
-    if (formData.packageItems.some((s) => s.serviceId === service.id)) {return;}
+    if (formData.packageItems.some((s) => s.serviceId === service.id)) {
+      return;
+    }
     const newItem: PackageItemUI = {
       serviceId: service.id,
       name: service.name,
@@ -115,7 +117,9 @@ export default function CreatePackagePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) {return;}
+    if (!token) {
+      return;
+    }
 
     setShowServerError({ visible: false, message: "" });
     setIsLoading(true);
@@ -166,7 +170,6 @@ export default function CreatePackagePage() {
           subtitle="Complete la información del nuevo paquete"
         />
 
-        {/* FORM */}
         <PackageForm
           formData={formData}
           onChange={handleChange}
@@ -174,7 +177,6 @@ export default function CreatePackagePage() {
           services={availableServices}
         />
 
-        {/* BOTÓN */}
         <Button
           type="submit"
           variant="primary"
@@ -185,7 +187,6 @@ export default function CreatePackagePage() {
         </Button>
       </form>
 
-      {/* NOTIFICACIONES */}
       {showSuccess && (
         <Notification
           variant="success"
