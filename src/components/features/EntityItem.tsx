@@ -10,6 +10,7 @@ export type EntityItemProps = {
   action?: React.ReactNode;
   className?: string;
   onClick?: () => void;
+  children?: React.ReactNode;
 };
 
 export default function EntityItem({
