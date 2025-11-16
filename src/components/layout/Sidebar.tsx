@@ -73,6 +73,17 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
         { name: "Inicio", icon: HomeIcon, href: "/" },
         { name: "Sucursales", icon: BuildingStorefrontIcon, href: "/branches" },
         { name: "Clientes", icon: UserIcon, href: "/clients" },
+
+        {
+          name: "Clases y Reservas",
+          icon: Calendar,
+          subitems: [
+            { name: "Calendario", href: "/calendar" },
+            { name: "Listado de Clases", href: "/classes" },
+            { name: "Reservas", href: "/reservations" },
+          ],
+        },
+
         {
           name: "Usuarios y Seguridad",
           icon: UsersIcon,
@@ -81,6 +92,7 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
             { name: "Roles y permisos", href: "/users/audit" },
           ],
         },
+
         {
           name: "Membresías y Servicios",
           icon: CurrencyDollarIcon,
@@ -92,6 +104,7 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
             { name: "Promociones", href: "/promotions" },
           ],
         },
+
         {
           name: "Reportes y Finanzas",
           icon: ChartBar,
@@ -113,7 +126,16 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
         { name: "Membresías", icon: CurrencyDollarIcon, href: "/memberships" },
         { name: "Servicios", icon: TicketIcon, href: "/services" },
         { name: "Instructores", icon: UsersIcon, href: "/instructors" },
-        { name: "Clases y Reservas", icon: Calendar, href: "/classes" },
+
+        {
+          name: "Clases y Reservas",
+          icon: Calendar,
+          subitems: [
+            { name: "Calendario", href: "/calendar" },
+            { name: "Listado de Clases", href: "/classes" },
+            { name: "Reservas", href: "/reservations" },
+          ],
+        },
       ],
     },
   ],
