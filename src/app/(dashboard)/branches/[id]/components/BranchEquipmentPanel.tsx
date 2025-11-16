@@ -1,11 +1,6 @@
 "use client";
 
-import React, {
-  useState,
-  useImperativeHandle,
-  forwardRef,
-  useEffect,
-} from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -18,13 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import InputField from "@/components/ui/InputField";
-import { BranchPanelRef } from "./BranchServicesPanel";
 import { api } from "@/lib/sdk-config";
-import {
-  BranchEquipmentInventory,
-  Equipment,
-  CreateBranchEquipment,
-} from "@vitalfit/sdk";
+import { Equipment, CreateBranchEquipment } from "@vitalfit/sdk";
 import { useAuth } from "@/context/AuthContext";
 
 interface BranchEquipmentPanelProps {
@@ -32,146 +22,124 @@ interface BranchEquipmentPanelProps {
   branchId: string;
 }
 
-const BranchEquipmentPanel = forwardRef<
-  BranchPanelRef,
-  BranchEquipmentPanelProps
->(({ mode = "edit", branchId }, ref) => {
+const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
+  mode = "edit",
+  branchId,
+}) => {
   const { token } = useAuth();
   const [currentInventory, setCurrentInventory] = useState<Equipment[]>([]);
   const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(
     null,
   );
-  const [quantity, setQuantity] = useState<number | string>(1);
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isDisabled = mode === "view";
 
   useEffect(() => {
-    const fetchEquipment = async () => {
+    if (!token) {
+      return;
+    }
+
+    const fetchAllEquipment = async () => {
+      setLoading(true);
       try {
-        if (!token) {
-          return;
-        }
-        const res = await api.equipment.getEquipment(token);
-        console.log("✅ Equipamiento cargado correctamente", res.data);
+        const res = await api.equipment.getEquipment(token, {
+          page: 1,
+          limit: 100,
+        });
+        console.log(res.data);
         setAllEquipment(res.data || []);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error cargando equipamiento:", err);
+        setError(err.message || "Error cargando equipamiento");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchEquipment();
+
+    fetchAllEquipment();
   }, [token]);
 
-  // Cargar el inventario actual de la sucursal
   useEffect(() => {
+    if (!token || !branchId) {
+      return;
+    }
+
     const fetchBranchInventory = async () => {
+      setLoading(true);
       try {
-        if (!token) {
-          return;
-        }
         const res = await api.equipment.getBranchEquipment(branchId, token);
-        console.log(
-          "✅ Inventario de la sucursal cargado correctamente",
-          res.data,
-        );
-        setCurrentInventory(res.data);
-      } catch (err) {
+        console.log(res.data);
+        setCurrentInventory(res.data || []);
+      } catch (err: any) {
         console.error("Error cargando inventario de la sucursal:", err);
+        setError(err.message || "Error cargando inventario");
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchBranchInventory();
   }, [branchId, token]);
 
-  const handleAddClick = () => {
-    if (!selectedEquipmentId || Number(quantity) <= 0) {
+  const handleAddClick = async () => {
+    if (!selectedEquipmentId || !token) {
       return;
     }
+    const now = new Date();
+    const formattedDate = now.toISOString().split(".")[0];
 
-    const equipment = allEquipment.find(
-      (e) => e.equipment_id === selectedEquipmentId,
-    );
-    if (!equipment) {
-      return;
-    }
-
-    const newItem: BranchEquipmentInventory = {
-      inventory_id: crypto.randomUUID(),
-      equipment_id: equipment.equipment_id,
-      acquisition_date: new Date().toISOString(),
-      last_maintenance_date: new Date().toISOString(),
+    const newEquipment: CreateBranchEquipment = {
+      equipment_id: selectedEquipmentId,
+      acquisition_date: formattedDate,
+      last_maintenance_date: "",
       notes: "",
       serial_number: "",
-      status: "Available", // default
+      status: "Available",
     };
 
-    //setCurrentInventory(prev => [...prev, newItem]);
-    setSelectedEquipmentId(null);
-    setQuantity(1);
+    try {
+      await api.equipment.addBranchEquipment(branchId, newEquipment, token);
+
+      const res = await api.equipment.getBranchEquipment(branchId, token);
+      setCurrentInventory(res.data || []);
+
+      setSelectedEquipmentId(null);
+      setSearch("");
+    } catch (err: any) {
+      console.error("Error agregando equipamiento:", err);
+      setError(err.message || "Error agregando equipamiento");
+    }
   };
 
-  const handleRemoveItem = (inventoryId: string) => {
-    setCurrentInventory((prev) =>
-      prev.filter((item) => item.equipment_id !== inventoryId),
-    );
-  };
-
-  const inventoryColumns = React.useMemo<Column<BranchEquipmentInventory>[]>(
+  const inventoryColumns = React.useMemo<Column<Equipment>[]>(
     () => [
+      { header: "Nombre", accessor: "name" },
       {
-        header: "ID",
-        accessor: "inventory_id",
-        render: (id) => String(id).substring(0, 8),
-      },
-      //{
-      //   header: "Equipamiento",
-      //   accessor: "name",
-      //   render: (name, row) => name ?? allEquipment.find(e => e.equipment_id === row.equipment_id)?.name ?? "Sin nombre",
-      // },
-      {
-        header: "Nota",
-        accessor: "notes",
+        header: "Marca",
+        accessor: "brand",
       },
       {
-        header: "Serial",
-        accessor: "serial_number",
-        render: (serial) =>
-          serial || <span className="text-gray-400 italic">N/A</span>,
+        header: "Modelo",
+        accessor: "model",
       },
       {
-        header: "Fecha adquisición",
-        accessor: "acquisition_date",
-        render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
+        header: "Categoría",
+        accessor: "category",
       },
       {
         header: "Último mantenimiento",
-        accessor: "last_maintenance_date",
+        accessor: "updated_at",
         render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
       },
-      {
-        header: "Estado",
-        accessor: "status",
-        render: (status) => {
-          const label =
-            status === "Available"
-              ? "Disponible"
-              : status === "Maintenance"
-                ? "Mantenimiento"
-                : status;
-          const variant =
-            status === "Available"
-              ? "default"
-              : status === "Maintenance"
-                ? "secondary"
-                : "outline";
-          return <Badge variant={variant}>{label}</Badge>;
-        },
-      },
     ],
-    [allEquipment],
+    [],
   );
 
-  const actionRenderer = (row: BranchEquipmentInventory) => (
+  const actionRenderer = (row: Equipment) => (
     <div className="flex items-center justify-end gap-1">
       <Button
         size="icon"
@@ -187,35 +155,26 @@ const BranchEquipmentPanel = forwardRef<
           variant="ghost"
           className="text-red-600 hover:text-red-700"
           title="Eliminar"
-          onClick={() => handleRemoveItem(row.inventory_id)}
+          onClick={async () => {
+            try {
+              await api.equipment.removeBranchEquipment(
+                branchId,
+                row.equipment_id,
+                token!,
+              );
+              setCurrentInventory((prev) =>
+                prev.filter((e) => e.equipment_id !== row.equipment_id),
+              );
+            } catch (err) {
+              console.error("Error eliminando equipo:", err);
+            }
+          }}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       )}
     </div>
   );
-
-  // useImperativeHandle(ref, () => ({
-  //   saveData: async () => {
-  //     if (!token) {throw new Error("Token no válido");}
-  //     try {
-  //       for (const item of currentInventory) {
-  //         const equipmentData: CreateBranchEquipment = {
-  //           equipment_id: item.equipment_id,
-  //           acquisition_date: item || new Date().toISOString(),
-  //           last_maintenance_date: item.last_maintenance_date || new Date().toISOString(),
-  //           notes: item.notes || "",
-  //           serial_number: item.serial_number || "",
-  //         };
-  //         await api.equipment.addBranchEquipment(branchId, equipmentData, token);
-  //       }
-  //       alert("Equipamiento guardado correctamente");
-  //     } catch (err) {
-  //       console.error("Error guardando equipamiento:", err);
-  //       throw err;
-  //     }
-  //   },
-  // }));
 
   return (
     <div className="space-y-8">
@@ -227,8 +186,13 @@ const BranchEquipmentPanel = forwardRef<
           <div className="flex flex-col sm:flex-row items-end gap-4">
             <div className="flex-grow space-y-1.5">
               <label className="text-sm font-medium text-gray-700">
-                Equipamiento
+                Buscar equipo
               </label>
+              <InputField
+                placeholder="Buscar..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
               <Select
                 value={selectedEquipmentId ?? ""}
                 onValueChange={setSelectedEquipmentId}
@@ -236,41 +200,34 @@ const BranchEquipmentPanel = forwardRef<
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar un equipo" />
                 </SelectTrigger>
-                <SelectContent>
-                  {allEquipment.map((equip) => (
-                    <SelectItem
-                      key={equip.equipment_id}
-                      value={equip.equipment_id}
-                    >
-                      {equip.name}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="max-h-48 overflow-y-auto">
+                  {allEquipment
+                    .filter((e) =>
+                      e.name.toLowerCase().includes(search.toLowerCase()),
+                    )
+                    .map((equip) => (
+                      <SelectItem
+                        key={equip.equipment_id}
+                        value={equip.equipment_id}
+                      >
+                        {equip.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="w-full sm:w-32 space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">
-                Cantidad
-              </label>
-              <InputField
-                type="number"
-                min={1}
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="0"
-              />
             </div>
             <Button
               type="button"
               variant="outline"
               onClick={handleAddClick}
-              disabled={!selectedEquipmentId || Number(quantity) <= 0}
+              disabled={!selectedEquipmentId || loading}
               className="w-full sm:w-auto flex-shrink-0"
             >
               <Plus size={16} className="mr-2" />
               Agregar
             </Button>
           </div>
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
       )}
 
@@ -288,16 +245,13 @@ const BranchEquipmentPanel = forwardRef<
             data={currentInventory}
             enableRowSelection
             actions={actionRenderer}
-            page={page}
+            page={1}
             pageSize={10}
-            onPageChange={setPage}
           />
         )}
       </div>
     </div>
   );
-});
-
-BranchEquipmentPanel.displayName = "BranchEquipmentPanel";
+};
 
 export default BranchEquipmentPanel;

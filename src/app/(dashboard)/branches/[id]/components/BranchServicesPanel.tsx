@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { getInitials } from "@/utils";
 import {
   Select,
@@ -33,7 +33,6 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   const { token } = useAuth();
   const isDisabled = mode === "view";
 
-  // Estados
   const [allServices, setAllServices] = useState<ServiceFullDetail[]>([]);
   const [services, setServices] = useState<BranchServicePrice[]>([]);
   const [newServices, setNewServices] = useState<
@@ -57,15 +56,13 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     null,
   );
 
-  // Cargar servicios base
+  // Cargar todos los servicios disponibles
   useEffect(() => {
-    if (!token) {
-      return;
-    }
+    if (!token) {return;}
+
     const fetchServices = async () => {
       try {
         const response = await api.products.getServices(token, { page: 1 });
-        console.log("Listado de servicios", response.data);
         setAllServices(response.data || []);
       } catch (err) {
         console.error("Error cargando servicios:", err);
@@ -74,16 +71,14 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     fetchServices();
   }, [token]);
 
+  // Cargar servicios asignados a la sucursal
   useEffect(() => {
-    if (!token || !branchId) {
-      return;
-    }
+    if (!token || !branchId) {return;}
 
     const fetchBranchServices = async () => {
       setIsLoading(true);
       try {
         const response = await api.products.getBranchServices(branchId, token);
-        console.log("Servicios de la sucursal", response.data);
         setServices(response?.data || []);
       } catch (err) {
         console.error("Error cargando servicios de la sucursal:", err);
@@ -94,16 +89,12 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     fetchBranchServices();
   }, [token, branchId]);
 
-  // Agregar servicio local y a la lista de nuevos
+  // Agregar un nuevo servicio localmente
   const handleAddService = () => {
-    if (!selectedServiceId) {
-      return;
-    }
+    if (!selectedServiceId) {return;}
 
     const service = allServices.find((s) => s.service_id === selectedServiceId);
-    if (!service) {
-      return;
-    }
+    if (!service) {return;}
 
     const newService: CreateBranchServicePriceItem = {
       service_id: service.service_id,
@@ -117,7 +108,6 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     setNewServices((prev) => [...prev, newService]);
     setDirty(true);
 
-    // Reset form
     setSelectedServiceId(null);
     setAforo(0);
     setPriceMember(0);
@@ -125,10 +115,9 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     setIsVisible(true);
   };
 
+  // Eliminar servicio
   const handleRemoveService = async (serviceId: string) => {
-    if (!token || !branchId) {
-      return;
-    }
+    if (!token || !branchId) {return;}
 
     setIsLoading(true);
     try {
@@ -151,12 +140,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
 
   // Guardar todos los servicios nuevos
   const handleSave = async () => {
-    if (!token || !branchId) {
-      return;
-    }
-    if (newServices.length === 0) {
-      return;
-    }
+    if (!token || !branchId || newServices.length === 0) {return;}
 
     setLoading(true);
     try {
@@ -168,6 +152,39 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       console.error("Error guardando servicios:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Actualizar un servicio existente
+  const handleUpdateService = async (updatedData: {
+    max_capacity: number;
+    price_for_member: number;
+    price_for_non_member: number;
+    is_visible: boolean;
+  }) => {
+    if (!serviceToEdit || !token || !branchId) {return;}
+
+    try {
+      await api.products.updateBranchService(
+        branchId,
+        serviceToEdit.service_id,
+        updatedData,
+        token,
+      );
+
+      setServices((prev) =>
+        prev.map((s) =>
+          s.service_id === serviceToEdit.service_id
+            ? { ...s, ...updatedData }
+            : s,
+        ),
+      );
+
+      setEditModalOpen(false);
+      setServiceToEdit(null);
+      console.log("Servicio actualizado correctamente");
+    } catch (err) {
+      console.error("Error actualizando servicio:", err);
     }
   };
 
@@ -183,10 +200,10 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
         </p>
       </section>
 
-      {/* Formulario agregar servicio */}
       {!isDisabled && (
         <div className="p-4 border rounded-lg bg-gray-50">
           <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-end">
+            {/* Selector de servicio */}
             <div className="flex-grow min-w-[200px] space-y-1.5">
               <p className="text-sm font-medium text-gray-700">
                 Agregar nuevo servicio
@@ -225,7 +242,6 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
               value={aforo}
               onChange={(e) => setAforo(Number(e.target.value))}
             />
-
             <InputField
               label="Precio miembros"
               type="number"
@@ -233,7 +249,6 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
               value={priceMember}
               onChange={(e) => setPriceMember(Number(e.target.value))}
             />
-
             <InputField
               label="Precio no miembros"
               type="number"
@@ -258,8 +273,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
               disabled={!selectedServiceId || aforo <= 0}
               onClick={handleAddService}
             >
-              <Plus size={16} className="mr-2" />
-              Agregar
+              <Plus size={16} className="mr-2" /> Agregar
             </Button>
           </div>
         </div>
@@ -285,13 +299,25 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
               description={`Aforo: ${service.max_capacity} | Miembros: $${service.price_for_member} | No miembros: $${service.price_for_non_member} | Visible: ${service.is_visible ? "Sí" : "No"}`}
               action={
                 !isDisabled ? (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveService(service.service_id)}
-                    className="rounded-md p-1 text-muted-foreground hover:text-red-600"
-                  >
-                    <Trash2 size={20} />
-                  </button>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => handleRemoveService(service.service_id)}
+                      variant="outline"
+                    >
+                      <Trash2 size={20} />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setServiceToEdit(service);
+                        setEditModalOpen(true);
+                      }}
+                      variant="outline"
+                    >
+                      <Pencil size={20} />
+                    </Button>
+                  </div>
                 ) : undefined
               }
             />
@@ -305,6 +331,15 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
           {loading ? "Guardando..." : "Guardar cambios"}
         </Button>
       )}
+
+      {/* Modal de edición */}
+      <EditBranchServiceModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        service={serviceToEdit}
+        onSave={handleUpdateService}
+        mode={mode}
+      />
     </div>
   );
 });
