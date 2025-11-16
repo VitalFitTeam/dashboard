@@ -34,12 +34,12 @@ export default function BranchInstructorPanel({
     string | null
   >(null);
   const [loading, setLoading] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const fetchBranchInstructors = useCallback(async () => {
     if (!token || !branchId) {
       return;
     }
-
     try {
       setLoading(true);
       const res = await api.instructor.getBranchInstructors(
@@ -66,59 +66,104 @@ export default function BranchInstructorPanel({
     if (!token) {
       return;
     }
-
     try {
       setLoading(true);
-      const res = await api.instructor.getInstructors({}, token);
+      const res = await api.instructor.getInstructors(
+        {
+          page: 1,
+        },
+        token,
+      );
+      console.log("instructores", res.data);
       setAllInstructors(res.data);
     } catch (err) {
-      console.error("Error cargando instructores:", err);
-      toast.error("No se pudieron cargar los instructores disponibles");
+      // ...
     } finally {
       setLoading(false);
     }
   }, [token]);
 
-  const handleAddInstructor = async () => {
-    if (!token || !branchId || !selectedInstructorId) {
+  const handleAddInstructor = () => {
+    if (!selectedInstructorId) {
       return;
     }
 
-    try {
-      setLoading(true);
-      await api.instructor.addBranchInstructor(
-        branchId,
-        [selectedInstructorId],
-        token,
-      );
-      toast.success("Instructor agregado correctamente");
-      await fetchBranchInstructors();
-      setSelectedInstructorId(null);
-    } catch (err) {
-      console.error("Error agregando instructor:", err);
-      toast.error("No se pudo agregar el instructor");
-    } finally {
-      setLoading(false);
+    if (
+      branchInstructors.some((i) => i.instructorID === selectedInstructorId)
+    ) {
+      toast.error("El instructor ya está asignado a esta sucursal");
+      return;
     }
+
+    // Agregar temporalmente a la lista y marcar dirty
+    const instructor = allInstructors.find(
+      (i) => i.instructor_id === selectedInstructorId,
+    );
+    if (!instructor) {
+      return;
+    }
+
+    setBranchInstructors((prev) => [
+      ...prev,
+      {
+        instructorID: instructor.instructor_id,
+        instructorName: `${instructor.first_name} ${instructor.last_name}`,
+        email: instructor.email ?? "",
+        phone: instructor.phone ?? "",
+      },
+    ]);
+    setDirty(true);
+    toast.success(
+      "Instructor seleccionado para agregar. Guarda los cambios para aplicar.",
+    );
+    setSelectedInstructorId(null);
   };
 
   const handleRemoveInstructor = async (instructorId: string) => {
-    if (!token || !branchId || !instructorId) {
+    if (!token || !branchId) {
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
       await api.instructor.removeBranchInstructor(
         branchId,
         instructorId,
         token,
       );
+      setBranchInstructors((prev) =>
+        prev.filter((i) => i.instructorID !== instructorId),
+      );
+      setDirty(false);
       toast.success("Instructor eliminado correctamente");
-      await fetchBranchInstructors();
     } catch (err) {
-      console.error("❌ Error eliminando instructor:", err);
+      console.error("Error eliminando instructor:", err);
       toast.error("No se pudo eliminar el instructor");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!token || !branchId) {
+      return;
+    }
+    setLoading(true);
+    try {
+      if (selectedInstructorId) {
+        await api.instructor.addBranchInstructor(
+          branchId,
+          [selectedInstructorId],
+          token,
+        );
+        setSelectedInstructorId(null);
+      }
+      await fetchBranchInstructors();
+      setDirty(false);
+      toast.success("Cambios guardados correctamente");
+    } catch (err) {
+      console.error("Error guardando cambios:", err);
+      toast.error("No se pudieron guardar los cambios");
     } finally {
       setLoading(false);
     }
@@ -161,13 +206,15 @@ export default function BranchInstructorPanel({
           type="button"
           onClick={handleAddInstructor}
           disabled={!selectedInstructorId || loading}
-          className="sm:mt-0 mt-2"
         >
-          {loading ? "Cargando..." : "Agregar"}
+          Agregar
+        </Button>
+        <Button type="button" onClick={handleSave} disabled={!dirty || loading}>
+          {loading ? "Guardando..." : "Guardar cambios"}
         </Button>
       </div>
 
-      {/* 🔹 Lista de instructores asignados */}
+      {/* Lista de instructores asignados */}
       <div className="space-y-2">
         {loading ? (
           <p className="text-sm text-gray-500">Cargando instructores...</p>

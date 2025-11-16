@@ -1,32 +1,147 @@
 "use client";
 
-import React from "react";
-import { Branches } from "@/models/branches";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
-import { PaymentMethodUI } from "@/app/(dashboard)/branches/page";
-import PaymentMethodSelector from "@/components/features/branches/PaymentMethodSelector";
+import React, { useState, useEffect } from "react";
+import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
+import { BranchPaymentMethodInfo, PaymentMethod } from "@vitalfit/sdk";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import EntityItem from "@/components/features/EntityItem";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
-interface PaymentMethodProps {
-  formData: Branches;
-  handlePaymentMethodChange: (selectedIds: string[]) => void;
-  mode: "edit" | "view";
-  allPaymentMethods: PaymentMethodUI[];
+interface BranchPaymentMethodPanelProps {
+  branchId: string;
+  mode?: "edit" | "view";
 }
 
 export default function BranchPaymentMethodPanel({
-  formData = { paymethods: [] } as unknown as Branches,
-  handlePaymentMethodChange = () => {},
+  branchId,
   mode = "edit",
-  allPaymentMethods = [],
-}: PaymentMethodProps) {
-  const handlePaymentMethodsChange = (updatedMethods: string[]) => {
-    handlePaymentMethodChange(updatedMethods);
+}: BranchPaymentMethodPanelProps) {
+  const { token } = useAuth();
+
+  const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethod[]>(
+    [],
+  );
+  const [selectedMethods, setSelectedMethods] = useState<
+    BranchPaymentMethodInfo[]
+  >([]);
+  const [selectedId, setSelectedId] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    const fetchAllMethods = async () => {
+      try {
+        setLoading(true);
+        const res = await api.paymentMethod.getPaymentMethods(token);
+        setAllPaymentMethods(res.data || []);
+      } catch (err) {
+        console.error("Error cargando métodos de pago:", err);
+        toast.error("No se pudieron cargar los métodos de pago disponibles");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllMethods();
+  }, [token]);
+
+  useEffect(() => {
+    if (!token || !branchId) {
+      return;
+    }
+    const fetchBranchMethods = async () => {
+      try {
+        setLoading(true);
+        const res = await api.paymentMethod.getBranchPaymentMethods(
+          branchId,
+          token,
+        );
+        console.log(res.data);
+        setSelectedMethods(res.data || []);
+        setDirty(false);
+      } catch (err) {
+        console.error("Error cargando métodos de pago de la sucursal:", err);
+        toast.error("No se pudieron cargar los métodos de pago de la sucursal");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBranchMethods();
+  }, [branchId, token]);
+
+  const handleAddMethod = () => {
+    if (!branchId || !selectedId) {
+      return;
+    }
+
+    const method = allPaymentMethods.find((m) => m.method_id === selectedId);
+    if (!method) {
+      return;
+    }
+
+    const newMethod: BranchPaymentMethodInfo = {
+      method_id: method.method_id,
+      branch_id: branchId,
+      is_active: true,
+      name: method.name,
+      type: method.type,
+    };
+
+    setSelectedMethods((prev) => [...prev, newMethod]);
+    setSelectedId("");
+    setDirty(true);
   };
-  const currentMethods = formData.paymethods ?? [];
+
+  const handleRemove = async (id: string) => {
+    if (!token || !branchId) {
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.paymentMethod.removeBranchPaymentMethod(branchId, id, token);
+      setSelectedMethods((prev) => prev.filter((m) => m.method_id !== id));
+      setDirty(true);
+      toast.success("Método de pago eliminado correctamente");
+    } catch (err) {
+      console.error("Error eliminando método de pago:", err);
+      toast.error("No se pudo eliminar el método de pago");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Guardar cambios
+  const handleSave = async () => {
+    if (!token || !branchId) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const payload = selectedMethods.map((m) => m.method_id);
+      console.log(payload);
+      await api.paymentMethod.addBranchPaymentMethod(branchId, payload, token);
+      setDirty(false);
+      console.log("Métodos de pago guardados correctamente");
+    } catch (err) {
+      console.error("Error guardando métodos de pago:", err);
+      toast.error("No se pudieron guardar los métodos de pago");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       <section>
         <h2 className="text-xl font-semibold text-gray-900">
           Métodos de pago aceptados
@@ -37,22 +152,66 @@ export default function BranchPaymentMethodPanel({
         </p>
       </section>
 
-      <section>
-        <PaymentMethodSelector
-          selectedMethods={currentMethods}
-          onSelectionChange={handlePaymentMethodsChange}
-          mode={mode}
-          availableMethods={allPaymentMethods}
-        />
-      </section>
-      <Alert variant="default" className="mt-6">
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <span className="font-medium">Importante:</span> los métodos
-          seleccionados estarán disponibles para todos los servicios y
-          membresías de esta sucursal. Puedes modificarlos posteriormente.
-        </AlertDescription>
-      </Alert>
+      {mode === "edit" && (
+        <div className="flex gap-2 items-end">
+          <Select value={selectedId} onValueChange={setSelectedId}>
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="Selecciona un método..." />
+            </SelectTrigger>
+            <SelectContent>
+              {allPaymentMethods
+                .filter(
+                  (m) =>
+                    !selectedMethods.some((s) => s.method_id === m.method_id),
+                )
+                .map((method) => (
+                  <SelectItem key={method.method_id} value={method.method_id}>
+                    {method.name}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={handleAddMethod} disabled={!selectedId}>
+            Agregar
+          </Button>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        {selectedMethods.length === 0 ? (
+          <p className="text-sm text-gray-500">
+            No hay métodos de pago seleccionados.
+          </p>
+        ) : (
+          selectedMethods.map((method) => (
+            <EntityItem
+              key={method.method_id}
+              initials={method.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+              title={method.name}
+              description={`Tipo: ${method.type}`}
+              action={
+                mode === "edit" ? (
+                  <button
+                    className="text-sm text-red-500 hover:underline"
+                    onClick={() => handleRemove(method.method_id)}
+                  >
+                    Eliminar
+                  </button>
+                ) : null
+              }
+            />
+          ))
+        )}
+      </div>
+
+      {mode === "edit" && (
+        <Button onClick={handleSave} disabled={!dirty || loading}>
+          {loading ? "Guardando..." : "Guardar cambios"}
+        </Button>
+      )}
     </div>
   );
 }

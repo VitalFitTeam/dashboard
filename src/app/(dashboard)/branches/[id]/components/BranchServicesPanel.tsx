@@ -1,11 +1,6 @@
 "use client";
 
-import React, {
-  useEffect,
-  useImperativeHandle,
-  useState,
-  forwardRef,
-} from "react";
+import React, { useEffect, useState, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { getInitials } from "@/utils";
@@ -20,246 +15,298 @@ import InputField from "@/components/ui/InputField";
 import EntityItem from "@/components/features/EntityItem";
 import { useAuth } from "@/context/AuthContext";
 import {
-  BranchDetails,
   BranchServicePrice,
   CreateBranchServicePriceItem,
   ServiceFullDetail,
+  UpdateBranchServicePrice,
 } from "@vitalfit/sdk";
 import { api } from "@/lib/sdk-config";
+import EditBranchServiceModal from "./EditBranchServiceModal";
 
-export interface BranchPanelRef {
-  saveData: () => Promise<void>;
-}
-
-interface ServicesPanelProps {
-  formData: BranchDetails & { services: BranchServicePrice[] };
-  setFormData: React.Dispatch<
-    React.SetStateAction<BranchDetails & { services: BranchServicePrice[] }>
-  >;
+interface BranchServicePanelProps {
+  branchId: string;
   mode: "view" | "edit";
-  allServices?: ServiceFullDetail[];
 }
 
-const BranchServicePanel = forwardRef<BranchPanelRef, ServicesPanelProps>(
-  ({ formData, setFormData, mode = "edit", allServices = [] }, ref) => {
-    const { token } = useAuth();
-    const isDisabled = mode === "view";
+const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
+  const { branchId, mode = "edit" } = props;
+  const { token } = useAuth();
+  const isDisabled = mode === "view";
 
-    const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-      null,
-    );
-    const [aforo, setAforo] = useState<number | string>("");
-    const [priceMember, setPriceMember] = useState<number | string>("");
-    const [priceNonMember, setPriceNonMember] = useState<number | string>("");
-    const [isVisible, setIsVisible] = useState<boolean>(true);
-    const [isLoading, setIsLoading] = useState(false);
+  // Estados
+  const [allServices, setAllServices] = useState<ServiceFullDetail[]>([]);
+  const [services, setServices] = useState<BranchServicePrice[]>([]);
+  const [newServices, setNewServices] = useState<
+    CreateBranchServicePriceItem[]
+  >([]);
 
-    const assignedServices: BranchServicePrice[] = formData.services ?? [];
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null,
+  );
+  const [aforo, setAforo] = useState<number>(0);
+  const [priceMember, setPriceMember] = useState<number>(0);
+  const [priceNonMember, setPriceNonMember] = useState<number>(0);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
 
-    useEffect(() => {
-      if (!token) {
-        return;
-      }
-      const fetchServices = async () => {
-        try {
-          const response = await api.products.getServices(token);
-          setAllServicesFromApi(response.data || []);
-        } catch (err) {
-          console.error("❌ Error cargando servicios:", err);
-        }
-      };
-      fetchServices();
-    }, [token]);
+  const [loading, setLoading] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-    // Cargar servicios de la sucursal desde la API
-    useEffect(() => {
-      const loadServices = async () => {
-        if (!token || !formData.branch_id) {
-          return;
-        }
-        setIsLoading(true);
-        try {
-          const response = await api.products.getBranchServices(
-            formData.branch_id,
-            token,
-          );
-          console.log("✅ Servicios cargados correctamente", response?.data);
-          if (response?.data) {
-            setFormData((prev) => ({ ...prev, services: response.data }));
-          }
-        } catch (err) {
-          console.error("❌ Error cargando servicios:", err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      loadServices();
-    }, [token, formData.branch_id, setFormData]);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [serviceToEdit, setServiceToEdit] = useState<BranchServicePrice | null>(
+    null,
+  );
 
-    const handleRemoveService = async (serviceId: string) => {
-      if (!token || !formData.branch_id) {
-        return;
-      }
+  // Cargar servicios base
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    const fetchServices = async () => {
       try {
-        await api.products.removeBranchService(
-          formData.branch_id,
-          serviceId,
-          token,
-        );
-        // Actualizar lista local
-        setFormData((prev) => ({
-          ...prev,
-          services: prev.services.filter((s) => s.service_id !== serviceId),
-        }));
+        const response = await api.products.getServices(token, { page: 1 });
+        console.log("Listado de servicios", response.data);
+        setAllServices(response.data || []);
       } catch (err) {
-        console.error("❌ Error al eliminar servicio:", err);
-        alert(
-          "No se pudo eliminar el servicio (posiblemente ya no existe o hubo un error en el servidor).",
-        );
+        console.error("Error cargando servicios:", err);
       }
     };
+    fetchServices();
+  }, [token]);
 
-    return (
-      <div className="space-y-10">
-        <section>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Servicios de la sucursal
-          </h2>
-          <p className="mt-1 text-sm text-gray-600">
-            Administra los servicios disponibles y sus precios.
-          </p>
-        </section>
+  useEffect(() => {
+    if (!token || !branchId) {
+      return;
+    }
 
-        {!isDisabled && (
-          <div className="p-4 border rounded-lg bg-gray-50">
-            <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-end">
-              <div className="flex-grow min-w-[200px] space-y-1.5">
-                <p className="text-sm font-medium text-gray-700">
-                  Agregar nuevo servicio
-                </p>
-                <Select
-                  value={selectedServiceId ?? ""}
-                  onValueChange={setSelectedServiceId}
-                >
-                  <SelectTrigger id="service-select">
-                    <SelectValue placeholder="Selecciona un servicio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allServices
-                      .filter(
-                        (s) =>
-                          !assignedServices.some(
-                            (asv) => asv.service_id === s.service_id,
-                          ),
-                      )
-                      .map((service) => (
-                        <SelectItem
-                          key={service.service_id}
-                          value={service.service_id}
-                        >
-                          {service.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
+    const fetchBranchServices = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.products.getBranchServices(branchId, token);
+        console.log("Servicios de la sucursal", response.data);
+        setServices(response?.data || []);
+      } catch (err) {
+        console.error("Error cargando servicios de la sucursal:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBranchServices();
+  }, [token, branchId]);
 
-              <InputField
-                label="Aforo"
-                id="aforo"
-                name="aforo"
-                type="number"
-                min="0"
-                value={aforo}
-                onChange={(e) => setAforo(e.target.value)}
-                placeholder="Capacidad"
-              />
+  // Agregar servicio local y a la lista de nuevos
+  const handleAddService = () => {
+    if (!selectedServiceId) {
+      return;
+    }
 
-              <InputField
-                label="Precio miembros"
-                id="price_member"
-                name="price_member"
-                type="number"
-                min="0"
-                value={priceMember}
-                onChange={(e) => setPriceMember(e.target.value)}
-                placeholder="0.00"
-              />
+    const service = allServices.find((s) => s.service_id === selectedServiceId);
+    if (!service) {
+      return;
+    }
 
-              <InputField
-                label="Precio no miembros"
-                id="price_non_member"
-                name="price_non_member"
-                type="number"
-                min="0"
-                value={priceNonMember}
-                onChange={(e) => setPriceNonMember(e.target.value)}
-                placeholder="0.00"
-              />
+    const newService: CreateBranchServicePriceItem = {
+      service_id: service.service_id,
+      max_capacity: aforo,
+      price_for_member: priceMember,
+      price_for_non_member: priceNonMember,
+      is_visible: isVisible,
+    };
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="visible"
-                  checked={isVisible}
-                  onChange={(e) => setIsVisible(e.target.checked)}
-                  className="h-4 w-4"
-                />
-                <label htmlFor="visible" className="text-sm">
-                  Visible
-                </label>
-              </div>
+    setServices((prev) => [...prev, newService as BranchServicePrice]);
+    setNewServices((prev) => [...prev, newService]);
+    setDirty(true);
 
-              <Button
-                type="button"
-                variant="outline"
-                disabled={!selectedServiceId || aforo === ""}
+    // Reset form
+    setSelectedServiceId(null);
+    setAforo(0);
+    setPriceMember(0);
+    setPriceNonMember(0);
+    setIsVisible(true);
+  };
+
+  const handleRemoveService = async (serviceId: string) => {
+    if (!token || !branchId) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const isNew = newServices.find((s) => s.service_id === serviceId);
+      if (isNew) {
+        setNewServices((prev) =>
+          prev.filter((s) => s.service_id !== serviceId),
+        );
+      } else {
+        await api.products.removeBranchService(branchId, serviceId, token);
+      }
+      setServices((prev) => prev.filter((s) => s.service_id !== serviceId));
+      setDirty(true);
+    } catch (err) {
+      console.error("Error eliminando servicio:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Guardar todos los servicios nuevos
+  const handleSave = async () => {
+    if (!token || !branchId) {
+      return;
+    }
+    if (newServices.length === 0) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.products.addBranchService(newServices, branchId, token);
+      setNewServices([]);
+      setDirty(false);
+      console.log("Servicios guardados correctamente");
+    } catch (err) {
+      console.error("Error guardando servicios:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-10">
+      {/* Título */}
+      <section>
+        <h2 className="text-xl font-semibold text-gray-900">
+          Servicios de la sucursal
+        </h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Administra los servicios disponibles y sus precios.
+        </p>
+      </section>
+
+      {/* Formulario agregar servicio */}
+      {!isDisabled && (
+        <div className="p-4 border rounded-lg bg-gray-50">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-end">
+            <div className="flex-grow min-w-[200px] space-y-1.5">
+              <p className="text-sm font-medium text-gray-700">
+                Agregar nuevo servicio
+              </p>
+              <Select
+                value={selectedServiceId ?? ""}
+                onValueChange={setSelectedServiceId}
               >
-                <Plus size={16} className="mr-2" />
-                Agregar
-              </Button>
+                <SelectTrigger id="service-select">
+                  <SelectValue placeholder="Selecciona un servicio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allServices
+                    .filter(
+                      (s) =>
+                        !services.some(
+                          (asv) => asv.service_id === s.service_id,
+                        ),
+                    )
+                    .map((service) => (
+                      <SelectItem
+                        key={service.service_id}
+                        value={service.service_id}
+                      >
+                        {service.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-        )}
 
-        <div>
-          <h3 className="text-sm font-medium text-gray-800 mb-4">
-            Servicios asignados
-          </h3>
-          {isLoading ? (
-            <p className="text-sm text-gray-500">Cargando servicios...</p>
-          ) : assignedServices.length === 0 ? (
-            <p className="text-sm text-gray-500">No hay servicios asignados.</p>
-          ) : (
-            assignedServices.map((service) => (
-              <EntityItem
-                key={service.service_id}
-                initials={getInitials(service.service_name ?? "??")}
-                title={
-                  service.service_name ?? `Servicio ID: ${service.service_id}`
-                }
-                description={`Aforo: ${service.max_capacity} | Miembros: $${service.price_for_member} | No miembros: $${service.price_for_non_member} | Visible: ${
-                  service.is_visible ? "Sí" : "No"
-                }`}
-                action={
-                  !isDisabled ? (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveService(service.service_id)}
-                      className="rounded-md p-1 text-muted-foreground transition-colors hover:text-red-600"
-                      aria-label="Eliminar servicio"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  ) : undefined
-                }
+            <InputField
+              label="Aforo"
+              type="number"
+              min={0}
+              value={aforo}
+              onChange={(e) => setAforo(Number(e.target.value))}
+            />
+
+            <InputField
+              label="Precio miembros"
+              type="number"
+              min={0}
+              value={priceMember}
+              onChange={(e) => setPriceMember(Number(e.target.value))}
+            />
+
+            <InputField
+              label="Precio no miembros"
+              type="number"
+              min={0}
+              value={priceNonMember}
+              onChange={(e) => setPriceNonMember(Number(e.target.value))}
+            />
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={isVisible}
+                onChange={(e) => setIsVisible(e.target.checked)}
+                className="h-4 w-4"
               />
-            ))
-          )}
+              <label className="text-sm">Visible</label>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!selectedServiceId || aforo <= 0}
+              onClick={handleAddService}
+            >
+              <Plus size={16} className="mr-2" />
+              Agregar
+            </Button>
+          </div>
         </div>
+      )}
+
+      {/* Lista de servicios */}
+      <div>
+        <h3 className="text-sm font-medium text-gray-800 mb-4">
+          Servicios asignados
+        </h3>
+        {isLoading ? (
+          <p className="text-sm text-gray-500">Cargando servicios...</p>
+        ) : services.length === 0 ? (
+          <p className="text-sm text-gray-500">No hay servicios asignados.</p>
+        ) : (
+          services.map((service) => (
+            <EntityItem
+              key={service.service_id}
+              initials={getInitials(service.service_name ?? "??")}
+              title={
+                service.service_name ?? `Servicio ID: ${service.service_id}`
+              }
+              description={`Aforo: ${service.max_capacity} | Miembros: $${service.price_for_member} | No miembros: $${service.price_for_non_member} | Visible: ${service.is_visible ? "Sí" : "No"}`}
+              action={
+                !isDisabled ? (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveService(service.service_id)}
+                    className="rounded-md p-1 text-muted-foreground hover:text-red-600"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                ) : undefined
+              }
+            />
+          ))
+        )}
       </div>
-    );
-  },
-);
+
+      {/* Guardar cambios */}
+      {!isDisabled && (
+        <Button onClick={handleSave} disabled={!dirty || loading}>
+          {loading ? "Guardando..." : "Guardar cambios"}
+        </Button>
+      )}
+    </div>
+  );
+});
 
 export default BranchServicePanel;
