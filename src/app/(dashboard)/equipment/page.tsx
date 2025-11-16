@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import EquipmentTable from "./EquipmentTable";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Equipment as EquipmentType, EquipmentCategory } from "@vitalfit/sdk";
@@ -60,8 +60,42 @@ export default function Equipment() {
   }, [token, page, pageSize, filters]);
 
   useEffect(() => {
-    loadEquipmentData();
-  }, [loadEquipmentData]);
+    const loadEquipmentData = async () => {
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const categoryParam =
+          filters.category !== "all"
+            ? (filters.category as EquipmentCategory)
+            : undefined;
+
+        const result = await api.equipment.getEquipment(token, {
+          limit: pageSize,
+          page: page,
+          search: filters.search || undefined,
+          category: categoryParam,
+        });
+
+        console.log(
+          "Datos página",
+          page,
+          ":",
+          result.data?.length,
+          "registros",
+        );
+        setEquipmentData(result.data || []);
+        setTotalItems(result.total || 0);
+      } catch (error) {
+        console.error("Error cargando equipamiento:", error);
+        setEquipmentData([]);
+        setTotalItems(0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -91,7 +125,7 @@ export default function Equipment() {
       ) : (
         <EquipmentTable
           data={equipmentData}
-          onReload={loadEquipmentData}
+          onReload={() => setPage((prev) => prev)}
           page={page}
           pageSize={pageSize}
           onPageChange={handlePageChange}
