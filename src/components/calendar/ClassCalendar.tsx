@@ -5,27 +5,29 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { useRouter } from "next/navigation";
 
 import { GymClass } from "./types";
 import { mockClasses } from "./mockData";
-import { ClassDetailsSidebar } from "./ClassDetailsSidebar";
-import { DeleteClassDialog } from "./DeleteClassDialog";
-import { ClassModal } from "./ClassModal";
 import { classColors } from "@/styles/eventColors";
 import { useAuth } from "@/context/AuthContext";
 
-export function CalendarWrapper() {
+interface CalendarWrapperProps {
+  onCreateClass?: (dateStr: string) => void;
+  onViewClass?: (classId: string) => void;
+}
+
+export function ClassCalendar({
+  onCreateClass,
+  onViewClass,
+}: CalendarWrapperProps) {
   const { user, hasRole } = useAuth();
+  const router = useRouter();
 
   const [events, setEvents] = useState<GymClass[]>([]);
-  const [selectedClass, setSelectedClass] = useState<GymClass | null>(null);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [instructorFilter, setInstructorFilter] = useState<string | null>(null);
   const [branchFilter, setBranchFilter] = useState<string | null>(null);
-
-  const [openModal, setOpenModal] = useState(false);
-  const [openDetails, setOpenDetails] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
 
   useEffect(() => {
     setEvents(mockClasses);
@@ -60,71 +62,41 @@ export function CalendarWrapper() {
     );
   });
 
-  const canEdit = (gymClass: GymClass) => {
-    if (!user) {
-      return false;
-    }
-    switch (user.role) {
-      case "super_admin":
-        return true;
-      case "branch_admin":
-      case "recepcionist":
-        return gymClass.branchId === user.branchId;
-      case "instructor":
-        return gymClass.instructorId === user.user_id;
-      default:
-        return false;
-    }
+  const canCreate = () => {
+    return hasRole?.(["super_admin", "branch_admin", "recepcionist"]) ?? false;
   };
 
   const handleDateClick = (arg: any) => {
-    if (!user || !hasRole(["super_admin", "branch_admin", "recepcionist"])) {
+    if (!canCreate()) {
       return;
     }
 
-    setSelectedClass({
-      id: "",
-      title: "Nueva Clase",
-      instructorId: "",
-      start: arg.dateStr,
-      end: arg.dateStr,
-      type: "Yoga",
-      branchId: user.branchId || "b-default",
-      maxCapacity: 20,
-    });
-    setOpenModal(true);
+    if (onCreateClass) {
+      onCreateClass(arg.dateStr);
+    } else {
+      router.push(
+        `/classes/new?date=${arg.dateStr}&branch=${user?.branchId || "b-default"}`,
+      );
+    }
   };
 
+  // Cuando se hace click en un evento para ver detalles
   const handleEventClick = (info: any) => {
     const event = events.find((e) => e.id === info.event.id);
     if (!event) {
       return;
     }
 
-    setSelectedClass(event);
-    setOpenDetails(true);
-  };
-
-  const handleSave = (gymClass: GymClass) => {
-    if (!gymClass.id) {
-      const newClass = { ...gymClass, id: String(Date.now()) };
-      setEvents([...events, newClass]);
+    if (onViewClass) {
+      onViewClass(event.id);
     } else {
-      setEvents(events.map((c) => (c.id === gymClass.id ? gymClass : c)));
+      router.push(`/classes/${event.id}`);
     }
-    setOpenModal(false);
-  };
-
-  const handleDelete = () => {
-    if (!selectedClass) {
-      return;
-    }
-    setEvents(events.filter((e) => e.id !== selectedClass.id));
-    setOpenDelete(false);
   };
 
   return (
     <>
+      {/* Filtros */}
       <div className="flex gap-4 mb-4">
         <select
           className="border rounded px-2 py-1"
@@ -158,11 +130,12 @@ export function CalendarWrapper() {
         </select>
       </div>
 
+      {/* Calendario */}
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         height="90vh"
-        selectable={canEdit({} as GymClass)}
+        selectable={canCreate()}
         editable={false}
         displayEventTime={true}
         headerToolbar={{
@@ -212,37 +185,6 @@ export function CalendarWrapper() {
             info.el.style.borderRadius = "0.5rem";
           }
         }}
-      />
-
-      <ClassModal
-        open={openModal}
-        onOpenChange={setOpenModal}
-        data={selectedClass}
-        onSave={handleSave}
-      />
-
-      <ClassDetailsSidebar
-        open={openDetails}
-        onOpenChange={setOpenDetails}
-        data={selectedClass}
-        onEdit={() => {
-          if (selectedClass && canEdit(selectedClass)) {
-            setOpenDetails(false);
-            setOpenModal(true);
-          }
-        }}
-        onDelete={() => {
-          if (selectedClass && canEdit(selectedClass)) {
-            setOpenDetails(false);
-            setOpenDelete(true);
-          }
-        }}
-      />
-
-      <DeleteClassDialog
-        open={openDelete}
-        onOpenChange={setOpenDelete}
-        onConfirm={handleDelete}
       />
     </>
   );

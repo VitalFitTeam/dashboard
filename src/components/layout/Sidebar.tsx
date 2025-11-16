@@ -78,9 +78,8 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
           name: "Clases y Reservas",
           icon: Calendar,
           subitems: [
-            { name: "Calendario", href: "/calendar" },
             { name: "Listado de Clases", href: "/classes" },
-            { name: "Reservas", href: "/reservations" },
+            { name: "Seguimiento de reservas", href: "/reservations" },
           ],
         },
 
