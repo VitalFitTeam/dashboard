@@ -11,13 +11,14 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Equipment } from "@vitalfit/sdk";
 import { useRouter } from "next/navigation";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import { Notification } from "@/components/ui/Notification";
 
 interface EquipmentTableProps {
   data: Equipment[];
@@ -46,6 +47,13 @@ export default function EquipmentTable({
   onFilterChange,
 }: EquipmentTableProps) {
   const [searchInput, setSearchInput] = useState(filters.search);
+  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [pendingRow, setPendingRow] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const { token } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -61,10 +69,6 @@ export default function EquipmentTable({
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const { token } = useAuth();
-  const router = useRouter();
-
   const handleView = (row: EquipmentRow) => {
     router.push(`/equipment/${row.equipment_id}`);
   };
@@ -75,18 +79,25 @@ export default function EquipmentTable({
 
   const handleDeleteEquipment = async (equipment: Equipment) => {
     if (!token) {
-      alert("Error: Sesión no autenticada.");
-      setDeleteRowId(null);
+      setDeleteError("Error: Sesión no autenticada.");
       return;
     }
+
+    setPendingRow(equipment.equipment_id);
+    setDeleteError(null);
+
     try {
       await api.equipment.deleteEquipment(equipment.equipment_id, token);
+      setShowSuccess(true);
       onReload();
-      setDeleteRowId(null);
     } catch (error) {
       console.error("Error al eliminar el equipo:", error);
-      alert("Error al eliminar el equipo. Inténtelo de nuevo.");
+      setDeleteError("Error al eliminar el equipamiento. Intenta nuevamente.");
+    } finally {
+      setPendingRow(null);
       setDeleteRowId(null);
+      // Ocultar notificación después de 2 seg
+      setTimeout(() => setShowSuccess(false), 2000);
     }
   };
 
@@ -109,6 +120,7 @@ export default function EquipmentTable({
             onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
+
         <Select
           value={filters.category}
           onValueChange={(value) => onFilterChange({ category: value })}
@@ -133,6 +145,22 @@ export default function EquipmentTable({
           </Button>
         </div>
       </div>
+
+      {/* Notification global */}
+      {showSuccess && (
+        <Notification
+          variant="success"
+          description="Equipamiento eliminado correctamente"
+          onClose={() => setShowSuccess(false)}
+        />
+      )}
+      {deleteError && (
+        <Notification
+          variant="destructive"
+          description={deleteError}
+          onClose={() => setDeleteError(null)}
+        />
+      )}
 
       <DataTable<Equipment>
         key={`page-${page}-${data.length}`}
@@ -160,33 +188,19 @@ export default function EquipmentTable({
                 },
               ]}
             />
+
             {deleteRowId === row.equipment_id && (
-              <Alert className="mt-2 w-full max-w-md">
-                <AlertTitle className="text-black">
-                  Confirmar Eliminación
-                </AlertTitle>
-                <AlertDescription className="text-gray-900">
-                  ¿Estás seguro de que deseas eliminar este equipo? Esta acción
-                  no se puede deshacer.
-                </AlertDescription>
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    className="border-white"
-                    onClick={() => setDeleteRowId(null)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="text-white"
-                    onClick={() => handleDeleteEquipment(row)}
-                  >
-                    <Trash2 className="h-4 w-4 text-white" />
-                    Eliminar
-                  </Button>
-                </div>
-              </Alert>
+              <GeneralAlertDialog
+                open={true}
+                onOpenChange={(open) => !open && setDeleteRowId(null)}
+                trigger={null}
+                title="Confirmar eliminación"
+                description="¿Estás seguro de que deseas eliminar este equipo? Esta acción no se puede deshacer."
+                actionText="Eliminar"
+                cancelText="Cancelar"
+                onAction={() => handleDeleteEquipment(row)}
+                actionVariant="destructive"
+              />
             )}
           </div>
         )}

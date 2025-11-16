@@ -26,6 +26,39 @@ export default function Equipment() {
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
+  const loadEquipmentData = useCallback(async () => {
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const categoryParam =
+        filters.category !== "all"
+          ? (filters.category as EquipmentCategory)
+          : undefined;
+
+      const result = await api.equipment.getEquipment(token, {
+        limit: pageSize,
+        page,
+        search: filters.search || undefined,
+        category: categoryParam,
+      });
+
+      console.log("Datos página", page, ":", result.data?.length, "registros");
+
+      setEquipmentData(result.data || []);
+      setTotalItems(result.total || 0);
+    } catch (error) {
+      console.error("Error cargando equipamiento:", error);
+      setEquipmentData([]);
+      setTotalItems(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token, page, pageSize, filters]);
+
   useEffect(() => {
     const loadEquipmentData = async () => {
       if (!token) {
@@ -63,9 +96,6 @@ export default function Equipment() {
         setIsLoading(false);
       }
     };
-
-    loadEquipmentData();
-  }, [token, pageSize, filters, page]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);

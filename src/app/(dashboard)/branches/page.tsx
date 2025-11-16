@@ -155,12 +155,18 @@ export default function HomeBranches() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <PageHeader title="SUCURSALES">
-        <Button variant="primary" onClick={() => router.push("/branches/new")}>
-          <PlusIcon className="h-5 w-5" />
-          Crear Sucursal
-        </Button>
-      </PageHeader>
+      <PageHeader
+        title="SUCURSALES"
+        actionButton={
+          <Button
+            variant="primary"
+            onClick={() => router.push("/branches/new")}
+          >
+            <PlusIcon className="h-5 w-5" />
+            Crear Sucursal
+          </Button>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCardsConfig.map((card) => (

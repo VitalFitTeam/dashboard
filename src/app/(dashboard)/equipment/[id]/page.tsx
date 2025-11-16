@@ -1,77 +1,81 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
-import ViewEquipment from "./ViewEquipment";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
-import { EquipmentInfo, DataResponse } from "@vitalfit/sdk";
+import { useAuth } from "@/context/AuthContext";
+import EquipmentForm from "../EquipmentForm";
+import { EquipmentInfo } from "@vitalfit/sdk";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Button } from "@/components/ui/button";
 
-export default function ViewEquipmentPage() {
+export default function EquipmentDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { token } = useAuth();
+
   const id = params?.id as string | undefined;
-  const [loading, setLoading] = useState(true);
   const [equipment, setEquipment] = useState<EquipmentInfo | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) {
-      router.replace("/equipment");
-      return;
-    }
-    if (!token) {
+    if (!id || !token) {
       return;
     }
 
-    let mounted = true;
-    setLoading(true);
-    setError(null);
-
-    (async () => {
+    const fetchEquipment = async () => {
       try {
-        const equipmentData: DataResponse<EquipmentInfo> =
-          await api.equipment.getEquipmentByID(id, token);
-
-        if (!mounted) {
-          return;
-        }
-        setEquipment(equipmentData.data);
-      } catch (err: any) {
-        if (!mounted) {
-          return;
-        }
-
-        const status = err?.response?.status ?? err?.status ?? null;
-        if (status === 404) {
-          router.replace("/equipment");
-        } else {
-          console.error("Error cargando equipamiento:", err);
-          setError("No se pudo cargar la información del equipamiento.");
-        }
+        const data = await api.equipment.getEquipmentByID(id, token);
+        setEquipment(data.data);
+      } catch (err) {
+        console.error("Error al cargar equipo:", err);
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
-    })();
-
-    return () => {
-      mounted = false;
     };
-  }, [id, token, router]);
+
+    fetchEquipment();
+  }, [id, token]);
 
   if (loading) {
-    return <div className="p-6">Cargando equipamiento...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-red-500">{error}</div>;
+    return <div className="p-6">Cargando detalles...</div>;
   }
 
   if (!equipment) {
-    return null;
+    return <div className="p-6 text-red-500">Equipo no encontrado.</div>;
   }
-  return <ViewEquipment equipment={equipment} />;
+
+  return (
+    <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
+      <PageHeader
+        title="DETALLES DE EQUIPAMIENTO"
+        subtitle={
+          <p className="text-sm text-muted-foreground">
+            Información del equipamiento:{" "}
+            <span className="font-medium">{equipment.name}</span>
+          </p>
+        }
+        actionButton={
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => router.push("/equipment")}
+            >
+              Volver
+            </Button>
+            <Button
+              variant="primary"
+              type="button"
+              onClick={() => router.push(`/equipment/edit/${id}`)}
+            >
+              Modificar
+            </Button>
+          </div>
+        }
+      />
+
+      <EquipmentForm equipment={equipment} mode="view" />
+    </div>
+  );
 }
