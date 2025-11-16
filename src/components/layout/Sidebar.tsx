@@ -90,6 +90,7 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
             { name: "Equipamiento", href: "/equipment" },
             { name: "Instructores", href: "/instructors" },
             { name: "Promociones", href: "/promotions" },
+            { name: "Paquetes", href: "/packages" },
           ],
         },
         {
