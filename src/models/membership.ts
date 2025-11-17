@@ -1,8 +1,8 @@
 export type Membership = {
-  id: string;
+  membership_type_id: string;
   name: string;
   description: string;
-  duration: number;
+  duration_days: number;
   price: number;
-  status: "Active" | "Inactive";
+  is_active: boolean;
 };

@@ -1,89 +1,120 @@
 "use client";
-import { useState } from "react";
-import type { Instructor } from "@/models/instructor";
+import { useState, useEffect } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import { Notification } from "@/components/ui/Notification";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, Trash2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
+import { InstructorDataList } from "@vitalfit/sdk";
+import { useRouter } from "next/navigation";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import { Notification } from "@/components/ui/Notification";
 
-interface InstructorTableProps {
-  data: Instructor[];
-  isLoading: boolean;
-  onView: (instructor: Instructor) => void;
-  onEdit: (instructor: Instructor) => void;
-  filters: Record<string, string | undefined>;
-  setFilters: React.Dispatch<
-    React.SetStateAction<Record<string, string | undefined>>
-  >;
+interface instructorsTableProps {
+  data: InstructorDataList[];
+  onReload: () => void;
   page: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
   pageSize: number;
-  setPageSize: React.Dispatch<React.SetStateAction<number>>;
-  sort: "asc" | "desc";
-  setSort: React.Dispatch<React.SetStateAction<"asc" | "desc">>;
-  totalInstructor: number;
-  refreshKey: number;
-  setRefreshKey: React.Dispatch<React.SetStateAction<number>>;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  filters: { search: string; category: string };
+  onFilterChange: (filters: { search?: string; category?: string }) => void;
 }
 
-export default function InstructorTable({
+export default function instructorsTable({
   data,
-  isLoading,
-  onView,
-  onEdit,
-  filters,
-  setFilters,
+  onReload,
   page,
-  setPage,
   pageSize,
-  setPageSize,
-  sort,
-  setSort,
-  totalInstructor,
-  refreshKey,
-  setRefreshKey,
-}: InstructorTableProps) {
+  totalPages,
+  onPageChange,
+  filters,
+  onFilterChange,
+}: instructorsTableProps) {
+  const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [showSuccessNotification, setShowSuccessNotification] = useState(false);
-  const [showErrorNotification, setShowErrorNotification] = useState(false);
+  const { token } = useAuth();
+  const router = useRouter();
 
-  const handleDelete = async (row: Instructor) => {
-    console.warn("Instructor Eliminado ", row.id);
-    setDeleteRowId(null);
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    description: "",
+    title: "",
+  });
 
-    const token = localStorage.getItem("access_token");
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (searchInput.trim() === "") {
+        if (filters.search !== "") {
+          onFilterChange({ search: "" });
+        }
+      } else if (searchInput !== filters.search) {
+        onFilterChange({ search: searchInput });
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
+  const handleView = (row: InstructorDataList) => {
+    router.push(`/instructors/${row.instructor_id}`);
+  };
+
+  const handleEdit = (row: InstructorDataList) => {
+    router.push(`/instructors/${row.instructor_id}/edit`);
+  };
+
+  const handleDeleteinstructors = async (instructors: InstructorDataList) => {
     if (!token) {
-      console.error("Token no disponible");
+      console.error("sesion no autenticada");
+      setDeleteRowId(null);
       return;
     }
-
     try {
-      const response = await api.instructor.deleteInstructor(row.id, token);
-      console.log("Instructor borrado:", response);
-      setShowSuccessNotification(true);
-      setRefreshKey((prev) => prev + 1);
+      await api.instructor.deleteInstructor(instructors.instructor_id, token);
+
+      // Primero mostrar la notificación
+      setNotification({
+        isVisible: true,
+        description: "Registro borrado exitosamente",
+        title: "Éxito",
+      });
+
+      setDeleteRowId(null);
+
       setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 4000);
-    } catch (err) {
-      console.error("Error eliminando instructor:", err);
-      setShowErrorNotification(true);
+        onReload();
+      }, 1000);
+    } catch (error) {
+      console.error("Error al eliminar el Instructor:", error);
+      setDeleteRowId(null);
+
+      setNotification({
+        isVisible: true,
+        description: "Error al borrar el registro",
+        title: "Error",
+      });
     }
   };
 
-  const visibleColumns: Column<Instructor>[] = [
-    { header: "ID", accessor: "id", render: (id) => <div>{id}</div> },
+  const hideNotification = () => {
+    setNotification((prev) => ({ ...prev, isVisible: false }));
+  };
+
+  const visibleColumns: Column<InstructorDataList>[] = [
+    {
+      header: "ID",
+      accessor: "instructor_id",
+      render: (id) => <div>{id}</div>,
+    },
     { header: "Nombre", accessor: "first_name", filterType: "text" },
     { header: "Email", accessor: "email", filterType: "text" },
   ];
 
-  const invisibleColumns: Column<Instructor>[] = [
+  const invisibleColumns: Column<InstructorDataList>[] = [
     { header: "Teléfono", accessor: "phone" },
     { header: "Fecha de nacimiento", accessor: "birth_date" },
     { header: "Género", accessor: "gender" },
@@ -98,97 +129,73 @@ export default function InstructorTable({
         <div className="relative w-full sm:w-[250px]">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Filtrar por nombre o email"
+            placeholder="Filtrar por nombre"
             className="pl-9"
-            value={filters?.email || ""}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, name: e.target.value }))
-            }
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
 
         <div className="flex items-center gap-4">
           <Button variant="outline">
-            <ArrowDownTray className="mr-2 h-4 w-4" />
-            Download CSV
+            <Download className="mr-2 h-4 w-4" />
+            Descarga
           </Button>
         </div>
       </div>
 
-      {showSuccessNotification && (
-        <Notification
-          variant="success"
-          title="Eliminacion exitosa"
-          description="El instructor ha sido eliminado."
-          onClose={() => setShowSuccessNotification(false)}
-        />
-      )}
-
-      {showErrorNotification && (
-        <Notification
-          variant="destructive"
-          title="Error al eliminar"
-          description="No se pudo eliminar el instructor. Intenta nuevamente."
-          onClose={() => setShowErrorNotification(false)}
-        />
-      )}
-
-      <DataTable<Instructor>
+      <DataTable<InstructorDataList>
+        key={`page-${page}-${data.length}`}
         columns={visibleColumns}
         data={data}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
+        onPageChange={onPageChange}
+        totalPages={totalPages}
+        rowIdKey="instructor_id"
         actions={(row) => (
           <div className="flex flex-col items-center justify-center w-full">
             <RowActions
               actions={[
-                { label: "Ver", icon: Eye, onClick: () => onView(row) },
+                { label: "Ver", icon: Eye, onClick: () => handleView(row) },
                 {
                   label: "Modificar",
                   icon: Pencil,
-                  onClick: () => onEdit(row),
+                  onClick: () => handleEdit(row),
                 },
                 {
                   label: "Eliminar",
                   icon: Trash2,
-                  onClick: () => setDeleteRowId(row.id),
+                  onClick: () => setDeleteRowId(row.instructor_id),
                   variant: "danger",
                   separatorBefore: true,
                 },
               ]}
             />
-            {deleteRowId === row.id && (
-              <Alert className="mt-2 w-full max-w-md">
-                <AlertTitle className="text-black">
-                  Confirmar Eliminación
-                </AlertTitle>
-                <AlertDescription className="text-gray-900">
-                  ¿Estás seguro de que deseas eliminar este metodo? Esta acción
-                  no se puede deshacer.
-                </AlertDescription>
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    className="border-white"
-                    onClick={() => setDeleteRowId(null)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="text-white"
-                    onClick={() => handleDelete(row)}
-                  >
-                    <Trash2 className="h-4 w-4 text-white" />
-                    Eliminar
-                  </Button>
-                </div>
-              </Alert>
+            {deleteRowId === row.instructor_id && (
+              <GeneralAlertDialog
+                open={deleteRowId === row.instructor_id}
+                onOpenChange={(open) => !open && setDeleteRowId(null)}
+                trigger={null}
+                title="Confirmar eliminación"
+                description="¿Estás seguro de que deseas eliminar este Instructor? Esta acción no se puede deshacer."
+                actionText="Eliminar"
+                cancelText="Cancelar"
+                onAction={() => handleDeleteinstructors(row)}
+                actionVariant="destructive"
+              />
             )}
           </div>
         )}
       />
+
+      {notification.isVisible && (
+        <Notification
+          title={notification.title}
+          description={notification.description}
+          onClose={hideNotification}
+          autoCloseDuration={3000}
+          variant={notification.title === "Error" ? "destructive" : "success"}
+        />
+      )}
     </>
   );
 }

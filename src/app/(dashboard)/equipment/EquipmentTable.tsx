@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
@@ -11,81 +11,95 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Equipment } from "@vitalfit/sdk";
+import { useRouter } from "next/navigation";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import { Notification } from "@/components/ui/Notification";
 
-// 1. CRÍTICO: Definimos TODAS las props de paginación.
 interface EquipmentTableProps {
-  onView: (equipment: Equipment) => void;
-  onEdit: (equipment: Equipment) => void;
   data: Equipment[];
   onReload: () => void;
-
-  // Props de paginación externa/controlada
   page: number;
   pageSize: number;
-  totalPages: number; // <--- Esta prop es VITAL
+  totalPages: number;
   onPageChange: (page: number) => void;
+  filters: { search: string; category: string };
+  onFilterChange: (filters: { search?: string; category?: string }) => void;
 }
+
+interface EquipmentRow {
+  equipment_id: string;
+  name: string;
+}
+
 export default function EquipmentTable({
-  onView,
-  onEdit,
   data,
   onReload,
-  // 2. Recibir todas las props de paginación
   page,
   pageSize,
   totalPages,
   onPageChange,
+  filters,
+  onFilterChange,
 }: EquipmentTableProps) {
+  const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
-  const { token } = useAuth();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [pendingRow, setPendingRow] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Lógica de eliminación (sin cambios funcionales)
-  const handleDeleteEquipment = async (equipment: Equipment) => {
-    if (!token) {
-      alert("Error: Sesión no autenticada.");
-      setDeleteRowId(null);
-      return;
-    }
-    try {
-      await api.equipment.deleteEquipment(equipment.equipment_id, token);
-      onReload();
-      setDeleteRowId(null);
-    } catch (error) {
-      console.error("Error al eliminar el equipo:", error);
-      alert("Error al eliminar el equipo. Inténtelo de nuevo.");
-      setDeleteRowId(null);
-    }
+  const { token } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (searchInput.trim() === "") {
+        if (filters.search !== "") {
+          onFilterChange({ search: "" });
+        }
+      } else if (searchInput !== filters.search) {
+        onFilterChange({ search: searchInput });
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
+  const handleView = (row: EquipmentRow) => {
+    router.push(`/equipment/${row.equipment_id}`);
   };
 
-  const filteredData = useMemo(() => {
-    let currentData = data;
-    const searchText = inputFilters.search?.toLowerCase() || "";
-    const selectedCategory = inputFilters.category || "";
+  const handleEdit = (row: EquipmentRow) => {
+    router.push(`/equipment/${row.equipment_id}/edit`);
+  };
 
-    if (selectedCategory && selectedCategory !== "all") {
-      currentData = currentData.filter(
-        (equipment) => equipment.category === selectedCategory,
-      );
+  const handleDeleteEquipment = async (equipment: Equipment) => {
+    if (!token) {
+      setDeleteError("Error: Sesión no autenticada.");
+      return;
     }
 
-    if (searchText) {
-      currentData = currentData.filter(
-        (equipment) =>
-          equipment.name.toLowerCase().includes(searchText) ||
-          equipment.model.toLowerCase().includes(searchText) ||
-          equipment.brand.toLowerCase().includes(searchText),
-      );
-    }
+    setPendingRow(equipment.equipment_id);
+    setDeleteError(null);
 
-    return currentData;
-  }, [data, inputFilters]);
+    try {
+      await api.equipment.deleteEquipment(equipment.equipment_id, token);
+      setShowSuccess(true);
+      onReload();
+    } catch (error) {
+      console.error("Error al eliminar el equipo:", error);
+      setDeleteError("Error al eliminar el equipamiento. Intenta nuevamente.");
+    } finally {
+      setPendingRow(null);
+      setDeleteRowId(null);
+      // Ocultar notificación después de 2 seg
+      setTimeout(() => setShowSuccess(false), 2000);
+    }
+  };
 
   const columns: Column<Equipment>[] = [
     { header: "Equipamiento", accessor: "name", filterType: "text" },
@@ -102,17 +116,14 @@ export default function EquipmentTable({
           <Input
             placeholder="Filtrar por nombre"
             className="pl-9"
-            value={inputFilters.search || ""}
-            onChange={(e) =>
-              setInputFilters((prev) => ({ ...prev, search: e.target.value }))
-            }
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
+
         <Select
-          value={inputFilters.category || "all"}
-          onValueChange={(value) =>
-            setInputFilters((prev) => ({ ...prev, category: value }))
-          }
+          value={filters.category}
+          onValueChange={(value) => onFilterChange({ category: value })}
         >
           <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <SelectValue placeholder="Categoría" />
@@ -130,16 +141,31 @@ export default function EquipmentTable({
         <div className="flex items-center gap-4">
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
-            Download CSV
+            Descarga
           </Button>
         </div>
       </div>
 
+      {/* Notification global */}
+      {showSuccess && (
+        <Notification
+          variant="success"
+          description="Equipamiento eliminado correctamente"
+          onClose={() => setShowSuccess(false)}
+        />
+      )}
+      {deleteError && (
+        <Notification
+          variant="destructive"
+          description={deleteError}
+          onClose={() => setDeleteError(null)}
+        />
+      )}
+
       <DataTable<Equipment>
+        key={`page-${page}-${data.length}`}
         columns={columns}
-        data={filteredData}
-        page={page}
-        pageSize={pageSize}
+        data={data}
         onPageChange={onPageChange}
         totalPages={totalPages}
         rowIdKey="equipment_id"
@@ -147,11 +173,11 @@ export default function EquipmentTable({
           <div className="flex flex-col items-center justify-center w-full">
             <RowActions
               actions={[
-                { label: "Ver", icon: Eye, onClick: () => onView(row) },
+                { label: "Ver", icon: Eye, onClick: () => handleView(row) },
                 {
                   label: "Modificar",
                   icon: Pencil,
-                  onClick: () => onEdit(row),
+                  onClick: () => handleEdit(row),
                 },
                 {
                   label: "Eliminar",
@@ -162,33 +188,19 @@ export default function EquipmentTable({
                 },
               ]}
             />
+
             {deleteRowId === row.equipment_id && (
-              <Alert className="mt-2 w-full max-w-md">
-                <AlertTitle className="text-black">
-                  Confirmar Eliminación
-                </AlertTitle>
-                <AlertDescription className="text-gray-900">
-                  ¿Estás seguro de que deseas eliminar este equipo? Esta acción
-                  no se puede deshacer.
-                </AlertDescription>
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    className="border-white"
-                    onClick={() => setDeleteRowId(null)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="text-white"
-                    onClick={() => handleDeleteEquipment(row)}
-                  >
-                    <Trash2 className="h-4 w-4 text-white" />
-                    Eliminar
-                  </Button>
-                </div>
-              </Alert>
+              <GeneralAlertDialog
+                open={true}
+                onOpenChange={(open) => !open && setDeleteRowId(null)}
+                trigger={null}
+                title="Confirmar eliminación"
+                description="¿Estás seguro de que deseas eliminar este equipo? Esta acción no se puede deshacer."
+                actionText="Eliminar"
+                cancelText="Cancelar"
+                onAction={() => handleDeleteEquipment(row)}
+                actionVariant="destructive"
+              />
             )}
           </div>
         )}
