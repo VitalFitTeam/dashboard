@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import { Notification } from "@/components/ui/Notification";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import {
   Select,
   SelectContent,
@@ -14,14 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { useRouter } from "next/navigation";
+import { useRouter as useNavRouter } from "next/navigation";
 import {
+  ServiceFullDetail,
   ServiceCategoryInfo,
-  CreateService as CreateServiceType,
-  CreateServiceImage,
+  UpdateServiceManual,
+  UpdateServiceImageManual,
   CreateBanner,
   Banner,
 } from "@vitalfit/sdk";
@@ -33,10 +35,15 @@ const DEFAULT_BANNER_IMAGE =
 
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB;
 
-export default function CreateService() {
+export default function EditService() {
+  const params = useParams();
   const router = useRouter();
+  const navigation = useNavRouter();
   const { token } = useAuth();
 
+  const serviceId = params.id as string;
+
+  const [service, setService] = useState<ServiceFullDetail | null>(null);
   const [categories, setCategories] = useState<ServiceCategoryInfo[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,24 +74,51 @@ export default function CreateService() {
 
   useEffect(() => {
     const loadInitialData = async () => {
-      if (!token) {
+      if (!token || !serviceId) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const [categoriesResponse, bannersResponse] = await Promise.all([
-          api.products.getCategories(token),
-          api.marketing.getBanner(token),
-        ]);
+        const [serviceResponse, categoriesResponse, bannersResponse] =
+          await Promise.all([
+            api.products.getServiceByID(serviceId, token),
+            api.products.getCategories(token),
+            api.marketing.getBanner(token),
+          ]);
 
+        const serviceData = serviceResponse.data;
+        setService(serviceData);
         setCategories(categoriesResponse.data || []);
         setBanners(bannersResponse.data || []);
+
+        setFormData({
+          name: serviceData.name,
+          description: serviceData.description,
+          category_id: serviceData.category_id,
+          duration_minutes: serviceData.duration_minutes.toString(),
+          priority_score: serviceData.priority_score.toString(),
+          is_featured: serviceData.is_featured ? "true" : "false",
+          banner_id:
+            serviceData.banners && serviceData.banners.length > 0
+              ? serviceData.banners[0].banner_id || ""
+              : "",
+        });
+
+        if (serviceData.banners && serviceData.banners.length > 0) {
+          const banner = serviceData.banners[0];
+          setBannerImage(banner.image_url);
+        }
+
+        const existingServiceImages = serviceData.images.map((image) => {
+          return image.image_url;
+        });
+        setServiceImages(existingServiceImages);
       } catch (error) {
         console.error("Error cargando datos iniciales:", error);
         setShowError({
           visible: true,
-          message: "Error al cargar los datos iniciales",
+          message: "Error al cargar los datos del servicio",
         });
       } finally {
         setIsLoading(false);
@@ -92,7 +126,7 @@ export default function CreateService() {
     };
 
     loadInitialData();
-  }, [token]);
+  }, [token, serviceId]);
 
   const uploadToImgBB = async (file: File): Promise<string> => {
     setUploading(true);
@@ -109,7 +143,7 @@ export default function CreateService() {
       );
 
       if (!response.ok) {
-        console.warn(`Error ${response.status}: No se pudo subir la imagen`);
+        throw new Error(`Error ${response.status}: No se pudo subir la imagen`);
       }
 
       const data = await response.json();
@@ -127,6 +161,29 @@ export default function CreateService() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const createNewBanner = async (
+    bannerPayload: CreateBanner,
+  ): Promise<string> => {
+    if (!token) {
+      throw new Error("No token available");
+    }
+
+    await api.marketing.createBanners(bannerPayload, token);
+
+    const bannersResponse = await api.marketing.getBanner(token);
+    const updatedBanners = bannersResponse.data || [];
+
+    const newBanner = updatedBanners.find((banner: Banner) => {
+      return banner.image_url === bannerPayload.image_url;
+    });
+
+    if (!newBanner || !newBanner.banner_id) {
+      throw new Error("No se pudo obtener el ID del banner creado");
+    }
+
+    return newBanner.banner_id;
   };
 
   const validateForm = (): boolean => {
@@ -169,10 +226,10 @@ export default function CreateService() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!token) {
+    if (!token || !service) {
       setShowError({
         visible: true,
-        message: "No estás autenticado. Por favor, inicia sesión nuevamente.",
+        message: "No estás autenticado o el servicio no existe.",
       });
       return;
     }
@@ -191,11 +248,8 @@ export default function CreateService() {
     try {
       let bannerId = formData.banner_id;
 
-      if (bannerId) {
-        console.log("Usando banner existente:", bannerId);
-      } else if (bannerImage) {
+      if (bannerImage && bannerImage !== service.banners?.[0]?.image_url) {
         try {
-          console.log("Creando nuevo banner desde imagen subida...");
           const bannerPayload: CreateBanner = {
             name: `Banner - ${formData.name}`,
             image_url: bannerImage,
@@ -203,60 +257,28 @@ export default function CreateService() {
             is_active: true,
           };
 
-          await api.marketing.createBanners(bannerPayload, token);
-
-          const bannersResponse = await api.marketing.getBanner(token);
-          const updatedBanners = bannersResponse.data || [];
-          const newBanner = updatedBanners.find((banner: Banner) => {
-            return banner.image_url === bannerImage;
-          });
-
-          if (newBanner?.banner_id) {
-            bannerId = newBanner.banner_id;
-            console.log("Banner creado exitosamente:", bannerId);
-          } else {
-            throw new Error("No se pudo obtener el ID del banner creado");
-          }
+          bannerId = await createNewBanner(bannerPayload);
         } catch (error) {
-          console.error("Error creando banner desde imagen:", error);
+          console.error("Error creando banner:", error);
+          setShowError({
+            visible: true,
+            message:
+              "Error al crear el banner. El servicio se actualizará sin cambios en el banner.",
+          });
         }
       }
 
-      if (!bannerId) {
-        try {
-          console.log("Creando banner por defecto...");
-          bannerId = await createDefaultBanner(formData.name);
-          console.log("Banner por defecto creado:", bannerId);
-        } catch (error) {
-          console.error("Error creando banner por defecto:", error);
-          const activeBanners = banners.filter((b) => {
-            return b.is_active;
-          });
-          if (activeBanners.length > 0 && activeBanners[0].banner_id) {
-            bannerId = activeBanners[0].banner_id;
-            console.log("Usando primer banner activo disponible:", bannerId);
-          } else {
-            throw new Error("No se pudo obtener un banner válido.");
-          }
-        }
-      }
-
-      const serviceImagesPayload: CreateServiceImage[] = serviceImages.map(
-        (url, index) => {
+      const serviceImagesPayload: UpdateServiceImageManual[] =
+        serviceImages.map((url, index) => {
           return {
             image_url: url,
             alt_text: `Imagen ${index + 1} - ${formData.name}`,
             display_order: index,
             is_primary: index === 0,
           };
-        },
-      );
+        });
 
-      if (!bannerId) {
-        throw new Error("No se pudo obtener un banner válido para el servicio");
-      }
-
-      const servicePayload: CreateServiceType = {
+      const updatePayload: UpdateServiceManual = {
         name: formData.name,
         description: formData.description,
         category_id: formData.category_id,
@@ -264,61 +286,43 @@ export default function CreateService() {
         priority: parseInt(formData.priority_score),
         is_featured: formData.is_featured === "true",
         banner_id: bannerId,
-        service_images: serviceImagesPayload,
       };
 
-      console.log("Enviando servicio:", servicePayload);
+      if (serviceImagesPayload.length > 0) {
+        updatePayload.service_images = serviceImagesPayload;
+      }
 
-      await api.products.createService(servicePayload, token);
+      await api.products.updateService(serviceId, updatePayload, token);
 
       setShowSuccess(true);
       setTimeout(() => {
-        router.push("/services");
+        navigation.push("/services");
       }, 1500);
     } catch (error) {
-      console.error("Error al crear servicio:", error);
+      console.error("Error al actualizar servicio:", error);
       setShowError({
         visible: true,
         message:
           error instanceof Error
             ? error.message
-            : "Error desconocido al crear el servicio",
+            : "Error desconocido al actualizar el servicio",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const createDefaultBanner = async (serviceName: string): Promise<string> => {
-    if (!token) {
-      throw new Error("No token available");
-    }
+  const handleChange = (field: keyof ServiceFormData, value: string) => {
+    setFormData((prev) => {
+      return { ...prev, [field]: value };
+    });
 
-    try {
-      const bannerPayload: CreateBanner = {
-        name: `Banner - ${serviceName}`,
-        image_url: DEFAULT_BANNER_IMAGE,
-        link_url: DEFAULT_BANNER_IMAGE,
-        is_active: true,
-      };
-
-      await api.marketing.createBanners(bannerPayload, token);
-
-      const bannersResponse = await api.marketing.getBanner(token);
-      const updatedBanners = bannersResponse.data || [];
-
-      const newBanner = updatedBanners.find((banner: Banner) => {
-        return banner.name === `Banner - ${serviceName}`;
-      });
-
-      if (!newBanner || !newBanner.banner_id) {
-        throw new Error("No se pudo obtener el ID del banner creado");
-      }
-
-      return newBanner.banner_id;
-    } catch (error) {
-      console.error("Error creando banner por defecto:", error);
-      throw error;
+    if (
+      field === "name" ||
+      field === "description" ||
+      field === "duration_minutes"
+    ) {
+      validateField(field, value);
     }
   };
 
@@ -338,7 +342,7 @@ export default function CreateService() {
       console.error("Error subiendo banner:", error);
       setShowError({
         visible: true,
-        message: "Error al subir el banner. Se usará una imagen por defecto.",
+        message: "Error al subir el banner.",
       });
     }
   };
@@ -362,23 +366,8 @@ export default function CreateService() {
       console.error("Error subiendo imágenes de servicio:", error);
       setShowError({
         visible: true,
-        message:
-          "Error al subir algunas imágenes. Se usarán imágenes por defecto.",
+        message: "Error al subir algunas imágenes.",
       });
-    }
-  };
-
-  const handleChange = (field: keyof ServiceFormData, value: string) => {
-    setFormData((prev) => {
-      return { ...prev, [field]: value };
-    });
-
-    if (
-      field === "name" ||
-      field === "description" ||
-      field === "duration_minutes"
-    ) {
-      validateField(field, value);
     }
   };
 
@@ -392,10 +381,34 @@ export default function CreateService() {
     });
   };
 
+  const handleBack = () => {
+    router.push("/services");
+  };
+
   if (isLoading) {
     return (
       <div className="flex-1 space-y-6 p-8 pt-6">
-        <div className="text-center">Cargando datos...</div>
+        <div className="text-center">Cargando datos del servicio...</div>
+      </div>
+    );
+  }
+
+  if (!service) {
+    return (
+      <div className="flex-1 space-y-6 p-8 pt-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Servicio no encontrado
+          </h2>
+          <Button
+            onClick={() => {
+              router.push("/services");
+            }}
+            variant="primary"
+          >
+            Volver a servicios
+          </Button>
+        </div>
       </div>
     );
   }
@@ -404,8 +417,8 @@ export default function CreateService() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <form onSubmit={handleSubmit} className="space-y-6">
         <PageHeader
-          title="CREAR NUEVO SERVICIO"
-          subtitle="Complete la información del nuevo servicio"
+          title="EDITAR SERVICIO"
+          subtitle={`Modifica la información del servicio ${service.name}`}
         />
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -538,7 +551,7 @@ export default function CreateService() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="banner_id">Banner del Servicio *</Label>
+            <Label htmlFor="banner_id">Banner Existente (Opcional)</Label>
             <Select
               value={formData.banner_id}
               onValueChange={(value) => {
@@ -547,7 +560,6 @@ export default function CreateService() {
                   setBannerImage("");
                 }
               }}
-              required
             >
               <SelectTrigger id="banner_id" className="w-full">
                 <SelectValue placeholder="Selecciona un banner existente" />
@@ -569,14 +581,11 @@ export default function CreateService() {
                   })}
               </SelectContent>
             </Select>
-            <p className="text-sm text-gray-500">
-              Este campo es obligatorio. Selecciona un banner existente.
-            </p>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>O subir nuevo banner (Opcional)</Label>
+          <Label>O subir nuevo banner</Label>
 
           {bannerImage ? (
             <div className="border rounded-lg p-4 bg-gray-50">
@@ -588,9 +597,11 @@ export default function CreateService() {
                     className="w-20 h-20 rounded border object-cover"
                   />
                   <div>
-                    <p className="font-medium">Banner subido exitosamente</p>
+                    <p className="font-medium">Banner actual</p>
                     <p className="text-sm text-gray-500">
-                      Listo para crear el servicio
+                      {bannerImage === service.banners?.[0]?.image_url
+                        ? "Banner existente"
+                        : "Nuevo banner subido"}
                     </p>
                   </div>
                 </div>
@@ -629,13 +640,13 @@ export default function CreateService() {
           )}
 
           <p className="text-sm text-gray-500">
-            Si subes un nuevo banner, se creará automáticamente y se usará para
-            este servicio.
+            Solo se permite un banner por servicio. Si subes un nuevo banner, se
+            creará automáticamente.
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label>Imágenes del servicio (Opcional)</Label>
+          <Label>Imágenes del servicio</Label>
 
           {serviceImages.length > 0 && (
             <div className="space-y-3 mb-4">
@@ -666,7 +677,7 @@ export default function CreateService() {
                           removeServiceImage(index);
                         }}
                       >
-                        <TrashIcon className="h-6 w-6 text-red-500" />
+                        Remover
                       </Button>
                     </div>
                   </div>
@@ -699,7 +710,7 @@ export default function CreateService() {
           </div>
 
           <p className="text-sm text-gray-500">
-            Puedes subir múltiples imágenes para el servicio
+            Puedes subir nuevas imágenes para el servicio
           </p>
         </div>
 
@@ -707,9 +718,7 @@ export default function CreateService() {
           <Button
             type="button"
             variant="secondary"
-            onClick={() => {
-              router.push("/services");
-            }}
+            onClick={handleBack}
             className="flex-1"
           >
             Cancelar
@@ -720,7 +729,7 @@ export default function CreateService() {
             disabled={isSubmitting || uploading}
             className="flex-1"
           >
-            {isSubmitting ? "Creando servicio..." : "Crear Servicio"}
+            {isSubmitting ? "Actualizando servicio..." : "Guardar Cambios"}
           </Button>
         </div>
       </form>
@@ -728,7 +737,7 @@ export default function CreateService() {
       {showSuccess && (
         <Notification
           variant="success"
-          description="¡Servicio creado exitosamente!"
+          description="¡Servicio actualizado exitosamente!"
           onClose={() => {
             setShowSuccess(false);
           }}
@@ -737,7 +746,7 @@ export default function CreateService() {
       {showError.visible && (
         <Notification
           variant="destructive"
-          title="Error al crear servicio"
+          title="Error al actualizar servicio"
           description={showError.message}
           onClose={() => {
             setShowError({ visible: false, message: "" });
