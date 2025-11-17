@@ -19,6 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { branchDetailsSchema } from "@/lib/validation/branchDetailsSchema";
 
 interface BasicDataPanelProps {
   mode?: "view" | "edit";
@@ -121,6 +122,17 @@ export default function BranchBasicDataPanel({
   };
 
   const handleSaveChanges = async () => {
+    const result = branchDetailsSchema.safeParse(formData);
+
+    if (!result.success) {
+      const messages = result.error.issues
+        .map((issue) => `${String(issue.path[0])}: ${issue.message}`)
+        .join("\n");
+
+      toast.error(messages);
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = transformDataForAPI(formData);
