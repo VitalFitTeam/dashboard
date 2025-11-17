@@ -1,265 +1,248 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Pencil } from "lucide-react";
-import { Column, DataTable } from "@/components/ui/table/DataTable";
-import InputField from "@/components/ui/InputField";
-import { api } from "@/lib/sdk-config";
-import {
-  BranchEquipmentInventory,
-  Equipment,
-  UpdateBranchEquipmentDetails,
-} from "@vitalfit/sdk";
-import { useAuth } from "@/context/AuthContext";
-import { toast } from "sonner";
-import EditBranchEquipmentModal from "./EditBranchEquipmentModal";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { getInitials } from "@/utils";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+import InputField from "@/components/ui/InputField";
+import EntityItem from "@/components/features/EntityItem";
+import { useAuth } from "@/context/AuthContext";
+import {
+  BranchServicePrice,
+  CreateBranchServicePriceItem,
+  ServiceFullDetail,
+  UpdateBranchServicePrice,
+} from "@vitalfit/sdk";
+import { api } from "@/lib/sdk-config";
+import EditBranchServiceModal from "./EditBranchServiceModal";
 
-interface BranchEquipmentPanelProps {
+interface BranchServicePanelProps {
   branchId: string;
-  mode?: "view" | "edit";
+  mode: "view" | "edit";
 }
 
-type InventoryRow = BranchEquipmentInventory & {
-  name: string;
-  brand: string;
-  model: string;
-  category: string;
-};
-
-const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
-  branchId,
-  mode = "edit",
-}) => {
+const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
+  const { branchId, mode = "edit" } = props;
   const { token } = useAuth();
   const isDisabled = mode === "view";
 
-  const [currentInventory, setCurrentInventory] = useState<
-    BranchEquipmentInventory[]
+  const [allServices, setAllServices] = useState<ServiceFullDetail[]>([]);
+  const [services, setServices] = useState<BranchServicePrice[]>([]);
+  const [newServices, setNewServices] = useState<
+    CreateBranchServicePriceItem[]
   >([]);
-  const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
-  const [editingEquipment, setEditingEquipment] =
-    useState<BranchEquipmentInventory | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null,
+  );
+  const [aforo, setAforo] = useState<number>(0);
+  const [priceMember, setPriceMember] = useState<number>(0);
+  const [priceNonMember, setPriceNonMember] = useState<number>(0);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
+
   const [loading, setLoading] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [serviceToEdit, setServiceToEdit] = useState<BranchServicePrice | null>(
+    null,
+  );
 
   useEffect(() => {
-    if (!token) {return;}
-    const fetchAllEquipment = async () => {
-      setLoading(true);
+    if (!token) {
+      return;
+    }
+
+    const fetchServices = async () => {
       try {
-        const res = await api.equipment.getEquipment(token, {
-          page: 1,
-          limit: 100,
-        });
-        setAllEquipment(res.data || []);
+        const response = await api.products.getServices(token, { page: 1 });
+        setAllServices(response.data || []);
       } catch (err) {
-        console.error("Error cargando equipos:", err);
-      } finally {
-        setLoading(false);
+        console.error("Error cargando servicios:", err);
       }
     };
-    fetchAllEquipment();
+    fetchServices();
   }, [token]);
 
   useEffect(() => {
-    if (!token) {return;}
-    const fetchInventory = async () => {
-      setLoading(true);
+    if (!token || !branchId) {
+      return;
+    }
+
+    const fetchBranchServices = async () => {
+      setIsLoading(true);
       try {
-        const res = await api.equipment.getBranchEquipment(branchId, token);
-        setCurrentInventory(res.data || []);
+        const response = await api.products.getBranchServices(branchId, token);
+        console.log(response.data);
+        setServices(response?.data || []);
       } catch (err) {
-        console.error("Error cargando inventario:", err);
+        console.error("Error cargando servicios de la sucursal:", err);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    fetchInventory();
-  }, [branchId, token]);
-
-  // Merge inventory for display
-  const mergedInventory: InventoryRow[] = currentInventory.map((inv) => {
-    const equip = allEquipment.find((e) => e.equipment_id === inv.equipment_id);
-    return {
-      ...inv,
-      name: equip?.name ?? "-",
-      brand: equip?.brand ?? "-",
-      model: equip?.model ?? "-",
-      category: equip?.category ?? "-",
-    };
-  });
-
-  // Columns
-  const inventoryColumns: Column<InventoryRow>[] = [
-    { header: "Nombre", accessor: "name" },
-    { header: "Marca", accessor: "brand" },
-    { header: "Modelo", accessor: "model" },
-    { header: "Categoría", accessor: "category" },
-    { header: "Serial", accessor: "serial_number" },
-    { header: "Estado", accessor: "status" },
-    { header: "Adquisición", accessor: "acquisition_date" },
-    { header: "Último mantenimiento", accessor: "last_maintenance_date" },
-  ];
-
-  // Actions
-  const actionRenderer = (row: InventoryRow) => (
-    <div className="flex gap-2">
-      {!isDisabled && (
-        <>
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => {
-              setEditingEquipment(row);
-              setIsModalOpen(true);
-            }}
-            title="Editar equipamiento"
-          >
-            <Pencil size={16} />
-          </Button>
-
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={async () => {
-              if (!token) {return;}
-              try {
-                await api.equipment.removeBranchEquipment(
-                  branchId,
-                  row.equipment_id,
-                  token,
-                );
-                setCurrentInventory((prev) =>
-                  prev.filter((e) => e.equipment_id !== row.equipment_id),
-                );
-                toast.success("Equipamiento eliminado");
-              } catch (err) {
-                console.error(err);
-                toast.error("Error eliminando equipamiento");
-              }
-            }}
-            title="Eliminar equipamiento"
-          >
-            <Trash2 size={16} />
-          </Button>
-        </>
-      )}
-    </div>
-  );
-
-  // Save changes from modal
-  const handleSaveEquipment = async (data: UpdateBranchEquipmentDetails) => {
-    if (!editingEquipment || !token) {return;}
-    try {
-      await api.equipment.updateBranchEquipment(
-        branchId,
-        editingEquipment.equipment_id,
-        data,
-        token,
-      );
-      setCurrentInventory((prev) =>
-        prev.map((e) =>
-          e.equipment_id === editingEquipment.equipment_id
-            ? { ...e, ...data }
-            : e,
-        ),
-      );
-      setIsModalOpen(false);
-      setEditingEquipment(null);
-      toast.success("Equipamiento actualizado");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error actualizando equipamiento");
-    }
-  };
+    fetchBranchServices();
+  }, [token, branchId]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
+      <section>
+        <h2 className="text-xl font-semibold text-gray-900">
+          Servicios de la sucursal
+        </h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Administra los servicios disponibles y sus precios.
+        </p>
+      </section>
+
       {!isDisabled && (
         <div className="p-4 border rounded-lg bg-gray-50">
-          <h3 className="text-base font-semibold text-gray-800 mb-3">
-            Agregar nuevo equipamiento
-          </h3>
-          <div className="flex flex-col sm:flex-row items-end gap-4">
-            <div className="flex-grow space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">
-                Buscar equipo
-              </label>
-              <InputField
-                placeholder="Buscar..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-end">
+            <div className="flex-grow min-w-[200px] space-y-1.5">
+              <p className="text-sm font-medium text-gray-700">
+                Agregar nuevo servicio
+              </p>
               <Select
-                value={selectedEquipmentId ?? ""}
-                onValueChange={setSelectedEquipmentId}
+                value={selectedServiceId ?? ""}
+                onValueChange={setSelectedServiceId}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar un equipo" />
+                <SelectTrigger id="service-select">
+                  <SelectValue placeholder="Selecciona un servicio" />
                 </SelectTrigger>
-                <SelectContent className="max-h-48 overflow-y-auto">
-                  {allEquipment
-                    .filter((e) =>
-                      e.name.toLowerCase().includes(search.toLowerCase()),
+                <SelectContent>
+                  {allServices
+                    .filter(
+                      (s) =>
+                        !services.some(
+                          (asv) => asv.service_id === s.service_id,
+                        ),
                     )
-                    .map((equip) => (
+                    .map((service) => (
                       <SelectItem
-                        key={equip.equipment_id}
-                        value={equip.equipment_id}
+                        key={service.service_id}
+                        value={service.service_id}
                       >
-                        {equip.name}
+                        {service.name}
                       </SelectItem>
                     ))}
                 </SelectContent>
               </Select>
             </div>
+
+            <InputField
+              label="Aforo"
+              type="number"
+              min={0}
+              value={aforo}
+              onChange={(e) => setAforo(Number(e.target.value))}
+            />
+            <InputField
+              label="Precio miembros"
+              type="number"
+              min={0}
+              value={priceMember}
+              onChange={(e) => setPriceMember(Number(e.target.value))}
+            />
+            <InputField
+              label="Precio no miembros"
+              type="number"
+              min={0}
+              value={priceNonMember}
+              onChange={(e) => setPriceNonMember(Number(e.target.value))}
+            />
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={isVisible}
+                onChange={(e) => setIsVisible(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <label className="text-sm">Visible</label>
+            </div>
+
             <Button
               type="button"
               variant="outline"
-              disabled={!selectedEquipmentId || loading}
+              disabled={!selectedServiceId || aforo <= 0}
+              //onClick={handleAddService}
             >
-              <Plus size={16} className="mr-2" />
-              Agregar
+              <Plus size={16} className="mr-2" /> Agregar
             </Button>
           </div>
         </div>
       )}
-      <h3 className="text-lg font-semibold">Inventario de la sucursal</h3>
-      {mergedInventory.length === 0 ? (
-        <p className="text-sm text-gray-500">
-          No hay equipamiento asignado a esta sucursal.
-        </p>
-      ) : (
-        <DataTable<InventoryRow>
-          columns={inventoryColumns}
-          data={mergedInventory}
-          rowIdKey={(row) => row.inventory_id}
-          enableRowSelection
-          actions={actionRenderer}
-          page={1}
-          pageSize={10}
-        />
+
+      <div>
+        <h3 className="text-sm font-medium text-gray-800 mb-4">
+          Servicios asignados
+        </h3>
+        {isLoading ? (
+          <p className="text-sm text-gray-500">Cargando servicios...</p>
+        ) : services.length === 0 ? (
+          <p className="text-sm text-gray-500">No hay servicios asignados.</p>
+        ) : (
+          services.map((service) => (
+            <EntityItem
+              key={service.service_id}
+              initials={getInitials(service.service_name ?? "??")}
+              title={
+                service.service_name ?? `Servicio ID: ${service.service_id}`
+              }
+              description={`Aforo: ${service.max_capacity} | Miembros: $${service.price_for_member} | No miembros: $${service.price_for_non_member} | Visible: ${service.is_visible ? "Sí" : "No"}`}
+              action={
+                !isDisabled ? (
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      //onClick={() => handleRemoveService(service.service_id)}
+                      variant="outline"
+                    >
+                      <Trash2 size={20} />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setServiceToEdit(service);
+                        setEditModalOpen(true);
+                      }}
+                      variant="outline"
+                    >
+                      <Pencil size={20} />
+                    </Button>
+                  </div>
+                ) : undefined
+              }
+            />
+          ))
+        )}
+      </div>
+      {!isDisabled && (
+        <Button
+          //onClick={handleSave}
+          disabled={!dirty || loading}
+        >
+          {loading ? "Guardando..." : "Guardar cambios"}
+        </Button>
       )}
 
-      {editingEquipment && (
-        <EditBranchEquipmentModal
-          open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          equipment={editingEquipment}
-          onSave={handleSaveEquipment}
-          mode={mode}
-        />
-      )}
+      {/* <EditBranchServiceModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        service={serviceToEdit}
+        onSave={handleUpdateService}
+        mode={mode}
+      /> */}
     </div>
   );
-};
+});
 
-export default BranchEquipmentPanel;
+export default BranchServicePanel;
