@@ -22,6 +22,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import EditBranchEquipmentModal from "./EditBranchEquipmentModal";
+import { branchEquipmentSchema } from "@/lib/validation/branchEquipmentSchema";
 
 interface BranchEquipmentPanelProps {
   branchId: string;
@@ -118,6 +119,15 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       status: "Available",
     };
 
+    const validation = branchEquipmentSchema.safeParse(newPending);
+    if (!validation.success) {
+      const errorMessages = validation.error.issues
+        .map((e) => e.message)
+        .join(", ");
+      toast.error(`Error al agregar equipo: ${errorMessages}`);
+      return;
+    }
+
     setPendingInventory((prev) => [...prev, newPending]);
     setSelectedEquipmentId(null);
     setSerialNumber("");
@@ -200,6 +210,20 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
   }) => {
     if (!token || !equipmentToEdit) {
       toast.error("Equipo inválido para actualizar");
+      return;
+    }
+
+    const updatedEquipment: BranchEquipmentInventory = {
+      ...equipmentToEdit,
+      ...data,
+    };
+
+    const validation = branchEquipmentSchema.safeParse(updatedEquipment);
+    if (!validation.success) {
+      const errorMessages = validation.error.issues
+        .map((e) => e.message)
+        .join(", ");
+      toast.error(`Error al actualizar equipo: ${errorMessages}`);
       return;
     }
 

@@ -23,6 +23,7 @@ import {
 import { api } from "@/lib/sdk-config";
 import EditBranchServiceModal from "./EditBranchServiceModal";
 import { toast } from "sonner";
+import { branchServiceSchema } from "@/lib/validation/branchServiceSchema";
 
 interface BranchServicePanelProps {
   branchId: string;
@@ -94,13 +95,10 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   }, [token, branchId]);
 
   const handleAddService = () => {
-    if (!selectedServiceId) {
-      return;
-    }
+    if (!selectedServiceId) {return;}
+
     const service = allServices.find((s) => s.service_id === selectedServiceId);
-    if (!service) {
-      return;
-    }
+    if (!service) {return;}
 
     const newService: CreateBranchServicePriceItem = {
       service_id: service.service_id,
@@ -109,6 +107,16 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       price_for_non_member: priceNonMember,
       is_visible: isVisible,
     };
+
+    const result = branchServiceSchema.safeParse(newService);
+    if (!result.success) {
+      const messages = result.error.issues
+        .map((issue) => `${String(issue.path[0])}: ${issue.message}`)
+        .join("\n");
+
+      toast.error(messages);
+      return;
+    }
 
     setServices((prev) => [
       ...prev,
