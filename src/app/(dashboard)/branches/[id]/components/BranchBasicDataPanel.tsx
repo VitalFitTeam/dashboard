@@ -13,13 +13,20 @@ import {
 } from "@/components/ui/select";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { MapPin } from "lucide-react";
-import { BranchDetails } from "@vitalfit/sdk";
+import { BranchDetails, UpdateBranchRequest } from "@vitalfit/sdk";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/sdk-config";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { branchDetailsSchema } from "@/lib/validation/branchDetailsSchema";
 
 interface BasicDataPanelProps {
   mode?: "view" | "edit";
   formData: BranchDetails;
   setFormData: React.Dispatch<React.SetStateAction<BranchDetails>>;
 }
+
 const statusOptions: { label: string; value: BranchDetails["status"] }[] = [
   { label: "Activa", value: "Active" },
   { label: "Inactiva", value: "Inactive" },
@@ -34,11 +41,68 @@ interface MapSelectData {
   country: string;
 }
 
+const toHHMMSS = (input?: string | null) => {
+  if (!input) {
+    return "00:00:00";
+  }
+  const s = input.trim();
+  if (/^\d{1,2}:\d{2}:\d{2}$/.test(s)) {
+    return s;
+  }
+  const hm = /^(\d{1,2}):(\d{2})$/.exec(s);
+  if (hm) {
+    return `${hm[1].padStart(2, "0")}:${hm[2]}:00`;
+  }
+  const ampm = /^(\d{1,2}):(\d{2})(?:\s*)(AM|PM)$/i.exec(s);
+  if (ampm) {
+    let hh = Number(ampm[1]);
+    const mm = ampm[2];
+    const period = ampm[3].toUpperCase();
+    if (period === "PM" && hh < 12) {
+      hh += 12;
+    }
+    if (period === "AM" && hh === 12) {
+      hh = 0;
+    }
+    return `${hh.toString().padStart(2, "0")}:${mm}:00`;
+  }
+  return "00:00:00";
+};
+
+const transformDataForAPI = (data: BranchDetails): UpdateBranchRequest => {
+  const opHours = data.operating_hours.map((h) => ({
+    day_of_week: h.day_of_week,
+    open_time: h.is_closed ? "00:00:00" : toHHMMSS(h.open_time),
+    close_time: h.is_closed ? "00:00:00" : toHHMMSS(h.close_time),
+    is_closed: h.is_closed,
+  }));
+
+  return {
+    name: data.name,
+    tax_id: data.tax_id,
+    address: data.address,
+    phone: data.phone,
+    status: data.status,
+    state: data.state,
+    country: data.country,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    max_capacity: data.max_capacity,
+    manager_id: data.manager,
+    operating_hours: opHours,
+    payment_methods: [],
+  };
+};
+
 export default function BranchBasicDataPanel({
-  mode,
+  mode = "edit",
   formData,
   setFormData,
 }: BasicDataPanelProps) {
+  const [loading, setLoading] = useState(false);
+  const isViewMode = mode === "view";
+  const { token } = useAuth();
+
   const handleMapSelect = (data: MapSelectData) => {
     setFormData((prev) => ({
       ...prev,
@@ -57,7 +121,30 @@ export default function BranchBasicDataPanel({
     }));
   };
 
-  const isViewMode = mode === "view";
+  const handleSaveChanges = async () => {
+    const result = branchDetailsSchema.safeParse(formData);
+
+    if (!result.success) {
+      const messages = result.error.issues
+        .map((issue) => `${String(issue.path[0])}: ${issue.message}`)
+        .join("\n");
+
+      toast.error(messages);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = transformDataForAPI(formData);
+      await api.branch.updateBranch(formData.branch_id, payload, token || "");
+      toast.success("Sucursal actualizada correctamente");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error actualizando sucursal");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-10">
@@ -72,9 +159,7 @@ export default function BranchBasicDataPanel({
         <form className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <InputField
             id="name"
-            name="name"
             label="Razón social"
-            placeholder="GymPro Sucursal Centro"
             value={formData.name ?? ""}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, name: e.target.value }))
@@ -84,9 +169,7 @@ export default function BranchBasicDataPanel({
 
           <InputField
             id="taxId"
-            name="taxId"
             label="RIF"
-            placeholder="J-12345678-9"
             value={formData.tax_id ?? ""}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, tax_id: e.target.value }))
@@ -95,24 +178,8 @@ export default function BranchBasicDataPanel({
           />
 
           <InputField
-            id="administrator"
-            name="administrator"
-            label="Gerente Responsable"
-            placeholder="Ej. María Pérez"
-            value={
-              `${formData.manager_first_name ?? ""} ${formData.manager_last_name ?? ""}`.trim() ||
-              "No asignado"
-            }
-            readOnly
-            disabled
-            className="bg-gray-100"
-          />
-
-          <InputField
             id="phone"
-            name="phone"
             label="Teléfono"
-            placeholder="Num. de contacto"
             value={formData.phone ?? ""}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, phone: e.target.value }))
@@ -122,10 +189,8 @@ export default function BranchBasicDataPanel({
 
           <InputField
             id="maxCapacity"
-            name="maxCapacity"
             label="Capacidad máxima"
             type="number"
-            placeholder="50"
             value={formData.max_capacity ?? ""}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -135,6 +200,7 @@ export default function BranchBasicDataPanel({
             }
             readOnly={isViewMode}
           />
+
           <div className="flex flex-col space-y-2">
             <label
               htmlFor="status"
@@ -262,23 +328,27 @@ export default function BranchBasicDataPanel({
             lat={formData.latitude ? String(formData.latitude) : "0"}
             lng={formData.longitude ? String(formData.longitude) : "0"}
             onSelect={handleMapSelect}
-            //readOnly={isViewMode}
           />
         </div>
       </section>
+
+      {/* Horarios */}
       <section>
         <h2 className="text-lg font-semibold text-gray-900 mb-1">
           Horarios de operación
         </h2>
-        <p className="text-sm text-gray-600 mb-4">
-          Horarios de apertura y cierre de la sucursal
-        </p>
         <BranchSchedule
           schedule={formData.operating_hours || []}
           onScheduleChange={handleScheduleChange}
-          mode="edit"
+          mode={mode}
         />
       </section>
+
+      {!isViewMode && (
+        <Button onClick={handleSaveChanges} disabled={loading}>
+          {loading ? "Guardando..." : "Guardar cambios"}
+        </Button>
+      )}
     </div>
   );
 }

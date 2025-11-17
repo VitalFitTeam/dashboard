@@ -1,14 +1,19 @@
 "use client";
 
-import React, {
-  useState,
-  useImperativeHandle,
-  forwardRef,
-  useEffect,
-} from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Eye } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Column, DataTable } from "@/components/ui/table/DataTable";
+import InputField from "@/components/ui/InputField";
+import { api } from "@/lib/sdk-config";
+import {
+  BranchEquipmentInventory,
+  CreateBranchEquipment,
+  Equipment,
+  EquipmentStatus,
+} from "@vitalfit/sdk";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 import {
   Select,
   SelectTrigger,
@@ -16,288 +21,406 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Column, DataTable } from "@/components/ui/table/DataTable";
-import InputField from "@/components/ui/InputField";
-import { BranchPanelRef } from "./BranchServicesPanel";
-import { api } from "@/lib/sdk-config";
-import {
-  BranchEquipmentInventory,
-  Equipment,
-  CreateBranchEquipment,
-} from "@vitalfit/sdk";
-import { useAuth } from "@/context/AuthContext";
+import EditBranchEquipmentModal from "./EditBranchEquipmentModal";
+import { branchEquipmentSchema } from "@/lib/validation/branchEquipmentSchema";
 
 interface BranchEquipmentPanelProps {
-  mode?: "view" | "edit";
   branchId: string;
+  mode?: "view" | "edit";
 }
 
-const BranchEquipmentPanel = forwardRef<
-  BranchPanelRef,
-  BranchEquipmentPanelProps
->(({ mode = "edit", branchId }, ref) => {
+const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
+  branchId,
+  mode = "edit",
+}) => {
   const { token } = useAuth();
-  const [currentInventory, setCurrentInventory] = useState<Equipment[]>([]);
+  const isDisabled = mode === "view";
+
+  const [currentInventory, setCurrentInventory] = useState<
+    BranchEquipmentInventory[]
+  >([]);
+  const [pendingInventory, setPendingInventory] = useState<
+    BranchEquipmentInventory[]
+  >([]);
+  const [removedInventoryIds, setRemovedInventoryIds] = useState<string[]>([]);
   const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(
     null,
   );
-  const [quantity, setQuantity] = useState<number | string>(1);
-  const [page, setPage] = useState(1);
-
-  const isDisabled = mode === "view";
+  const [notes, setNotes] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [equipmentToEdit, setEquipmentToEdit] =
+    useState<BranchEquipmentInventory | null>(null);
+  const [modalMode, setModalMode] = useState<"view" | "edit">("edit");
 
   useEffect(() => {
-    const fetchEquipment = async () => {
+    if (!token) {
+      return;
+    }
+    const fetchAllEquipment = async () => {
+      setLoading(true);
       try {
-        if (!token) {
-          return;
-        }
-        const res = await api.equipment.getEquipment(token);
-        console.log("✅ Equipamiento cargado correctamente", res.data);
-        setAllEquipment(res.data || []);
+        const res = await api.equipment.getEquipment(token, {
+          page: 1,
+          limit: 100,
+        });
+        setAllEquipment(res.data);
       } catch (err) {
-        console.error("Error cargando equipamiento:", err);
+        console.error(err);
+        toast.error("Error cargando equipos");
+      } finally {
+        setLoading(false);
       }
     };
-    fetchEquipment();
+    fetchAllEquipment();
   }, [token]);
 
-  // Cargar el inventario actual de la sucursal
+  const fetchInventory = async () => {
+    if (!token) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await api.equipment.getBranchEquipment(branchId, token);
+      setCurrentInventory(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error cargando inventario");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchBranchInventory = async () => {
-      try {
-        if (!token) {
-          return;
-        }
-        const res = await api.equipment.getBranchEquipment(branchId, token);
-        console.log(
-          "✅ Inventario de la sucursal cargado correctamente",
-          res.data,
-        );
-        setCurrentInventory(res.data);
-      } catch (err) {
-        console.error("Error cargando inventario de la sucursal:", err);
-      }
-    };
-    fetchBranchInventory();
+    fetchInventory();
   }, [branchId, token]);
 
-  const handleAddClick = () => {
-    if (!selectedEquipmentId || Number(quantity) <= 0) {
+  const handleAddEquipment = () => {
+    if (!selectedEquipmentId) {
+      toast.error("Debes seleccionar un equipo antes de agregarlo");
       return;
     }
 
-    const equipment = allEquipment.find(
-      (e) => e.equipment_id === selectedEquipmentId,
-    );
-    if (!equipment) {
-      return;
-    }
+    const today = new Date().toISOString().split("T")[0];
 
-    const newItem: BranchEquipmentInventory = {
+    const newPending: BranchEquipmentInventory = {
       inventory_id: crypto.randomUUID(),
-      equipment_id: equipment.equipment_id,
-      acquisition_date: new Date().toISOString(),
-      last_maintenance_date: new Date().toISOString(),
-      notes: "",
-      serial_number: "",
-      status: "Available", // default
+      equipment_id: selectedEquipmentId,
+      name:
+        allEquipment.find((e) => e.equipment_id === selectedEquipmentId)
+          ?.name || "",
+      serial_number: serialNumber,
+      notes,
+      acquisition_date: today,
+      last_maintenance_date: today,
+      status: "Available",
     };
 
-    //setCurrentInventory(prev => [...prev, newItem]);
-    setSelectedEquipmentId(null);
-    setQuantity(1);
-  };
+    const validation = branchEquipmentSchema.safeParse(newPending);
+    if (!validation.success) {
+      const errorMessages = validation.error.issues
+        .map((e) => e.message)
+        .join(", ");
+      toast.error(`Error al agregar equipo: ${errorMessages}`);
+      return;
+    }
 
-  const handleRemoveItem = (inventoryId: string) => {
-    setCurrentInventory((prev) =>
-      prev.filter((item) => item.equipment_id !== inventoryId),
+    setPendingInventory((prev) => [...prev, newPending]);
+    setSelectedEquipmentId(null);
+    setSerialNumber("");
+    setNotes("");
+    toast.success(
+      `Equipo "${newPending.name}" agregado al inventario pendiente`,
     );
   };
 
-  const inventoryColumns = React.useMemo<Column<BranchEquipmentInventory>[]>(
-    () => [
-      {
-        header: "ID",
-        accessor: "inventory_id",
-        render: (id) => String(id).substring(0, 8),
-      },
-      //{
-      //   header: "Equipamiento",
-      //   accessor: "name",
-      //   render: (name, row) => name ?? allEquipment.find(e => e.equipment_id === row.equipment_id)?.name ?? "Sin nombre",
-      // },
-      {
-        header: "Nota",
-        accessor: "notes",
-      },
-      {
-        header: "Serial",
-        accessor: "serial_number",
-        render: (serial) =>
-          serial || <span className="text-gray-400 italic">N/A</span>,
-      },
-      {
-        header: "Fecha adquisición",
-        accessor: "acquisition_date",
-        render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
-      },
-      {
-        header: "Último mantenimiento",
-        accessor: "last_maintenance_date",
-        render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
-      },
-      {
-        header: "Estado",
-        accessor: "status",
-        render: (status) => {
-          const label =
-            status === "Available"
-              ? "Disponible"
-              : status === "Maintenance"
-                ? "Mantenimiento"
-                : status;
-          const variant =
-            status === "Available"
-              ? "default"
-              : status === "Maintenance"
-                ? "secondary"
-                : "outline";
-          return <Badge variant={variant}>{label}</Badge>;
-        },
-      },
-    ],
-    [allEquipment],
-  );
+  const handleRemoveEquipment = (inventoryId: string) => {
+    const isPending = pendingInventory.find(
+      (e) => e.inventory_id === inventoryId,
+    );
+    if (isPending) {
+      setPendingInventory((prev) =>
+        prev.filter((e) => e.inventory_id !== inventoryId),
+      );
+      toast.success(
+        `Equipo "${isPending.name}" eliminado del inventario pendiente`,
+      );
+      return;
+    }
 
+    const removed = currentInventory.find(
+      (e) => e.inventory_id === inventoryId,
+    );
+    if (!removed) {
+      return;
+    }
+
+    setRemovedInventoryIds((prev) => [...prev, inventoryId]);
+    setCurrentInventory((prev) =>
+      prev.filter((e) => e.inventory_id !== inventoryId),
+    );
+
+    toast.success(`Equipo "${removed.name}" eliminado del inventario`);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!token) {
+      toast.error("Token inválido");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      for (const item of pendingInventory) {
+        const payload: CreateBranchEquipment = {
+          equipment_id: item.equipment_id,
+          serial_number: item.serial_number,
+          notes: item.notes,
+          acquisition_date: item.acquisition_date,
+          last_maintenance_date: item.last_maintenance_date,
+          status: item.status,
+        };
+        await api.equipment.addBranchEquipment(branchId, payload, token);
+      }
+
+      for (const invId of removedInventoryIds) {
+        await api.equipment.removeBranchEquipment(branchId, invId, token);
+      }
+
+      toast.success("Cambios guardados correctamente");
+      setPendingInventory([]);
+      setRemovedInventoryIds([]);
+      await fetchInventory();
+    } catch (err) {
+      console.error(err);
+      toast.error("Error guardando cambios");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateEquipment = async (data: {
+    last_maintenance_date: string;
+    notes: string;
+    status: EquipmentStatus;
+  }) => {
+    if (!token || !equipmentToEdit) {
+      toast.error("Equipo inválido para actualizar");
+      return;
+    }
+
+    const updatedEquipment: BranchEquipmentInventory = {
+      ...equipmentToEdit,
+      ...data,
+    };
+
+    const validation = branchEquipmentSchema.safeParse(updatedEquipment);
+    if (!validation.success) {
+      const errorMessages = validation.error.issues
+        .map((e) => e.message)
+        .join(", ");
+      toast.error(`Error al actualizar equipo: ${errorMessages}`);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.equipment.updateBranchEquipment(
+        branchId,
+        equipmentToEdit.inventory_id,
+        data,
+        token,
+      );
+
+      setCurrentInventory((prev) =>
+        prev.map((e) =>
+          e.inventory_id === equipmentToEdit.inventory_id
+            ? { ...e, ...data }
+            : e,
+        ),
+      );
+
+      toast.success(
+        `Equipo "${equipmentToEdit.name}" actualizado correctamente`,
+      );
+      setEditModalOpen(false);
+      setEquipmentToEdit(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Error actualizando equipamiento");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inventoryColumns: Column<BranchEquipmentInventory>[] = [
+    { header: "Nombre", accessor: "name" },
+    { header: "Serial", accessor: "serial_number" },
+    { header: "Estado", accessor: "status" },
+    { header: "Adquisición", accessor: "acquisition_date" },
+    { header: "Último mantenimiento", accessor: "last_maintenance_date" },
+  ];
+
+  const handleEdit = (equipment: BranchEquipmentInventory) => {
+    setEquipmentToEdit(equipment);
+    setModalMode("edit");
+    setEditModalOpen(true);
+  };
+  const handleView = (equipment: BranchEquipmentInventory) => {
+    setEquipmentToEdit(equipment);
+    setModalMode("view");
+    setEditModalOpen(true);
+  };
   const actionRenderer = (row: BranchEquipmentInventory) => (
-    <div className="flex items-center justify-end gap-1">
+    <div className="flex gap-2">
       <Button
         size="icon"
-        variant="ghost"
-        title="Ver detalles"
-        onClick={() => console.log("Ver detalles de", row)}
+        variant="outline"
+        onClick={() => handleView(row)}
+        title="Ver equipamiento"
       >
-        <Eye className="h-4 w-4" />
+        <Eye size={16} />
       </Button>
+
       {!isDisabled && (
         <Button
           size="icon"
-          variant="ghost"
-          className="text-red-600 hover:text-red-700"
-          title="Eliminar"
-          onClick={() => handleRemoveItem(row.inventory_id)}
+          variant="outline"
+          onClick={() => handleEdit(row)}
+          title="Editar equipamiento"
         >
-          <Trash2 className="h-4 w-4" />
+          <Pencil size={16} />
+        </Button>
+      )}
+
+      {!isDisabled && (
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => handleRemoveEquipment(row.inventory_id)}
+          title="Eliminar equipamiento"
+        >
+          <Trash2 size={16} />
         </Button>
       )}
     </div>
   );
+  const filteredEquipment = allEquipment.filter((e) =>
+    e.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
-  // useImperativeHandle(ref, () => ({
-  //   saveData: async () => {
-  //     if (!token) {throw new Error("Token no válido");}
-  //     try {
-  //       for (const item of currentInventory) {
-  //         const equipmentData: CreateBranchEquipment = {
-  //           equipment_id: item.equipment_id,
-  //           acquisition_date: item || new Date().toISOString(),
-  //           last_maintenance_date: item.last_maintenance_date || new Date().toISOString(),
-  //           notes: item.notes || "",
-  //           serial_number: item.serial_number || "",
-  //         };
-  //         await api.equipment.addBranchEquipment(branchId, equipmentData, token);
-  //       }
-  //       alert("Equipamiento guardado correctamente");
-  //     } catch (err) {
-  //       console.error("Error guardando equipamiento:", err);
-  //       throw err;
-  //     }
-  //   },
-  // }));
+  const displayedInventory = currentInventory
+    .filter((e) => !removedInventoryIds.includes(e.inventory_id))
+    .concat(pendingInventory);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {!isDisabled && (
-        <div className="p-4 border rounded-lg bg-gray-50">
-          <h3 className="text-base font-semibold text-gray-800 mb-3">
+        <div className="p-6 border rounded-xl bg-gray-50 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Agregar nuevo equipamiento
           </h3>
-          <div className="flex flex-col sm:flex-row items-end gap-4">
-            <div className="flex-grow space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">
-                Equipamiento
-              </label>
-              <Select
-                value={selectedEquipmentId ?? ""}
-                onValueChange={setSelectedEquipmentId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar un equipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {allEquipment.map((equip) => (
-                    <SelectItem
-                      key={equip.equipment_id}
-                      value={equip.equipment_id}
-                    >
-                      {equip.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-full sm:w-32 space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">
-                Cantidad
-              </label>
-              <InputField
-                type="number"
-                min={1}
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="0"
-              />
-            </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">
+              Buscar equipo
+            </label>
+            <InputField
+              placeholder="Ej: Monster Power Rack"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <Select
+              value={selectedEquipmentId ?? ""}
+              onValueChange={setSelectedEquipmentId}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar un equipo (Ej: Monster Power Rack)" />
+              </SelectTrigger>
+              <SelectContent className="max-h-48 overflow-y-auto w-full">
+                {filteredEquipment.map((equipment) => (
+                  <SelectItem
+                    key={equipment.equipment_id}
+                    value={equipment.equipment_id}
+                  >
+                    {equipment.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 mt-3">
+            <InputField
+              label="Número de serie"
+              type="text"
+              placeholder="Ej: SN-ROG-123"
+              value={serialNumber}
+              onChange={(e) => setSerialNumber(e.target.value)}
+              className="flex-1"
+            />
+            <InputField
+              label="Notas"
+              type="text"
+              placeholder="Ej: Equipo listo para usar"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="flex-1"
+            />
+          </div>
+
+          <div className="flex gap-4 mt-4 flex-wrap">
             <Button
               type="button"
               variant="outline"
-              onClick={handleAddClick}
-              disabled={!selectedEquipmentId || Number(quantity) <= 0}
-              className="w-full sm:w-auto flex-shrink-0"
+              onClick={handleAddEquipment}
+              className="flex items-center"
             >
-              <Plus size={16} className="mr-2" />
-              Agregar
+              <Plus size={16} className="mr-2" /> Agregar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSaveChanges}
+              disabled={
+                pendingInventory.length === 0 &&
+                removedInventoryIds.length === 0
+              }
+            >
+              {loading ? "Guardando..." : "Guardar cambios"}
             </Button>
           </div>
         </div>
       )}
 
-      <div>
-        <h3 className="text-base font-semibold text-gray-800 mb-4">
-          Inventario de la sucursal
-        </h3>
-        {currentInventory.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            No hay equipamiento asignado a esta sucursal.
-          </p>
-        ) : (
-          <DataTable
-            columns={inventoryColumns}
-            data={currentInventory}
-            enableRowSelection
-            actions={actionRenderer}
-            page={page}
-            pageSize={10}
-            onPageChange={setPage}
-          />
-        )}
-      </div>
+      <h3 className="text-lg font-semibold">Inventario de la sucursal</h3>
+      {displayedInventory.length === 0 ? (
+        <p className="text-sm text-gray-500">
+          No hay equipamiento asignado a esta sucursal.
+        </p>
+      ) : (
+        <DataTable
+          columns={inventoryColumns}
+          data={displayedInventory}
+          enableRowSelection
+          actions={actionRenderer}
+          page={1}
+          pageSize={10}
+          rowIdKey="inventory_id"
+        />
+      )}
+      <EditBranchEquipmentModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        equipment={equipmentToEdit}
+        onSave={handleUpdateEquipment}
+        mode={modalMode}
+      />
     </div>
   );
-});
-
-BranchEquipmentPanel.displayName = "BranchEquipmentPanel";
+};
 
 export default BranchEquipmentPanel;

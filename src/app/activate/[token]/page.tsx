@@ -29,16 +29,16 @@ export default function Activate() {
 
   const [errors, setErrors] = useState<{
     password?: string;
-    confirmPassword?: string; 
+    confirmPassword?: string;
   }>({});
-
 
   const validate = () => {
     const newErrors: { password?: string; confirmPassword?: string } = {};
 
     if (!formData.password) {
       newErrors.password = "La contraseña es obligatoria.";
-    } else if (formData.password.length < 6) { // Ejemplo de validación de longitud
+    } else if (formData.password.length < 6) {
+      // Ejemplo de validación de longitud
       newErrors.password = "La contraseña debe tener al menos 6 caracteres.";
     }
 
@@ -77,14 +77,18 @@ export default function Activate() {
     }
 
     try {
-        const response = await api.auth.verifyStaff(token, formData.password, formData.confirmPassword);
-        console.log(response);
-        setShowAlert(true);
+      const response = await api.auth.verifyStaff(
+        token,
+        formData.password,
+        formData.confirmPassword,
+      );
+      console.log(response);
+      setShowAlert(true);
     } catch (error) {
-        console.error("Error de conexión:", error);
-        setShowConnectionError(true);
+      console.error("Error de conexión:", error);
+      setShowConnectionError(true);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
