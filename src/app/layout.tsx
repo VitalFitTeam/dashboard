@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import ToasterProvider from "@/components/ToasterProvider";
 
 import { Montserrat, Bebas_Neue } from "next/font/google";
 
@@ -30,7 +31,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${montserrat.variable} ${bebas.variable}`}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <ToasterProvider />
+        </AuthProvider>
       </body>
     </html>
   );

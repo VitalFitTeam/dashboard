@@ -14,7 +14,9 @@ export const membershipSchema = z.object({
   duration_days: z
     .union([z.string(), z.number()])
     .transform((val) => {
-      if (val === "" || val === null || val === undefined) {return 0;}
+      if (val === "" || val === null || val === undefined) {
+        return 0;
+      }
       const num = Number(val);
       return isNaN(num) ? 0 : Math.max(0, num);
     })
@@ -29,7 +31,9 @@ export const membershipSchema = z.object({
   price: z
     .union([z.string(), z.number()])
     .transform((val) => {
-      if (val === "" || val === null || val === undefined) {return 0;}
+      if (val === "" || val === null || val === undefined) {
+        return 0;
+      }
       const num = Number(val);
       return isNaN(num) ? 0 : num;
     })
