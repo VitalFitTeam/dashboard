@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Eye } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectTrigger,
@@ -14,8 +13,9 @@ import {
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import InputField from "@/components/ui/InputField";
 import { api } from "@/lib/sdk-config";
-import { Equipment, CreateBranchEquipment } from "@vitalfit/sdk";
+import { Equipment, BranchEquipmentInventory } from "@vitalfit/sdk";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface BranchEquipmentPanelProps {
   mode?: "view" | "edit";
@@ -27,21 +27,20 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
   branchId,
 }) => {
   const { token } = useAuth();
-  const [currentInventory, setCurrentInventory] = useState<Equipment[]>([]);
+  const [currentInventory, setCurrentInventory] = useState<
+    BranchEquipmentInventory[]
+  >([]);
   const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(
     null,
   );
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const isDisabled = mode === "view";
 
+  // Traer todos los equipos disponibles
   useEffect(() => {
-    if (!token) {
-      return;
-    }
+    if (!token) {return;}
 
     const fetchAllEquipment = async () => {
       setLoading(true);
@@ -50,11 +49,9 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
           page: 1,
           limit: 100,
         });
-        console.log(res.data);
         setAllEquipment(res.data || []);
-      } catch (err: any) {
-        console.error("Error cargando equipamiento:", err);
-        setError(err.message || "Error cargando equipamiento");
+      } catch (err) {
+        console.error("Error cargando equipos:", err);
       } finally {
         setLoading(false);
       }
@@ -63,90 +60,41 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
     fetchAllEquipment();
   }, [token]);
 
+  // Traer inventario de la sucursal
   useEffect(() => {
-    if (!token || !branchId) {
-      return;
-    }
+    if (!token) {return;}
 
-    const fetchBranchInventory = async () => {
+    const fetchInventory = async () => {
       setLoading(true);
       try {
         const res = await api.equipment.getBranchEquipment(branchId, token);
-        console.log(res.data);
         setCurrentInventory(res.data || []);
-      } catch (err: any) {
-        console.error("Error cargando inventario de la sucursal:", err);
-        setError(err.message || "Error cargando inventario");
+      } catch (err) {
+        console.error("Error cargando inventario:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBranchInventory();
+    fetchInventory();
   }, [branchId, token]);
 
-  const handleAddClick = async () => {
-    if (!selectedEquipmentId || !token) {
-      return;
-    }
-    const now = new Date();
-    const formattedDate = now.toISOString().split(".")[0];
+  // Columnas para la tabla
+  const inventoryColumns: Column<BranchEquipmentInventory>[] = [
+    { header: "Nombre", accessor: "name" },
+    { header: "Serial", accessor: "serial_number" },
+    { header: "Estado", accessor: "status" },
+    { header: "Adquisición", accessor: "acquisition_date" },
+    { header: "Último mantenimiento", accessor: "last_maintenance_date" },
+    { header: "Notas", accessor: "notes" },
+    { header: "Creado", accessor: "created_at" },
+    { header: "Actualizado", accessor: "updated_at" },
+  ];
 
-    const newEquipment: CreateBranchEquipment = {
-      equipment_id: selectedEquipmentId,
-      acquisition_date: formattedDate,
-      last_maintenance_date: "",
-      notes: "",
-      serial_number: "",
-      status: "Available",
-    };
-
-    try {
-      await api.equipment.addBranchEquipment(branchId, newEquipment, token);
-
-      const res = await api.equipment.getBranchEquipment(branchId, token);
-      setCurrentInventory(res.data || []);
-
-      setSelectedEquipmentId(null);
-      setSearch("");
-    } catch (err: any) {
-      console.error("Error agregando equipamiento:", err);
-      setError(err.message || "Error agregando equipamiento");
-    }
-  };
-
-  const inventoryColumns = React.useMemo<Column<Equipment>[]>(
-    () => [
-      { header: "Nombre", accessor: "name" },
-      {
-        header: "Marca",
-        accessor: "brand",
-      },
-      {
-        header: "Modelo",
-        accessor: "model",
-      },
-      {
-        header: "Categoría",
-        accessor: "category",
-      },
-      {
-        header: "Último mantenimiento",
-        accessor: "updated_at",
-        render: (date) => (date ? new Date(date).toLocaleDateString() : "-"),
-      },
-    ],
-    [],
-  );
-
-  const actionRenderer = (row: Equipment) => (
+  // Render de acciones (ver detalles / eliminar)
+  const actionRenderer = (row: BranchEquipmentInventory) => (
     <div className="flex items-center justify-end gap-1">
-      <Button
-        size="icon"
-        variant="ghost"
-        title="Ver detalles"
-        onClick={() => console.log("Ver detalles de", row)}
-      >
+      <Button size="icon" variant="ghost" title="Ver detalles">
         <Eye className="h-4 w-4" />
       </Button>
       {!isDisabled && (
@@ -157,16 +105,22 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
           title="Eliminar"
           onClick={async () => {
             try {
+              if (!token) {return;}
+
               await api.equipment.removeBranchEquipment(
                 branchId,
-                row.equipment_id,
-                token!,
+                row.inventory_id,
+                token,
               );
+
               setCurrentInventory((prev) =>
-                prev.filter((e) => e.equipment_id !== row.equipment_id),
+                prev.filter((e) => e.inventory_id !== row.inventory_id),
               );
+
+              toast.success("Equipo eliminado correctamente");
             } catch (err) {
-              console.error("Error eliminando equipo:", err);
+              console.error(err);
+              toast.error("Error eliminando equipo");
             }
           }}
         >
@@ -219,15 +173,12 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
             <Button
               type="button"
               variant="outline"
-              onClick={handleAddClick}
               disabled={!selectedEquipmentId || loading}
-              className="w-full sm:w-auto flex-shrink-0"
             >
               <Plus size={16} className="mr-2" />
               Agregar
             </Button>
           </div>
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
       )}
 
@@ -240,9 +191,10 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
             No hay equipamiento asignado a esta sucursal.
           </p>
         ) : (
-          <DataTable
+          <DataTable<BranchEquipmentInventory>
             columns={inventoryColumns}
             data={currentInventory}
+            getRowId={(row) => row.inventory_id}
             enableRowSelection
             actions={actionRenderer}
             page={1}
