@@ -38,7 +38,6 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   const [newServices, setNewServices] = useState<
     CreateBranchServicePriceItem[]
   >([]);
-
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
@@ -55,12 +54,10 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   const [serviceToEdit, setServiceToEdit] = useState<BranchServicePrice | null>(
     null,
   );
+  const [modalMode, setModalMode] = useState<"view" | "edit">("view");
 
   useEffect(() => {
-    if (!token) {
-      return;
-    }
-
+    if (!token) {return;}
     const fetchServices = async () => {
       try {
         const response = await api.products.getServices(token, { page: 1 });
@@ -73,16 +70,12 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   }, [token]);
 
   useEffect(() => {
-    if (!token || !branchId) {
-      return;
-    }
-
+    if (!token || !branchId) {return;}
     const fetchBranchServices = async () => {
       setIsLoading(true);
       try {
         const response = await api.products.getBranchServices(branchId, token);
-        console.log(response.data);
-        setServices(response?.data || []);
+        setServices(response.data || []);
       } catch (err) {
         console.error("Error cargando servicios de la sucursal:", err);
       } finally {
@@ -91,6 +84,122 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     };
     fetchBranchServices();
   }, [token, branchId]);
+
+  const handleAddService = () => {
+    if (!selectedServiceId) {return;}
+    const service = allServices.find((s) => s.service_id === selectedServiceId);
+    if (!service) {return;}
+
+    const newService: CreateBranchServicePriceItem = {
+      service_id: service.service_id,
+      max_capacity: aforo,
+      price_for_member: priceMember,
+      price_for_non_member: priceNonMember,
+      is_visible: isVisible,
+    };
+
+    setServices((prev) => [
+      ...prev,
+      { ...newService, service_name: service.name } as BranchServicePrice,
+    ]);
+    setNewServices((prev) => [...prev, newService]);
+    setDirty(true);
+
+    setSelectedServiceId(null);
+    setAforo(0);
+    setPriceMember(0);
+    setPriceNonMember(0);
+    setIsVisible(true);
+  };
+
+  const handleRemoveService = async (serviceId: string) => {
+    if (!token || !branchId) {return;}
+    setIsLoading(true);
+    try {
+      const isNew = newServices.find((s) => s.service_id === serviceId);
+      if (isNew) {
+        setNewServices((prev) =>
+          prev.filter((s) => s.service_id !== serviceId),
+        );
+      } else {
+        await api.products.removeBranchService(branchId, serviceId, token);
+      }
+      setServices((prev) => prev.filter((s) => s.service_id !== serviceId));
+      setDirty(true);
+    } catch (err) {
+      console.error("Error eliminando servicio:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!token || !branchId) {return;}
+    if (newServices.length === 0) {return;}
+    console.log("id de la sucursal:", branchId);
+
+    setLoading(true);
+    try {
+      console.log("Servicios a enviar:", newServices);
+      await api.products.addBranchService(newServices, branchId, token);
+      console.log("POST completado, ahora refrescando...");
+      const response = await api.products.getBranchServices(branchId, token);
+      console.log("Servicios obtenidos del backend:", response.data);
+      setServices(response.data || []);
+
+      console.log("Servicios guardados correctamente");
+    } catch (err) {
+      console.error("Error guardando servicios:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Actualizar un servicio existente
+  const handleUpdateService = async (updatedData: {
+    max_capacity: number;
+    price_for_member: number;
+    price_for_non_member: number;
+    is_visible: boolean;
+  }) => {
+    if (!serviceToEdit || !token || !branchId) {return;}
+
+    try {
+      await api.products.updateBranchService(
+        branchId,
+        serviceToEdit.service_id,
+        updatedData,
+        token,
+      );
+
+      setServices((prev) =>
+        prev.map((s) =>
+          s.service_id === serviceToEdit.service_id
+            ? { ...s, ...updatedData }
+            : s,
+        ),
+      );
+
+      setEditModalOpen(false);
+      setServiceToEdit(null);
+
+      console.log("Servicio actualizado correctamente");
+    } catch (err) {
+      console.error("Error actualizando servicio:", err);
+    }
+  };
+
+  const handleViewService = (service: BranchServicePrice) => {
+    setServiceToEdit(service);
+    setModalMode("view");
+    setEditModalOpen(true);
+  };
+
+  const handleEditService = (service: BranchServicePrice) => {
+    setServiceToEdit(service);
+    setModalMode("edit");
+    setEditModalOpen(true);
+  };
 
   return (
     <div className="space-y-10">
@@ -173,7 +282,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
               type="button"
               variant="outline"
               disabled={!selectedServiceId || aforo <= 0}
-              //onClick={handleAddService}
+              onClick={handleAddService}
             >
               <Plus size={16} className="mr-2" /> Agregar
             </Button>
@@ -203,17 +312,14 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
                   <div className="flex gap-2">
                     <Button
                       type="button"
-                      //onClick={() => handleRemoveService(service.service_id)}
+                      onClick={() => handleRemoveService(service.service_id)}
                       variant="outline"
                     >
                       <Trash2 size={20} />
                     </Button>
                     <Button
                       type="button"
-                      onClick={() => {
-                        setServiceToEdit(service);
-                        setEditModalOpen(true);
-                      }}
+                      onClick={() => handleEditService(service)}
                       variant="outline"
                     >
                       <Pencil size={20} />
@@ -221,26 +327,25 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
                   </div>
                 ) : undefined
               }
+              onClick={() => handleViewService(service)}
             />
           ))
         )}
       </div>
+
       {!isDisabled && (
-        <Button
-          //onClick={handleSave}
-          disabled={!dirty || loading}
-        >
+        <Button onClick={handleSave} disabled={!dirty || loading}>
           {loading ? "Guardando..." : "Guardar cambios"}
         </Button>
       )}
 
-      {/* <EditBranchServiceModal
+      <EditBranchServiceModal
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         service={serviceToEdit}
         onSave={handleUpdateService}
-        mode={mode}
-      /> */}
+        mode={modalMode} // <-- Aquí se aplica view o edit
+      />
     </div>
   );
 });

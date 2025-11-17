@@ -11,7 +11,6 @@ import {
   CreateBranchEquipment,
   Equipment,
   EquipmentStatus,
-  UpdateBranchEquipmentDetails,
 } from "@vitalfit/sdk";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";

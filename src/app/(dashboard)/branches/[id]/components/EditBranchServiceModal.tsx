@@ -12,19 +12,32 @@ import InputField from "@/components/ui/InputField";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 
+interface ServiceData {
+  service_id: string;
+  service_name?: string;
+  max_capacity: number;
+  price_for_member: number;
+  price_for_non_member: number;
+  is_visible: boolean;
+}
+
+interface EditBranchServiceModalProps {
+  open: boolean;
+  onClose: () => void;
+  service: ServiceData | null;
+  onSave: (
+    data: Omit<ServiceData, "service_id" | "service_name">,
+  ) => Promise<void>;
+  mode?: "view" | "edit";
+}
+
 export default function EditBranchServiceModal({
   open,
   onClose,
   service,
   onSave,
-  mode = "edit", // 👈 modo agregado
-}: {
-  open: boolean;
-  onClose: () => void;
-  service: any;
-  onSave: (data: any) => Promise<void>;
-  mode?: "view" | "edit"; // 👈 Añadimos el tipo
-}) {
+  mode = "edit",
+}: EditBranchServiceModalProps) {
   const isViewMode = mode === "view";
 
   const [maxCapacity, setMaxCapacity] = useState(0);
@@ -41,13 +54,15 @@ export default function EditBranchServiceModal({
     }
   }, [service]);
 
-  const handleSave = () => {
-    onSave({
+  const handleSave = async () => {
+    if (!service) {return;}
+    await onSave({
       max_capacity: maxCapacity,
       price_for_member: priceMember,
       price_for_non_member: priceNonMember,
       is_visible: isVisible,
     });
+    onClose();
   };
 
   return (
@@ -55,7 +70,9 @@ export default function EditBranchServiceModal({
       <DialogContent>
         <DialogHeader>
           <VisuallyHidden>
-            <DialogTitle>Editar servicio</DialogTitle>
+            <DialogTitle>
+              {isViewMode ? "Ver servicio" : "Editar servicio"}
+            </DialogTitle>
           </VisuallyHidden>
         </DialogHeader>
 
