@@ -47,7 +47,6 @@ export default function EditBranchEquipmentModal({
 
   useEffect(() => {
     if (equipment) {
-      // Convertimos a formato yyyy-MM-dd para el input type="date"
       setLastMaintenanceDate(
         equipment.last_maintenance_date?.split("T")[0] || "",
       );

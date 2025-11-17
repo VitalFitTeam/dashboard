@@ -99,8 +99,10 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
 
   const handleAddEquipment = () => {
     if (!selectedEquipmentId) {
+      toast.error("Debes seleccionar un equipo antes de agregarlo");
       return;
     }
+
     const today = new Date().toISOString().split("T")[0];
 
     const newPending: BranchEquipmentInventory = {
@@ -120,6 +122,9 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
     setSelectedEquipmentId(null);
     setSerialNumber("");
     setNotes("");
+    toast.success(
+      `Equipo "${newPending.name}" agregado al inventario pendiente`,
+    );
   };
 
   const handleRemoveEquipment = (inventoryId: string) => {
@@ -130,6 +135,16 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       setPendingInventory((prev) =>
         prev.filter((e) => e.inventory_id !== inventoryId),
       );
+      toast.success(
+        `Equipo "${isPending.name}" eliminado del inventario pendiente`,
+      );
+      return;
+    }
+
+    const removed = currentInventory.find(
+      (e) => e.inventory_id === inventoryId,
+    );
+    if (!removed) {
       return;
     }
 
@@ -137,12 +152,16 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
     setCurrentInventory((prev) =>
       prev.filter((e) => e.inventory_id !== inventoryId),
     );
+
+    toast.success(`Equipo "${removed.name}" eliminado del inventario`);
   };
 
   const handleSaveChanges = async () => {
     if (!token) {
+      toast.error("Token inválido");
       return;
     }
+
     setLoading(true);
 
     try {
@@ -162,8 +181,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         await api.equipment.removeBranchEquipment(branchId, invId, token);
       }
 
-      console.log("Cambios guardados correctamente");
-
+      toast.success("Cambios guardados correctamente");
       setPendingInventory([]);
       setRemovedInventoryIds([]);
       await fetchInventory();
@@ -181,6 +199,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
     status: EquipmentStatus;
   }) => {
     if (!token || !equipmentToEdit) {
+      toast.error("Equipo inválido para actualizar");
       return;
     }
 
@@ -201,7 +220,9 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         ),
       );
 
-      toast.success("Equipamiento actualizado correctamente");
+      toast.success(
+        `Equipo "${equipmentToEdit.name}" actualizado correctamente`,
+      );
       setEditModalOpen(false);
       setEquipmentToEdit(null);
     } catch (err) {
@@ -232,7 +253,6 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
   };
   const actionRenderer = (row: BranchEquipmentInventory) => (
     <div className="flex gap-2">
-      {/* Ver */}
       <Button
         size="icon"
         variant="outline"
@@ -242,7 +262,6 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         <Eye size={16} />
       </Button>
 
-      {/* Editar */}
       {!isDisabled && (
         <Button
           size="icon"
@@ -254,7 +273,6 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         </Button>
       )}
 
-      {/* Eliminar */}
       {!isDisabled && (
         <Button
           size="icon"
@@ -283,7 +301,6 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
             Agregar nuevo equipamiento
           </h3>
 
-          {/* Fila 1: Buscar equipo */}
           <div className="space-y-3">
             <label className="text-sm font-medium text-gray-700">
               Buscar equipo
@@ -313,7 +330,6 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
             </Select>
           </div>
 
-          {/* Fila 2: Número de serie y Notas */}
           <div className="flex flex-col sm:flex-row gap-4 mt-3">
             <InputField
               label="Número de serie"
@@ -333,7 +349,6 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
             />
           </div>
 
-          {/* Fila 3: Botones */}
           <div className="flex gap-4 mt-4 flex-wrap">
             <Button
               type="button"
@@ -345,7 +360,6 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
             </Button>
             <Button
               type="button"
-              variant="outline"
               onClick={handleSaveChanges}
               disabled={
                 pendingInventory.length === 0 &&

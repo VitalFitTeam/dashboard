@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { getInitials } from "@/utils";
 import {
   Select,
@@ -145,7 +145,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       setDirty(true);
       toast.success(
         `Servicio "${removedService?.service_name ?? ""}" eliminado`,
-      ); // <-- TOAST SUCCESS
+      );
     } catch (err) {
       console.error("Error eliminando servicio:", err);
       toast.error("No se pudo eliminar el servicio");
@@ -338,10 +338,10 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
                   <div className="flex gap-2">
                     <Button
                       type="button"
-                      onClick={() => handleRemoveService(service.service_id)}
+                      onClick={() => handleViewService(service)}
                       variant="outline"
                     >
-                      <Trash2 size={20} />
+                      <Eye size={20} />
                     </Button>
                     <Button
                       type="button"
@@ -350,10 +350,16 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
                     >
                       <Pencil size={20} />
                     </Button>
+                    <Button
+                      type="button"
+                      onClick={() => handleRemoveService(service.service_id)}
+                      variant="outline"
+                    >
+                      <Trash2 size={20} />
+                    </Button>
                   </div>
                 ) : undefined
               }
-              onClick={() => handleViewService(service)}
             />
           ))
         )}
@@ -366,9 +372,9 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       )}
 
       <EditBranchServiceModal
-        open={editModalOpen}
+        open={editModalOpen && !!serviceToEdit}
         onClose={() => setEditModalOpen(false)}
-        service={serviceToEdit}
+        service={serviceToEdit!}
         onSave={handleUpdateService}
         mode={modalMode}
       />

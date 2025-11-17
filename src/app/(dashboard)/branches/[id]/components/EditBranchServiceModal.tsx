@@ -46,7 +46,6 @@ export default function EditBranchServiceModal({
   const [priceNonMember, setPriceNonMember] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
-  // Actualizamos los valores cada vez que cambia el servicio
   useEffect(() => {
     if (service) {
       setMaxCapacity(service.max_capacity);
@@ -57,7 +56,9 @@ export default function EditBranchServiceModal({
   }, [service]);
 
   const handleSave = async () => {
-    if (!service) {return;}
+    if (!service) {
+      return;
+    }
 
     try {
       await onSave({
