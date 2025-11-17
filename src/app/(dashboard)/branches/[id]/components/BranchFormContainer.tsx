@@ -55,7 +55,9 @@ export default function BranchFormContainer({
     {
       value: "instructors",
       label: "Instructores",
-      content: <BranchInstructorPanel branchId={branch.branch_id} />,
+      content: (
+        <BranchInstructorPanel mode={mode} branchId={branch.branch_id} />
+      ),
     },
     {
       value: "equipment",

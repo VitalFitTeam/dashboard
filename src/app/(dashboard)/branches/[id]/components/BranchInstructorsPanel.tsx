@@ -17,12 +17,15 @@ import { toast } from "sonner";
 
 interface BranchInstructorPanelProps {
   branchId: string;
+  mode?: "view" | "edit";
 }
 
 export default function BranchInstructorPanel({
   branchId,
+  mode = "edit",
 }: BranchInstructorPanelProps) {
   const { token } = useAuth();
+  const isViewMode = mode === "view";
 
   const [branchInstructors, setBranchInstructors] = useState<
     BranchInstructorInfo[]
@@ -33,15 +36,16 @@ export default function BranchInstructorPanel({
   const [selectedInstructorId, setSelectedInstructorId] = useState<
     string | null
   >(null);
-  const [loading, setLoading] = useState(false);
+  const [newInstructors, setNewInstructors] = useState<string[]>([]);
+
+  const [loadingData, setLoadingData] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
   const fetchBranchInstructors = useCallback(async () => {
-    if (!token || !branchId) {
-      return;
-    }
+    if (!token || !branchId) {return;}
     try {
-      setLoading(true);
+      setLoadingData(true);
       const res = await api.instructor.getBranchInstructors(
         branchId,
         {},
@@ -58,35 +62,31 @@ export default function BranchInstructorPanel({
       console.error("Error cargando instructores de la sucursal:", err);
       toast.error("No se pudieron cargar los instructores de la sucursal");
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   }, [token, branchId]);
 
   const fetchAllInstructors = useCallback(async () => {
-    if (!token) {
-      return;
-    }
+    if (!token) {return;}
     try {
-      setLoading(true);
-      const res = await api.instructor.getInstructors(
-        {
-          page: 1,
-        },
-        token,
-      );
-      console.log("instructores", res.data);
-      setAllInstructors(res.data);
+      setLoadingData(true);
+      const res = await api.instructor.getInstructors({ page: 1 }, token);
+      setAllInstructors(res.data || []);
     } catch (err) {
-      // ...
+      console.error("Error cargando instructores:", err);
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   }, [token]);
 
+  useEffect(() => {
+    fetchBranchInstructors();
+    if (!isViewMode) {fetchAllInstructors();}
+  }, [fetchBranchInstructors, fetchAllInstructors, isViewMode]);
+
   const handleAddInstructor = () => {
-    if (!selectedInstructorId) {
-      return;
-    }
+    if (isViewMode) {return;}
+    if (!selectedInstructorId) {return;}
 
     if (
       branchInstructors.some((i) => i.instructorID === selectedInstructorId)
@@ -95,13 +95,10 @@ export default function BranchInstructorPanel({
       return;
     }
 
-    // Agregar temporalmente a la lista y marcar dirty
     const instructor = allInstructors.find(
       (i) => i.instructor_id === selectedInstructorId,
     );
-    if (!instructor) {
-      return;
-    }
+    if (!instructor) {return;}
 
     setBranchInstructors((prev) => [
       ...prev,
@@ -112,20 +109,30 @@ export default function BranchInstructorPanel({
         phone: instructor.phone ?? "",
       },
     ]);
+
+    setNewInstructors((prev) => [...prev, selectedInstructorId]);
     setDirty(true);
-    toast.success(
-      "Instructor seleccionado para agregar. Guarda los cambios para aplicar.",
-    );
     setSelectedInstructorId(null);
+    toast.success("Instructor agregado. Guarda los cambios para aplicar.");
   };
 
   const handleRemoveInstructor = async (instructorId: string) => {
-    if (!token || !branchId) {
+    if (isViewMode) {return;}
+
+    if (!token || !branchId) {return;}
+
+    if (newInstructors.includes(instructorId)) {
+      setBranchInstructors((prev) =>
+        prev.filter((i) => i.instructorID !== instructorId),
+      );
+      setNewInstructors((prev) => prev.filter((id) => id !== instructorId));
+      setDirty(newInstructors.length > 1);
+      toast.success("Instructor eliminado localmente");
       return;
     }
 
-    setLoading(true);
     try {
+      setLoadingData(true);
       await api.instructor.removeBranchInstructor(
         branchId,
         instructorId,
@@ -134,30 +141,23 @@ export default function BranchInstructorPanel({
       setBranchInstructors((prev) =>
         prev.filter((i) => i.instructorID !== instructorId),
       );
-      setDirty(false);
       toast.success("Instructor eliminado correctamente");
     } catch (err) {
       console.error("Error eliminando instructor:", err);
       toast.error("No se pudo eliminar el instructor");
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   };
 
   const handleSave = async () => {
-    if (!token || !branchId) {
-      return;
-    }
-    setLoading(true);
+    if (isViewMode) {return;}
+    if (!token || !branchId || newInstructors.length === 0) {return;}
+
+    setIsSaving(true);
     try {
-      if (selectedInstructorId) {
-        await api.instructor.addBranchInstructor(
-          branchId,
-          [selectedInstructorId],
-          token,
-        );
-        setSelectedInstructorId(null);
-      }
+      await api.instructor.addBranchInstructor(branchId, newInstructors, token);
+      setNewInstructors([]);
       await fetchBranchInstructors();
       setDirty(false);
       toast.success("Cambios guardados correctamente");
@@ -165,58 +165,58 @@ export default function BranchInstructorPanel({
       console.error("Error guardando cambios:", err);
       toast.error("No se pudieron guardar los cambios");
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
-  useEffect(() => {
-    fetchBranchInstructors();
-    fetchAllInstructors();
-  }, [fetchBranchInstructors, fetchAllInstructors]);
-
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-end">
-        <div className="flex-grow">
-          <label className="text-sm font-medium text-gray-700 mb-1 block">
-            Agregar instructor
-          </label>
+      {!isViewMode && (
+        <div className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="flex-grow">
+            <label className="text-sm font-medium text-gray-700 mb-1 block">
+              Agregar instructor
+            </label>
 
-          <Select
-            value={selectedInstructorId ?? ""}
-            onValueChange={setSelectedInstructorId}
+            <Select
+              value={selectedInstructorId ?? ""}
+              onValueChange={setSelectedInstructorId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un instructor" />
+              </SelectTrigger>
+              <SelectContent>
+                {allInstructors.map((instr) => (
+                  <SelectItem
+                    key={instr.instructor_id}
+                    value={instr.instructor_id}
+                  >
+                    {`${instr.first_name} ${instr.last_name}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            type="button"
+            onClick={handleAddInstructor}
+            disabled={!selectedInstructorId || loadingData || isSaving}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecciona un instructor" />
-            </SelectTrigger>
-            <SelectContent>
-              {allInstructors.map((instr) => (
-                <SelectItem
-                  key={instr.instructor_id}
-                  value={instr.instructor_id}
-                >
-                  {`${instr.first_name} ${instr.last_name}`}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            Agregar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={!dirty || isSaving || newInstructors.length === 0}
+          >
+            {isSaving ? "Guardando..." : "Guardar cambios"}
+          </Button>
         </div>
+      )}
 
-        <Button
-          type="button"
-          onClick={handleAddInstructor}
-          disabled={!selectedInstructorId || loading}
-        >
-          Agregar
-        </Button>
-        <Button type="button" onClick={handleSave} disabled={!dirty || loading}>
-          {loading ? "Guardando..." : "Guardar cambios"}
-        </Button>
-      </div>
-
-      {/* Lista de instructores asignados */}
       <div className="space-y-2">
-        {loading ? (
+        {loadingData ? (
           <p className="text-sm text-gray-500">Cargando instructores...</p>
         ) : branchInstructors.length === 0 ? (
           <p className="text-sm text-gray-500">
@@ -236,12 +236,14 @@ export default function BranchInstructorPanel({
               title={instr.instructorName ?? "Sin nombre"}
               description={instr.email}
               action={
-                <button
-                  className="text-sm text-red-500 hover:underline"
-                  onClick={() => handleRemoveInstructor(instr.instructorID)}
-                >
-                  Eliminar
-                </button>
+                !isViewMode ? (
+                  <button
+                    className="text-sm text-red-500 hover:underline"
+                    onClick={() => handleRemoveInstructor(instr.instructorID)}
+                  >
+                    Eliminar
+                  </button>
+                ) : undefined
               }
             />
           ))
