@@ -379,7 +379,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         onClose={() => setEditModalOpen(false)}
         equipment={equipmentToEdit}
         onSave={handleUpdateEquipment}
-        mode={modalMode} // Aquí le pasamos "view" o "edit"
+        mode={modalMode}
       />
     </div>
   );

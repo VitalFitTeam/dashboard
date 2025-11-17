@@ -40,18 +40,20 @@ export default function BranchPaymentMethodPanel({
     if (!token) {
       return;
     }
+
     const fetchAllMethods = async () => {
       try {
         setLoading(true);
         const res = await api.paymentMethod.getPaymentMethods(token);
         setAllPaymentMethods(res.data || []);
       } catch (err) {
-        console.error("Error cargando métodos de pago:", err);
+        console.error(err);
         toast.error("No se pudieron cargar los métodos de pago disponibles");
       } finally {
         setLoading(false);
       }
     };
+
     fetchAllMethods();
   }, [token]);
 
@@ -59,6 +61,7 @@ export default function BranchPaymentMethodPanel({
     if (!token || !branchId) {
       return;
     }
+
     const fetchBranchMethods = async () => {
       try {
         setLoading(true);
@@ -66,16 +69,17 @@ export default function BranchPaymentMethodPanel({
           branchId,
           token,
         );
-        console.log(res.data);
         setSelectedMethods(res.data || []);
         setDirty(false);
+        toast.success("Métodos de pago de la sucursal cargados correctamente");
       } catch (err) {
-        console.error("Error cargando métodos de pago de la sucursal:", err);
+        console.error(err);
         toast.error("No se pudieron cargar los métodos de pago de la sucursal");
       } finally {
         setLoading(false);
       }
     };
+
     fetchBranchMethods();
   }, [branchId, token]);
 
@@ -100,6 +104,7 @@ export default function BranchPaymentMethodPanel({
     setSelectedMethods((prev) => [...prev, newMethod]);
     setSelectedId("");
     setDirty(true);
+    toast.success(`Método de pago "${method.name}" agregado`);
   };
 
   const handleRemove = async (id: string) => {
@@ -120,21 +125,27 @@ export default function BranchPaymentMethodPanel({
     }
   };
 
-  // Guardar cambios
   const handleSave = async () => {
     if (!token || !branchId) {
       return;
     }
+
     setLoading(true);
     try {
       const payload = selectedMethods.map((m) => m.method_id);
-      console.log(payload);
-      await api.paymentMethod.addBranchPaymentMethod(branchId, payload, token);
+
+      await toast.promise(
+        api.paymentMethod.addBranchPaymentMethod(branchId, payload, token),
+        {
+          loading: "Guardando métodos de pago...",
+          success: "Métodos de pago guardados correctamente",
+          error: "No se pudieron guardar los métodos de pago",
+        },
+      );
+
       setDirty(false);
-      console.log("Métodos de pago guardados correctamente");
     } catch (err) {
-      console.error("Error guardando métodos de pago:", err);
-      toast.error("No se pudieron guardar los métodos de pago");
+      console.error(err);
     } finally {
       setLoading(false);
     }

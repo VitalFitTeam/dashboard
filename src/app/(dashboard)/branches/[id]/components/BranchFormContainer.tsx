@@ -84,12 +84,6 @@ export default function BranchFormContainer({
               Modificar
             </Button>
           )}
-
-          {mode === "edit" && (
-            <Button variant="outline" onClick={() => router.back()}>
-              Cancelar
-            </Button>
-          )}
         </div>
       </div>
 

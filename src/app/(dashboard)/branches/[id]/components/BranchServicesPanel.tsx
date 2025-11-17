@@ -22,6 +22,7 @@ import {
 } from "@vitalfit/sdk";
 import { api } from "@/lib/sdk-config";
 import EditBranchServiceModal from "./EditBranchServiceModal";
+import { toast } from "sonner";
 
 interface BranchServicePanelProps {
   branchId: string;
@@ -57,20 +58,26 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
 
   useEffect(() => {
-    if (!token) {return;}
+    if (!token) {
+      return;
+    }
     const fetchServices = async () => {
       try {
         const response = await api.products.getServices(token, { page: 1 });
+        toast.success("Servicios de la sucursal cargados correctamente");
         setAllServices(response.data || []);
       } catch (err) {
         console.error("Error cargando servicios:", err);
+        toast.error("No se pudieron cargar los servicios disponibles");
       }
     };
     fetchServices();
   }, [token]);
 
   useEffect(() => {
-    if (!token || !branchId) {return;}
+    if (!token || !branchId) {
+      return;
+    }
     const fetchBranchServices = async () => {
       setIsLoading(true);
       try {
@@ -78,6 +85,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
         setServices(response.data || []);
       } catch (err) {
         console.error("Error cargando servicios de la sucursal:", err);
+        toast.error("No se pudieron cargar los servicios de la sucursal");
       } finally {
         setIsLoading(false);
       }
@@ -86,9 +94,13 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   }, [token, branchId]);
 
   const handleAddService = () => {
-    if (!selectedServiceId) {return;}
+    if (!selectedServiceId) {
+      return;
+    }
     const service = allServices.find((s) => s.service_id === selectedServiceId);
-    if (!service) {return;}
+    if (!service) {
+      return;
+    }
 
     const newService: CreateBranchServicePriceItem = {
       service_id: service.service_id,
@@ -110,10 +122,14 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     setPriceMember(0);
     setPriceNonMember(0);
     setIsVisible(true);
+
+    toast.success(`Servicio "${service.name}" agregado`);
   };
 
   const handleRemoveService = async (serviceId: string) => {
-    if (!token || !branchId) {return;}
+    if (!token || !branchId) {
+      return;
+    }
     setIsLoading(true);
     try {
       const isNew = newServices.find((s) => s.service_id === serviceId);
@@ -124,45 +140,54 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       } else {
         await api.products.removeBranchService(branchId, serviceId, token);
       }
+      const removedService = services.find((s) => s.service_id === serviceId);
       setServices((prev) => prev.filter((s) => s.service_id !== serviceId));
       setDirty(true);
+      toast.success(
+        `Servicio "${removedService?.service_name ?? ""}" eliminado`,
+      ); // <-- TOAST SUCCESS
     } catch (err) {
       console.error("Error eliminando servicio:", err);
+      toast.error("No se pudo eliminar el servicio");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSave = async () => {
-    if (!token || !branchId) {return;}
-    if (newServices.length === 0) {return;}
-    console.log("id de la sucursal:", branchId);
+    if (!token || !branchId) {
+      return;
+    }
+    if (newServices.length === 0) {
+      toast.error("No hay servicios nuevos para guardar");
+      return;
+    }
 
     setLoading(true);
     try {
-      console.log("Servicios a enviar:", newServices);
       await api.products.addBranchService(newServices, branchId, token);
-      console.log("POST completado, ahora refrescando...");
       const response = await api.products.getBranchServices(branchId, token);
-      console.log("Servicios obtenidos del backend:", response.data);
       setServices(response.data || []);
+      setNewServices([]);
+      setDirty(false);
 
-      console.log("Servicios guardados correctamente");
+      toast.success("Servicios guardados correctamente");
     } catch (err) {
       console.error("Error guardando servicios:", err);
+      toast.error("Error al guardar los servicios");
     } finally {
       setLoading(false);
     }
   };
-
-  // Actualizar un servicio existente
   const handleUpdateService = async (updatedData: {
     max_capacity: number;
     price_for_member: number;
     price_for_non_member: number;
     is_visible: boolean;
   }) => {
-    if (!serviceToEdit || !token || !branchId) {return;}
+    if (!serviceToEdit || !token || !branchId) {
+      return;
+    }
 
     try {
       await api.products.updateBranchService(
@@ -183,9 +208,10 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       setEditModalOpen(false);
       setServiceToEdit(null);
 
-      console.log("Servicio actualizado correctamente");
+      toast.success(`Servicio "${serviceToEdit.service_name}" actualizado`);
     } catch (err) {
       console.error("Error actualizando servicio:", err);
+      toast.error("Error al actualizar el servicio");
     }
   };
 
@@ -344,7 +370,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
         onClose={() => setEditModalOpen(false)}
         service={serviceToEdit}
         onSave={handleUpdateService}
-        mode={modalMode} // <-- Aquí se aplica view o edit
+        mode={modalMode}
       />
     </div>
   );

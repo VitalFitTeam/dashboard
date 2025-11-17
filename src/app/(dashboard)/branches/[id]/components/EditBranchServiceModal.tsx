@@ -11,6 +11,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import InputField from "@/components/ui/InputField";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface ServiceData {
   service_id: string;
@@ -45,6 +46,7 @@ export default function EditBranchServiceModal({
   const [priceNonMember, setPriceNonMember] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
+  // Actualizamos los valores cada vez que cambia el servicio
   useEffect(() => {
     if (service) {
       setMaxCapacity(service.max_capacity);
@@ -56,13 +58,20 @@ export default function EditBranchServiceModal({
 
   const handleSave = async () => {
     if (!service) {return;}
-    await onSave({
-      max_capacity: maxCapacity,
-      price_for_member: priceMember,
-      price_for_non_member: priceNonMember,
-      is_visible: isVisible,
-    });
-    onClose();
+
+    try {
+      await onSave({
+        max_capacity: maxCapacity,
+        price_for_member: priceMember,
+        price_for_non_member: priceNonMember,
+        is_visible: isVisible,
+      });
+      toast.success(`Servicio "${service.service_name}" actualizado`);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error(`Error actualizando "${service.service_name}"`);
+    }
   };
 
   return (
