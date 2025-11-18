@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import ClassForm from "../ClassesForm";
@@ -10,7 +10,7 @@ import { Notification } from "@/components/ui/Notification";
 import { ClassFormData, ClassFormSchema } from "@/lib/validation/class";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { Input } from "@/components/ui/Input";
-import { Download } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import {
   Select,
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface AttendanceRecord {
   id: string;
@@ -30,12 +31,23 @@ interface AttendanceRecord {
 
 export default function ClassDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const { token } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"info" | "attendance">("info");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Estados para la eliminación
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Estados para los parámetros de la URL
+  const [branchId, setBranchId] = useState<string>("");
+  const [dateParam, setDateParam] = useState<string>("");
 
   const [formData, setFormData] = useState<ClassFormData>({
     service_id: "",
@@ -62,6 +74,77 @@ export default function ClassDetailPage() {
   const [option2, setOption2] = useState("");
 
   const classId = params.id as string;
+
+  // Extraer parámetros de la URL al montar el componente
+  useEffect(() => {
+    const branch = searchParams.get("branch");
+    const date = searchParams.get("date");
+
+    if (branch) {
+      setBranchId(branch);
+      setFormData((prev) => ({ ...prev, branch_id: branch }));
+    }
+
+    if (date) {
+      setDateParam(date);
+      setFormData((prev) => ({
+        ...prev,
+        start_date: date,
+        end_date: date,
+      }));
+    }
+  }, [searchParams]);
+
+  // Cargar datos de la clase cuando tengamos token, classId y branchId
+  useEffect(() => {
+    const loadClassData = async () => {
+      if (!token || !classId || !branchId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+
+        // Llamar a la API para obtener los datos de la clase
+        const response = await api.schedule.GetClassByID(classId, token);
+
+        if (response.data) {
+          const classData = response.data;
+
+          // Formatear las fechas y horas para el formulario
+          const startDate = new Date(classData.starts_at);
+          const endDate = new Date(classData.ends_at);
+
+          setFormData({
+            service_id: classData.service_id || "",
+            branch_id: classData.branch_id || branchId,
+            instructor_id: classData.instructor_id || "",
+            max_capacity: classData.max_capacity?.toString() || "",
+            start_date: startDate.toISOString().split("T")[0],
+            start_time:
+              startDate.toTimeString().split(" ")[0].substring(0, 5) + ":00",
+            end_date: endDate.toISOString().split("T")[0],
+            end_time:
+              endDate.toTimeString().split(" ")[0].substring(0, 5) + ":00",
+          });
+        } else {
+          throw new Error("No se encontraron datos de la clase");
+        }
+      } catch (error) {
+        console.error("Error cargando datos de la clase:", error);
+        setNotification({
+          isVisible: true,
+          description: "Error al cargar los datos de la clase",
+          title: "Error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadClassData();
+  }, [token, classId, branchId]);
 
   // Datos de prueba para el reporte de asistencia
   const mockAttendanceData: AttendanceRecord[] = [
@@ -105,6 +188,48 @@ export default function ClassDetailPage() {
   if (!token) {
     return null;
   }
+
+  // Función para confirmar eliminación
+  const confirmDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDelete = async () => {
+    if (!token || !classId || !branchId) {
+      setDeleteError("Falta información necesaria para eliminar la clase");
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+
+      await api.schedule.DeleteClass(branchId, classId, token);
+
+      setDeleteSuccess("Clase eliminada exitosamente");
+      setShowDeleteConfirm(false);
+
+      // Redirigir después de eliminar
+      setTimeout(() => {
+        router.push("/classes");
+      }, 2000);
+    } catch (error) {
+      console.error("Error eliminando clase:", error);
+      setDeleteError("Error al eliminar la clase. Intenta nuevamente.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Efecto para limpiar mensajes de éxito/error
+  useEffect(() => {
+    if (deleteSuccess || deleteError) {
+      const timer = setTimeout(() => {
+        setDeleteSuccess(null);
+        setDeleteError(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [deleteSuccess, deleteError]);
 
   const validateForm = (): boolean => {
     const result = ClassFormSchema.safeParse(formData);
@@ -164,9 +289,17 @@ export default function ClassDetailPage() {
       return;
     }
 
+    if (!branchId) {
+      setNotification({
+        isVisible: true,
+        description: "No se encontró información de la sucursal",
+        title: "Error",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-      const DEFAULT_BRANCH_ID = "main-branch";
 
       const updateData = {
         service_id: formData.service_id,
@@ -182,12 +315,7 @@ export default function ClassDetailPage() {
         notes: "",
       };
 
-      await api.schedule.UpdateClass(
-        DEFAULT_BRANCH_ID,
-        classId,
-        updateData,
-        token,
-      );
+      await api.schedule.UpdateClass(branchId, classId, updateData, token);
 
       setNotification({
         isVisible: true,
@@ -297,13 +425,73 @@ export default function ClassDetailPage() {
             </Button>
           </div>
         ) : activeTab === "info" ? (
-          <Button variant="primary" onClick={() => setIsEditing(true)}>
-            Modificar
-          </Button>
+          <>
+            <Button
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {isDeleting ? "Eliminando..." : "Eliminar"}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                router.push(`/classes/${classId}/edit?branch=${branchId}`);
+              }}
+            >
+              Modificar
+            </Button>
+          </>
         ) : (
           <></>
         )}
       </PageHeader>
+
+      {/* Confirmación de eliminación */}
+      {showDeleteConfirm && (
+        <Alert className="mt-2 w-full max-w-md">
+          <AlertTitle className="text-black">Confirmar Eliminación</AlertTitle>
+          <AlertDescription className="text-gray-900">
+            ¿Estás seguro de que deseas eliminar esta clase? Esta acción no se
+            puede deshacer.
+          </AlertDescription>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              className="border-white"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              className="text-white"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-4 w-4 mr-2 text-white" />
+              {isDeleting ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </div>
+        </Alert>
+      )}
+
+      {/* Mensajes de éxito/error */}
+      {deleteSuccess && (
+        <Alert className="w-full max-w-md border-green-300 bg-white text-green-800 mb-4">
+          <AlertTitle>Eliminación exitosa</AlertTitle>
+          <AlertDescription>{deleteSuccess}</AlertDescription>
+        </Alert>
+      )}
+
+      {deleteError && (
+        <Alert className="w-full max-w-md border-red-300 bg-white text-red-800 mb-4">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{deleteError}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Tabs */}
       <div className="border-b bg-[#F1F5F9] rounded border-gray-200 p-1">

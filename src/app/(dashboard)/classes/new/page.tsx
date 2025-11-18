@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import ClassForm from "../ClassesForm";
@@ -9,10 +9,34 @@ import { api } from "@/lib/sdk-config";
 import { Notification } from "@/components/ui/Notification";
 import { ClassFormData, ClassFormSchema } from "@/lib/validation/class";
 
+interface Branch {
+  branch_id: string;
+  name: string;
+}
+
+interface Service {
+  service_id: string;
+  name: string;
+  description: string;
+  duration_minutes: number;
+}
+
+interface Instructor {
+  instructor_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
 export default function NewClassPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { token } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[]>([]);
 
   const [formData, setFormData] = useState<ClassFormData>({
     service_id: "",
@@ -33,6 +57,90 @@ export default function NewClassPage() {
     description: "",
     title: "",
   });
+
+  // Extraer parámetros de la URL al montar el componente
+  useEffect(() => {
+    const date = searchParams.get("date");
+    const branch = searchParams.get("branch");
+
+    if (date) {
+      setFormData((prev) => ({
+        ...prev,
+        start_date: date,
+        end_date: date,
+      }));
+    }
+
+    if (branch) {
+      setFormData((prev) => ({ ...prev, branch_id: branch }));
+    }
+  }, [searchParams]);
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    const loadData = async () => {
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+
+        // Cargar sucursales
+        const branchesResponse = await api.branch.getBranches(
+          { page: 1, limit: 100 },
+          token,
+        );
+        if (branchesResponse.data) {
+          setBranches(branchesResponse.data);
+        }
+
+        // Cargar servicios
+        const servicesResponse = await api.products.getServices(token, {
+          page: 1,
+          limit: 100,
+        });
+        if (servicesResponse.data) {
+          const servicesData = servicesResponse.data.map((service: any) => ({
+            service_id: service.service_id,
+            name: service.name,
+            description: service.description,
+            duration_minutes: service.duration_minutes,
+          }));
+          setServices(servicesData);
+        }
+
+        // Cargar instructores
+        const instructorsResponse = await api.instructor.getInstructors(
+          { page: 1, limit: 100 },
+          token,
+        );
+        if (instructorsResponse.data) {
+          const instructorsData = instructorsResponse.data.map(
+            (instructor: any) => ({
+              instructor_id: instructor.instructor_id,
+              first_name: instructor.first_name,
+              last_name: instructor.last_name,
+              email: instructor.email,
+            }),
+          );
+          setInstructors(instructorsData);
+        }
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+        setNotification({
+          isVisible: true,
+          description: "Error al cargar los datos necesarios",
+          title: "Error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [token]);
 
   if (!token) {
     return null;
@@ -98,12 +206,68 @@ export default function NewClassPage() {
       return;
     }
 
-    console.warn("enviar clase");
+    if (!formData.branch_id) {
+      setNotification({
+        isVisible: true,
+        description: "Por favor selecciona una sucursal",
+        title: "Error",
+      });
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      // Preparar los datos para la API según CreateClassPayload
+      const classData = {
+        service_id: formData.service_id,
+        instructor_id: formData.instructor_id,
+        max_capacity: parseInt(formData.max_capacity),
+        starts_at: new Date(
+          `${formData.start_date}T${formData.start_time}`,
+        ).toISOString(),
+        ends_at: new Date(
+          `${formData.end_date}T${formData.end_time}`,
+        ).toISOString(),
+        is_visible: true,
+        notes: "",
+      };
+
+      // Llamar a la API para crear la clase
+      await api.schedule.CreateClass(formData.branch_id, classData, token);
+
+      setNotification({
+        isVisible: true,
+        description: "Clase creada exitosamente",
+        title: "Éxito",
+      });
+
+      // Redirigir después de crear exitosamente
+      setTimeout(() => {
+        router.push("/classes");
+      }, 2000);
+    } catch (error) {
+      console.error("Error creando clase:", error);
+      setNotification({
+        isVisible: true,
+        description: "Error al crear la clase. Intenta nuevamente.",
+        title: "Error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const hideNotification = () => {
     setNotification((prev) => ({ ...prev, isVisible: false }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
+        <div className="text-center p-10">Cargando datos...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
@@ -117,15 +281,30 @@ export default function NewClassPage() {
           errors={errors}
           onChange={handleChange}
           onBlur={handleBlur}
+          branches={branches}
+          services={services}
+          instructors={instructors}
         />
-        <Button
-          type="submit"
-          variant="primary"
-          className="w-full"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Creando..." : "Crear Clase"}
-        </Button>
+        <div className="flex gap-4 pt-6">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => {
+              router.push("/classes");
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creando..." : "Crear Clase"}
+          </Button>
+        </div>
       </form>
 
       {notification.isVisible && (

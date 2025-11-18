@@ -9,31 +9,34 @@ import {
 } from "@/components/ui/select";
 import { ClassFormData } from "@/lib/validation/class";
 
+interface Branch {
+  branch_id: string;
+  name: string;
+}
+
+interface Service {
+  service_id: string;
+  name: string;
+  description: string;
+  duration_minutes: number;
+}
+
+interface Instructor {
+  instructor_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
 interface ClassFormProps {
   formData: ClassFormData;
   errors: Partial<Record<keyof ClassFormData, string>>;
   onChange: (field: string, value: string) => void;
   onBlur: (field: string) => void;
+  branches?: Branch[];
+  services?: Service[];
+  instructors?: Instructor[];
 }
-
-const services = [
-  { id: "service1", name: "Yoga" },
-  { id: "service2", name: "Pilates" },
-  { id: "service3", name: "CrossFit" },
-  { id: "service4", name: "Spinning" },
-];
-
-const branches = [
-  { id: "branch1", name: "Sucursal Norte" },
-  { id: "branch2", name: "Sucursal Sur" },
-  { id: "branch3", name: "Sucursal Centro" },
-];
-
-const instructors = [
-  { id: "instructor1", name: "Juan Pérez" },
-  { id: "instructor2", name: "María García" },
-  { id: "instructor3", name: "Carlos López" },
-];
 
 const capacities = [
   { id: "10", name: "10 personas" },
@@ -48,6 +51,9 @@ export default function ClassForm({
   errors,
   onChange,
   onBlur,
+  branches = [],
+  services = [],
+  instructors = [],
 }: ClassFormProps) {
   const handleServiceChange = (value: string) => {
     onChange("service_id", value);
@@ -77,12 +83,78 @@ export default function ClassForm({
     onBlur(field);
   };
 
+  // Usar branches dinámicas o estáticas como fallback
+  const branchOptions =
+    branches.length > 0
+      ? branches
+      : [
+          { branch_id: "branch1", name: "Sucursal Norte" },
+          { branch_id: "branch2", name: "Sucursal Sur" },
+          { branch_id: "branch3", name: "Sucursal Centro" },
+        ];
+
+  // Usar servicios dinámicos o estáticos como fallback
+  const serviceOptions =
+    services.length > 0
+      ? services
+      : [
+          {
+            service_id: "service1",
+            name: "Yoga",
+            description: "Clase de yoga",
+            duration_minutes: 60,
+          },
+          {
+            service_id: "service2",
+            name: "Pilates",
+            description: "Clase de pilates",
+            duration_minutes: 60,
+          },
+          {
+            service_id: "service3",
+            name: "CrossFit",
+            description: "Clase de crossfit",
+            duration_minutes: 60,
+          },
+          {
+            service_id: "service4",
+            name: "Spinning",
+            description: "Clase de spinning",
+            duration_minutes: 45,
+          },
+        ];
+
+  // Usar instructores dinámicos o estáticos como fallback
+  const instructorOptions =
+    instructors.length > 0
+      ? instructors
+      : [
+          {
+            instructor_id: "instructor1",
+            first_name: "Juan",
+            last_name: "Pérez",
+            email: "juan@email.com",
+          },
+          {
+            instructor_id: "instructor2",
+            first_name: "María",
+            last_name: "García",
+            email: "maria@email.com",
+          },
+          {
+            instructor_id: "instructor3",
+            first_name: "Carlos",
+            last_name: "López",
+            email: "carlos@email.com",
+          },
+        ];
+
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <p className="text-lg font-semibold text-gray-900 mb-4">
           Información Básica de la Clase
-        </h2>
+        </p>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <label
@@ -96,11 +168,14 @@ export default function ClassForm({
               value={formData.service_id}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select an item" />
+                <SelectValue placeholder="Seleccionar servicio" />
               </SelectTrigger>
               <SelectContent>
-                {services.map((service) => (
-                  <SelectItem key={service.id} value={service.id}>
+                {serviceOptions.map((service) => (
+                  <SelectItem
+                    key={service.service_id}
+                    value={service.service_id}
+                  >
                     {service.name}
                   </SelectItem>
                 ))}
@@ -123,12 +198,15 @@ export default function ClassForm({
               value={formData.instructor_id}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select an item" />
+                <SelectValue placeholder="Seleccionar instructor" />
               </SelectTrigger>
               <SelectContent>
-                {instructors.map((instructor) => (
-                  <SelectItem key={instructor.id} value={instructor.id}>
-                    {instructor.name}
+                {instructorOptions.map((instructor) => (
+                  <SelectItem
+                    key={instructor.instructor_id}
+                    value={instructor.instructor_id}
+                  >
+                    {`${instructor.first_name} ${instructor.last_name}`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -152,11 +230,11 @@ export default function ClassForm({
               value={formData.branch_id}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select an item" />
+                <SelectValue placeholder="Seleccionar sucursal" />
               </SelectTrigger>
               <SelectContent>
-                {branches.map((branch) => (
-                  <SelectItem key={branch.id} value={branch.id}>
+                {branchOptions.map((branch) => (
+                  <SelectItem key={branch.branch_id} value={branch.branch_id}>
                     {branch.name}
                   </SelectItem>
                 ))}
@@ -179,7 +257,7 @@ export default function ClassForm({
               value={formData.max_capacity}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select an item" />
+                <SelectValue placeholder="Seleccionar capacidad" />
               </SelectTrigger>
               <SelectContent>
                 {capacities.map((capacity) => (
@@ -197,13 +275,13 @@ export default function ClassForm({
       </div>
 
       <div className="border-t border-gray-200 pt-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        <p className="text-lg font-semibold text-gray-900 mb-4">
           Configuración de Horario
-        </h2>
+        </p>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Fecha de Inicio
+              Fecha y Hora de Inicio
             </label>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -215,7 +293,7 @@ export default function ClassForm({
                   }
                   onBlur={() => handleInputBlur("start_date")}
                   className="w-full"
-                  placeholder="Select date"
+                  placeholder="Seleccionar fecha"
                 />
                 {errors.start_date && (
                   <p className="mt-1 text-sm text-red-600">
@@ -244,7 +322,7 @@ export default function ClassForm({
 
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hora de Fin / Duración
+              Fecha y Hora de Fin
             </label>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -254,7 +332,7 @@ export default function ClassForm({
                   onChange={(e) => handleDateChange("end_date", e.target.value)}
                   onBlur={() => handleInputBlur("end_date")}
                   className="w-full"
-                  placeholder="Select date"
+                  placeholder="Seleccionar fecha"
                 />
                 {errors.end_date && (
                   <p className="mt-1 text-sm text-red-600">{errors.end_date}</p>
