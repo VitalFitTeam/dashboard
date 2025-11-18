@@ -262,7 +262,6 @@ export default function EditClassPage() {
 
       // Llamar a la API para actualizar la clase
       await api.schedule.UpdateClass(classId, updateData, token);
-
       setNotification({
         isVisible: true,
         description: "Clase actualizada exitosamente",

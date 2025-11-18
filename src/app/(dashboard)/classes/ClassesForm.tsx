@@ -36,6 +36,7 @@ interface ClassFormProps {
   branches?: Branch[];
   services?: Service[];
   instructors?: Instructor[];
+  disabled?: boolean; // Nueva prop para deshabilitar campos
 }
 
 const capacities = [
@@ -54,32 +55,40 @@ export default function ClassForm({
   branches = [],
   services = [],
   instructors = [],
+  disabled = false, // Valor por defecto: false
 }: ClassFormProps) {
   const handleServiceChange = (value: string) => {
+    if (disabled) {return;} // No hacer nada si está deshabilitado
     onChange("service_id", value);
   };
 
   const handleBranchChange = (value: string) => {
+    if (disabled) {return;} // No hacer nada si está deshabilitado
     onChange("branch_id", value);
   };
 
   const handleInstructorChange = (value: string) => {
+    if (disabled) {return;} // No hacer nada si está deshabilitado
     onChange("instructor_id", value);
   };
 
   const handleCapacityChange = (value: string) => {
+    if (disabled) {return;} // No hacer nada si está deshabilitado
     onChange("max_capacity", value);
   };
 
   const handleDateChange = (field: string, value: string) => {
+    if (disabled) {return;} // No hacer nada si está deshabilitado
     onChange(field, value);
   };
 
   const handleTimeChange = (field: string, value: string) => {
+    if (disabled) {return;} // No hacer nada si está deshabilitado
     onChange(field, value);
   };
 
   const handleInputBlur = (field: string) => {
+    if (disabled) {return;} // No hacer nada si está deshabilitado
     onBlur(field);
   };
 
@@ -166,6 +175,7 @@ export default function ClassForm({
             <Select
               onValueChange={handleServiceChange}
               value={formData.service_id}
+              disabled={disabled} // Deshabilitar select
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Seleccionar servicio" />
@@ -196,6 +206,7 @@ export default function ClassForm({
             <Select
               onValueChange={handleInstructorChange}
               value={formData.instructor_id}
+              disabled={disabled} // Deshabilitar select
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Seleccionar instructor" />
@@ -228,6 +239,7 @@ export default function ClassForm({
             <Select
               onValueChange={handleBranchChange}
               value={formData.branch_id}
+              disabled={disabled} // Deshabilitar select
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Seleccionar sucursal" />
@@ -255,6 +267,7 @@ export default function ClassForm({
             <Select
               onValueChange={handleCapacityChange}
               value={formData.max_capacity}
+              disabled={disabled} // Deshabilitar select
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Seleccionar capacidad" />
@@ -294,6 +307,7 @@ export default function ClassForm({
                   onBlur={() => handleInputBlur("start_date")}
                   className="w-full"
                   placeholder="Seleccionar fecha"
+                  disabled={disabled}
                 />
                 {errors.start_date && (
                   <p className="mt-1 text-sm text-red-600">
@@ -310,6 +324,7 @@ export default function ClassForm({
                   }
                   onBlur={() => handleInputBlur("start_time")}
                   className="w-full"
+                  disabled={disabled}
                 />
                 {errors.start_time && (
                   <p className="mt-1 text-sm text-red-600">
@@ -333,6 +348,7 @@ export default function ClassForm({
                   onBlur={() => handleInputBlur("end_date")}
                   className="w-full"
                   placeholder="Seleccionar fecha"
+                  disabled={disabled}
                 />
                 {errors.end_date && (
                   <p className="mt-1 text-sm text-red-600">{errors.end_date}</p>
@@ -345,6 +361,7 @@ export default function ClassForm({
                   onChange={(e) => handleTimeChange("end_time", e.target.value)}
                   onBlur={() => handleInputBlur("end_time")}
                   className="w-full"
+                  disabled={disabled}
                 />
                 {errors.end_time && (
                   <p className="mt-1 text-sm text-red-600">{errors.end_time}</p>

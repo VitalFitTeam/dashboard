@@ -31,6 +31,7 @@ interface Instructor {
   instructor_id: string;
   first_name: string;
   last_name: string;
+  branch_id?: string;
 }
 
 export function ClassCalendar({
@@ -43,13 +44,19 @@ export function ClassCalendar({
   const [events, setEvents] = useState<GymClass[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingClasses, setIsLoadingClasses] = useState(false);
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
-  const [instructors, setInstructors] = useState<Instructor[]>([]);
+  const [allBranches, setAllBranches] = useState<Branch[]>([]);
+  const [allServices, setAllServices] = useState<Service[]>([]);
+  const [allInstructors, setAllInstructors] = useState<Instructor[]>([]);
 
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [instructorFilter, setInstructorFilter] = useState<string | null>(null);
   const [branchFilter, setBranchFilter] = useState<string | null>(null);
+
+  // Instructores y servicios filtrados por sucursal seleccionada
+  const [filteredInstructors, setFilteredInstructors] = useState<Instructor[]>(
+    [],
+  );
+  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
 
   // Cargar datos iniciales (branches, services, instructors)
   useEffect(() => {
@@ -67,7 +74,7 @@ export function ClassCalendar({
           token,
         );
         if (branchesResponse.data) {
-          setBranches(branchesResponse.data);
+          setAllBranches(branchesResponse.data);
 
           // Establecer la primera sucursal como filtro por defecto, o la del usuario si es branch_admin
           if (user?.role === "branch_admin" && user.branchId) {
@@ -87,7 +94,7 @@ export function ClassCalendar({
             service_id: service.service_id,
             name: service.name,
           }));
-          setServices(servicesData);
+          setAllServices(servicesData);
         }
 
         // Cargar instructores
@@ -101,9 +108,10 @@ export function ClassCalendar({
               instructor_id: instructor.instructor_id,
               first_name: instructor.first_name,
               last_name: instructor.last_name,
+              branch_id: instructor.branch_id, // Asegurar que tenemos branch_id
             }),
           );
-          setInstructors(instructorsData);
+          setAllInstructors(instructorsData);
         }
       } catch (error) {
         console.error("Error cargando datos iniciales:", error);
@@ -114,6 +122,46 @@ export function ClassCalendar({
 
     loadInitialData();
   }, [token, user]);
+
+  // Filtrar instructores y servicios cuando cambie la sucursal seleccionada
+  useEffect(() => {
+    if (branchFilter) {
+      // Método 1: Filtrar instructores por branch_id si está disponible
+      let instructorsForBranch = allInstructors;
+
+      // Si los instructores tienen branch_id, filtrar por él
+      if (allInstructors.some((instructor) => instructor.branch_id)) {
+        instructorsForBranch = allInstructors.filter(
+          (instructor) => instructor.branch_id === branchFilter,
+        );
+      } else {
+        // Método 2: Si no hay branch_id en instructores, obtener instructores de las clases de esta sucursal
+        const instructorIdsFromEvents = Array.from(
+          new Set(
+            events
+              .filter((event) => event.branchId === branchFilter)
+              .map((event) => event.instructorId)
+              .filter(Boolean),
+          ),
+        );
+
+        instructorsForBranch = allInstructors.filter((instructor) =>
+          instructorIdsFromEvents.includes(instructor.instructor_id),
+        );
+      }
+
+      setFilteredInstructors(instructorsForBranch);
+
+      // Resetear los otros filtros cuando cambia la sucursal
+      setTypeFilter(null);
+      setInstructorFilter(null);
+    } else {
+      setFilteredInstructors([]);
+      setFilteredServices([]);
+      setTypeFilter(null);
+      setInstructorFilter(null);
+    }
+  }, [branchFilter, allInstructors, events]);
 
   // Cargar clases cuando cambien los filtros
   useEffect(() => {
@@ -135,13 +183,13 @@ export function ClassCalendar({
           // Convertir BranchClassInfo a GymClass para el calendario
           const calendarEvents: GymClass[] = response.data.map(
             (classInfo: any) => {
-              const service = services.find(
+              const service = allServices.find(
                 (s) => s.service_id === classInfo.service_id,
               );
-              const instructor = instructors.find(
+              const instructor = allInstructors.find(
                 (i) => i.instructor_id === classInfo.instructor_id,
               );
-              const branch = branches.find(
+              const branch = allBranches.find(
                 (b) => b.branch_id === classInfo.branch_id,
               );
 
@@ -164,6 +212,41 @@ export function ClassCalendar({
           );
 
           setEvents(calendarEvents);
+
+          // Actualizar servicios filtrados basados en las clases reales de esta sucursal
+          const servicesInBranch = Array.from(
+            new Set(
+              calendarEvents
+                .map((event) => event.service_id)
+                .filter(Boolean) as string[],
+            ),
+          )
+            .map((serviceId) =>
+              allServices.find((service) => service.service_id === serviceId),
+            )
+            .filter(Boolean) as Service[];
+
+          setFilteredServices(servicesInBranch);
+
+          // Actualizar instructores filtrados basados en las clases reales de esta sucursal
+          const instructorsInBranch = Array.from(
+            new Set(
+              calendarEvents
+                .map((event) => event.instructorId)
+                .filter(Boolean) as string[],
+            ),
+          )
+            .map((instructorId) =>
+              allInstructors.find(
+                (instructor) => instructor.instructor_id === instructorId,
+              ),
+            )
+            .filter(Boolean) as Instructor[];
+
+          // Si no hay branch_id en los instructores, usar los instructores de las clases
+          if (!allInstructors.some((instructor) => instructor.branch_id)) {
+            setFilteredInstructors(instructorsInBranch);
+          }
         }
       } catch (error) {
         console.error("Error cargando clases:", error);
@@ -174,7 +257,7 @@ export function ClassCalendar({
     };
 
     loadClasses();
-  }, [token, branchFilter, branches, services, instructors]);
+  }, [token, branchFilter, allBranches, allServices, allInstructors]);
 
   const visibleEvents = events.filter((e) => {
     if (!user) {
@@ -236,6 +319,11 @@ export function ClassCalendar({
     }
   };
 
+  // Manejar cambio de sucursal
+  const handleBranchChange = (branchId: string) => {
+    setBranchFilter(branchId || null);
+  };
+
   // Indicador de carga principal
   if (isLoading) {
     return (
@@ -251,51 +339,55 @@ export function ClassCalendar({
   return (
     <>
       {/* Filtros */}
-      <div className="flex gap-4 mb-4">
-        {/* Filtro por tipo de servicio */}
+      <div className="flex gap-4 mb-4 flex-wrap">
+        {/* Filtro por sucursal (PRIMERO) */}
         <select
-          className="border rounded px-2 py-1"
-          value={typeFilter ?? ""}
-          onChange={(e) => setTypeFilter(e.target.value || null)}
-        >
-          <option value="">Todos los tipos</option>
-          {services.map((service) => (
-            <option key={service.service_id} value={service.name}>
-              {service.name}
-            </option>
-          ))}
-        </select>
-
-        {/* Filtro por instructor */}
-        <select
-          className="border rounded px-2 py-1"
-          value={instructorFilter ?? ""}
-          onChange={(e) => setInstructorFilter(e.target.value || null)}
-        >
-          <option value="">Todos los instructores</option>
-          {instructors.map((instructor) => (
-            <option
-              key={instructor.instructor_id}
-              value={instructor.instructor_id}
-            >
-              {instructor.first_name} {instructor.last_name}
-            </option>
-          ))}
-        </select>
-
-        {/* Filtro por sucursal */}
-        <select
-          className="border rounded px-2 py-1"
+          className="border rounded px-2 py-1 min-w-[150px]"
           value={branchFilter ?? ""}
-          onChange={(e) => setBranchFilter(e.target.value || null)}
+          onChange={(e) => handleBranchChange(e.target.value)}
         >
           <option value="">Elija una sucursal</option>
-          {branches.map((branch) => (
+          {allBranches.map((branch) => (
             <option key={branch.branch_id} value={branch.branch_id}>
               {branch.name}
             </option>
           ))}
         </select>
+
+        {/* Filtro por tipo de servicio - Solo muestra si hay sucursal seleccionada */}
+        {branchFilter && (
+          <select
+            className="border rounded px-2 py-1 min-w-[150px]"
+            value={typeFilter ?? ""}
+            onChange={(e) => setTypeFilter(e.target.value || null)}
+          >
+            <option value="">Todos los servicios</option>
+            {filteredServices.map((service) => (
+              <option key={service.service_id} value={service.name}>
+                {service.name}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Filtro por instructor - Solo muestra si hay sucursal seleccionada */}
+        {branchFilter && (
+          <select
+            className="border rounded px-2 py-1 min-w-[150px]"
+            value={instructorFilter ?? ""}
+            onChange={(e) => setInstructorFilter(e.target.value || null)}
+          >
+            <option value="">Todos los instructores</option>
+            {filteredInstructors.map((instructor) => (
+              <option
+                key={instructor.instructor_id}
+                value={instructor.instructor_id}
+              >
+                {instructor.first_name} {instructor.last_name}
+              </option>
+            ))}
+          </select>
+        )}
 
         {/* Indicador de carga para las clases */}
         {isLoadingClasses && (
@@ -305,6 +397,14 @@ export function ClassCalendar({
           </div>
         )}
       </div>
+
+      {/* Información de debug (puedes remover esto después) */}
+      {branchFilter && (
+        <div className="mb-2 text-sm text-gray-600">
+          Mostrando {filteredInstructors.length} instructores y{" "}
+          {filteredServices.length} servicios para esta sucursal
+        </div>
+      )}
 
       {/* Mensaje cuando no hay sucursal seleccionada */}
       {!branchFilter && (
