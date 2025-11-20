@@ -1,11 +1,13 @@
-export type GymClass = {
+export interface GymClass {
   id: string;
   title: string;
   start: string;
   end: string;
-  instructorId: string;
-  instructorName?: string;
   type: string;
-  branchId: string;
+  instructorId: string;
+  instructorName: string;
   maxCapacity: number;
-};
+  branchId: string;
+  branchName: string;
+  service_id?: string;
+}

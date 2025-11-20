@@ -32,21 +32,23 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
     }
     return range;
   };
-  return (    
+  return (
     <Pagination>
       <PaginationContent>
         {/* Botón Anterior */}
-        {page !=1 && <PaginationItem>
-          <PaginationPrevious
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              if (page > 1) {
-                onPageChange(page - 1);
-              }
-            }}
-          />
-        </PaginationItem>}
+        {page !== 1 && (
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                if (page > 1) {
+                  onPageChange(page - 1);
+                }
+              }}
+            />
+          </PaginationItem>
+        )}
         {/* Primera página */}
         <PaginationItem>
           <PaginationLink
