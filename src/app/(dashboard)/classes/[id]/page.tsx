@@ -7,7 +7,7 @@ import ClassForm from "../ClassesForm";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Notification } from "@/components/ui/Notification";
-import { ClassFormData, ClassFormSchema } from "@/lib/validation/class";
+import { ClassFormData } from "@/lib/validation/class";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { Input } from "@/components/ui/Input";
 import { Download, Trash2 } from "lucide-react";
@@ -81,9 +81,6 @@ export default function ClassDetailPage() {
     end_date: "",
     end_time: "10:30:00",
   });
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof ClassFormData, string>>
-  >({});
 
   const [notification, setNotification] = useState({
     isVisible: false,
@@ -214,7 +211,7 @@ export default function ClassDetailPage() {
     setShowDeleteConfirm(true);
   };
 
-  // Función para eliminar la clase
+  // Función para eliminar la clase - CORREGIDA
   const handleDelete = async () => {
     if (!token || !classId) {
       setDeleteError("Falta información necesaria para eliminar la clase");
@@ -231,28 +228,58 @@ export default function ClassDetailPage() {
       setDeleteSuccess("Clase eliminada exitosamente");
       setShowDeleteConfirm(false);
 
-      // Redirigir a /classes después de 1 segundo
-      setTimeout(() => {
-        router.push("/classes");
-      }, 1000);
+      // Mostrar notificación y redirigir inmediatamente
+      setNotification({
+        isVisible: true,
+        description: "Clase eliminada exitosamente",
+        title: "Éxito",
+      });
+
+      // Redirigir inmediatamente a /classes
+      router.push("/classes");
     } catch (error) {
       console.error("Error eliminando clase:", error);
       setDeleteError("Error al eliminar la clase. Intenta nuevamente.");
+      setNotification({
+        isVisible: true,
+        description: "Error al eliminar la clase",
+        title: "Error",
+      });
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Efecto para limpiar mensajes de éxito/error
-  useEffect(() => {
-    if (deleteSuccess || deleteError) {
-      const timer = setTimeout(() => {
-        setDeleteSuccess(null);
-        setDeleteError(null);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [deleteSuccess, deleteError]);
+  // Función para cerrar notificación
+  const hideNotification = () => {
+    setNotification((prev) => ({ ...prev, isVisible: false }));
+  };
+
+  // Función placeholder para descargar CSV
+  const handleDownloadCSV = () => {
+    console.log("Descargando CSV...");
+  };
+
+  // Función para badges de estado
+  const getStatusBadge = (status: string) => {
+    const statusColors = {
+      Presente: "text-green-800 border-green-200",
+      Ausente: "text-red-800 border-red-200",
+      Tardío: "text-orange-800 border-orange-200",
+    };
+
+    const colorClass =
+      statusColors[status as keyof typeof statusColors] ||
+      "bg-gray-100 text-gray-800 border-gray-200";
+
+    return (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}
+      >
+        {status}
+      </span>
+    );
+  };
 
   // Datos de prueba para el reporte de asistencia
   const mockAttendanceData: AttendanceRecord[] = [
@@ -293,49 +320,6 @@ export default function ClassDetailPage() {
     },
   ];
 
-  if (!token) {
-    return null;
-  }
-
-  // En este componente, las funciones handleChange y handleBlur no hacen nada
-  // porque los campos están deshabilitados
-  const handleChange = (field: string, value: string) => {
-    // No hacer nada - campos deshabilitados
-  };
-
-  const handleBlur = (field: string) => {
-    // No hacer nada - campos deshabilitados
-  };
-
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
-  };
-
-  const handleDownloadCSV = () => {
-    // Lógica para descargar CSV
-    console.log("Descargando CSV...");
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusColors = {
-      Presente: "text-green-800 border-green-200",
-      Ausente: "text-red-800 border-red-200",
-      Tardío: "text-orange-800 border-orange-200",
-    };
-
-    const colorClass =
-      statusColors[status as keyof typeof statusColors] ||
-      "bg-gray-100 text-gray-800 border-gray-200";
-
-    return (
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}
-      >
-        {status}
-      </span>
-    );
-  };
-
   const attendanceColumns: Column<AttendanceRecord>[] = [
     {
       header: "Nombre del Usuario",
@@ -366,6 +350,10 @@ export default function ClassDetailPage() {
       record.className.toLowerCase().includes(searchInput.toLowerCase()) ||
       record.status.toLowerCase().includes(searchInput.toLowerCase()),
   );
+
+  if (!token) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -398,13 +386,13 @@ export default function ClassDetailPage() {
 
       {/* Confirmación de eliminación */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
             <Alert className="border-red-200">
               <AlertTitle className="font-semibold">
                 Confirmar Eliminación
               </AlertTitle>
-              <AlertDescription className="text-red-700 mt-2">
+              <AlertDescription className="mt-2">
                 ¿Estás seguro de que deseas eliminar esta clase? Esta acción no
                 se puede deshacer.
               </AlertDescription>
@@ -474,9 +462,9 @@ export default function ClassDetailPage() {
         {activeTab === "info" ? (
           <ClassForm
             formData={formData}
-            errors={errors}
-            onChange={handleChange}
-            onBlur={handleBlur}
+            errors={{}}
+            onChange={() => {}} // Función vacía ya que los campos están deshabilitados
+            onBlur={() => {}} // Función vacía ya que los campos están deshabilitados
             branches={branches}
             services={services}
             instructors={instructors}
