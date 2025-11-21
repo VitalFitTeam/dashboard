@@ -105,7 +105,6 @@ export default function BranchesTable({
   };
 
   const columns: Column<PaginatedBranch>[] = [
-    { header: "ID", accessor: "branch_id" },
     {
       accessor: "name",
       header: "Nombre",

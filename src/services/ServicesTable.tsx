@@ -29,15 +29,6 @@ export default function ServicesTable({ onView, onEdit }: ServiceTableProps) {
 
   const columns: Column<ServiceRow>[] = [
     {
-      header: "ID",
-      accessor: "id",
-      render: (id) => (
-        <div className="w-28 truncate text-center" title={id as string}>
-          {id as string}
-        </div>
-      ),
-    },
-    {
       header: "Nombre",
       accessor: "name",
       filterType: "text",

@@ -108,15 +108,6 @@ export default function RolesTable() {
 
   const columns: Column<Roles>[] = [
     {
-      header: "ID",
-      accessor: "id",
-      render: (id) => (
-        <div className="w-28 truncate" title={id as string}>
-          {id as string}
-        </div>
-      ),
-    },
-    {
       header: "Nombre",
       accessor: "name",
       filterType: "text",

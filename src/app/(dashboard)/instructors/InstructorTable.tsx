@@ -105,11 +105,6 @@ export default function instructorsTable({
   };
 
   const visibleColumns: Column<InstructorDataList>[] = [
-    {
-      header: "ID",
-      accessor: "instructor_id",
-      render: (id) => <div>{id}</div>,
-    },
     { header: "Nombre", accessor: "first_name", filterType: "text" },
     { header: "Email", accessor: "email", filterType: "text" },
   ];

@@ -96,7 +96,6 @@ export default function PackageTable({
   };
 
   const columns: Column<PackageListItem>[] = [
-    { header: "ID", accessor: "packageId" },
     { header: "Nombre", accessor: "name" },
     { header: "Descripción", accessor: "description" },
     {

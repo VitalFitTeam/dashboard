@@ -37,15 +37,6 @@ export default function UsersTable({ onView, onEdit }: UsersTableProps) {
   };
 
   const columns: Column<Users>[] = [
-    {
-      header: "ID",
-      accessor: "id",
-      render: (id) => (
-        <div className="w-28 truncate" title={id as string}>
-          {id as string}
-        </div>
-      ),
-    },
     { header: "Nombre", accessor: "name", filterType: "text" },
     { header: "Email", accessor: "email", filterType: "text" },
     {

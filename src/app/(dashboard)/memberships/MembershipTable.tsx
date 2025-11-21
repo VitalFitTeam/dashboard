@@ -95,7 +95,6 @@ export default function MembershipTable({
   };
 
   const columns: Column<MembershipType>[] = [
-    { header: "ID", accessor: "membership_type_id" },
     { header: "Nombre", accessor: "name" },
     { header: "Descripción", accessor: "description" },
     { header: "Duración (días)", accessor: "duration_days" },

@@ -224,11 +224,6 @@ export default function ServicesTable({ onServiceUpdate }: ServicesTableProps) {
 
   const visibleColumns: Column<ServiceFullDetail>[] = [
     {
-      header: "ID",
-      accessor: "service_id",
-      render: (id) => <div className="font-mono text-sm">{id as string}</div>,
-    },
-    {
       header: "Nombre",
       accessor: "name",
       filterType: "text",
