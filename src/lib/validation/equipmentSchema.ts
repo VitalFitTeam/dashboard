@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 export const equipmentSchema = z.object({
-  equipment_id: z.string().min(1, "ID requerido"),
+  // ✅ CORRECCIÓN: Hacemos el ID opcional.
+  // Así no falla cuando estás creando un equipo nuevo (que aún no tiene ID).
+  equipment_id: z.string().optional(),
+
   name: z.string().min(1, "El nombre es obligatorio"),
   description: z.string().min(1, "La descripción es obligatoria"),
   brand: z.string().min(1, "La marca es obligatoria"),
