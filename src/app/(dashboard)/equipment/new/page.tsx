@@ -17,7 +17,6 @@ interface CreateEquipmentProps {
 
 export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
   const [formData, setFormData] = useState<EquipmentSchema>({
-    equipment_id: "",
     name: "",
     description: "",
     brand: "",

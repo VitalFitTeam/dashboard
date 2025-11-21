@@ -12,7 +12,11 @@ import {
 import { Textarea } from "@/components/ui/Textarea";
 import { Equipment, EquipmentInfo } from "@vitalfit/sdk";
 
-type EquipmentWithBrand = EquipmentInfo & { brand?: string };
+type EquipmentWithBrand = Partial<EquipmentInfo> & {
+  brand?: string;
+  model?: string;
+  category?: any;
+};
 
 interface EquipmentFormProps {
   equipment: EquipmentWithBrand;
