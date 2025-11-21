@@ -9,7 +9,6 @@ import { api } from "@/lib/sdk-config";
 import { BranchDetails } from "@vitalfit/sdk";
 
 export default function EditBranchPage() {
-  // <-- Cambia el nombre
   const params = useParams();
   const router = useRouter();
   const { token } = useAuth();
