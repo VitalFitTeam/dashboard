@@ -32,6 +32,9 @@ export default function EditInstructorPage() {
     visible: false,
     message: "",
   });
+  const [servicesOptions, setServicesOptions] = useState<
+    Array<{ service_id: string; name: string }>
+  >([]);
 
   useEffect(() => {
     if (!id || !token) {
@@ -53,6 +56,40 @@ export default function EditInstructorPage() {
 
     loadInstructor();
   }, [id, token]);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    let mounted = true;
+    const load = async () => {
+      try {
+        const res = await api.products.getServices(token, {
+          page: 1,
+          limit: 1000,
+        });
+        const services = (res?.data ?? []) as Array<any>;
+        if (!mounted) {
+          return;
+        }
+        setServicesOptions(
+          services.map((s) => ({
+            service_id: s.service_id ?? s.serviceId ?? s.id ?? String(s),
+            name: s.name ?? s.service_name ?? "",
+          })),
+        );
+      } catch (err) {
+        console.warn(
+          "No se pudieron cargar servicios para especialidades:",
+          err,
+        );
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [token]);
 
   const formatDateForBackend = (dateString: string): string => {
     if (!dateString) {
@@ -84,7 +121,7 @@ export default function EditInstructorPage() {
     }
   };
 
-  const handleChange = (field: keyof InstructorDataList, value: string) => {
+  const handleChange = (field: keyof InstructorDataList, value: any) => {
     if (instructor) {
       setInstructor((prev) => (prev ? { ...prev, [field]: value } : prev));
       if (errors[field as keyof InstructorFormData]) {
@@ -146,6 +183,36 @@ export default function EditInstructorPage() {
         payload,
         token,
       );
+
+      try {
+        const specialtyVal = (instructor as any).specialties;
+        if (specialtyVal) {
+          const specialtiesArray = Array.isArray(specialtyVal)
+            ? specialtyVal
+            : [specialtyVal];
+          const idsArray = specialtiesArray
+            .map((s: any) =>
+              typeof s === "string"
+                ? s
+                : (s?.specialty_id ?? s?.service_id ?? String(s)),
+            )
+            .filter(Boolean);
+          try {
+            await api.instructor.addSpecialty(
+              instructor.instructor_id,
+              idsArray as any,
+              token,
+            );
+          } catch (err) {
+            console.error(
+              "No se pudo agregar especialidad después de editar:",
+              err,
+            );
+          }
+        }
+      } catch (err) {
+        console.warn("No se pudo agregar especialidad después de editar:", err);
+      }
       setShowSuccess(true);
       setTimeout(() => {
         router.push("/instructors");
@@ -228,6 +295,7 @@ export default function EditInstructorPage() {
           onChange={handleChange}
           onFieldBlur={handleFieldBlur}
           errors={errors}
+          services={servicesOptions}
         />
       </form>
 

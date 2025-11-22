@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import InstructorForm from "../InstructorForm";
@@ -47,8 +47,11 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
     message: "",
   });
   const [showConnectionError, setShowConnectionError] = useState(false);
+  const [servicesOptions, setServicesOptions] = useState<
+    Array<{ service_id: string; name: string }>
+  >([]);
 
-  const handleChange = (field: keyof InstructorDataList, value: string) => {
+  const handleChange = (field: keyof InstructorDataList, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Limpiar error del campo cuando el usuario escribe
     if (errors[field as keyof InstructorFormData]) {
@@ -65,6 +68,40 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    let mounted = true;
+    const load = async () => {
+      try {
+        const res = await api.products.getServices(token, {
+          page: 1,
+          limit: 1000,
+        });
+        const services = (res?.data ?? []) as Array<any>;
+        if (!mounted) {
+          return;
+        }
+        setServicesOptions(
+          services.map((s) => ({
+            service_id: s.service_id ?? s.serviceId ?? s.id ?? String(s),
+            name: s.name ?? s.service_name ?? "",
+          })),
+        );
+      } catch (err) {
+        console.warn(
+          "No se pudieron cargar servicios para especialidades:",
+          err,
+        );
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,19 +157,61 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
       gender: mapGenderToEnum(formData.gender),
       biography: formData.biography || "",
       profile_picture_url: formData.profile_picture_url || "",
-      specialties: [],
     };
 
     setIsLoading(true);
     try {
       await api.instructor.createInstructor(payload, token);
+
+      try {
+        const searchKey =
+          formData.email || formData.identity_document || formData.first_name;
+        const list = await api.instructor.getInstructors(
+          { limit: 10, page: 1, search: searchKey },
+          token,
+        );
+        const created = (list.data || []).find(
+          (i: any) =>
+            i.email === formData.email ||
+            i.identity_document === formData.identity_document,
+        );
+        if (created) {
+          const specialtyVal = (formData as any).specialties;
+          if (specialtyVal) {
+            const specialtiesArray = Array.isArray(specialtyVal)
+              ? specialtyVal
+              : [specialtyVal];
+            const idsArray = specialtiesArray
+              .map((s: any) =>
+                typeof s === "string"
+                  ? s
+                  : (s?.specialty_id ?? s?.service_id ?? String(s)),
+              )
+              .filter(Boolean);
+            try {
+              await api.instructor.addSpecialty(
+                created.instructor_id,
+                idsArray as any,
+                token,
+              );
+            } catch (err) {
+              console.error(
+                "No se pudo agregar especialidad automáticamente:",
+                err,
+              );
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("No se pudo buscar instructor recién creado:", err);
+      }
+
       setShowSuccess(true);
       setTimeout(() => {
         router.push("/instructors");
       }, 1500);
     } catch (err: unknown) {
       console.error("Error al crear instructor:", err);
-
       if (err && typeof err === "object" && "messages" in err) {
         const error = err as { messages: string[]; error?: string };
         if (error.messages[0] === "conflict") {
@@ -172,6 +251,7 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
           onFieldBlur={handleFieldBlur}
           errors={errors}
           mode="edit"
+          services={servicesOptions}
         />
 
         <Button

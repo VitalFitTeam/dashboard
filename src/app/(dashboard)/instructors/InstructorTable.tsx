@@ -44,6 +44,9 @@ export default function instructorsTable({
     description: "",
     title: "",
   });
+  const [specialtiesMap, setSpecialtiesMap] = useState<
+    Record<string, string[]>
+  >({});
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -58,6 +61,50 @@ export default function instructorsTable({
 
     return () => clearTimeout(timeout);
   }, [searchInput]);
+
+  // Fetch specialties for each instructor in the table
+  useEffect(() => {
+    if (!token || !data || data.length === 0) {
+      setSpecialtiesMap({});
+      return;
+    }
+
+    let mounted = true;
+
+    const loadSpecialties = async () => {
+      const promises = data.map(async (row) => {
+        try {
+          const res = await api.instructor.getInstructorById(
+            row.instructor_id,
+            token,
+          );
+          const specs = (res?.data?.specialties ?? []) as Array<any>;
+          const names = specs.map(
+            (s) => s.specialty_name ?? s.specialty_id ?? "",
+          );
+          return { id: row.instructor_id, names };
+        } catch (err) {
+          return { id: row.instructor_id, names: [] };
+        }
+      });
+
+      const results = await Promise.all(promises);
+      if (!mounted) {
+        return;
+      }
+      const map: Record<string, string[]> = {};
+      results.forEach((r) => {
+        map[r.id] = r.names;
+      });
+      setSpecialtiesMap(map);
+    };
+
+    loadSpecialties();
+
+    return () => {
+      mounted = false;
+    };
+  }, [data, token]);
 
   const handleView = (row: InstructorDataList) => {
     router.push(`/instructors/${row.instructor_id}`);
@@ -105,8 +152,20 @@ export default function instructorsTable({
   };
 
   const visibleColumns: Column<InstructorDataList>[] = [
+    {
+      header: "ID",
+      accessor: "instructor_id",
+      render: (id) => <div>{id}</div>,
+    },
     { header: "Nombre", accessor: "first_name", filterType: "text" },
     { header: "Email", accessor: "email", filterType: "text" },
+    {
+      header: "Especialidad",
+      accessor: "_specialties" as unknown as keyof InstructorDataList,
+      render: (id) => (
+        <div>{(specialtiesMap[id as string] || []).join(", ")}</div>
+      ),
+    },
   ];
 
   const invisibleColumns: Column<InstructorDataList>[] = [

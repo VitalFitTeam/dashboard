@@ -1,5 +1,6 @@
 "use client";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { StatCard } from "@/components/ui/StatCard";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import InstructorsTable from "./InstructorTable";
@@ -29,6 +30,13 @@ export default function Instructor() {
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
+  const [summary, setSummary] = useState<{
+    total: number;
+    actives: number;
+    blocked: number;
+  } | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+
   useEffect(() => {
     const loadInstructorData = async () => {
       if (!token) {
@@ -46,13 +54,6 @@ export default function Instructor() {
           token,
         );
 
-        console.log(
-          "Datos página",
-          page,
-          ":",
-          result.data?.length,
-          "registros",
-        );
         setInstructorData(result.data || []);
         setTotalItems(result.total || 0);
       } catch (error) {
@@ -66,6 +67,28 @@ export default function Instructor() {
 
     loadInstructorData();
   }, [token, pageSize, filters, page, reloadTrigger]); // Añade reloadTrigger como dependencia
+
+  useEffect(() => {
+    const loadSummary = async () => {
+      if (!token) {
+        setSummary(null);
+        setSummaryLoading(false);
+        return;
+      }
+      setSummaryLoading(true);
+      try {
+        const res = await api.instructor.getSummary(token);
+        setSummary(res?.data ?? null);
+      } catch (err) {
+        console.error("Error cargando resumen de instructores:", err);
+        setSummary(null);
+      } finally {
+        setSummaryLoading(false);
+      }
+    };
+
+    loadSummary();
+  }, [token, reloadTrigger]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -84,6 +107,39 @@ export default function Instructor() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        <StatCard
+          title="Total"
+          value={
+            <>
+              <h3 className="ml-1.5 font-normal">
+                {summaryLoading ? "..." : (summary?.total ?? 0)} INSTRUCTORES
+              </h3>
+            </>
+          }
+        />
+        <StatCard
+          title="Activos"
+          value={
+            <>
+              <h3 className="ml-1.5 font-normal text-green-500">
+                {summaryLoading ? "..." : (summary?.actives ?? 0)} INSTRUCTORES
+              </h3>
+            </>
+          }
+        />
+        <StatCard
+          title="Bloqueados"
+          value={
+            <>
+              <h3 className="ml-1.5 font-normal text-red-500">
+                {summaryLoading ? "..." : (summary?.blocked ?? 0)} INSTRUCTORES
+              </h3>
+            </>
+          }
+        />
+      </div>
+
       <PageHeader title="Instructor">
         <Button
           className="bg-transparent text-black border border-gray-100"

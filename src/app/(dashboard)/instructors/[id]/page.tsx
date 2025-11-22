@@ -17,6 +17,9 @@ export default function InstructorDetailPage() {
   const [loading, setLoading] = useState(true);
   const [instructor, setInstructor] = useState<InstructorData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [servicesOptions, setServicesOptions] = useState<
+    Array<{ service_id: string; name: string }>
+  >([]);
 
   useEffect(() => {
     if (!id) {
@@ -59,6 +62,28 @@ export default function InstructorDetailPage() {
       }
     })();
 
+    // load services for specialties labels
+    (async () => {
+      try {
+        const res = await api.products.getServices(token, {
+          page: 1,
+          limit: 1000,
+        });
+        const services = (res?.data ?? []) as Array<any>;
+        setServicesOptions(
+          services.map((s) => ({
+            service_id: s.service_id ?? s.serviceId ?? s.id ?? String(s),
+            name: s.name ?? s.service_name ?? "",
+          })),
+        );
+      } catch (err) {
+        console.warn(
+          "No se pudieron cargar servicios para especialidades:",
+          err,
+        );
+      }
+    })();
+
     return () => {
       mounted = false;
     };
@@ -93,6 +118,7 @@ export default function InstructorDetailPage() {
         onChange={(field, value) =>
           setInstructor((prev) => (prev ? { ...prev, [field]: value } : prev))
         }
+        services={servicesOptions}
       />
     </>
   );
