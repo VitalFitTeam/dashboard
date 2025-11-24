@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import {
+  ChevronDownIcon,
+  FunnelIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/solid";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -41,6 +47,7 @@ export function ClassCalendar({
   const { user, hasRole, token } = useAuth();
   const router = useRouter();
 
+  const calendarRef = useRef<any>(null);
   const [events, setEvents] = useState<GymClass[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingClasses, setIsLoadingClasses] = useState(false);
@@ -57,6 +64,9 @@ export function ClassCalendar({
     [],
   );
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date()); // Fecha actual por defecto
+  const [currentView, setCurrentView] = useState<string>("dayGridMonth");
+  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   // Cargar datos iniciales (branches, services, instructors)
   useEffect(() => {
@@ -259,6 +269,14 @@ export function ClassCalendar({
     loadClasses();
   }, [token, branchFilter, allBranches, allServices, allInstructors]);
 
+  // Ir al mes actual cuando se carga el componente
+  useEffect(() => {
+    if (calendarRef.current && !isLoading) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.gotoDate(new Date()); // Ir a la fecha actual
+    }
+  }, [isLoading]);
+
   const visibleEvents = events.filter((e) => {
     if (!user) {
       return false;
@@ -301,7 +319,7 @@ export function ClassCalendar({
       onCreateClass(arg.dateStr);
     } else {
       router.push(
-        `/classes/new?date=${arg.dateStr}&branch=${branchFilter || user?.branchId || "b-default"}`,
+        `/calendar/new?date=${arg.dateStr}&branch=${branchFilter || user?.branchId || "b-default"}`,
       );
     }
   };
@@ -315,7 +333,7 @@ export function ClassCalendar({
     if (onViewClass) {
       onViewClass(event.id);
     } else {
-      router.push(`/classes/${event.id}?branch=${event.branchId}`);
+      router.push(`/calendar/${event.id}?branch=${event.branchId}`);
     }
   };
 
@@ -338,73 +356,7 @@ export function ClassCalendar({
 
   return (
     <>
-      {/* Filtros */}
-      <div className="flex gap-4 mb-4 flex-wrap">
-        {/* Filtro por sucursal (PRIMERO) */}
-        <select
-          className="border rounded px-2 py-1 min-w-[150px]"
-          value={branchFilter ?? ""}
-          onChange={(e) => handleBranchChange(e.target.value)}
-        >
-          <option value="">Elija una sucursal</option>
-          {allBranches.map((branch) => (
-            <option key={branch.branch_id} value={branch.branch_id}>
-              {branch.name}
-            </option>
-          ))}
-        </select>
-
-        {/* Filtro por tipo de servicio - Solo muestra si hay sucursal seleccionada */}
-        {branchFilter && (
-          <select
-            className="border rounded px-2 py-1 min-w-[150px]"
-            value={typeFilter ?? ""}
-            onChange={(e) => setTypeFilter(e.target.value || null)}
-          >
-            <option value="">Todos los servicios</option>
-            {filteredServices.map((service) => (
-              <option key={service.service_id} value={service.name}>
-                {service.name}
-              </option>
-            ))}
-          </select>
-        )}
-
-        {/* Filtro por instructor - Solo muestra si hay sucursal seleccionada */}
-        {branchFilter && (
-          <select
-            className="border rounded px-2 py-1 min-w-[150px]"
-            value={instructorFilter ?? ""}
-            onChange={(e) => setInstructorFilter(e.target.value || null)}
-          >
-            <option value="">Todos los instructores</option>
-            {filteredInstructors.map((instructor) => (
-              <option
-                key={instructor.instructor_id}
-                value={instructor.instructor_id}
-              >
-                {instructor.first_name} {instructor.last_name}
-              </option>
-            ))}
-          </select>
-        )}
-
-        {/* Indicador de carga para las clases */}
-        {isLoadingClasses && (
-          <div className="flex items-center gap-2 text-blue-600">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span className="text-sm">Cargando clases...</span>
-          </div>
-        )}
-      </div>
-
-      {/* Información de debug (puedes remover esto después) */}
-      {branchFilter && (
-        <div className="mb-2 text-sm text-gray-600">
-          Mostrando {filteredInstructors.length} instructores y{" "}
-          {filteredServices.length} servicios para esta sucursal
-        </div>
-      )}
+      {/* (Los filtros se muestran dentro de la toolbar cuando se activa "Filtro") */}
 
       {/* Mensaje cuando no hay sucursal seleccionada */}
       {!branchFilter && (
@@ -425,71 +377,241 @@ export function ClassCalendar({
             </div>
           </div>
         )}
-
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          height="90vh"
-          selectable={canCreate()}
-          editable={false}
-          displayEventTime={true}
-          headerToolbar={{
-            left: "dayGridMonth,timeGridWeek,timeGridDay",
-            center: "title",
-            right: "today prev,next",
-          }}
-          dayHeaderFormat={{ weekday: "short" }}
-          events={visibleEvents}
-          eventContent={(arg) => {
-            const eventData = arg.event.extendedProps as GymClass;
-            const color = classColors[eventData.type] ?? "#e2e8f0";
-
-            const startTime = new Date(arg.event.start!).toLocaleTimeString(
-              [],
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-              },
-            );
-            const endTime = new Date(arg.event.end!).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-
-            return (
-              <div
-                className="rounded-lg p-3 text-sm text-gray-900 hover:opacity-95 transition-opacity shadow-sm"
-                style={{ backgroundColor: color }}
-              >
-                <div className="font-semibold text-base">{eventData.title}</div>
-                <div className="text-gray-700">
-                  {startTime} - {endTime}
-                </div>
-                <div className="text-gray-600">
-                  Instructor: {eventData.instructorName}
-                </div>
-                <div className="text-gray-600">
-                  Capacidad: {eventData.maxCapacity}
-                </div>
-                <div className="text-gray-600 text-xs">
-                  Sucursal: {eventData.branchName}
+        <div className="container-toolbar">
+          {/* Toolbar personalizado con botón Filtro */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between border-b-2 pb-2">
+              <div className="flex items-center gap-4">
+                <span className="text-orange-400 font-semibold">Calendar</span>
+                <div className="flex gap-2 items-center">
+                  <button
+                    className={`px-3 py-1 text-sm border-0 ${currentView === "dayGridMonth"
+                        ? "text-orange-400 border-b-2 border-orange-400"
+                        : "bg-transparent"
+                      }`}
+                    onClick={() => {
+                      calendarRef.current?.getApi?.()?.changeView("dayGridMonth");
+                    }}
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    className={`px-3 py-1 text-sm border-0 ${currentView === "timeGridWeek"
+                        ? "text-orange-400 border-b-2 border-orange-400"
+                        : "bg-transparent"
+                      }`}
+                    onClick={() => {
+                      calendarRef.current?.getApi?.()?.changeView("timeGridWeek");
+                    }}
+                  >
+                    Weekly
+                  </button>
+                  <button
+                    className={`px-3 py-1 text-sm border-0 ${currentView === "timeGridDay"
+                        ? "text-orange-400 border-b-2 border-orange-400"
+                        : "bg-transparent"
+                      }`}
+                    onClick={() => {
+                      calendarRef.current?.getApi?.()?.changeView("timeGridDay");
+                    }}
+                  >
+                    Daily
+                  </button>
                 </div>
               </div>
-            );
-          }}
-          dateClick={handleDateClick}
-          eventClick={handleEventClick}
-          dayCellDidMount={(info) => {
-            const today = new Date();
-            if (info.date.toDateString() === today.toDateString()) {
-              info.el.style.backgroundColor = "#f3f4f6";
-              info.el.style.borderRadius = "0.5rem";
-            }
-          }}
-          loading={(isLoading) => {
-            console.warn(isLoading);
-          }}
-        />
+
+              <div className="flex flex-col items-center">
+                {/* filtro en la misma linea pero al final derecho */}
+                <div className="self-end">
+                  <button
+                    className="ml-2 px-3 py-1 rounded text-sm border border-orange-400 flex items-center gap-2 text-orange-400"
+                    onClick={() => setShowFilters((s) => !s)}
+                    aria-pressed={showFilters}
+                  >
+                    <FunnelIcon className="h-4 w-4" />
+                    Filtro
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Filtros desplegables (muestran los selects existentes) */}
+            {showFilters && (
+              <div className="mt-3 flex gap-3 flex-wrap items-center">
+                <select
+                  className="border rounded px-2 py-1 min-w-[150px]"
+                  value={branchFilter ?? ""}
+                  onChange={(e) => handleBranchChange(e.target.value)}
+                >
+                  <option value="">Elija una sucursal</option>
+                  {allBranches.map((branch) => (
+                    <option key={branch.branch_id} value={branch.branch_id}>
+                      {branch.name}
+                    </option>
+                  ))}
+                </select>
+
+                {branchFilter && (
+                  <select
+                    className="border rounded px-2 py-1 min-w-[150px]"
+                    value={typeFilter ?? ""}
+                    onChange={(e) => setTypeFilter(e.target.value || null)}
+                  >
+                    <option value="">Todos los servicios</option>
+                    {filteredServices.map((service) => (
+                      <option key={service.service_id} value={service.name}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {branchFilter && (
+                  <select
+                    className="border rounded px-2 py-1 min-w-[150px]"
+                    value={instructorFilter ?? ""}
+                    onChange={(e) => setInstructorFilter(e.target.value || null)}
+                  >
+                    <option value="">Todos los instructores</option>
+                    {filteredInstructors.map((instructor) => (
+                      <option
+                        key={instructor.instructor_id}
+                        value={instructor.instructor_id}
+                      >
+                        {instructor.first_name} {instructor.last_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {isLoadingClasses && (
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span className="text-sm">Cargando clases...</span>
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="flex gap-4 mt-2">
+              <div className="flex items-center mt-2">
+                <div className="text-lg text-orange-400 font-semibold">
+                  {currentDate.toLocaleString("es-ES", {
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </div>
+                <button
+                  className="ml-2 p-1 rounded hover:bg-gray-100"
+                  onClick={() => {
+                    try {
+                      const api = calendarRef.current?.getApi?.();
+                      const current = api.getDate();
+                      const yearInput = window.prompt(
+                        "Ir a año:",
+                        String(current.getFullYear()),
+                      );
+                      if (!yearInput){return;}
+                      const y = parseInt(yearInput, 10);
+                      if (isNaN(y)){return;}
+                      api.gotoDate(new Date(y, current.getMonth(), 1));
+                    } catch (e) {
+                      console.error("Error al cambiar de año:", e);
+                    }
+                  }}
+                  aria-label="Cambiar año"
+                >
+                  <ChevronDownIcon className="h-5 w-5 text-orange-400" />
+                </button>
+              </div>
+              <div className="flex gap-2 items-center mt-2">
+                <button
+                  className="p-2 rounded bg-orange-100"
+                  onClick={() => calendarRef.current?.getApi?.()?.prev()}
+                  aria-label="Anterior"
+                >
+                  <ChevronLeftIcon className="h-4 w-4 text-gray-700" />
+                </button>
+                <button
+                  className="px-3 py-1 rounded border bg-orange-400 text-white"
+                  onClick={() => {
+                    const today = new Date();
+                    calendarRef.current?.getApi?.()?.today();
+                    setCurrentDate(today);
+                  }}
+                >
+                  Hoy
+                </button>
+                <button
+                  className="p-2 rounded bg-orange-100"
+                  onClick={() => calendarRef.current?.getApi?.()?.next()}
+                  aria-label="Siguiente"
+                >
+                  <ChevronRightIcon className="h-4 w-4 text-gray-700" />
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <FullCalendar
+            ref={calendarRef}
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            initialDate={new Date()} // Fecha inicial establecida como hoy
+            height="90vh"
+            selectable={canCreate()}
+            editable={false}
+            displayEventTime={true}
+            headerToolbar={false}
+            datesSet={(arg) => {
+              setCurrentDate(arg.start ?? new Date());
+              setCurrentView(arg.view.type);
+            }}
+            dayHeaderFormat={{ weekday: "short" }}
+            events={visibleEvents}
+            eventContent={(arg) => {
+              const eventData = arg.event.extendedProps as GymClass;
+              const color = classColors[eventData.type] ?? "#e2e8f0";
+
+              const startTime = new Date(arg.event.start!).toLocaleTimeString(
+                [],
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                },
+              );
+              const endTime = new Date(arg.event.end!).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+              return (
+                <div
+                  className="rounded-lg text-xs text-gray-900 hover:opacity-95 transition-opacity shadow-sm"
+                  style={{ backgroundColor: color }}
+                >
+                  <div className="font-semibold text-sm">{eventData.title}</div>
+                  <div className="text-gray-700">
+                    {startTime} - {endTime}
+                  </div>
+                </div>
+              );
+            }}
+            dateClick={handleDateClick}
+            eventClick={handleEventClick}
+            dayCellDidMount={(info) => {
+              const today = new Date();
+              if (info.date.toDateString() === today.toDateString()) {
+                info.el.style.backgroundColor = "#f3f4f6";
+                info.el.style.borderRadius = "0.5rem";
+              }
+            }}
+            loading={(isLoading) => {
+              console.warn(isLoading);
+            }}
+          />
+        </div>
       </div>
 
       {!isLoadingClasses && branchFilter && visibleEvents.length === 0 && (
