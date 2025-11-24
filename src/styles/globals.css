@@ -237,27 +237,80 @@ h5 {
   }
 }
 
+.fc-toolbar-chunk {
+  @apply flex items-center gap-2;
+}
+
+/* Mostrar la palabra "Calendar" sólo antes del grupo de botones de vista (month/week/day) */
+.fc .fc-toolbar-chunk:last-child .fc-button-group::before {
+  content: "Calendar";
+  padding-right: 2rem;
+  font-weight: theme("fontWeight.semibold");
+  color: theme("colors.orange.400");
+}
+
 /* Toolbar title */
 .fc .fc-toolbar-title {
-  @apply text-base font-semibold text-gray-800;
+  @apply font-semibold text-orange-400;
+}
+
+.fc .fc-button.fc-yearSelector-button:hover {
+  @apply text-orange-400 bg-transparent;
+}
+/* .fc .fc-toolbar-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+} */
+
+.fc-today-button{
+  @apply bg-orange-300 rounded-md;
 }
 
 /* Botones */
 .fc .fc-button {
-  @apply bg-gray-100 text-gray-800 rounded-md px-3 py-1 font-medium transition-colors;
+  @apply bg-transparent border-0 rounded-none text-gray-800 px-3 py-1 font-medium transition-colors;
 }
 
 .fc .fc-button:hover {
-  @apply bg-gray-200;
+  @apply bg-transparent text-orange-400;
 }
 
 .fc .fc-button:focus {
-  @apply ring-2 ring-gray-300;
+  @apply bg-transparent border-0;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active{
+  @apply bg-transparent border-0 border-b-2 rounded-none border-orange-400 text-orange-400;
+}
+
+.fc .fc-button-primary:disabled {
+  @apply bg-orange-400 rounded-md;
+}
+
+.fc-prev-button,.fc-next-button {
+  @apply bg-orange-100 rounded-md;
+}
+
+.fc-timeGridWeek-button, .fc-button .fc-button-primary{
+  @apply border-0;
+}
+
+.fc-col-header-cell,.fc-col-header {
+  @apply bg-[#F9F9F9] rounded-md;
+}
+
+.fc-view-harness, .fc-view-harness-active,.fc-dayGridMonth-view, .fc-view, .fc-daygrid{
+  @apply border-0;
+}
+
+.fc-scrollgrid,  .fc-scrollgrid-liquid{
+  @apply bg-white rounded-lg shadow-sm;
 }
 
 /* Número de día */
 .fc .fc-daygrid-day-number {
-  @apply text-sm text-gray-500 font-normal;
+  @apply text-sm text-gray-500 font-normal text-left;
 }
 
 /* Celdas de hora (vista semanal) */
@@ -270,3 +323,9 @@ h5 {
   font-family: "Inter", sans-serif;
   --fc-small-font-size: 13px;
 }
+
+.fc-dayGridMonth-button{
+  @apply bg-orange-300 rounded-md;
+}
+
+

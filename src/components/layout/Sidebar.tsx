@@ -75,11 +75,12 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
         { name: "Clientes", icon: UserIcon, href: "/clients" },
 
         {
-          name: "Clases y Reservas",
+          name: "Calendario y Reservas",
           icon: Calendar,
           subitems: [
-            { name: "Listado de Clases", href: "/classes" },
-            { name: "Seguimiento de reservas", href: "/reservations" },
+            { name: "Calendario", href: "/calendar" },
+            { name: "Reservas por bloque", href: "/reservations" },
+            { name: "Registro de Asistencia", href: "/attendance" },
           ],
         },
 
@@ -128,12 +129,12 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
         { name: "Instructores", icon: UsersIcon, href: "/instructors" },
 
         {
-          name: "Clases y Reservas",
+          name: "Calendario y Reservas",
           icon: Calendar,
           subitems: [
             { name: "Calendario", href: "/calendar" },
-            { name: "Listado de Clases", href: "/classes" },
-            { name: "Reservas", href: "/reservations" },
+            { name: "Reservas por bloque", href: "/reservations" },
+            { name: "Registro de Asistencia", href: "/attendance" },
           ],
         },
       ],
