@@ -98,6 +98,7 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
           icon: CurrencyDollarIcon,
           subitems: [
             { name: "Membresías", href: "/memberships" },
+            { name: "Metodos de Pago", href: "/payment-methods" },
             { name: "Servicios", href: "/services" },
             { name: "Equipamiento", href: "/equipment" },
             { name: "Instructores", href: "/instructors" },
