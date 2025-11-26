@@ -32,9 +32,8 @@ export default function EditCausePage() {
   };
 
   const handleSubmit = async () => {
-    if (!cause) return;
+    if (!cause){return;}
 
-    // Validación básica
     const newErrors: Record<string, string> = {};
     
     if (!cause.name.trim()) {

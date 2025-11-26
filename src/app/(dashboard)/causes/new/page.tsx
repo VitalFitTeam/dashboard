@@ -14,7 +14,7 @@ export default function NewCausePage() {
   const [newCause, setNewCause] = useState({
     name: "",
     description: "",
-    status: "active" as 'active' | 'inactive'
+    status: "active" as "active" | "inactive"
   });
 
   const handleChange = (field: string, value: string) => {

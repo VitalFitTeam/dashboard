@@ -14,7 +14,7 @@ interface Cause {
   causes_id?: string;
   name: string;
   description: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 interface CausesFormProps {
@@ -57,7 +57,7 @@ export default function CausesForm({
           <label className="text-sm font-medium mb-2">Estado</label>
           <Select
             value={cause.status}
-            onValueChange={(value: 'active' | 'inactive') => handleChange("status", value)}
+            onValueChange={(value: "active" | "inactive") => handleChange("status", value)}
             disabled={disabled}
           >
             <SelectTrigger className="w-full md:w-[200px]">

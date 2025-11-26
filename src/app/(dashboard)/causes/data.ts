@@ -3,7 +3,7 @@ export interface Cause {
   causes_id: string;
   name: string;
   description: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 export const mockCauses: Cause[] = [

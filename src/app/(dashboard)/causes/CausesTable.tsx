@@ -86,7 +86,7 @@ export default function CausesTable({
   };
 
 
-  const StatusBadge = ({ status }: { status: 'active' | 'inactive' }) => {
+  const StatusBadge = ({ status }: { status: "active" | "inactive" }) => {
     const variantMap = {
       active: "secondary", 
       inactive: "destructive" 
@@ -111,7 +111,7 @@ export default function CausesTable({
       header: "Estado", 
       accessor: "status", 
       filterType: "text",
-      render: (value) => <StatusBadge status={value as 'active' | 'inactive'} />
+      render: (value) => <StatusBadge status={value as "active" | "inactive"} />
     },
   ];
 
