@@ -99,6 +99,7 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
           subitems: [
             { name: "Membresías", href: "/memberships" },
             { name: "Métodos de Pagos", href: "/payment-methods" },
+            { name: "Causales de Cancelación", href: "/causes" },
             { name: "Servicios", href: "/services" },
             { name: "Equipamiento", href: "/equipment" },
             { name: "Instructores", href: "/instructors" },
