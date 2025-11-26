@@ -249,7 +249,7 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   };
 
   const columns: Column<PaymentMethod>[] = [
-    {
+    /*{
       header: "ID",
       accessor: "method_id",
       render: (id) => (
@@ -258,6 +258,7 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
         </div>
       ),
     },
+    */
     {
       header: "Nombre",
       accessor: "name",
