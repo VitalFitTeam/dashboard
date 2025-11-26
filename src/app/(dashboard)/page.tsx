@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import SuperAdminDashboard from "@/components/features/dashboard/SuperAdminDashboard";
 
 export default function DashboardHome() {
   const { user, hasRole } = useAuth();
@@ -11,11 +12,16 @@ export default function DashboardHome() {
 
   return (
     <div>
-      <h1>Bienvenido, {user.first_name}</h1>
-      <p>Tu rol: {user.role_label}</p>
+
+      {!hasRole(["super_admin", "branch_admin", "accountant"]) && (
+        <>
+        <h1>Bienvenido, {user.first_name}</h1>
+        <p>Tu rol: {user.role_label}</p>
+        </>
+      )}
 
       {hasRole(["super_admin", "branch_admin"]) && (
-        <button>Gestionar usuarios</button>
+        <SuperAdminDashboard/>
       )}
 
       {hasRole("accountant") && <button>Ver reportes financieros</button>}
