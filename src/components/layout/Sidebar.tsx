@@ -100,6 +100,7 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
             { name: "Membresías", href: "/memberships" },
             { name: "Métodos de Pagos", href: "/payment-methods" },
             { name: "Servicios", href: "/services" },
+            { name: "Documento Fiscal", href: "/catalog/fiscalDocument" },
             { name: "Equipamiento", href: "/equipment" },
             { name: "Instructores", href: "/instructors" },
             { name: "Promociones", href: "/promotions" },
