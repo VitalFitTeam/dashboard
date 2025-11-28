@@ -222,7 +222,7 @@ export default function ManualPaymentPage() {
         <div className="flex gap-4 justify-end">
           <Button
             variant="outline"
-            onClick={() => router.push("/membershipManagement")}
+            onClick={() => router.push("/administrator/membershipManagement")}
             disabled={isSubmitting}
           >
             Cancelar
