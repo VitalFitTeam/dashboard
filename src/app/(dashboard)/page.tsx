@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import SuperAdminDashboard from "@/components/features/dashboard/SuperAdminDashboard";
+import InstructorDashboard from "@/components/features/dashboard/InstructorDashboard";
 
 export default function DashboardHome() {
   const { user, hasRole } = useAuth();
@@ -13,7 +14,7 @@ export default function DashboardHome() {
   return (
     <div>
 
-      {!hasRole(["super_admin", "branch_admin", "accountant"]) && (
+      {!hasRole(["super_admin", "branch_admin", "accountant","instructor"]) && (
         <>
         <h1>Bienvenido, {user.first_name}</h1>
         <p>Tu rol: {user.role_label}</p>
@@ -21,7 +22,12 @@ export default function DashboardHome() {
       )}
 
       {hasRole(["super_admin", "branch_admin"]) && (
-        <SuperAdminDashboard/>
+        <SuperAdminDashboard/>  
+       
+      )}
+
+      {hasRole(["instructor"]) && (
+        <InstructorDashboard/>
       )}
 
       {hasRole("accountant") && <button>Ver reportes financieros</button>}
