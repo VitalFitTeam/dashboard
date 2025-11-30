@@ -107,6 +107,7 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
             { name: "Instructores", href: "/instructors" },
             { name: "Promociones", href: "/promotions" },
             { name: "Paquetes", href: "/packages" },
+            { name: "Gestión Global de Banners ", href: "/banners" },
           ],
         },
 
