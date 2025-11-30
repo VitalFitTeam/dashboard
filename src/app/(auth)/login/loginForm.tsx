@@ -116,7 +116,7 @@ export default function LoginForm() {
 
           <div className="text-right text-[0.9rem] mb-6">
             <a
-              href="#"
+              href="/forgotPassword"
               style={{ color: colors.primary }}
               className="font-semibold hover:underline transition-colors duration-200"
             >
