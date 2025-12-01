@@ -7,10 +7,6 @@ import {
   UsersIcon,
   ChartBarIcon,
   TicketIcon,
-  Cog6ToothIcon,
-  QuestionMarkCircleIcon,
-  ArrowRightCircleIcon,
-  ChevronDownIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -35,37 +31,38 @@ import {
 import Image from "next/image";
 import { NavUser } from "./NavUser";
 import { useAuth } from "@/context/AuthContext";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 // 🔹 Tipos
-interface SubItem {
+export interface SubItem {
   name: string;
   href: string;
 }
 
-interface NavItemWithSub {
+export interface NavItemWithSub {
   name: string;
   icon: React.ComponentType<{ className?: string }>;
   subitems: SubItem[];
 }
 
-interface NavItemSimple {
+export interface NavItemSimple {
   name: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
-type NavItem = NavItemSimple | NavItemWithSub;
+export type NavItem = NavItemSimple | NavItemWithSub;
 
-interface NavSection {
+export interface NavSection {
   title?: string;
   items: NavItem[];
 }
 
-function isNavItemWithSub(item: NavItem): item is NavItemWithSub {
+export function isNavItemWithSub(item: NavItem): item is NavItemWithSub {
   return (item as NavItemWithSub).subitems !== undefined;
 }
 
-const sidebarMenusByRole: Record<string, NavSection[]> = {
+export const sidebarMenusByRole: Record<string, NavSection[]> = {
   super_admin: [
     {
       title: "Dashboard Principal",
@@ -103,12 +100,11 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
             { name: "Gestión de Membresías", href: "/administrator/membershipManagement" },
             { name: "Membresías por Vencer", href: "/administrator/membershipExpire" },
             { name: "Servicios", href: "/services" },
-            { name: "Documento Fiscal", href: "/catalog/fiscalDocument"},
+            { name: "Documento Fiscal", href: "/catalog/fiscalDocument" },
             { name: "Equipamiento", href: "/equipment" },
             { name: "Instructores", href: "/instructors" },
             { name: "Promociones", href: "/promotions" },
             { name: "Paquetes", href: "/packages" },
-            { name: "Gestión Global de Banners ", href: "/banners" },
           ],
         },
 
@@ -199,6 +195,7 @@ const sidebarMenusByRole: Record<string, NavSection[]> = {
   ],
 };
 
+
 export default function SidebarDashboard() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
@@ -249,18 +246,16 @@ export default function SidebarDashboard() {
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
-                              isAnySubActive
-                                ? "bg-gray-100 text-orange-400 font-medium"
-                                : "text-gray-700 hover:bg-gray-100"
-                            }`}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${isAnySubActive
+                              ? "bg-gray-100 text-orange-400 font-medium"
+                              : "text-gray-700 hover:bg-gray-100"
+                              }`}
                           >
                             <item.icon
-                              className={`h-4 w-4 ${
-                                isAnySubActive
-                                  ? "text-orange-400"
-                                  : "text-gray-600"
-                              }`}
+                              className={`h-4 w-4 ${isAnySubActive
+                                ? "text-orange-400"
+                                : "text-gray-600"
+                                }`}
                             />
                             <span className="flex-1">{item.name}</span>
                           </SidebarMenuButton>
@@ -271,11 +266,10 @@ export default function SidebarDashboard() {
                               <SidebarMenuSubItem key={sub.name}>
                                 <Link
                                   href={sub.href}
-                                  className={`block px-2 py-1 rounded-md text-sm transition-colors ${
-                                    pathname === sub.href
-                                      ? " text-orange-400 font-medium"
-                                      : "text-gray-700 hover:bg-gray-100"
-                                  }`}
+                                  className={`block px-2 py-1 rounded-md text-sm transition-colors ${pathname === sub.href
+                                    ? " text-orange-400 font-medium"
+                                    : "text-gray-700 hover:bg-gray-100"
+                                    }`}
                                 >
                                   {sub.name}
                                 </Link>
@@ -292,22 +286,20 @@ export default function SidebarDashboard() {
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton
                       asChild
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                        item.href === pathname
-                          ? "bg-gray-100 text-orange-400 font-medium"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${item.href === pathname
+                        ? "bg-gray-100 text-orange-400 font-medium"
+                        : "text-gray-700 hover:bg-gray-100"
+                        }`}
                     >
                       <Link
                         href={item.href}
                         className="flex items-center gap-2 w-full"
                       >
                         <item.icon
-                          className={`h-4 w-4 ${
-                            item.href === pathname
-                              ? "text-orange-600"
-                              : "text-gray-600"
-                          }`}
+                          className={`h-4 w-4 ${item.href === pathname
+                            ? "text-orange-600"
+                            : "text-gray-600"
+                            }`}
                         />
                         <span>{item.name}</span>
                       </Link>
