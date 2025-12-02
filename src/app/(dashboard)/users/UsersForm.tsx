@@ -209,8 +209,8 @@ export default function UsersForm({
               type="radio"
               name="genero"
               value="masculino"
-              checked={formData.gender === "masculino"}
-              onChange={() => onChange("gender", "masculino")}
+              checked={formData.gender === "masculino" || formData.gender === "male"}
+              onChange={() => onChange("gender", "male")}
               className="form-radio h-4 w-4 text-primary"
               disabled={disabled}
             />
@@ -222,8 +222,8 @@ export default function UsersForm({
               type="radio"
               name="genero"
               value="femenino"
-              checked={formData.gender === "femenino"}
-              onChange={() => onChange("gender", "femenino")}
+              checked={formData.gender === "femenino" || formData.gender === "female"}
+              onChange={() => onChange("gender", "female")}
               className="form-radio h-4 w-4 text-primary"
               disabled={disabled}
             />
@@ -234,9 +234,9 @@ export default function UsersForm({
             <input
               type="radio"
               name="genero"
-              value="prefiero no especificarlo"
-              checked={formData.gender === "prefiero no especificarlo"}
-              onChange={() => onChange("gender", "prefiero no especificarlo")}
+              value="prefer-not-to-say"
+              checked={formData.gender === "prefer-not-to-say"}
+              onChange={() => onChange("gender", "prefer-not-to-say")}
               className="form-radio h-4 w-4 text-primary"
               disabled={disabled}
             />

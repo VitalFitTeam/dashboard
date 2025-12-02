@@ -18,21 +18,17 @@ export default function EditUserPage() {
 
     const normalizePhone = (phone: string) => phone.replace(/\s+/g, "");
 
-    // Función para normalizar el género según lo que espera tu UI
-    const normalizeGender = (gender: string): string => {
-        const genderMap: Record<string, string> = {
-            "M": "masculino",
-            "F": "femenino",
-            "O": "prefiero no especificarlo",
-            "masculino": "masculino",
-            "femenino": "femenino",
-            "prefiero no especificarlo": "prefiero no especificarlo",
-            "male": "masculino",
-            "female": "femenino",
-            "other": "prefiero no especificarlo",
+    const mapGenderToBackend = (gender: string): "male" | "female" | "prefer-not-to-say" => {
+        const backendMap: Record<string, "male" | "female" | "prefer-not-to-say"> = {
+            "masculino": "male",
+            "femenino": "female",
+            "prefiero no especificarlo": "prefer-not-to-say",
+            "male": "male",
+            "female": "female",
+            "other": "prefer-not-to-say",
         };
 
-        return genderMap[gender] || "prefiero no especificarlo";
+        return backendMap[gender] || "prefer-not-to-say";
     };
 
     const [formData, setFormData] = useState<Users>({
@@ -97,8 +93,8 @@ export default function EditUserPage() {
                 if (userData) {
                     const roleName = userData.role_name || "";
                     const validRole = mapRoleNameToValidRole(roleName);
-                    const normalizedGender = normalizeGender(userData.gender || "");
-
+                    const normalizedGender = mapGenderToBackend(userData.gender);
+                     
                     setFormData({
                         id: userData.user_id || "",
                         name: userData.first_name || "",
@@ -172,7 +168,7 @@ export default function EditUserPage() {
                 phone: formData.phone.trim() || undefined,
                 identity_document: formData.document.trim() || undefined,
                 birth_date: formData.date || undefined,
-                gender: formData.gender || undefined,
+                gender: mapGenderToBackend(formData.gender),
                 role_name: formData.rol || undefined,
             };
 
