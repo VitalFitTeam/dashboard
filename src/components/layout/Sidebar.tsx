@@ -104,6 +104,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
             { name: "Instructores", href: "/instructors" },
             { name: "Promociones", href: "/promotions" },
             { name: "Paquetes", href: "/packages" },
+            { name: "Gestión Global de Banners", href: "/banners" },
           ],
         },
 
@@ -165,6 +166,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
     {
       title: "Panel del Instructor",
       items: [
+        { name: "Inicio", icon: HomeIcon, href: "/" },
         { name: "Mis Clases", icon: Calendar, href: "/instructor/classes" },
         { name: "Asistencia", icon: UsersIcon, href: "/instructor/attendance" },
         {
@@ -180,6 +182,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
     {
       title: "Finanzas",
       items: [
+        { name: "Inicio", icon: HomeIcon, href: "/" },
         {
           name: "Facturación",
           icon: CurrencyDollarIcon,
@@ -194,6 +197,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
     {
       title: "Análisis de Datos",
       items: [
+        { name: "Inicio", icon: HomeIcon, href: "/" },
         { name: "Reportes", icon: ChartBarIcon, href: "/analytics/reports" },
         { name: "Tendencias", icon: ChartBar, href: "/analytics/trends" },
       ],
