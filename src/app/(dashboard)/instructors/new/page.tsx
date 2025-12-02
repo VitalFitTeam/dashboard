@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import InstructorForm from "../InstructorForm";
@@ -7,7 +7,11 @@ import { api } from "@/lib/sdk-config";
 import { Notification } from "@/components/ui/Notification";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { InstructorDataList, UserGender } from "@vitalfit/sdk";
+import {
+  InstructorDataList,
+  UserGender,
+  ServiceCategoryInfo,
+} from "@vitalfit/sdk";
 import {
   validateInstructor,
   validateInstructorField,
@@ -47,8 +51,11 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
     message: "",
   });
   const [showConnectionError, setShowConnectionError] = useState(false);
+  const [categoriesOptions, setCategoriesOptions] = useState<
+    Array<{ category_id: string; name: string }>
+  >([]);
 
-  const handleChange = (field: keyof InstructorDataList, value: string) => {
+  const handleChange = (field: keyof InstructorDataList, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Limpiar error del campo cuando el usuario escribe
     if (errors[field as keyof InstructorFormData]) {
@@ -66,6 +73,40 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
     }
   };
 
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    let mounted = true;
+    const loadCategories = async () => {
+      try {
+        const res = await api.products.getCategories(token);
+        // Según el SDK, getCategories retorna DataResponse<ServiceCategoryInfo[]>
+        const categories = (res?.data ?? []) as ServiceCategoryInfo[];
+        if (!mounted) {
+          return;
+        }
+        setCategoriesOptions(
+          categories.map((cat) => ({
+            category_id: cat.category_id,
+            name: cat.name,
+          })),
+        );
+      } catch (err) {
+        console.warn(
+          "No se pudieron cargar las categorías para especialidades:",
+          err,
+        );
+        // Opcional: setear opciones por defecto o manejar error
+        setCategoriesOptions([]);
+      }
+    };
+    loadCategories();
+    return () => {
+      mounted = false;
+    };
+  }, [token]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowServerError({ visible: false, message: "" });
@@ -79,7 +120,6 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
       });
       return;
     }
-
     // Validar formulario completo con Zod
     const validationResult = validateInstructor(formData);
     if (!validationResult.success) {
@@ -120,19 +160,62 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
       gender: mapGenderToEnum(formData.gender),
       biography: formData.biography || "",
       profile_picture_url: formData.profile_picture_url || "",
-      specialties: [],
     };
 
     setIsLoading(true);
     try {
       await api.instructor.createInstructor(payload, token);
+
+      try {
+        const searchKey =
+          formData.email || formData.identity_document || formData.first_name;
+        const list = await api.instructor.getInstructors(
+          { limit: 10, page: 1, search: searchKey },
+          token,
+        );
+        const created = (list.data || []).find(
+          (i: any) =>
+            i.email === formData.email ||
+            i.identity_document === formData.identity_document,
+        );
+        if (created) {
+          const specialtyVal = (formData as any).specialties;
+          if (specialtyVal) {
+            const specialtiesArray = Array.isArray(specialtyVal)
+              ? specialtyVal
+              : [specialtyVal];
+            // Ahora se espera que las especialidades sean category_id de las categorías cargadas
+            const idsArray = specialtiesArray
+              .map((s: any) =>
+                typeof s === "string"
+                  ? s
+                  : (s?.specialty_id ?? s?.category_id ?? String(s)),
+              )
+              .filter(Boolean);
+            try {
+              await api.instructor.addSpecialty(
+                created.instructor_id,
+                idsArray as any,
+                token,
+              );
+            } catch (err) {
+              console.error(
+                "No se pudo agregar especialidad automáticamente:",
+                err,
+              );
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("No se pudo buscar instructor recién creado:", err);
+      }
+
       setShowSuccess(true);
       setTimeout(() => {
         router.push("/instructors");
       }, 1500);
     } catch (err: unknown) {
       console.error("Error al crear instructor:", err);
-
       if (err && typeof err === "object" && "messages" in err) {
         const error = err as { messages: string[]; error?: string };
         if (error.messages[0] === "conflict") {
@@ -172,6 +255,7 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
           onFieldBlur={handleFieldBlur}
           errors={errors}
           mode="edit"
+          categories={categoriesOptions}
         />
 
         <Button

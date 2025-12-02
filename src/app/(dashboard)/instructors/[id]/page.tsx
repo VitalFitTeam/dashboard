@@ -5,7 +5,11 @@ import InstructorForm from "../InstructorForm";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
-import { InstructorData, DataResponse } from "@vitalfit/sdk";
+import {
+  InstructorData,
+  ServiceCategoryInfo,
+  DataResponse,
+} from "@vitalfit/sdk";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 
@@ -14,9 +18,13 @@ export default function InstructorDetailPage() {
   const { token } = useAuth();
   const router = useRouter();
   const id = params?.id as string | undefined;
+
   const [loading, setLoading] = useState(true);
   const [instructor, setInstructor] = useState<InstructorData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [categoriesOptions, setCategoriesOptions] = useState<
+    Array<{ category_id: string; name: string }>
+  >([]);
 
   useEffect(() => {
     if (!id) {
@@ -33,18 +41,27 @@ export default function InstructorDetailPage() {
 
     (async () => {
       try {
-        const InstructorData: DataResponse<InstructorData> =
+        const instructorRes: DataResponse<InstructorData> =
           await api.instructor.getInstructorById(id, token);
-
         if (!mounted) {
           return;
         }
-        setInstructor(InstructorData.data);
+
+        const data = instructorRes.data;
+        if (
+          data?.specialties &&
+          Array.isArray(data.specialties) &&
+          data.specialties.length > 0
+        ) {
+          const last = data.specialties[data.specialties.length - 1];
+          data.specialties = [last];
+        }
+
+        setInstructor(data);
       } catch (err: any) {
         if (!mounted) {
           return;
         }
-
         const status = err?.response?.status ?? err?.status ?? null;
         if (status === 404) {
           router.replace("/instructors");
@@ -56,6 +73,28 @@ export default function InstructorDetailPage() {
         if (mounted) {
           setLoading(false);
         }
+      }
+    })();
+
+    (async () => {
+      try {
+        const res = await api.products.getCategories(token);
+        const categories = (res?.data ?? []) as ServiceCategoryInfo[];
+        if (!mounted) {
+          return;
+        }
+        setCategoriesOptions(
+          categories.map((cat) => ({
+            category_id: cat.category_id,
+            name: cat.name,
+          })),
+        );
+      } catch (err) {
+        console.warn(
+          "No se pudieron cargar las categorías para especialidades:",
+          err,
+        );
+        setCategoriesOptions([]);
       }
     })();
 
@@ -75,6 +114,7 @@ export default function InstructorDetailPage() {
   if (!instructor) {
     return null;
   }
+
   return (
     <>
       <PageHeader title="DETALLES DE INSTRUCTOR">
@@ -93,6 +133,7 @@ export default function InstructorDetailPage() {
         onChange={(field, value) =>
           setInstructor((prev) => (prev ? { ...prev, [field]: value } : prev))
         }
+        categories={categoriesOptions}
       />
     </>
   );

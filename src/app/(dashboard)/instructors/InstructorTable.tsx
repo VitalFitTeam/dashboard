@@ -76,7 +76,6 @@ export default function instructorsTable({
     try {
       await api.instructor.deleteInstructor(instructors.instructor_id, token);
 
-      // Primero mostrar la notificación
       setNotification({
         isVisible: true,
         description: "Registro borrado exitosamente",
@@ -105,15 +104,29 @@ export default function instructorsTable({
   };
 
   const visibleColumns: Column<InstructorDataList>[] = [
-    { header: "Nombre", accessor: "first_name", filterType: "text" },
-    { header: "Email", accessor: "email", filterType: "text" },
+    {
+      header: "Nombre",
+      accessor: "first_name",
+      filterType: "text",
+      render: (value, row) => (
+        <div>
+          {value} {row.last_name}
+        </div>
+      ),
+    },
+    {
+      header: "Email",
+      accessor: "email",
+      filterType: "text",
+      render: (email) => (
+        <div className="hover:text-blue-800 cursor-pointer">{email}</div>
+      ),
+    },
   ];
 
   const invisibleColumns: Column<InstructorDataList>[] = [
-    { header: "Teléfono", accessor: "phone" },
     { header: "Fecha de nacimiento", accessor: "birth_date" },
     { header: "Género", accessor: "gender" },
-    { header: "Documento", accessor: "identity_document" },
     { header: "Biografía", accessor: "biography" },
     { header: "Foto", accessor: "profile_picture_url" },
   ];
@@ -124,7 +137,7 @@ export default function instructorsTable({
         <div className="relative w-full sm:w-[250px]">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Filtrar por nombre"
+            placeholder="Filtrar por nombre, email o documento"
             className="pl-9"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
