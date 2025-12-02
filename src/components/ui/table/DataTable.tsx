@@ -139,7 +139,7 @@ export function DataTable<T extends object>({
   });
 
   //Paginación
-  const pageRows = table.getPaginationRowModel().rows;
+  const pageRows = table.getRowModel().rows;
   const [internalPage, setInternalPage] = React.useState(1);
   const [internalPageSize, setInternalPageSize] = React.useState(10);
 
@@ -147,12 +147,7 @@ export function DataTable<T extends object>({
   const currentPageSize = pageSize ?? internalPageSize;
 
   const handlePageChange = (newPage: number) => {
-    if (onPageChange) {
-      onPageChange(newPage); // modo externo (backend)
-    } else {
-      setInternalPage(newPage); // modo interno
-      table.setPageIndex(newPage - 1);
-    }
+    onPageChange ? onPageChange(newPage) : setInternalPage(newPage);
   };
 
   React.useEffect(() => {
@@ -245,35 +240,45 @@ export function DataTable<T extends object>({
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
             {pageRows.length ? (
               pageRows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No hay datos disponibles
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
-
         </Table>
       </div>
 
       <PaginationControls
         page={currentPage}
-        totalPages={totalPages ?? Math.ceil(data.length / currentPageSize)}
+        totalPages={
+          totalPages ?? Math.ceil(renderFilters.length / currentPageSize)
+        }
         onPageChange={handlePageChange}
       />
-
     </div>
   );
 }

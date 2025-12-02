@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import SuperAdminDashboard from "@/components/features/dashboard/SuperAdminDashboard";
+import BranchDashboard from "@/components/features/dashboard/BranchDashboard";
 import InstructorDashboard from "@/components/features/dashboard/InstructorDashboard";
 
 export default function DashboardHome() {
@@ -14,20 +15,23 @@ export default function DashboardHome() {
   return (
     <div>
 
-      {!hasRole(["super_admin", "branch_admin", "accountant","instructor"]) && (
+      {!hasRole(["super_admin", "branch_admin", "accountant", "instructor"]) && (
         <>
-        <h1>Bienvenido, {user.first_name}</h1>
-        <p>Tu rol: {user.role_label}</p>
+          <h1>Bienvenido, {user.first_name}</h1>
+          <p>Tu rol: {user.role_label}</p>
         </>
       )}
 
       {hasRole(["super_admin", "branch_admin"]) && (
-        <SuperAdminDashboard/>  
-       
+        <SuperAdminDashboard />
       )}
 
       {hasRole(["instructor"]) && (
-        <InstructorDashboard/>
+        <InstructorDashboard />
+      )}
+
+      {hasRole(["branch_admin"]) && (
+        <BranchDashboard />
       )}
 
       {hasRole("accountant") && <button>Ver reportes financieros</button>}
