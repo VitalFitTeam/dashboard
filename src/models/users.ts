@@ -1,4 +1,5 @@
-export type Users = {
+// En @/models/users.ts
+export interface Users {
   id: string;
   name: string;
   lastname: string;
@@ -7,17 +8,10 @@ export type Users = {
   document: string;
   date: string;
   gender: string;
-  rol:
-    | "super_admin"
-    | "branch_admin"
-    | "accountant"
-    | "data_analyst"
-    | "instructor"
-    | "recepcionist"
-    | "client";
-  status: "active" | "inactive" | "maintenance" | "blocked";
-  uacceso?: string;
-};
+  rol: "super_admin" | "branch_admin" | "accountant" | "data_analyst" | "instructor" | "recepcionist" | "client";
+  status: "active" | "inactive";
+  uacceso: string;
+}
 
 export const roleLabels: Record<Users["rol"], string> = {
   super_admin: "Super Administrador",

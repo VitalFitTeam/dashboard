@@ -10,7 +10,7 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -33,7 +33,6 @@ import { NavUser } from "./NavUser";
 import { useAuth } from "@/context/AuthContext";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
-// 🔹 Tipos
 export interface SubItem {
   name: string;
   href: string;
@@ -125,18 +124,37 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
       title: "Gestión de Sede",
       items: [
         { name: "Inicio", icon: HomeIcon, href: "/" },
-        { name: "Clientes", icon: UserIcon, href: "/clients" },
-        { name: "Membresías", icon: CurrencyDollarIcon, href: "/memberships" },
-        { name: "Servicios", icon: TicketIcon, href: "/services" },
-        { name: "Instructores", icon: UsersIcon, href: "/instructors" },
-
+        {
+          name: "Mi sucursal",
+          icon: BuildingStorefrontIcon,
+          subitems: [
+            { name: "Información General", href: "/branches" },
+            { name: "Configuración de la sede", href: "/branches" },
+          ],
+        },
+        {
+          name: "Gestion de Clientes",
+          icon: UserIcon,
+          subitems: [
+            { name: "Lista de Clientes", href: "/clients" },
+            { name: "Historial", href: "/clients" },
+          ],
+        },
+        {
+          name: "Finanzas",
+          icon: CurrencyDollarIcon,
+          subitems: [
+            { name: "Pagos y membresías", href: "/memberships" },
+            { name: "Próximas a vencer", href: "/memberships" },
+          ],
+        },
         {
           name: "Calendario y Reservas",
           icon: Calendar,
           subitems: [
             { name: "Calendario", href: "/calendar" },
-            { name: "Reservas por bloque", href: "/reservations" },
-            { name: "Registro de Asistencia", href: "/attendance" },
+            { name: "Reservas Activas", href: "/reservations" },
+            { name: "Historial de Reservas", href: "/attendance" },
           ],
         },
       ],
@@ -198,6 +216,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
 
 export default function SidebarDashboard() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, loading } = useAuth();
 
   if (loading || !user) {
@@ -206,6 +225,22 @@ export default function SidebarDashboard() {
 
   const currentUserRole = user.role?.toLowerCase() || "guest";
   const sections = sidebarMenusByRole[currentUserRole] || [];
+
+  // Handler for navigating to main modules (uses replace to control history)
+  const handleMainModuleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+
+    // Get the base module path (e.g., "/users" from "/users/123/edit")
+    const currentModule = pathname.split("/")[1];
+    const targetModule = href.split("/")[1];
+
+    // If navigating to a different main module, use replace to avoid stacking
+    if (currentModule && targetModule && currentModule !== targetModule) {
+      router.replace(href);
+    } else {
+      router.push(href);
+    }
+  };
 
   return (
     <Sidebar
@@ -266,6 +301,7 @@ export default function SidebarDashboard() {
                               <SidebarMenuSubItem key={sub.name}>
                                 <Link
                                   href={sub.href}
+                                  onClick={(e) => handleMainModuleClick(e, sub.href)}
                                   className={`block px-2 py-1 rounded-md text-sm transition-colors ${pathname === sub.href
                                     ? " text-orange-400 font-medium"
                                     : "text-gray-700 hover:bg-gray-100"
@@ -293,6 +329,7 @@ export default function SidebarDashboard() {
                     >
                       <Link
                         href={item.href}
+                        onClick={(e) => handleMainModuleClick(e, item.href)}
                         className="flex items-center gap-2 w-full"
                       >
                         <item.icon
