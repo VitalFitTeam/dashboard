@@ -231,8 +231,8 @@ export default function SidebarDashboard() {
     e.preventDefault();
 
     // Get the base module path (e.g., "/users" from "/users/123/edit")
-    const currentModule = pathname.split('/')[1];
-    const targetModule = href.split('/')[1];
+    const currentModule = pathname.split("/")[1];
+    const targetModule = href.split("/")[1];
 
     // If navigating to a different main module, use replace to avoid stacking
     if (currentModule && targetModule && currentModule !== targetModule) {
