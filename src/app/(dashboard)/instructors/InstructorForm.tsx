@@ -15,8 +15,8 @@ import {
   validateInstructorField,
 } from "@/lib/validation/instructorSchema";
 
-interface ServiceOption {
-  service_id: string;
+interface CategoryOption {
+  category_id: string;
   name: string;
 }
 
@@ -27,7 +27,7 @@ interface InstructorFormProps {
   disabled?: boolean;
   errors?: Partial<Record<keyof InstructorFormData, string>>;
   onFieldBlur?: (field: keyof InstructorDataList, value: string) => void;
-  services?: ServiceOption[];
+  categories?: CategoryOption[];
 }
 
 export default function InstructorForm({
@@ -36,7 +36,7 @@ export default function InstructorForm({
   mode = "view",
   errors = {},
   onFieldBlur,
-  services = [],
+  categories = [],
 }: InstructorFormProps) {
   const formatDateForBackend = (dateString: string): string => {
     if (!dateString) {
@@ -161,24 +161,24 @@ export default function InstructorForm({
                 const first = raw[0];
                 selectedValue =
                   first?.specialty_id ??
-                  first?.service_id ??
+                  first?.category_id ?? // Ahora busca category_id
                   String(first ?? "");
               } else if (typeof raw === "string") {
                 selectedValue = raw;
               } else {
-                selectedValue = raw?.specialty_id ?? raw?.service_id ?? "";
+                selectedValue = raw?.specialty_id ?? raw?.category_id ?? "";
               }
             }
 
             const options =
-              services && services.length > 0
-                ? services
+              categories && categories.length > 0
+                ? categories
                 : [
-                    { service_id: "Yoga", name: "Yoga" },
-                    { service_id: "Pilates", name: "Pilates" },
-                    { service_id: "Crossfit", name: "Crossfit" },
-                    { service_id: "Funcional", name: "Funcional" },
-                    { service_id: "Natación", name: "Natación" },
+                    { category_id: "yoga", name: "Yoga" },
+                    { category_id: "pilates", name: "Pilates" },
+                    { category_id: "crossfit", name: "Crossfit" },
+                    { category_id: "funcional", name: "Funcional" },
+                    { category_id: "natacion", name: "Natación" },
                   ];
 
             return (
@@ -195,9 +195,12 @@ export default function InstructorForm({
                   <SelectValue placeholder="-- Seleccionar --" />
                 </SelectTrigger>
                 <SelectContent>
-                  {options.map((s) => (
-                    <SelectItem key={s.service_id} value={s.service_id}>
-                      {s.name}
+                  {options.map((category) => (
+                    <SelectItem
+                      key={category.category_id}
+                      value={category.category_id}
+                    >
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

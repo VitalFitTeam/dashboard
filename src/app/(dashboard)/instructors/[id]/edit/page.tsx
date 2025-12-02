@@ -5,7 +5,11 @@ import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import InstructorForm from "../../InstructorForm";
-import { UserGender, InstructorDataList } from "@vitalfit/sdk";
+import {
+  UserGender,
+  InstructorDataList,
+  ServiceCategoryInfo,
+} from "@vitalfit/sdk";
 import { Instructor } from "@/models/instructor";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -32,20 +36,31 @@ export default function EditInstructorPage() {
     visible: false,
     message: "",
   });
-  const [servicesOptions, setServicesOptions] = useState<
-    Array<{ service_id: string; name: string }>
+  const [categoriesOptions, setCategoriesOptions] = useState<
+    Array<{ category_id: string; name: string }>
   >([]);
 
   useEffect(() => {
     if (!id || !token) {
       return;
     }
-
     const loadInstructor = async () => {
       try {
         setLoading(true);
         const response = await api.instructor.getInstructorById(id, token);
-        setInstructor(response.data ?? response);
+        let data = response.data ?? response;
+
+        // Tomar solo la última especialidad
+        if (
+          data?.specialties &&
+          Array.isArray(data.specialties) &&
+          data.specialties.length > 0
+        ) {
+          const lastSpecialty = data.specialties[data.specialties.length - 1];
+          data.specialties = [lastSpecialty];
+        }
+
+        setInstructor(data);
       } catch (err) {
         console.error("Error cargando instructor:", err);
         setError("No se pudo cargar el instructor.");
@@ -53,7 +68,6 @@ export default function EditInstructorPage() {
         setLoading(false);
       }
     };
-
     loadInstructor();
   }, [id, token]);
 
@@ -62,30 +76,28 @@ export default function EditInstructorPage() {
       return;
     }
     let mounted = true;
-    const load = async () => {
+    const loadCategories = async () => {
       try {
-        const res = await api.products.getServices(token, {
-          page: 1,
-          limit: 1000,
-        });
-        const services = (res?.data ?? []) as Array<any>;
+        const res = await api.products.getCategories(token);
+        const categories = (res?.data ?? []) as ServiceCategoryInfo[];
         if (!mounted) {
           return;
         }
-        setServicesOptions(
-          services.map((s) => ({
-            service_id: s.service_id ?? s.serviceId ?? s.id ?? String(s),
-            name: s.name ?? s.service_name ?? "",
+        setCategoriesOptions(
+          categories.map((cat) => ({
+            category_id: cat.category_id,
+            name: cat.name,
           })),
         );
       } catch (err) {
         console.warn(
-          "No se pudieron cargar servicios para especialidades:",
+          "No se pudieron cargar las categorías para especialidades:",
           err,
         );
+        setCategoriesOptions([]);
       }
     };
-    load();
+    loadCategories();
     return () => {
       mounted = false;
     };
@@ -95,16 +107,13 @@ export default function EditInstructorPage() {
     if (!dateString) {
       return "";
     }
-
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       return dateString;
     }
-
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
       return dateString;
     }
-
     return date.toISOString().split("T")[0];
   };
 
@@ -131,7 +140,6 @@ export default function EditInstructorPage() {
   };
 
   const handleFieldBlur = (field: keyof InstructorDataList, value: string) => {
-    // Validación en tiempo real al perder el foco
     const result = validateInstructorField(field, value);
     if (!result.success && result.error) {
       setErrors((prev) => ({ ...prev, [field]: result.error }));
@@ -184,42 +192,33 @@ export default function EditInstructorPage() {
         token,
       );
 
-      try {
-        const specialtyVal = (instructor as any).specialties;
-        if (specialtyVal) {
-          const specialtiesArray = Array.isArray(specialtyVal)
-            ? specialtyVal
-            : [specialtyVal];
-          const idsArray = specialtiesArray
-            .map((s: any) =>
-              typeof s === "string"
-                ? s
-                : (s?.specialty_id ?? s?.service_id ?? String(s)),
-            )
-            .filter(Boolean);
-          try {
-            await api.instructor.addSpecialty(
-              instructor.instructor_id,
-              idsArray as any,
-              token,
-            );
-          } catch (err) {
-            console.error(
-              "No se pudo agregar especialidad después de editar:",
-              err,
-            );
-          }
+      // Solo agregar la última especialidad
+      const specialtyVal = (instructor as any).specialties;
+      if (specialtyVal) {
+        const selected = Array.isArray(specialtyVal)
+          ? specialtyVal[0]
+          : specialtyVal;
+        const selectedId =
+          typeof selected === "string"
+            ? selected
+            : (selected?.specialty_id ??
+              selected?.category_id ??
+              String(selected));
+        if (selectedId) {
+          await api.instructor.addSpecialty(
+            instructor.instructor_id,
+            [selectedId],
+            token,
+          );
         }
-      } catch (err) {
-        console.warn("No se pudo agregar especialidad después de editar:", err);
       }
+
       setShowSuccess(true);
       setTimeout(() => {
         router.push("/instructors");
       }, 1500);
     } catch (err: unknown) {
       console.error("Error al guardar cambios:", err);
-
       if (err && typeof err === "object" && "messages" in err) {
         const error = err as { messages: string[]; error?: string };
         if (error.messages[0] === "conflict") {
@@ -288,17 +287,15 @@ export default function EditInstructorPage() {
             </div>
           }
         />
-
         <InstructorForm
           mode="edit"
           formData={instructor}
           onChange={handleChange}
           onFieldBlur={handleFieldBlur}
           errors={errors}
-          services={servicesOptions}
+          categories={categoriesOptions}
         />
       </form>
-
       {showSuccess && (
         <Notification
           variant="success"
