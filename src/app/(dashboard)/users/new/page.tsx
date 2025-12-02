@@ -115,7 +115,7 @@ export default function CreateUserPage() {
 
             console.log("Datos de registro:", signUpData);
 
-            const response = await api.auth.signUpStaff(signUpData);
+            const response = await api.auth.signUpStaff(signUpData, token);
 
             setSuccess("Usuario creado exitosamente. Se ha enviado un correo de verificación.");
 
