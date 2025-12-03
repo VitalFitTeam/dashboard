@@ -22,7 +22,7 @@ export default function DashboardHome() {
         </>
       )}
 
-      {hasRole(["super_admin", "branch_admin"]) && (
+      {hasRole(["super_admin"]) && (
         <SuperAdminDashboard />
       )}
 

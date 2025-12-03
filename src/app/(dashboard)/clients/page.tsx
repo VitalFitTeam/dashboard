@@ -5,10 +5,13 @@ import { useEffect, useState } from "react";
 import { StatCard } from "@/components/ui/StatCard";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { clientsData } from "./data";
+import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
+import { DataResponse, User } from "@vitalfit/sdk";
 
 export default function Clients() {
-  const [data, setData] = useState<any[]>([]);
+  const [allData, setAllData] = useState<User[]>([]);
+  const [paginatedData, setPaginatedData] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
@@ -28,45 +31,102 @@ export default function Clients() {
     blocked: 0
   });
 
+  const { token } = useAuth();
+
   useEffect(() => {
-    const loadClientsData = async () => {
+    const loadAllClients = async () => {
+      if (!token) { return; }
+
       setIsLoading(true);
       try {
+        const options = {
+          search: filters.search || undefined,
+          sort: "desc" as "asc" | "desc",
+          role: "client"
+        };
 
-        const filteredData = clientsData.filter(client => {
-          const matchesSearch = filters.search === "" ||
-            client.first_name.toLowerCase().includes(filters.search.toLowerCase()) ||
-            client.last_name.toLowerCase().includes(filters.search.toLowerCase()) ||
-            client.email.toLowerCase().includes(filters.search.toLowerCase());
-          return matchesSearch;
-        });
+        const response = await api.user.getClientUsers(token, options);
 
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        const paginatedData = filteredData.slice(start, end);
+        const allUsers = (response as DataResponse<User[]>).data || [];
 
-        setData(paginatedData);
-        setTotalItems(filteredData.length);
+        const activeCount = allUsers.filter(user =>
+          user.is_validated === true
+        ).length;
+
+        const blockedCount = allUsers.filter(user =>
+          user.is_validated === false || user.is_validated === undefined
+        ).length;
+
+        setAllData(allUsers);
+        setTotalItems(allUsers.length);
 
         setStats({
-          total: clientsData.length,
-          active: clientsData.filter(c => c.status === "active").length,
-          blocked: clientsData.filter(c => c.status === "blocked").length
+          total: allUsers.length,
+          active: activeCount,
+          blocked: blockedCount
         });
 
       } catch (error) {
         console.error("Error loading clients:", error);
-        setData([]);
+        setAllData([]);
         setTotalItems(0);
+        setStats({
+          total: 0,
+          active: 0,
+          blocked: 0
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadClientsData();
-  }, [pageSize, filters, page, reloadTrigger]);
+    loadAllClients();
+  }, [filters.search, reloadTrigger, token]);
+
+  // Aplicar paginación cuando cambia la página o los datos
+  useEffect(() => {
+    if (allData.length === 0) {
+      setPaginatedData([]);
+      return;
+    }
+
+    // Aplicar paginación manualmente
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginated = allData.slice(startIndex, endIndex);
+
+    setPaginatedData(paginated);
+  }, [allData, page, pageSize]);
+
+  useEffect(() => {
+    if (allData.length === 0) { return; }
+    let filtered = allData;
+
+    setTotalItems(filtered.length);
+
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginated = filtered.slice(startIndex, endIndex);
+
+    setPaginatedData(paginated);
+
+    const activeCount = filtered.filter(user =>
+      user.is_validated === true
+    ).length;
+
+    const blockedCount = filtered.filter(user =>
+      user.is_validated === false || user.is_validated === undefined
+    ).length;
+
+    setStats({
+      total: filtered.length,
+      active: activeCount,
+      blocked: blockedCount
+    });
+  }, [allData, page, pageSize, filters.category]);
 
   const handlePageChange = (newPage: number) => {
+    console.log("Changing to page:", newPage);
     setPage(newPage);
   };
 
@@ -75,7 +135,7 @@ export default function Clients() {
     category?: string;
   }) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
-    setPage(1);
+    setPage(1); // Reiniciar a página 1 al filtrar
   };
 
   const handleReload = () => {
@@ -96,7 +156,7 @@ export default function Clients() {
           bottomMarkup={true}
         />
         <StatCard
-          title="BLOQUEADO"
+          title="INACTIVOS/BLOQUEADOS"
           value={<h3 className="text-4xl text-red-500">{stats.blocked} CLIENTES</h3>}
           bottomMarkup={true}
         />
@@ -113,7 +173,14 @@ export default function Clients() {
         <div className="text-center p-10">Cargando Clientes...</div>
       ) : (
         <ClientsTable
-          data={data}
+          data={paginatedData.map(user => ({
+            client_id: user.user_id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            category: "N/A",
+            status: user.is_validated ? "active" : "blocked"
+          }))}
           onReload={handleReload}
           page={page}
           pageSize={pageSize}

@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
 
 interface Client {
   client_id: string;
@@ -56,8 +58,10 @@ export default function ClientsTable({
     title: "",
     variant: "success" as "success" | "destructive",
   });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const router = useRouter();
+  const { token } = useAuth();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -82,13 +86,24 @@ export default function ClientsTable({
   };
 
   const handleDeleteClient = async (client: Client) => {
+    if (!token) {
+      setNotification({
+        isVisible: true,
+        title: "Error",
+        description: "No hay token de autenticación",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDeleting(true);
     try {
-      console.log("Deleting client (mock):", client.client_id);
+      await api.user.deleteUser(client.client_id, token);
 
       setNotification({
         isVisible: true,
         title: "Éxito",
-        description: "Cliente eliminado correctamente (Simulación)",
+        description: "Cliente eliminado correctamente",
         variant: "success",
       });
 
@@ -97,14 +112,30 @@ export default function ClientsTable({
       setTimeout(() => {
         onReload();
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting client:", error);
+
+      let errorMessage = "Error al eliminar el cliente";
+
+      if (error.status === 403) {
+        errorMessage = "No tienes permisos para eliminar clientes";
+      } else if (error.status === 404) {
+        errorMessage = "Cliente no encontrado";
+      } else if (error.status === 401) {
+        errorMessage = "Sesión expirada. Por favor inicia sesión nuevamente";
+        router.replace("/login");
+      } else if (error.messages && Array.isArray(error.messages)) {
+        errorMessage = error.messages.join(", ");
+      }
+
       setNotification({
         isVisible: true,
         title: "Error",
-        description: "Error al eliminar el cliente",
+        description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -129,18 +160,32 @@ export default function ClientsTable({
 
     const normalizedStatus = status?.toLowerCase() || "inactive";
 
+    const displayStatus = normalizedStatus === "blocked" ? "inactive" : normalizedStatus;
+
     return (
-      <Badge variant={variantMap[normalizedStatus] || "default"}>
-        {labels[normalizedStatus] || status}
+      <Badge variant={variantMap[displayStatus] || "default"}>
+        {labels[displayStatus] || status}
       </Badge>
     );
   };
 
   const columns: Column<Client>[] = [
-    { header: "ID", accessor: "client_id", filterType: "text", render: (val) => <span className="text-xs text-muted-foreground">{(val as string).substring(0, 8)}</span> },
-    { header: "Nombre", accessor: "first_name", filterType: "text", render: (_, row) => `${row.first_name} ${row.last_name}` },
-    { header: "Email", accessor: "email", filterType: "text" },
-    { header: "Categoría", accessor: "category", filterType: "text" },
+    {
+      header: "Nombre",
+      accessor: "first_name",
+      filterType: "text",
+      render: (_, row) => `${row.first_name} ${row.last_name}`
+    },
+    {
+      header: "Email",
+      accessor: "email",
+      filterType: "text"
+    },
+    {
+      header: "Categoría",
+      accessor: "category",
+      filterType: "text"
+    },
     {
       header: "Status",
       accessor: "status",
@@ -162,20 +207,25 @@ export default function ClientsTable({
           />
         </div>
 
-        <Select defaultValue="all">
+        <Select
+          value={filters.category}
+          onValueChange={(value) => onFilterChange({ category: value })}
+        >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Rol" />
+            <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Rol</SelectItem>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            <SelectItem value="premium">Premium</SelectItem>
+            <SelectItem value="regular">Regular</SelectItem>
+            <SelectItem value="new">Nuevo</SelectItem>
           </SelectContent>
         </Select>
 
         <Button variant="outline">
           <Download className="mr-2 h-4 w-4" />
-          Descarga
+          Descargar
         </Button>
-
       </div>
 
       <DataTable<Client>
