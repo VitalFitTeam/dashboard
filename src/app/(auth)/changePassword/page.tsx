@@ -75,12 +75,7 @@ export default function ChangePassword() {
         setIsLoading(false);
         return;
       }
-
-      await api.auth.verifyStaff(
-        tokenCode,
-        formData.password,
-        formData.confirmPassword
-      );
+      await api.auth.resetPassword(tokenCode,formData.password,formData.confirmPassword);
 
       setErrors({});
       setFormData({ password: "", confirmPassword: "" });
