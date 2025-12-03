@@ -5,7 +5,11 @@ import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import InstructorForm from "../../InstructorForm";
-import { UserGender, InstructorDataList } from "@vitalfit/sdk";
+import {
+  UserGender,
+  InstructorDataList,
+  ServiceCategoryInfo,
+} from "@vitalfit/sdk";
 import { Instructor } from "@/models/instructor";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -32,17 +36,31 @@ export default function EditInstructorPage() {
     visible: false,
     message: "",
   });
+  const [categoriesOptions, setCategoriesOptions] = useState<
+    Array<{ category_id: string; name: string }>
+  >([]);
 
   useEffect(() => {
     if (!id || !token) {
       return;
     }
-
     const loadInstructor = async () => {
       try {
         setLoading(true);
         const response = await api.instructor.getInstructorById(id, token);
-        setInstructor(response.data ?? response);
+        let data = response.data ?? response;
+
+        // Tomar solo la última especialidad
+        if (
+          data?.specialties &&
+          Array.isArray(data.specialties) &&
+          data.specialties.length > 0
+        ) {
+          const lastSpecialty = data.specialties[data.specialties.length - 1];
+          data.specialties = [lastSpecialty];
+        }
+
+        setInstructor(data);
       } catch (err) {
         console.error("Error cargando instructor:", err);
         setError("No se pudo cargar el instructor.");
@@ -50,24 +68,52 @@ export default function EditInstructorPage() {
         setLoading(false);
       }
     };
-
     loadInstructor();
   }, [id, token]);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+    let mounted = true;
+    const loadCategories = async () => {
+      try {
+        const res = await api.products.getCategories(token);
+        const categories = (res?.data ?? []) as ServiceCategoryInfo[];
+        if (!mounted) {
+          return;
+        }
+        setCategoriesOptions(
+          categories.map((cat) => ({
+            category_id: cat.category_id,
+            name: cat.name,
+          })),
+        );
+      } catch (err) {
+        console.warn(
+          "No se pudieron cargar las categorías para especialidades:",
+          err,
+        );
+        setCategoriesOptions([]);
+      }
+    };
+    loadCategories();
+    return () => {
+      mounted = false;
+    };
+  }, [token]);
 
   const formatDateForBackend = (dateString: string): string => {
     if (!dateString) {
       return "";
     }
-
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
       return dateString;
     }
-
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
       return dateString;
     }
-
     return date.toISOString().split("T")[0];
   };
 
@@ -84,7 +130,7 @@ export default function EditInstructorPage() {
     }
   };
 
-  const handleChange = (field: keyof InstructorDataList, value: string) => {
+  const handleChange = (field: keyof InstructorDataList, value: any) => {
     if (instructor) {
       setInstructor((prev) => (prev ? { ...prev, [field]: value } : prev));
       if (errors[field as keyof InstructorFormData]) {
@@ -94,7 +140,6 @@ export default function EditInstructorPage() {
   };
 
   const handleFieldBlur = (field: keyof InstructorDataList, value: string) => {
-    // Validación en tiempo real al perder el foco
     const result = validateInstructorField(field, value);
     if (!result.success && result.error) {
       setErrors((prev) => ({ ...prev, [field]: result.error }));
@@ -146,13 +191,34 @@ export default function EditInstructorPage() {
         payload,
         token,
       );
+
+      // Solo agregar la última especialidad
+      const specialtyVal = (instructor as any).specialties;
+      if (specialtyVal) {
+        const selected = Array.isArray(specialtyVal)
+          ? specialtyVal[0]
+          : specialtyVal;
+        const selectedId =
+          typeof selected === "string"
+            ? selected
+            : (selected?.specialty_id ??
+              selected?.category_id ??
+              String(selected));
+        if (selectedId) {
+          await api.instructor.addSpecialty(
+            instructor.instructor_id,
+            [selectedId],
+            token,
+          );
+        }
+      }
+
       setShowSuccess(true);
       setTimeout(() => {
         router.push("/instructors");
       }, 1500);
     } catch (err: unknown) {
       console.error("Error al guardar cambios:", err);
-
       if (err && typeof err === "object" && "messages" in err) {
         const error = err as { messages: string[]; error?: string };
         if (error.messages[0] === "conflict") {
@@ -221,16 +287,15 @@ export default function EditInstructorPage() {
             </div>
           }
         />
-
         <InstructorForm
           mode="edit"
           formData={instructor}
           onChange={handleChange}
           onFieldBlur={handleFieldBlur}
           errors={errors}
+          categories={categoriesOptions}
         />
       </form>
-
       {showSuccess && (
         <Notification
           variant="success"

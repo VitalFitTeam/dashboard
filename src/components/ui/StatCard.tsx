@@ -6,7 +6,8 @@ export type StatCardProps = {
   title: string;
   value: React.ReactNode;
   icon?: React.ReactNode; // 👇 Este es el único cambio que necesitas
-  description?: string;
+  bottomMarkup?: boolean;
+  description?: React.ReactNode;
   className?: string;
 };
 
@@ -14,6 +15,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon,
+  bottomMarkup = true,
   description,
 }) => {
   return (
@@ -28,9 +30,11 @@ export const StatCard: React.FC<StatCardProps> = ({
           <p className="text-xs text-muted-foreground">{description}</p>
         )}
       </CardContent>
-      <CardFooter>
-        <div className="bg-gray-100 p-5 w-full"></div>
-      </CardFooter>
+      {bottomMarkup && (
+        <CardFooter>
+          <div className="bg-gray-100 p-5 w-full"></div>
+        </CardFooter>
+      )}
     </Card>
   );
 };

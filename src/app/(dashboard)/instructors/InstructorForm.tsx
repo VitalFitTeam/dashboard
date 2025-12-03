@@ -1,19 +1,33 @@
 "use client";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { PhoneInput } from "@/components/ui/phone-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { InstructorDataList } from "@vitalfit/sdk";
 import {
   InstructorFormData,
   validateInstructorField,
 } from "@/lib/validation/instructorSchema";
 
+interface CategoryOption {
+  category_id: string;
+  name: string;
+}
+
 interface InstructorFormProps {
   formData: InstructorDataList;
-  onChange: (field: keyof InstructorDataList, value: string) => void;
+  onChange: (field: keyof InstructorDataList, value: any) => void;
   mode?: "view" | "edit";
   disabled?: boolean;
   errors?: Partial<Record<keyof InstructorFormData, string>>;
   onFieldBlur?: (field: keyof InstructorDataList, value: string) => void;
+  categories?: CategoryOption[];
 }
 
 export default function InstructorForm({
@@ -22,6 +36,7 @@ export default function InstructorForm({
   mode = "view",
   errors = {},
   onFieldBlur,
+  categories = [],
 }: InstructorFormProps) {
   const formatDateForBackend = (dateString: string): string => {
     if (!dateString) {
@@ -105,32 +120,7 @@ export default function InstructorForm({
         </div>
       </div>
 
-      <div className="flex-1 mb-3">
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
-        >
-          Correo Electrónico*
-        </label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          disabled={mode === "view" ? true : false}
-          placeholder="correo@ejemplo.com"
-          value={formData.email}
-          onChange={(e) => onChange("email", e.target.value)}
-          onBlur={(e) => handleBlur("email", e.target.value)}
-          className={`bg-white w-full ${getFieldError("email") ? "border-red-500" : ""}`}
-        />
-        {getFieldError("email") && (
-          <p className="text-red-500 text-xs mt-1 text-left">
-            {getFieldError("email")}
-          </p>
-        )}
-      </div>
-
-      <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="flex-1">
           <label
             htmlFor="documento"
@@ -155,6 +145,123 @@ export default function InstructorForm({
           )}
         </div>
 
+        <div className="flex-1">
+          <label
+            htmlFor="especialidad"
+            className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
+          >
+            Especialidad
+          </label>
+
+          {(() => {
+            const raw = (formData as any).specialties;
+            let selectedValue = "";
+            if (raw) {
+              if (Array.isArray(raw)) {
+                const first = raw[0];
+                selectedValue =
+                  first?.specialty_id ??
+                  first?.category_id ?? // Ahora busca category_id
+                  String(first ?? "");
+              } else if (typeof raw === "string") {
+                selectedValue = raw;
+              } else {
+                selectedValue = raw?.specialty_id ?? raw?.category_id ?? "";
+              }
+            }
+
+            const options =
+              categories && categories.length > 0
+                ? categories
+                : [
+                    { category_id: "yoga", name: "Yoga" },
+                    { category_id: "pilates", name: "Pilates" },
+                    { category_id: "crossfit", name: "Crossfit" },
+                    { category_id: "funcional", name: "Funcional" },
+                    { category_id: "natacion", name: "Natación" },
+                  ];
+
+            return (
+              <Select
+                onValueChange={(val) => {
+                  onChange("specialties" as keyof InstructorDataList, val);
+                }}
+                value={selectedValue}
+              >
+                <SelectTrigger
+                  className={`w-full ${getFieldError("specialties" as keyof InstructorFormData) ? "border-red-500" : ""}`}
+                  disabled={mode === "view"}
+                >
+                  <SelectValue placeholder="-- Seleccionar --" />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.map((category) => (
+                    <SelectItem
+                      key={category.category_id}
+                      value={category.category_id}
+                    >
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          })()}
+          {getFieldError("specialties" as keyof InstructorFormData) && (
+            <p className="text-red-500 text-xs mt-1 text-left">
+              {getFieldError("specialties" as keyof InstructorFormData)}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <label className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left">
+          Biografía
+        </label>
+        <Textarea
+          disabled={mode === "view" ? true : false}
+          className={`w-full rounded-md border px-3 py-2 resize-vertical h-24 ${getFieldError("biography" as keyof InstructorFormData) ? "border-red-500" : "border-gray-200"}`}
+          value={(formData as any).biography ?? ""}
+          onChange={(e) =>
+            onChange("biography" as keyof InstructorDataList, e.target.value)
+          }
+          onBlur={(e) =>
+            handleBlur("biography" as keyof InstructorDataList, e.target.value)
+          }
+        />
+        {getFieldError("biography" as keyof InstructorFormData) && (
+          <p className="text-red-500 text-xs mt-1 text-left">
+            {getFieldError("biography" as keyof InstructorFormData)}
+          </p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-3">
+        <div className="flex-1">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
+          >
+            Correo Electrónico*
+          </label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            disabled={mode === "view" ? true : false}
+            placeholder="correo@ejemplo.com"
+            value={formData.email}
+            onChange={(e) => onChange("email", e.target.value)}
+            onBlur={(e) => handleBlur("email", e.target.value)}
+            className={`bg-white w-full ${getFieldError("email") ? "border-red-500" : ""}`}
+          />
+          {getFieldError("email") && (
+            <p className="text-red-500 text-xs mt-1 text-left">
+              {getFieldError("email")}
+            </p>
+          )}
+        </div>
         <div className="flex-1">
           <label
             htmlFor="telefono"
