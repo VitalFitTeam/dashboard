@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/Input";
 import { api } from "@/lib/sdk-config";
+import InputField from "@/components/ui/InputField";
 
 export default function ChangePassword() {
   const router = useRouter();
@@ -75,7 +76,7 @@ export default function ChangePassword() {
         setIsLoading(false);
         return;
       }
-      await api.auth.resetPassword(tokenCode,formData.password,formData.confirmPassword);
+      await api.auth.resetPassword(tokenCode, formData.password, formData.confirmPassword);
 
       setErrors({});
       setFormData({ password: "", confirmPassword: "" });
@@ -157,14 +158,10 @@ export default function ChangePassword() {
               <div className="space-y-4">
                 {/* Campo Nueva Contraseña */}
                 <div className="space-y-2">
-                  <label
-                    htmlFor="password"
-                    className="text-sm font-medium leading-none"
-                  >
-                    Nueva Contraseña
-                  </label>
-                  <Input
-                    id="password"
+
+
+                  <InputField
+                    label="Nueva Contraseña"
                     type="password"
                     placeholder="Nueva contraseña"
                     value={formData.password}
@@ -181,14 +178,8 @@ export default function ChangePassword() {
 
                 {/* Campo Confirmar Contraseña */}
                 <div className="space-y-2">
-                  <label
-                    htmlFor="confirmPassword"
-                    className="text-sm font-medium leading-none"
-                  >
-                    Confirmar Contraseña
-                  </label>
-                  <Input
-                    id="confirmPassword"
+                  <InputField
+                    label="Confirmar Contraseña"
                     type="password"
                     placeholder="Confirmar contraseña"
                     value={formData.confirmPassword}
