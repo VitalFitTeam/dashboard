@@ -14,9 +14,7 @@ function ConfirmEmailContent() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [showAlert, setShowAlert] = useState(false);
   const [showAlertConfirmation, setShowAlertConfirmation] = useState(false);
-  const [showConnectionError, setShowConnectionError] = useState(false);
   const [incorrectCode, setIncorrectCode] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const flow = searchParams.get("flow");
@@ -40,7 +38,6 @@ function ConfirmEmailContent() {
 
     if (incorrectCode) {
       setIncorrectCode(false);
-      setErrorMessage(null);
     }
 
     if (index < code.length - 1 && char !== "") {
@@ -85,7 +82,6 @@ function ConfirmEmailContent() {
     const verificationCode = code.join("").trim();
     if (verificationCode.length !== 6) {
       setIncorrectCode(true);
-      setErrorMessage("Por favor, ingresa el código completo de 6 caracteres");
       setLoading(false);
       return;
     }
@@ -97,15 +93,11 @@ function ConfirmEmailContent() {
       console.warn(response);
       localStorage.setItem("code", verificationCode);
       setIncorrectCode(false);
-      setErrorMessage(null);
       setShowAlert(true);
     } catch (error) {
       console.error("Error al conectar con la API:", error);
+      // Solo marcamos incorrecto, sin mostrar mensaje de conexión
       setIncorrectCode(true);
-      setErrorMessage(
-        "No se pudo conectar con el servidor. Intenta más tarde.",
-      );
-      setShowConnectionError(true);
     } finally {
       setLoading(false);
     }
@@ -121,8 +113,8 @@ function ConfirmEmailContent() {
       setShowAlertConfirmation(true);
     } catch (error) {
       console.error("Error al conectar con la API:", error);
+      // No mostramos mensaje de conexión
       setIncorrectCode(true);
-      setErrorMessage("No se pudo conectar con el servidor");
     }
   };
 
@@ -156,15 +148,6 @@ function ConfirmEmailContent() {
           title="Código de Confirmación Reenviado"
           description="Se ha enviado un nuevo código a tu correo electrónico"
           onClose={handleConfirmationClose}
-        />
-      )}
-
-      {showConnectionError && (
-        <Notification
-          variant="destructive"
-          title="Error de Conexión"
-          description="No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde."
-          onClose={() => setShowConnectionError(false)}
         />
       )}
 
@@ -213,7 +196,7 @@ function ConfirmEmailContent() {
                 {incorrectCode && (
                   <div className="text-center">
                     <p className="text-destructive text-sm font-medium">
-                      {errorMessage ?? "Código incorrecto"}
+                      Error de Código
                     </p>
                   </div>
                 )}

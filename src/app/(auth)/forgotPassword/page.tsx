@@ -16,17 +16,11 @@ export default function ForgotPassword() {
   const [error, setError] = useState<{ usuario?: string[] }>({});
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showConnectionError, setShowConnectionError] = useState(false);
-  const [showServerError, setShowServerError] = useState<{
-    visible: boolean;
-    message: string;
-  }>({ visible: false, message: "" });
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setShowServerError({ visible: false, message: "" });
 
     const result = recoverSchema.safeParse(formData);
 
@@ -45,16 +39,14 @@ export default function ForgotPassword() {
 
     try {
       await api.auth.forgotPassword(formData.usuario);
+    } catch {
+    } finally {
       localStorage.setItem("email", formData.usuario);
       setShowAlert(true);
       setError({});
       setFormData({ usuario: "" });
-    } catch (error) {
-      console.error("Error al conectar con la API:", error);
-      setShowConnectionError(true);
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,27 +66,9 @@ export default function ForgotPassword() {
       {showAlert && (
         <Notification
           variant="success"
-          title="Revisa tu Correo"
-          description="Hemos enviado instrucciones para restablecer tu contraseña a tu correo electrónico. "
+          title="Correo registrado"
+          description="Si tu correo coincide con una cuenta registrada, recibirás un código de verificación."
           onClose={handleSuccessClose}
-        />
-      )}
-
-      {showConnectionError && (
-        <Notification
-          variant="destructive"
-          title="Error de Conexión"
-          description="No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde."
-          onClose={() => setShowConnectionError(false)}
-        />
-      )}
-
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error del Servidor"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
         />
       )}
 
@@ -104,7 +78,7 @@ export default function ForgotPassword() {
             <CardHeader className="text-center space-y-4">
               <div className="flex justify-center">
                 <Image
-                  src="/images/isotipo.png" // Ajusta la ruta según tu estructura
+                  src="/images/isotipo.png"
                   alt="Logo"
                   width={80}
                   height={80}
