@@ -6,7 +6,6 @@ import {
   BuildingStorefrontIcon,
   UsersIcon,
   ChartBarIcon,
-  TicketIcon,
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -32,6 +31,7 @@ import Image from "next/image";
 import { NavUser } from "./NavUser";
 import { useAuth } from "@/context/AuthContext";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { UserRole } from "@/lib/roles";
 
 export interface SubItem {
   name: string;
@@ -61,8 +61,8 @@ export function isNavItemWithSub(item: NavItem): item is NavItemWithSub {
   return (item as NavItemWithSub).subitems !== undefined;
 }
 
-export const sidebarMenusByRole: Record<string, NavSection[]> = {
-  super_admin: [
+export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
+  [UserRole.SUPER_ADMIN]: [
     {
       title: "Dashboard Principal",
       items: [
@@ -120,7 +120,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  branch_admin: [
+  [UserRole.BRANCH_ADMIN]: [
     {
       title: "Gestión de Sede",
       items: [
@@ -162,7 +162,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  instructor: [
+  [UserRole.INSTRUCTOR]: [
     {
       title: "Panel del Instructor",
       items: [
@@ -178,7 +178,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  accountant: [
+  [UserRole.ACCOUNTANT]: [
     {
       title: "Finanzas",
       items: [
@@ -193,7 +193,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  data_analyst: [
+  [UserRole.DATA_ANALYST]: [
     {
       title: "Análisis de Datos",
       items: [
@@ -204,7 +204,7 @@ export const sidebarMenusByRole: Record<string, NavSection[]> = {
     },
   ],
 
-  recepcionist: [
+  [UserRole.RECEPTIONIST]: [
     {
       title: "Panel de Recepción",
       items: [
@@ -226,19 +226,16 @@ export default function SidebarDashboard() {
   if (loading || !user) {
     return <SidebarMenuSkeleton />;
   }
+  const sections = user.role ? sidebarMenusByRole[user.role] : [];
+  
+  const safeSections = sections || [];
 
-  const currentUserRole = user.role?.toLowerCase() || "guest";
-  const sections = sidebarMenusByRole[currentUserRole] || [];
-
-  // Handler for navigating to main modules (uses replace to control history)
   const handleMainModuleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
 
-    // Get the base module path (e.g., "/users" from "/users/123/edit")
     const currentModule = pathname.split("/")[1];
     const targetModule = href.split("/")[1];
 
-    // If navigating to a different main module, use replace to avoid stacking
     if (currentModule && targetModule && currentModule !== targetModule) {
       router.replace(href);
     } else {
@@ -263,13 +260,13 @@ export default function SidebarDashboard() {
           <div className="flex flex-col">
             <span className="text-sm font-bold text-gray-900">VITALFIT</span>
             <span className="text-xs text-gray-500">
-              {user.role_name || currentUserRole}
+              {user.role_label}
             </span>
           </div>
           <ChevronDownIcon className="ml-auto h-5 w-5 text-gray-400" />
         </div>
 
-        {sections.map((section, i) => (
+        {safeSections.map((section, i) => (
           <SidebarGroup key={i} className="mt-2">
             {section.title && (
               <SidebarGroupLabel>{section.title}</SidebarGroupLabel>

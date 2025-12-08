@@ -6,13 +6,14 @@ import { useAuth } from "@/context/AuthContext";
 import { sidebarMenusByRole, isNavItemWithSub } from "@/components/layout/Sidebar";
 import ForbiddenError from "@/components/errors/ForbiddenError";
 import Loading from "@/app/loading";
+import { UserRole } from "@/lib/roles";
 
 export default function ProtectedRoute({
   children,
   allowedRoles,
 }: {
   children: ReactNode;
-  allowedRoles?: string[];
+  allowedRoles?: UserRole[];
 }) {
   const { isAuthenticated, loading, hasRole, user } = useAuth();
   const router = useRouter();
@@ -38,16 +39,17 @@ export default function ProtectedRoute({
   }
 
   if (!isAuthenticated || (allowedRoles && !hasRole(allowedRoles))) {
-    return <Loading />;
+    return <Loading />; 
   }
 
-  // - Validación de rutas según el Sidebar
   if (user?.role) {
-    const userRole = user.role.toLowerCase();
-    const allowedSections = sidebarMenusByRole[userRole] || [];
 
-    // Aplanar todas las rutas permitidas
+    const allowedSections = sidebarMenusByRole[user.role] || [];
+
     const allowedPaths: string[] = [];
+    
+    allowedPaths.push("/"); 
+
     allowedSections.forEach((section) => {
       section.items.forEach((item) => {
         if (isNavItemWithSub(item)) {
@@ -59,7 +61,10 @@ export default function ProtectedRoute({
     });
 
     const isAllowed = allowedPaths.some((path) => {
-      if (path === "/") { return pathname === "/"; }
+      if (path === "/") {
+        return pathname === "/";
+      }
+
       return pathname.startsWith(path);
     });
 
