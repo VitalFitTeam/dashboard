@@ -22,12 +22,12 @@ import {
   MessageCircle,
   UserIcon,
 } from "lucide-react";
-import { useAuth, User } from "@/context/AuthContext";
+import { useAuth, SessionUser } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 
 interface NavUserProps {
-  user: User;
+  user: SessionUser;
 }
 
 export function NavUser({ user }: NavUserProps) {
@@ -36,13 +36,11 @@ export function NavUser({ user }: NavUserProps) {
 
   const handleLogout = () => logout();
 
-  // ✅ Nombre completo y letra inicial
   const fullName = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim();
   const initial = user.first_name?.[0]?.toUpperCase() ?? "U";
 
-  // ✅ Si el backend provee imagen, úsala; si no, genera una dinámica de DiceBear
   const imageSrc = user.profile_picture_url
-    ? "/logo/isotipo.png"
+    ? user.profile_picture_url
     : `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(fullName || initial)}`;
 
   const UserAvatar = () => (
@@ -54,7 +52,7 @@ export function NavUser({ user }: NavUserProps) {
           width={40}
           height={40}
           className="rounded-full object-cover"
-          unoptimized
+          unoptimized 
         />
       ) : (
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-700">
