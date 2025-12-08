@@ -4,7 +4,6 @@ import * as React from "react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Badge } from "@/components/ui/badge";
-import EntityItem from "@/components/features/EntityItem";
 import { Calendar24 } from "@/components/layout/Calendar24";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +12,7 @@ import {
   CreatePackagePayload,
 } from "@vitalfit/sdk";
 import { PackageFormState } from "./new/page";
+import EntityItem from "@/components/layout/EntityItem";
 
 export type PackageItemUI = PackageItemDetail & { name: string }; // Para UI
 
