@@ -17,6 +17,8 @@ import { GymClass } from "./types";
 import { classColors } from "@/styles/eventColors";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
+// 1. IMPORTANTE: Importar el Enum
+import { UserRole } from "@/lib/roles";
 
 interface CalendarWrapperProps {
   onCreateClass?: (dateStr: string) => void;
@@ -64,7 +66,7 @@ export function ClassCalendar({
     [],
   );
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
-  const [currentDate, setCurrentDate] = useState<Date>(new Date()); // Fecha actual por defecto
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [currentView, setCurrentView] = useState<string>("dayGridMonth");
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
@@ -86,15 +88,15 @@ export function ClassCalendar({
         if (branchesResponse.data) {
           setAllBranches(branchesResponse.data);
 
-          // Establecer la primera sucursal como filtro por defecto, o la del usuario si es branch_admin
-          if (user?.role === "branch_admin" && user.branchId) {
-            setBranchFilter(user.branchId);
+          // 2. CORRECCIÓN: Usar Enum y branch_id (snake_case)
+          if (user?.role === UserRole.BRANCH_ADMIN && user.branch_id) {
+            setBranchFilter(user.branch_id);
           } else if (branchesResponse.data.length > 0) {
             setBranchFilter(branchesResponse.data[0].branch_id);
           }
         }
 
-        // Cargar servicios para el filtro de tipos
+        // Cargar servicios
         const servicesResponse = await api.products.getServices(token, {
           page: 1,
           limit: 100,
@@ -118,7 +120,7 @@ export function ClassCalendar({
               instructor_id: instructor.instructor_id,
               first_name: instructor.first_name,
               last_name: instructor.last_name,
-              branch_id: instructor.branch_id, // Asegurar que tenemos branch_id
+              branch_id: instructor.branch_id,
             }),
           );
           setAllInstructors(instructorsData);
@@ -136,16 +138,13 @@ export function ClassCalendar({
   // Filtrar instructores y servicios cuando cambie la sucursal seleccionada
   useEffect(() => {
     if (branchFilter) {
-      // Método 1: Filtrar instructores por branch_id si está disponible
       let instructorsForBranch = allInstructors;
 
-      // Si los instructores tienen branch_id, filtrar por él
       if (allInstructors.some((instructor) => instructor.branch_id)) {
         instructorsForBranch = allInstructors.filter(
           (instructor) => instructor.branch_id === branchFilter,
         );
       } else {
-        // Método 2: Si no hay branch_id en instructores, obtener instructores de las clases de esta sucursal
         const instructorIdsFromEvents = Array.from(
           new Set(
             events
@@ -161,8 +160,6 @@ export function ClassCalendar({
       }
 
       setFilteredInstructors(instructorsForBranch);
-
-      // Resetear los otros filtros cuando cambia la sucursal
       setTypeFilter(null);
       setInstructorFilter(null);
     } else {
@@ -173,7 +170,7 @@ export function ClassCalendar({
     }
   }, [branchFilter, allInstructors, events]);
 
-  // Cargar clases cuando cambien los filtros
+  // Cargar clases
   useEffect(() => {
     const loadClasses = async () => {
       if (!token || !branchFilter) {
@@ -183,14 +180,12 @@ export function ClassCalendar({
       try {
         setIsLoadingClasses(true);
 
-        // Llamar a la API para obtener las clases de la sucursal seleccionada
         const response = await api.schedule.ListBranchesClass(
           branchFilter,
           token,
         );
 
         if (response.data) {
-          // Convertir BranchClassInfo a GymClass para el calendario
           const calendarEvents: GymClass[] = response.data.map(
             (classInfo: any) => {
               const service = allServices.find(
@@ -223,7 +218,6 @@ export function ClassCalendar({
 
           setEvents(calendarEvents);
 
-          // Actualizar servicios filtrados basados en las clases reales de esta sucursal
           const servicesInBranch = Array.from(
             new Set(
               calendarEvents
@@ -238,7 +232,6 @@ export function ClassCalendar({
 
           setFilteredServices(servicesInBranch);
 
-          // Actualizar instructores filtrados basados en las clases reales de esta sucursal
           const instructorsInBranch = Array.from(
             new Set(
               calendarEvents
@@ -253,7 +246,6 @@ export function ClassCalendar({
             )
             .filter(Boolean) as Instructor[];
 
-          // Si no hay branch_id en los instructores, usar los instructores de las clases
           if (!allInstructors.some((instructor) => instructor.branch_id)) {
             setFilteredInstructors(instructorsInBranch);
           }
@@ -269,14 +261,14 @@ export function ClassCalendar({
     loadClasses();
   }, [token, branchFilter, allBranches, allServices, allInstructors]);
 
-  // Ir al mes actual cuando se carga el componente
   useEffect(() => {
     if (calendarRef.current && !isLoading) {
       const calendarApi = calendarRef.current.getApi();
-      calendarApi.gotoDate(new Date()); // Ir a la fecha actual
+      calendarApi.gotoDate(new Date());
     }
   }, [isLoading]);
 
+  // 3. CORRECCIÓN: Filtros usando Enums y branch_id corregido
   const visibleEvents = events.filter((e) => {
     if (!user) {
       return false;
@@ -284,14 +276,15 @@ export function ClassCalendar({
 
     let roleFilter = false;
     switch (user.role) {
-      case "super_admin":
+      case UserRole.SUPER_ADMIN:
         roleFilter = true;
         break;
-      case "branch_admin":
-      case "recepcionist":
-        roleFilter = e.branchId === user.branchId;
+      case UserRole.BRANCH_ADMIN:
+      case UserRole.RECEPTIONIST:
+        // Cuidado aquí: events usa branchId (camelCase) pero user usa branch_id (snakeCase)
+        roleFilter = e.branchId === user.branch_id;
         break;
-      case "instructor":
+      case UserRole.INSTRUCTOR:
         roleFilter = e.instructorId === user.user_id;
         break;
       default:
@@ -307,7 +300,14 @@ export function ClassCalendar({
   });
 
   const canCreate = () => {
-    return hasRole?.(["super_admin", "branch_admin", "recepcionist"]) ?? false;
+    // 4. CORRECCIÓN: Pasar Array de Enums a hasRole
+    return (
+      hasRole?.([
+        UserRole.SUPER_ADMIN,
+        UserRole.BRANCH_ADMIN,
+        UserRole.RECEPTIONIST,
+      ]) ?? false
+    );
   };
 
   const handleDateClick = (arg: any) => {
@@ -319,7 +319,9 @@ export function ClassCalendar({
       onCreateClass(arg.dateStr);
     } else {
       router.push(
-        `/calendar/new?date=${arg.dateStr}&branch=${branchFilter || user?.branchId || "b-default"}`,
+        `/calendar/new?date=${arg.dateStr}&branch=${
+          branchFilter || user?.branch_id || "b-default"
+        }`,
       );
     }
   };
@@ -337,12 +339,10 @@ export function ClassCalendar({
     }
   };
 
-  // Manejar cambio de sucursal
   const handleBranchChange = (branchId: string) => {
     setBranchFilter(branchId || null);
   };
 
-  // Indicador de carga principal
   if (isLoading) {
     return (
       <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
@@ -356,9 +356,6 @@ export function ClassCalendar({
 
   return (
     <>
-      {/* (Los filtros se muestran dentro de la toolbar cuando se activa "Filtro") */}
-
-      {/* Mensaje cuando no hay sucursal seleccionada */}
       {!branchFilter && (
         <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
           <p className="text-yellow-800">
@@ -367,7 +364,6 @@ export function ClassCalendar({
         </div>
       )}
 
-      {/* Calendario */}
       <div className="relative">
         {isLoadingClasses && (
           <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
@@ -378,17 +374,17 @@ export function ClassCalendar({
           </div>
         )}
         <div className="container-toolbar">
-          {/* Toolbar personalizado con botón Filtro */}
           <div className="mb-3">
             <div className="flex items-center justify-between border-b-2 pb-2">
               <div className="flex items-center gap-4">
                 <span className="text-orange-400 font-semibold">Calendar</span>
                 <div className="flex gap-2 items-center">
                   <button
-                    className={`px-3 py-1 text-sm border-0 ${currentView === "dayGridMonth"
+                    className={`px-3 py-1 text-sm border-0 ${
+                      currentView === "dayGridMonth"
                         ? "text-orange-400 border-b-2 border-orange-400"
                         : "bg-transparent"
-                      }`}
+                    }`}
                     onClick={() => {
                       calendarRef.current?.getApi?.()?.changeView("dayGridMonth");
                     }}
@@ -396,10 +392,11 @@ export function ClassCalendar({
                     Monthly
                   </button>
                   <button
-                    className={`px-3 py-1 text-sm border-0 ${currentView === "timeGridWeek"
+                    className={`px-3 py-1 text-sm border-0 ${
+                      currentView === "timeGridWeek"
                         ? "text-orange-400 border-b-2 border-orange-400"
                         : "bg-transparent"
-                      }`}
+                    }`}
                     onClick={() => {
                       calendarRef.current?.getApi?.()?.changeView("timeGridWeek");
                     }}
@@ -407,10 +404,11 @@ export function ClassCalendar({
                     Weekly
                   </button>
                   <button
-                    className={`px-3 py-1 text-sm border-0 ${currentView === "timeGridDay"
+                    className={`px-3 py-1 text-sm border-0 ${
+                      currentView === "timeGridDay"
                         ? "text-orange-400 border-b-2 border-orange-400"
                         : "bg-transparent"
-                      }`}
+                    }`}
                     onClick={() => {
                       calendarRef.current?.getApi?.()?.changeView("timeGridDay");
                     }}
@@ -421,7 +419,6 @@ export function ClassCalendar({
               </div>
 
               <div className="flex flex-col items-center">
-                {/* filtro en la misma linea pero al final derecho */}
                 <div className="self-end">
                   <button
                     className="ml-2 px-3 py-1 rounded text-sm border border-orange-400 flex items-center gap-2 text-orange-400"
@@ -432,11 +429,9 @@ export function ClassCalendar({
                     Filtro
                   </button>
                 </div>
-
               </div>
             </div>
 
-            {/* Filtros desplegables (muestran los selects existentes) */}
             {showFilters && (
               <div className="mt-3 flex gap-3 flex-wrap items-center">
                 <select
@@ -471,7 +466,9 @@ export function ClassCalendar({
                   <select
                     className="border rounded px-2 py-1 min-w-[150px]"
                     value={instructorFilter ?? ""}
-                    onChange={(e) => setInstructorFilter(e.target.value || null)}
+                    onChange={(e) =>
+                      setInstructorFilter(e.target.value || null)
+                    }
                   >
                     <option value="">Todos los instructores</option>
                     {filteredInstructors.map((instructor) => (
@@ -511,9 +508,13 @@ export function ClassCalendar({
                         "Ir a año:",
                         String(current.getFullYear()),
                       );
-                      if (!yearInput){return;}
+                      if (!yearInput) {
+                        return;
+                      }
                       const y = parseInt(yearInput, 10);
-                      if (isNaN(y)){return;}
+                      if (isNaN(y)) {
+                        return;
+                      }
                       api.gotoDate(new Date(y, current.getMonth(), 1));
                     } catch (e) {
                       console.error("Error al cambiar de año:", e);
@@ -550,68 +551,67 @@ export function ClassCalendar({
                   <ChevronRightIcon className="h-4 w-4 text-gray-700" />
                 </button>
               </div>
-
             </div>
           </div>
+        </div>
 
-          <FullCalendar
-            ref={calendarRef}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            initialDate={new Date()} // Fecha inicial establecida como hoy
-            height="90vh"
-            selectable={canCreate()}
-            editable={false}
-            displayEventTime={true}
-            headerToolbar={false}
-            datesSet={(arg) => {
-              setCurrentDate(arg.start ?? new Date());
-              setCurrentView(arg.view.type);
-            }}
-            dayHeaderFormat={{ weekday: "short" }}
-            events={visibleEvents}
-            eventContent={(arg) => {
-              const eventData = arg.event.extendedProps as GymClass;
-              const color = classColors[eventData.type] ?? "#e2e8f0";
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          initialDate={new Date()}
+          height="90vh"
+          selectable={canCreate()}
+          editable={false}
+          displayEventTime={true}
+          headerToolbar={false}
+          datesSet={(arg) => {
+            setCurrentDate(arg.start ?? new Date());
+            setCurrentView(arg.view.type);
+          }}
+          dayHeaderFormat={{ weekday: "short" }}
+          events={visibleEvents}
+          eventContent={(arg) => {
+            const eventData = arg.event.extendedProps as GymClass;
+            const color = classColors[eventData.type] ?? "#e2e8f0";
 
-              const startTime = new Date(arg.event.start!).toLocaleTimeString(
-                [],
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                },
-              );
-              const endTime = new Date(arg.event.end!).toLocaleTimeString([], {
+            const startTime = new Date(arg.event.start!).toLocaleTimeString(
+              [],
+              {
                 hour: "2-digit",
                 minute: "2-digit",
-              });
+              },
+            );
+            const endTime = new Date(arg.event.end!).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
 
-              return (
-                <div
-                  className="rounded-lg text-xs text-gray-900 hover:opacity-95 transition-opacity shadow-sm"
-                  style={{ backgroundColor: color }}
-                >
-                  <div className="font-semibold text-sm">{eventData.title}</div>
-                  <div className="text-gray-700">
-                    {startTime} - {endTime}
-                  </div>
+            return (
+              <div
+                className="rounded-lg text-xs text-gray-900 hover:opacity-95 transition-opacity shadow-sm"
+                style={{ backgroundColor: color }}
+              >
+                <div className="font-semibold text-sm">{eventData.title}</div>
+                <div className="text-gray-700">
+                  {startTime} - {endTime}
                 </div>
-              );
-            }}
-            dateClick={handleDateClick}
-            eventClick={handleEventClick}
-            dayCellDidMount={(info) => {
-              const today = new Date();
-              if (info.date.toDateString() === today.toDateString()) {
-                info.el.style.backgroundColor = "#f3f4f6";
-                info.el.style.borderRadius = "0.5rem";
-              }
-            }}
-            loading={(isLoading) => {
-              console.warn(isLoading);
-            }}
-          />
-        </div>
+              </div>
+            );
+          }}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          dayCellDidMount={(info) => {
+            const today = new Date();
+            if (info.date.toDateString() === today.toDateString()) {
+              info.el.style.backgroundColor = "#f3f4f6";
+              info.el.style.borderRadius = "0.5rem";
+            }
+          }}
+          loading={(isLoading) => {
+            console.warn(isLoading);
+          }}
+        />
       </div>
 
       {!isLoadingClasses && branchFilter && visibleEvents.length === 0 && (
