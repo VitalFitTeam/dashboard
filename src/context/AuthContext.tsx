@@ -11,6 +11,10 @@ import {
 } from "react";
 import { jwtDecode } from "jwt-decode";
 import { api } from "@/lib/sdk-config";
+// 1. Importamos el usuario del SDK con un alias para no confundirnos
+import { User as SdkUser } from "@vitalfit/sdk";
+// 2. Importamos nuestros roles centralizados
+import { UserRole, ROLE_LABELS } from "@/lib/roles";
 
 interface JwtPayload {
   exp?: number;
@@ -19,42 +23,22 @@ interface JwtPayload {
   roles?: string[];
 }
 
-export interface User {
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: string;
-  role_label?: string;
-  [k: string]: any;
+export interface SessionUser extends Omit<SdkUser, "role"> {
+  role: UserRole;
+  role_label: string;
+  branch_id?: string; 
 }
 
-const ALLOWED_ROLES = [
-  "super_admin",
-  "branch_admin",
-  "accountant",
-  "data_analyst",
-  "instructor",
-  "recepcionist",
-];
-
-const ROLE_LABELS: Record<string, string> = {
-  super_admin: "Super Administrador",
-  branch_admin: "Administrador de sede",
-  accountant: "Contador",
-  data_analyst: "Analista de datos",
-  instructor: "Instructor",
-  recepcionist: "Recepcionista",
-};
+const VALID_ROLES = Object.values(UserRole);
 
 interface AuthContextType {
   token: string | null;
-  user: User | null;
+  user: SessionUser | null;
   loading: boolean;
   isAuthenticated: boolean;
   login: (token: string, remember?: boolean) => Promise<void>;
   logout: () => Promise<void>;
-  hasRole: (roles: string | string[]) => boolean;
+  hasRole: (roles: UserRole | UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -82,12 +66,12 @@ const decodeToken = (token: string): JwtPayload | null => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   const getUserProfile = useCallback(
-    async (token: string): Promise<User | null> => {
+    async (token: string): Promise<SessionUser | null> => {
       const decoded = decodeToken(token);
       if (!decoded) {
         return null;
@@ -95,42 +79,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const profileResponse = await api.user.WhoAmI(token);
+        console.log(profileResponse);
+        const sdkData = profileResponse.user; 
 
-        if (!profileResponse || !profileResponse.user) {
+        if (!sdkData) {
           console.error("Respuesta de WhoAmI inválida");
           return null;
         }
+        const rawRoleName = (sdkData.role as any)?.name?.toLowerCase();
+        const userRole = rawRoleName as UserRole;
 
-        const userData = profileResponse.user;
-        console.log(userData);
-        const userRole = userData.role?.name?.toLowerCase();
-
-        if (!ALLOWED_ROLES.includes(userRole)) {
+        if (!VALID_ROLES.includes(userRole)) {
           console.error(
-            `Acceso denegado: El rol '${userRole}' no tiene permisos para este sistema.`,
+            `Acceso denegado: El rol '${rawRoleName}' no tiene permisos para este sistema.`
           );
           return null;
         }
 
         return {
-          user_id: userData.user_id,
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          email: userData.email,
-          role: userRole,
-          role_label: ROLE_LABELS[userRole] ?? userRole,
-          is_validated: userData.is_validated ?? false,
-          profile_picture_url: userData.profile_picture_url,
-          phone: userData.phone,
-          identity_document: userData.identity_document,
-          birth_date: userData.birth_date,
+          ...sdkData, 
+          role: userRole, 
+          role_label: ROLE_LABELS[userRole] ?? rawRoleName,
+          branch_id:
+            (sdkData as any).branch_id || (sdkData as any).franchise_id,
         };
       } catch (error) {
         console.error("Error al obtener perfil del usuario:", error);
         return null;
       }
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -140,7 +118,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const storedToken = localStorage.getItem("access_token");
         if (storedToken) {
           const userProfile = await getUserProfile(storedToken);
-
           if (userProfile) {
             setToken(storedToken);
             setUser(userProfile);
@@ -159,7 +136,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     };
-
     initAuth();
   }, [getUserProfile]);
 
@@ -168,7 +144,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       try {
         const userProfile = await getUserProfile(newToken);
-
         if (userProfile) {
           localStorage.setItem("access_token", newToken);
           setToken(newToken);
@@ -177,9 +152,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           localStorage.removeItem("access_token");
           setToken(null);
           setUser(null);
-          throw new Error(
-            "Credenciales inválidas o sin permisos de administrador",
-          );
+          throw new Error("Credenciales inválidas o sin permisos");
         }
       } catch (err) {
         console.error("Login error:", err);
@@ -188,7 +161,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
       }
     },
-    [getUserProfile],
+    [getUserProfile]
   );
 
   const logout = useCallback(async () => {
@@ -203,14 +176,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [router]);
 
   const hasRole = useCallback(
-    (roles: string | string[]) => {
+    (roles: UserRole | UserRole[]) => {
       if (!user?.role) {
         return false;
       }
       const allowed = Array.isArray(roles) ? roles : [roles];
       return allowed.includes(user.role);
     },
-    [user],
+    [user]
   );
 
   return (
