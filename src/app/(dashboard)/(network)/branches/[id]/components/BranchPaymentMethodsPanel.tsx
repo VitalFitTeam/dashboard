@@ -6,7 +6,6 @@ import { useAuth } from "@/context/AuthContext";
 import { BranchPaymentMethodInfo, PaymentMethod } from "@vitalfit/sdk";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import EntityItem from "@/components/features/EntityItem";
 import {
   Select,
   SelectTrigger,
@@ -14,6 +13,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import EntityItem from "@/components/layout/EntityItem";
 
 interface BranchPaymentMethodPanelProps {
   branchId: string;

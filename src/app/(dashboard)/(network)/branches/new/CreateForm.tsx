@@ -7,20 +7,20 @@ import {
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { Button } from "@/components/ui/button";
-import Wizard from "@/app/(dashboard)/branches/Wizard";
 import {
   CardHeader,
   CardTitle,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import StepForm from "@/app/(dashboard)/branches/StepForm";
 import Image from "next/image";
 import { Country, State, City } from "@/models/location";
 import { api } from "@/lib/sdk-config";
 import { CreateBranchRequest, User } from "@vitalfit/sdk";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import Wizard from "../Wizard";
+import StepForm from "../StepForm";
 
 interface BranchFromProps {
   allCountries: Country[];

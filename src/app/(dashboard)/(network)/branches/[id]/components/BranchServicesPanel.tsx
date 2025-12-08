@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import InputField from "@/components/ui/InputField";
-import EntityItem from "@/components/features/EntityItem";
 import { useAuth } from "@/context/AuthContext";
 import {
   BranchServicePrice,
@@ -24,6 +23,7 @@ import { api } from "@/lib/sdk-config";
 import EditBranchServiceModal from "./EditBranchServiceModal";
 import { toast } from "sonner";
 import { branchServiceSchema } from "@/lib/validation/branchServiceSchema";
+import EntityItem from "@/components/layout/EntityItem";
 
 interface BranchServicePanelProps {
   branchId: string;

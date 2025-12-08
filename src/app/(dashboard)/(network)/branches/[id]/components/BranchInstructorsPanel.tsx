@@ -12,8 +12,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import EntityItem from "@/components/features/EntityItem";
 import { toast } from "sonner";
+import EntityItem from "@/components/layout/EntityItem";
 
 interface BranchInstructorPanelProps {
   branchId: string;
