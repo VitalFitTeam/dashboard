@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
-import ImageUploader from "@/components/features/services/ImageUploader";
+import ImageUploader from "@/components/modules/services/ImageUploader";
 import {
   Select,
   SelectContent,

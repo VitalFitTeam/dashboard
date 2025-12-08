@@ -19,7 +19,7 @@ import { api } from "@/lib/sdk-config";
 import { ServiceFullDetail, ServiceCategoryInfo } from "@vitalfit/sdk";
 import ImageUploader, {
   UploadableImage,
-} from "@/components/features/services/ImageUploader";
+} from "@/components/modules/services/ImageUploader";
 
 export default function ServiceDetail() {
   const params = useParams();

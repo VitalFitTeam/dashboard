@@ -102,6 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const userData = profileResponse.user;
+        console.log(userData);
         const userRole = userData.role?.name?.toLowerCase();
 
         if (!ALLOWED_ROLES.includes(userRole)) {
