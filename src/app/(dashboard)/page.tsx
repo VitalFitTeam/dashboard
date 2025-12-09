@@ -1,9 +1,9 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import SuperAdminDashboard from "@/components/features/dashboard/SuperAdminDashboard";
-import BranchDashboard from "@/components/features/dashboard/BranchDashboard";
-import InstructorDashboard from "@/components/features/dashboard/InstructorDashboard";
+import SuperAdminDashboard from "@/components/modules/dashboard/SuperAdminDashboard";
+import BranchDashboard from "@/components/modules/dashboard/BranchDashboard";
+import InstructorDashboard from "@/components/modules/dashboard/InstructorDashboard";
 
 export default function DashboardHome() {
   const { user, hasRole } = useAuth();

@@ -3,9 +3,9 @@
 import { ReactNode, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import Loading from "@/app/(dashboard)/loading";
 import { sidebarMenusByRole, isNavItemWithSub } from "@/components/layout/Sidebar";
 import ForbiddenError from "@/components/errors/ForbiddenError";
+import Loading from "@/app/loading";
 
 export default function ProtectedRoute({
   children,
