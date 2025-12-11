@@ -41,7 +41,6 @@ export default function ServicesPage() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      {/* Tarjetas de estadísticas en tiempo real */}
       <div className="grid gap-4 md:grid-cols-2">
         {statCardsConfig.map((card) => (
           <StatCard

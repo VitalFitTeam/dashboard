@@ -18,7 +18,6 @@ import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { ServiceFullDetail, ServiceCategoryInfo } from "@vitalfit/sdk";
-<<<<<<< HEAD:src/app/(dashboard)/services/[id]/page.tsx
 
 interface ViewableImage {
   id: string;
@@ -29,11 +28,6 @@ interface ViewableImage {
   fileName?: string;
   fileSize?: string;
 }
-=======
-import ImageUploader, {
-  UploadableImage,
-} from "@/components/modules/services/ImageUploader";
->>>>>>> development:src/app/(dashboard)/(catalog)/services/[id]/page.tsx
 
 export default function ServiceDetail() {
   const params = useParams();

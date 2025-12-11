@@ -24,7 +24,7 @@ import {
   Banner,
 } from "@vitalfit/sdk";
 import { serviceSchema, ServiceFormData } from "@/lib/validation/serviceSchema";
-import ImageUploader from "@/components/features/services/ImageUploader";
+import ImageUploader from "@/components/modules/services/ImageUploader";
 import { z } from "zod";
 
 export type UploadedImage = {
