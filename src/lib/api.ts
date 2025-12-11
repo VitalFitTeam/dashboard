@@ -1,6 +1,6 @@
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   try {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
 
     const headers = new Headers(options.headers);
 
@@ -18,7 +18,7 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
     if (!res.ok) {
       const errorText = await res.text();
       if (res.status === 401) {
-        localStorage.removeItem("token");
+        localStorage.removeItem("access_token");
         window.location.href = "/login";
       }
       throw new Error(`Error ${res.status}: ${errorText}`);
