@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { useRouter } from "next/navigation";
@@ -22,16 +21,26 @@ import {
   ServiceCategoryInfo,
   CreateService as CreateServiceType,
   CreateServiceImage,
-  CreateBanner,
   Banner,
 } from "@vitalfit/sdk";
 import { serviceSchema, ServiceFormData } from "@/lib/validation/serviceSchema";
+import ImageUploader from "@/components/modules/services/ImageUploader";
 import { z } from "zod";
 
-const DEFAULT_BANNER_IMAGE =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2YzZjNmMyIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5CYW5uZXIgZGUgU2VydmljaW88L3RleHQ+Cjwvc3ZnPg==";
-
-const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB;
+export type UploadedImage = {
+  id: string;
+  file: File;
+  preview: string;
+  originalPreview: string;
+  croppedBlob?: Blob;
+  croppedPreview?: string;
+  status: "pending" | "cropped" | "uploading" | "uploaded" | "error";
+  url?: string;
+  error?: string;
+  isPrimary?: boolean;
+  order: number;
+  description?: string;
+};
 
 export default function CreateService() {
   const router = useRouter();
@@ -47,9 +56,9 @@ export default function CreateService() {
     message: "",
   });
 
-  const [bannerImage, setBannerImage] = useState<string>("");
-  const [serviceImages, setServiceImages] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
+  const [serviceImages, setServiceImages] = useState<UploadedImage[]>([]);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [bannerError, setBannerError] = useState<string>("");
 
   const [formData, setFormData] = useState<ServiceFormData>({
     name: "",
@@ -94,41 +103,6 @@ export default function CreateService() {
     loadInitialData();
   }, [token]);
 
-  const uploadToImgBB = async (file: File): Promise<string> => {
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const response = await fetch(
-        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
-
-      if (!response.ok) {
-        console.warn(`Error ${response.status}: No se pudo subir la imagen`);
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        return data.data.url;
-      } else {
-        throw new Error(
-          data.error?.message || "Error desconocido al subir imagen",
-        );
-      }
-    } catch (error) {
-      console.error("Error subiendo a ImgBB:", error);
-      return DEFAULT_BANNER_IMAGE;
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const validateForm = (): boolean => {
     try {
       serviceSchema.parse(formData);
@@ -156,13 +130,114 @@ export default function CreateService() {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        setFormErrors((prev) => {
-          return {
-            ...prev,
-            [field]: error.issues[0]?.message,
-          };
-        });
+        setFormErrors((prev) => ({
+          ...prev,
+          [field]: error.issues[0]?.message,
+        }));
       }
+    }
+  };
+
+  const handleChange = (field: keyof ServiceFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    if (field === "banner_id" && value) {
+      setBannerError("");
+    }
+
+    if (
+      field === "name" ||
+      field === "description" ||
+      field === "duration_minutes"
+    ) {
+      validateField(field, value);
+    }
+  };
+
+  const handleImagesChange = (images: UploadedImage[]) => {
+    setServiceImages(images);
+  };
+
+  // Función para subir una imagen a ImgBB
+  const uploadToImgBB = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const imgbbKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY || process.env.NEXT_PUBLIC_IMGBB;
+
+    if (!imgbbKey) {
+      throw new Error("No se encontró la clave de API de ImgBB");
+    }
+
+    const res = await fetch(
+      `https://api.imgbb.com/1/upload?key=${imgbbKey}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Error de ImgBB:", errorText);
+      throw new Error(`Error al subir la imagen: ${res.status}`);
+    }
+
+    const json = await res.json();
+
+    if (!json.data || !json.data.url) {
+      throw new Error("Respuesta inválida de ImgBB");
+    }
+
+    return json.data.url;
+  };
+
+  // Función para procesar y subir todas las imágenes
+  const processAndUploadImages = async (): Promise<CreateServiceImage[]> => {
+    if (serviceImages.length === 0) { return []; }
+
+    setIsUploadingImages(true);
+    const uploadedImages: CreateServiceImage[] = [];
+
+    try {
+      for (const [index, img] of serviceImages.entries()) {
+        try {
+          let imageUrl = img.url;
+
+          // Si la imagen no tiene URL, subirla a ImgBB
+          if (!imageUrl) {
+            // Determinar qué archivo subir (recortado u original)
+            let fileToUpload: File;
+
+            if (img.croppedBlob) {
+              // Usar la versión recortada si existe
+              fileToUpload = new File(
+                [img.croppedBlob],
+                img.file.name || "cropped-image.jpg",
+                { type: "image/jpeg" }
+              );
+            } else {
+              fileToUpload = img.file;
+            }
+            imageUrl = await uploadToImgBB(fileToUpload);
+          }
+
+          uploadedImages.push({
+            image_url: imageUrl,
+            alt_text: img.description || `Imagen ${index + 1} - ${formData.name}`,
+            display_order: img.order,
+            is_primary: img.isPrimary || index === 0,
+          });
+
+        } catch (error) {
+          console.error(`Error procesando imagen ${index + 1}:`, error);
+          throw new Error(`Error al procesar la imagen ${index + 1}: ${error instanceof Error ? error.message : "Error desconocido"}`);
+        }
+      }
+
+      return uploadedImages;
+    } finally {
+      setIsUploadingImages(false);
     }
   };
 
@@ -177,6 +252,14 @@ export default function CreateService() {
       return;
     }
 
+    // Validar que se haya seleccionado un banner
+    if (!formData.banner_id) {
+      setBannerError("Por favor, selecciona un banner para el servicio.");
+      return;
+    } else {
+      setBannerError("");
+    }
+
     if (!validateForm()) {
       setShowError({
         visible: true,
@@ -185,76 +268,20 @@ export default function CreateService() {
       return;
     }
 
+    // Validar que haya al menos una imagen
+    if (serviceImages.length === 0) {
+      setShowError({
+        visible: true,
+        message: "El servicio debe tener al menos una imagen.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setShowError({ visible: false, message: "" });
 
     try {
-      let bannerId = formData.banner_id;
-
-      if (bannerId) {
-        console.log("Usando banner existente:", bannerId);
-      } else if (bannerImage) {
-        try {
-          console.log("Creando nuevo banner desde imagen subida...");
-          const bannerPayload: CreateBanner = {
-            name: `Banner - ${formData.name}`,
-            image_url: bannerImage,
-            link_url: bannerImage,
-            is_active: true,
-          };
-
-          await api.marketing.createBanners(bannerPayload, token);
-
-          const bannersResponse = await api.marketing.getBanner(token);
-          const updatedBanners = bannersResponse.data || [];
-          const newBanner = updatedBanners.find((banner: Banner) => {
-            return banner.image_url === bannerImage;
-          });
-
-          if (newBanner?.banner_id) {
-            bannerId = newBanner.banner_id;
-            console.log("Banner creado exitosamente:", bannerId);
-          } else {
-            throw new Error("No se pudo obtener el ID del banner creado");
-          }
-        } catch (error) {
-          console.error("Error creando banner desde imagen:", error);
-        }
-      }
-
-      if (!bannerId) {
-        try {
-          console.log("Creando banner por defecto...");
-          bannerId = await createDefaultBanner(formData.name);
-          console.log("Banner por defecto creado:", bannerId);
-        } catch (error) {
-          console.error("Error creando banner por defecto:", error);
-          const activeBanners = banners.filter((b) => {
-            return b.is_active;
-          });
-          if (activeBanners.length > 0 && activeBanners[0].banner_id) {
-            bannerId = activeBanners[0].banner_id;
-            console.log("Usando primer banner activo disponible:", bannerId);
-          } else {
-            throw new Error("No se pudo obtener un banner válido.");
-          }
-        }
-      }
-
-      const serviceImagesPayload: CreateServiceImage[] = serviceImages.map(
-        (url, index) => {
-          return {
-            image_url: url,
-            alt_text: `Imagen ${index + 1} - ${formData.name}`,
-            display_order: index,
-            is_primary: index === 0,
-          };
-        },
-      );
-
-      if (!bannerId) {
-        throw new Error("No se pudo obtener un banner válido para el servicio");
-      }
+      const serviceImagesPayload = await processAndUploadImages();
 
       const servicePayload: CreateServiceType = {
         name: formData.name,
@@ -263,17 +290,16 @@ export default function CreateService() {
         duration: parseInt(formData.duration_minutes),
         priority: parseInt(formData.priority_score),
         is_featured: formData.is_featured === "true",
-        banner_id: bannerId,
+        banner_id: formData.banner_id,
         service_images: serviceImagesPayload,
       };
-
-      console.log("Enviando servicio:", servicePayload);
 
       await api.products.createService(servicePayload, token);
 
       setShowSuccess(true);
+
       setTimeout(() => {
-        router.push("/services");
+        router.replace("/services");
       }, 1500);
     } catch (error) {
       console.error("Error al crear servicio:", error);
@@ -287,109 +313,6 @@ export default function CreateService() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const createDefaultBanner = async (serviceName: string): Promise<string> => {
-    if (!token) {
-      throw new Error("No token available");
-    }
-
-    try {
-      const bannerPayload: CreateBanner = {
-        name: `Banner - ${serviceName}`,
-        image_url: DEFAULT_BANNER_IMAGE,
-        link_url: DEFAULT_BANNER_IMAGE,
-        is_active: true,
-      };
-
-      await api.marketing.createBanners(bannerPayload, token);
-
-      const bannersResponse = await api.marketing.getBanner(token);
-      const updatedBanners = bannersResponse.data || [];
-
-      const newBanner = updatedBanners.find((banner: Banner) => {
-        return banner.name === `Banner - ${serviceName}`;
-      });
-
-      if (!newBanner || !newBanner.banner_id) {
-        throw new Error("No se pudo obtener el ID del banner creado");
-      }
-
-      return newBanner.banner_id;
-    } catch (error) {
-      console.error("Error creando banner por defecto:", error);
-      throw error;
-    }
-  };
-
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    try {
-      const imageUrl = await uploadToImgBB(file);
-      setBannerImage(imageUrl);
-      setFormData((prev) => {
-        return { ...prev, banner_id: "" };
-      });
-    } catch (error) {
-      console.error("Error subiendo banner:", error);
-      setShowError({
-        visible: true,
-        message: "Error al subir el banner. Se usará una imagen por defecto.",
-      });
-    }
-  };
-
-  const handleServiceImagesUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) {
-      return;
-    }
-
-    try {
-      for (const file of files) {
-        const imageUrl = await uploadToImgBB(file);
-        setServiceImages((prev) => {
-          return [...prev, imageUrl];
-        });
-      }
-    } catch (error) {
-      console.error("Error subiendo imágenes de servicio:", error);
-      setShowError({
-        visible: true,
-        message:
-          "Error al subir algunas imágenes. Se usarán imágenes por defecto.",
-      });
-    }
-  };
-
-  const handleChange = (field: keyof ServiceFormData, value: string) => {
-    setFormData((prev) => {
-      return { ...prev, [field]: value };
-    });
-
-    if (
-      field === "name" ||
-      field === "description" ||
-      field === "duration_minutes"
-    ) {
-      validateField(field, value);
-    }
-  };
-
-  const handleBannerRemove = () => {
-    setBannerImage("");
-  };
-
-  const removeServiceImage = (index: number) => {
-    setServiceImages((prev) => {
-      return prev.filter((_, i) => i !== index);
-    });
   };
 
   if (isLoading) {
@@ -441,13 +364,11 @@ export default function CreateService() {
                 <SelectValue placeholder="Selecciona una categoría" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => {
-                  return (
-                    <SelectItem key={cat.category_id} value={cat.category_id}>
-                      {cat.name}
-                    </SelectItem>
-                  );
-                })}
+                {categories.map((cat) => (
+                  <SelectItem key={cat.category_id} value={cat.category_id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {formErrors.category_id && (
@@ -543,164 +464,55 @@ export default function CreateService() {
               value={formData.banner_id}
               onValueChange={(value) => {
                 handleChange("banner_id", value);
-                if (value) {
-                  setBannerImage("");
-                }
               }}
               required
             >
-              <SelectTrigger id="banner_id" className="w-full">
+              <SelectTrigger
+                id="banner_id"
+                className={`w-full ${bannerError ? "border-red-500" : ""}`}
+              >
                 <SelectValue placeholder="Selecciona un banner existente" />
               </SelectTrigger>
               <SelectContent>
                 {banners
-                  .filter((b) => {
-                    return b.is_active;
-                  })
-                  .map((banner) => {
-                    return (
-                      <SelectItem
-                        key={banner.banner_id}
-                        value={banner.banner_id || ""}
-                      >
-                        {banner.name}
-                      </SelectItem>
-                    );
-                  })}
+                  .filter((b) => b.is_active)
+                  .map((banner) => (
+                    <SelectItem
+                      key={banner.banner_id}
+                      value={banner.banner_id || ""}
+                    >
+                      {banner.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
-            <p className="text-sm text-gray-500">
-              Este campo es obligatorio. Selecciona un banner existente.
-            </p>
+            {bannerError && (
+              <p className="text-red-500 text-sm">{bannerError}</p>
+            )}
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>O subir nuevo banner (Opcional)</Label>
-
-          {bannerImage ? (
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={bannerImage}
-                    alt="Banner preview"
-                    className="w-20 h-20 rounded border object-cover"
-                  />
-                  <div>
-                    <p className="font-medium">Banner subido exitosamente</p>
-                    <p className="text-sm text-gray-500">
-                      Listo para crear el servicio
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBannerRemove}
-                >
-                  <TrashIcon className="h-6 w-6 text-red-500" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="border-2 border-dashed border-orange-300 rounded-lg p-8 text-center bg-gray-50/50 hover:bg-gray-50 transition-colors">
-              <input
-                type="file"
-                id="banner-upload"
-                accept="image/*"
-                onChange={handleBannerUpload}
-                className="hidden"
-              />
-              <label htmlFor="banner-upload" className="cursor-pointer">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="h-12 w-12 bg-orange-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-lg">+</span>
-                  </div>
-                  <span className="hover:text-orange-600">
-                    {uploading
-                      ? "Subiendo..."
-                      : "Haz clic para subir un banner"}
-                  </span>
-                </div>
-              </label>
-            </div>
-          )}
-
-          <p className="text-sm text-gray-500">
-            Si subes un nuevo banner, se creará automáticamente y se usará para
-            este servicio.
+        <div className="space-y-4">
+          <Label>Imágenes del Servicio *</Label>
+          <p className="text-sm text-gray-600">
+            Las imágenes se subirán automáticamente al crear el servicio.
           </p>
-        </div>
 
-        <div className="space-y-2">
-          <Label>Imágenes del servicio (Opcional)</Label>
+          <ImageUploader
+            maxFiles={8}
+            aspect={16 / 9}
+            onChange={handleImagesChange}
+            disableManualUpload={true}
+          />
 
           {serviceImages.length > 0 && (
-            <div className="space-y-3 mb-4">
-              {serviceImages.map((url, index) => {
-                return (
-                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <img
-                          src={url}
-                          alt={`Service image ${index + 1}`}
-                          className="w-16 h-16 rounded border object-cover"
-                        />
-                        <div>
-                          <p className="font-medium">Imagen {index + 1}</p>
-                          <p className="text-sm text-gray-500">
-                            {index === 0
-                              ? "Imagen principal"
-                              : "Imagen secundaria"}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          removeServiceImage(index);
-                        }}
-                      >
-                        <TrashIcon className="h-6 w-6 text-red-500" />
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="mt-2 p-3 bg-blue-50 rounded-lg">
+              <div className="text-sm text-blue-800">
+                <span className="font-medium">{serviceImages.length}</span>
+                <span> imágenes listas para subir al guardar</span>
+              </div>
             </div>
           )}
-
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50/50 hover:bg-gray-50 transition-colors">
-            <input
-              type="file"
-              id="service-upload"
-              accept="image/*"
-              multiple
-              onChange={handleServiceImagesUpload}
-              className="hidden"
-            />
-            <label htmlFor="service-upload" className="cursor-pointer">
-              <div className="flex flex-col items-center gap-2">
-                <div className="h-8 w-8 bg-gray-400 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">+</span>
-                </div>
-                <span className="hover:text-gray-600">
-                  {uploading
-                    ? "Subiendo..."
-                    : "Haz clic para agregar imágenes del servicio"}
-                </span>
-              </div>
-            </label>
-          </div>
-
-          <p className="text-sm text-gray-500">
-            Puedes subir múltiples imágenes para el servicio
-          </p>
         </div>
 
         <div className="flex gap-4 pt-4">
@@ -708,7 +520,7 @@ export default function CreateService() {
             type="button"
             variant="secondary"
             onClick={() => {
-              router.push("/services");
+              router.replace("/services");
             }}
             className="flex-1"
           >
@@ -717,10 +529,10 @@ export default function CreateService() {
           <Button
             type="submit"
             variant="primary"
-            disabled={isSubmitting || uploading}
+            disabled={isSubmitting || isUploadingImages}
             className="flex-1"
           >
-            {isSubmitting ? "Creando servicio..." : "Crear Servicio"}
+            {isSubmitting ? "Creando servicio..." : isUploadingImages ? "Subiendo imágenes..." : "Crear Servicio"}
           </Button>
         </div>
       </form>
