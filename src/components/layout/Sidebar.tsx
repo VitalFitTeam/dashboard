@@ -112,8 +112,9 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
           name: "Reportes y Finanzas",
           icon: ChartBar,
           subitems: [
-            { name: "Facturación", href: "/finance/billing" },
-            { name: "Reportes", href: "/finance/reports" },
+            { name: "Clientes", href: "/reports/clients" }, 
+            { name: "Finanzas", href: "/reports/financial" },
+            { name: "Ventas", href: "/reports/sales" },
           ],
         },
       ],
