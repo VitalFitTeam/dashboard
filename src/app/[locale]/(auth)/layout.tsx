@@ -1,5 +1,3 @@
-// src/app/[locale]/(auth)/layout.tsx
-
 import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 

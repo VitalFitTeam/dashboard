@@ -7,7 +7,6 @@ import { LoginFormData, } from "@/lib/validation/loginSchema";
 export const useLoginSchema = () => {
   const t = useTranslations("Auth");
 
-  // Definimos el esquema traducido
   const schema = z.object({
     email: z
       .string()
@@ -20,7 +19,5 @@ export const useLoginSchema = () => {
       .max(20, { message: t("validation_password_max", { max: 20 }) }),
   });
 
-  // 🛑 LA SOLUCIÓN CLAVE: Devolvemos el esquema con el tipo Zod fuertemente tipado (TLoginSchema)
-  // Esto resuelve la ambigüedad del sobrecarga de funciones del resolver.
   return schema as ZodType<LoginFormData>;
 };

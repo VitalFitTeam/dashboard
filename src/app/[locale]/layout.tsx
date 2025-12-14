@@ -1,5 +1,3 @@
-// src/app/[locale]/layout.tsx (COMPLETO Y CORREGIDO)
-
 import { NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing"; 
 import React from "react";
