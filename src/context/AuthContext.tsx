@@ -11,9 +11,7 @@ import {
 } from "react";
 import { jwtDecode } from "jwt-decode";
 import { api } from "@/lib/sdk-config";
-// 1. Importamos el usuario del SDK con un alias para no confundirnos
 import { User as SdkUser } from "@vitalfit/sdk";
-// 2. Importamos nuestros roles centralizados
 import { UserRole, ROLE_LABELS } from "@/lib/roles";
 
 interface JwtPayload {

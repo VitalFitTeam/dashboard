@@ -8,17 +8,21 @@ export default async function AuthLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const resolvedParams = await Promise.resolve(params);
-  const locale = resolvedParams.locale;
+  const { locale } = await params; // 👈 ESTO ES CLAVE
 
   let messages;
+
   try {
-    const authMessages = (await import(`${MESSAGE_PATH}/${locale}/auth.json`))
-      .default;
-    messages = { Auth: authMessages.Auth };
-  } catch (error) {
+    const authMessages = (
+      await import(`${MESSAGE_PATH}/${locale}/auth.json`)
+    ).default;
+
+    messages = {
+      Auth: authMessages.Auth,
+    };
+  } catch {
     notFound();
   }
 
@@ -28,3 +32,4 @@ export default async function AuthLayout({
     </NextIntlClientProvider>
   );
 }
+

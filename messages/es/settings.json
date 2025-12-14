@@ -1,0 +1,126 @@
+{
+  "sidebar": {
+    "logoTitle": "VITALFIT",
+    "roles": {
+      "SUPER_ADMIN": {
+        "title_0": "Panel de Control Global",
+        "menu_0_0": "Inicio (Dashboard)",
+        "menu_0_1": "Gestión de Franquicias",
+        
+        "title_1": "Gestión Operacional",
+        "menu_1_0": "Gestión de Socios/Clientes",
+        "sub_1_0_0": "Listado de clientes",
+        "sub_1_0_1": "Segmentación y Categorías",
+        "sub_1_0_2": "Quejas y Sugerencias",
+        "menu_1_1": "Membresías y Facturación",
+        "sub_1_1_0": "Gestión de Membresías",
+        "sub_1_1_1": "Membresías por Vencer",
+        "sub_1_1_2": "Descuentos y Post-Venta",
+        "sub_1_1_3": "Facturas Electrónicas",
+        "menu_1_2": "Operaciones de Clase/Sede",
+        "sub_1_2_0": "Calendario Global",
+        "sub_1_2_1": "Reservas por bloque",
+        "sub_1_2_2": "Clases",
+        
+        "title_2": "Administración del Sistema",
+        "menu_2_0": "Gestión de Usuarios y Roles",
+        "sub_2_0_0": "Listado de Usuarios",
+        "sub_2_0_1": "Roles y Matriz de Permisos",
+        "sub_2_0_2": "Historial de Acceso (Audit Log)",
+        "sub_2_0_3": "Políticas de Seguridad",
+        "menu_2_1": "Configuración Maestra",
+        "sub_2_1_0": "Tipos de Membresía",
+        "sub_2_1_1": "Servicios y Planes",
+        "sub_2_1_2": "Instructores",
+        "sub_2_1_3": "Equipamiento e Inventario",
+        "sub_2_1_4": "Promociones y Descuentos",
+        "sub_2_1_5": "Métodos de Pago",
+        "sub_2_1_6": "Causales de Cancelación",
+        "sub_2_1_7": "Documentos Fiscales",
+        "sub_2_1_8": "Paquetes/Combos",
+        "menu_2_2": "Marketing y Contenidos",
+        "sub_2_2_0": "Galería de Servicios (CDN)",
+        "sub_2_2_1": "Priorización y Merchandising",
+        "sub_2_2_2": "Cross-Selling Global",
+        
+        "title_3": "Reportes y Data",
+        "menu_3_0": "Dashboard Ejecutivo",
+        "menu_3_1": "Reportes y Analytics",
+        "sub_3_1_0": "Reportes Operativos",
+        "sub_3_1_1": "Reportes Financieros",
+        "sub_3_1_2": "Exportación y Automatización"
+      },
+      
+      "BRANCH_ADMIN": {
+        "title_0": "Panel de Sucursal",
+        "menu_0_0": "Inicio (Dashboard Sede)",
+        "menu_0_1": "Configuración de Sede",
+        "sub_0_1_0": "Datos de mi sucursal",
+        
+        "title_1": "Operaciones Locales",
+        "menu_1_0": "Gestión de Servicios",
+        "sub_1_0_0": "Calendarización de Clases",
+        "sub_1_0_1": "Seguimiento de Reservas",
+        "sub_1_0_2": "Asistencia y Ocupación",
+        "menu_1_1": "Gestión de Socios/Clientes",
+        "sub_1_1_0": "Lista de Clientes de la Sede",
+        "sub_1_1_1": "Bloqueos y Justificaciones",
+        "sub_1_1_2": "Scoring y Categorización",
+        "menu_1_2": "Membresías y Cobranzas",
+        "sub_1_2_0": "Pagos y Membresías Activas",
+        "sub_1_2_1": "Próximas a Vencer",
+        
+        "title_2": "Reportes",
+        "menu_2_0": "Reporte de Ventas por Sede",
+        "menu_2_1": "Reporte de Ocupación"
+      },
+      
+      "INSTRUCTOR": {
+        "title_0": "Panel de Instructor",
+        "menu_0_0": "Inicio",
+        "menu_0_1": "Gestión de Clases Asignadas",
+        "menu_0_2": "Control de Asistencia",
+        "menu_0_3": "Seguimiento de Clientes y Rutinas",
+        "sub_0_3_0": "Asignación de Rutinas",
+        "sub_0_3_1": "Tracking de Progreso de Clientes"
+      },
+      
+      "ACCOUNTANT": {
+        "title_0": "Módulo Financiero",
+        "menu_0_0": "Inicio",
+        "menu_0_1": "Gestión de Facturación y Pagos",
+        "sub_0_1_0": "Generación y Consulta de Facturas",
+        "sub_0_1_1": "Registro de Pagos y Comprobantes",
+        "sub_0_1_2": "Tipos de Documento Fiscal",
+        "menu_0_2": "Análisis Financiero",
+        "sub_0_2_0": "Estado de Resultados por Sucursal",
+        "sub_0_2_1": "Flujo de Caja Proyectado",
+        "sub_0_2_2": "Análisis de Rentabilidad"
+      },
+      
+      "DATA_ANALYST": {
+        "title_0": "Business Intelligence (BI)",
+        "menu_0_0": "Inicio (Dashboard Ejecutivo)",
+        "menu_0_1": "Reportes Operativos y Financieros",
+        "sub_0_1_0": "Reporte Detallado de Ventas",
+        "sub_0_1_1": "Reporte de Clientes y Asistencia",
+        "sub_0_1_2": "Reportes Financieros (Sólo Lectura)",
+        "menu_0_2": "Analytics Avanzado",
+        "sub_0_2_0": "CLV y Análisis RFM",
+        "sub_0_2_1": "Benchmarking y Desempeño Sede",
+        "sub_0_2_2": "Métricas Clave (Churn, NPS, RevPAS)",
+        "sub_0_2_3": "Integración con BI Tools"
+      },
+      
+      "RECEPTIONIST": {
+        "title_0": "Panel de Recepción",
+        "menu_0_0": "Inicio",
+        "menu_0_1": "Check-in/out de Clientes",
+        "menu_0_2": "Gestión de Clases y Aforo",
+        "sub_0_2_0": "Calendario de Clases",
+        "sub_0_2_1": "Aforo y Asistencia",
+        "menu_0_3": "Venta y Pagos"
+      }
+    }
+  }
+}

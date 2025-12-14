@@ -20,8 +20,13 @@ export default async function RootDashboardLayout({
   let messages;
   try {
     const dashboardMessages = (await import(`${MESSAGE_PATH}/${locale}/dashboard.json`)).default;
+    const settingMessages = (await import(`${MESSAGE_PATH}/${locale}/settings.json`)).default;
     
-    messages = { Dashboard: dashboardMessages.Dashboard }; 
+    // 💡 CORREÇÃO: Combinar os namespaces de ambos os arquivos JSON
+    messages = {
+      Dashboard: dashboardMessages, 
+      sidebar: settingMessages.sidebar      
+    };
 
   } catch (error) {
     console.error("Error loading root dashboard messages:", error);

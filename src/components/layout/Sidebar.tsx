@@ -32,20 +32,22 @@ import { NavUser } from "./NavUser";
 import { useAuth } from "@/context/AuthContext";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { UserRole } from "@/lib/roles";
-
+import { MegaphoneIcon } from "@heroicons/react/24/solid";
+import { useTranslations } from "next-intl";
+import { ROLE_I18N_KEY } from "@/lib/roleI18n";
 export interface SubItem {
-  name: string;
+  nameKey: string;
   href: string;
 }
 
 export interface NavItemWithSub {
-  name: string;
+  nameKey: string;
   icon: React.ComponentType<{ className?: string }>;
   subitems: SubItem[];
 }
 
 export interface NavItemSimple {
-  name: string;
+  nameKey: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
 }
@@ -53,7 +55,7 @@ export interface NavItemSimple {
 export type NavItem = NavItemSimple | NavItemWithSub;
 
 export interface NavSection {
-  title?: string;
+  titleKey?: string;
   items: NavItem[];
 }
 
@@ -64,56 +66,88 @@ export function isNavItemWithSub(item: NavItem): item is NavItemWithSub {
 export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
   [UserRole.SUPER_ADMIN]: [
     {
-      title: "Dashboard Principal",
+      titleKey: "title_0", // Panel de Control Global
       items: [
-        { name: "Inicio", icon: HomeIcon, href: "/" },
-        { name: "Sucursales", icon: BuildingStorefrontIcon, href: "/branches" },
-        { name: "Clientes", icon: UserIcon, href: "/clients" },
-
+        { nameKey: "menu_0_0", icon: HomeIcon, href: "/home" }, // Inicio (Dashboard)
+        { nameKey: "menu_0_1", icon: BuildingStorefrontIcon, href: "/branches" }, // Gestión de Franquicias
+      ],
+    },
+    {
+      titleKey: "title_1", // Gestión Operacional
+      items: [
         {
-          name: "Calendario y Reservas",
-          icon: Calendar,
+          nameKey: "menu_1_0", icon: UsersIcon, // Gestión de Socios/Clientes
           subitems: [
-            { name: "Calendario", href: "/calendar" },
-            { name: "Reservas por bloque", href: "/reservations" },
-            { name: "Registro de Asistencia", href: "/attendance" },
+            { nameKey: "sub_1_0_0", href: "/crm/clients" }, // Listado de clientes
+            { nameKey: "sub_1_0_1", href: "/crm/categories" }, // Segmentación y Categorías
+            { nameKey: "sub_1_0_2", href: "/crm/feedback" }, // Quejas y Sugerencias
           ],
         },
-
         {
-          name: "Usuarios y Seguridad",
-          icon: UsersIcon,
+          nameKey: "menu_1_1", icon: CurrencyDollarIcon, // Membresías y Facturación
           subitems: [
-            { name: "Usuarios", href: "/users" },
-            { name: "Roles y permisos", href: "/users/audit" },
+            { nameKey: "sub_1_1_0", href: "/billing/memberships" }, // Gestión de Membresías
+            { nameKey: "sub_1_1_1", href: "/billing/expiring" }, // Membresías por Vencer
+            { nameKey: "sub_1_1_2", href: "/billing/discounts" }, // Descuentos y Post-Venta
+            { nameKey: "sub_1_1_3", href: "/billing/invoices" }, // Facturas Electrónicas
           ],
         },
-
         {
-          name: "Membresías y Servicios",
-          icon: CurrencyDollarIcon,
+          nameKey: "menu_1_2", icon: Calendar, // Operaciones de Clase/Sede
           subitems: [
-            { name: "Membresías", href: "/memberships" },
-            { name: "Métodos de Pagos", href: "/payment-methods" },
-            { name: "Causales de Cancelación", href: "/causes" },
-            { name: "Gestión de Membresías", href: "/administrator/membershipManagement" },
-            { name: "Membresías por Vencer", href: "/administrator/membershipExpire" },
-            { name: "Servicios", href: "/services" },
-            { name: "Documento Fiscal", href: "/catalog/fiscalDocument" },
-            { name: "Equipamiento", href: "/equipment" },
-            { name: "Instructores", href: "/instructors" },
-            { name: "Promociones", href: "/promotions" },
-            { name: "Paquetes", href: "/packages" },
-            { name: "Gestión Global de Banners", href: "/banners" },
+            { nameKey: "sub_1_2_0", href: "/operations/calendar" }, // Calendario Global
+            { nameKey: "sub_1_2_1", href: "/operations/reservations" }, // Reservas por bloque
+            { nameKey: "sub_1_2_2", href: "/operations/classes" }, // Clases
           ],
         },
-
+      ],
+    },
+    {
+      titleKey: "title_2", // Administración del Sistema
+      items: [
         {
-          name: "Reportes y Finanzas",
-          icon: ChartBar,
+          nameKey: "menu_2_0", icon: UserIcon, // Gestión de Usuarios y Roles
           subitems: [
-            { name: "Facturación", href: "/finance/billing" },
-            { name: "Reportes", href: "/finance/reports" },
+            { nameKey: "sub_2_0_0", href: "/users/users" }, // Listado de Usuarios
+            { nameKey: "sub_2_0_1", href: "/users/roles" }, // Roles y Matriz de Permisos
+            { nameKey: "sub_2_0_2", href: "/users/audit" }, // Historial de Acceso (Audit Log)
+            { nameKey: "sub_2_0_3", href: "/users/security" }, // Políticas de Seguridad
+          ],
+        },
+        {
+          nameKey: "menu_2_1", icon: ChartBar, // Configuración Maestra
+          subitems: [
+            { nameKey: "sub_2_1_0", href: "/catalog/memberships" }, // Tipos de Membresía
+            { nameKey: "sub_2_1_1", href: "/catalog/services" }, // Servicios y Planes
+            { nameKey: "sub_2_1_2", href: "/catalog/instructors" }, // Instructores
+            { nameKey: "sub_2_1_3", href: "/catalog/equipment" }, // Equipamiento e Inventario
+            { nameKey: "sub_2_1_4", href: "/catalog/promotions" }, // Promociones y Descuentos
+            { nameKey: "sub_2_1_5", href: "/catalog/payment-methods" }, // Métodos de Pago
+            { nameKey: "sub_2_1_6", href: "/catalog/cancellation-causes" }, // Causales de Cancelación
+            { nameKey: "sub_2_1_7", href: "/catalog/fiscal-documents" }, // Documentos Fiscales
+            { nameKey: "sub_2_1_8", href: "/catalog/packages" }, // Paquetes/Combos
+          ],
+        },
+        {
+          nameKey: "menu_2_2", icon: MegaphoneIcon, // Marketing y Contenidos
+          subitems: [
+            { nameKey: "sub_2_2_0", href: "/marketing/banners" }, // Galería de Servicios (CDN)
+            { nameKey: "sub_2_2_1", href: "/marketing/merchandising" }, // Priorización y Merchandising
+            { nameKey: "sub_2_2_2", href: "/marketing/cross-selling" }, // Cross-Selling Global
+          ],
+        },
+      ],
+    },
+    {
+      titleKey: "title_3", // Reportes y Data
+      items: [
+        { nameKey: "menu_3_0", icon: ChartBarIcon, href: "/reports/executive" }, // Dashboard Ejecutivo
+        {
+          nameKey: "menu_3_1", icon: ChartBarIcon, // Reportes y Analytics
+          subitems: [
+            { nameKey: "sub_3_1_0", href: "/reports/operational" }, // Reportes Operativos
+            { nameKey: "sub_3_1_1", href: "/reports/financial" }, // Reportes Financieros
+            { nameKey: "sub_3_1_2", href: "/reports/automation" }, // Exportación y Automatización
           ],
         },
       ],
@@ -122,57 +156,67 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
 
   [UserRole.BRANCH_ADMIN]: [
     {
-      title: "Gestión de Sede",
+      titleKey: "title_0", // Panel de Sucursal
       items: [
-        { name: "Inicio", icon: HomeIcon, href: "/" },
+        { nameKey: "menu_0_0", icon: HomeIcon, href: "/home" }, // Inicio (Dashboard Sede)
         {
-          name: "Mi sucursal",
-          icon: BuildingStorefrontIcon,
+          nameKey: "menu_0_1", icon: BuildingStorefrontIcon, // Configuración de Sede
           subitems: [
-            { name: "Información General", href: "/branches" },
-            { name: "Configuración de la sede", href: "/branches" },
+            { nameKey: "sub_0_1_0", href: "/branches" }, // Datos de mi sucursal
+          ],
+        },
+      ],
+    },
+    {
+      titleKey: "title_1", // Operaciones Locales
+      items: [
+        {
+          nameKey: "menu_1_0", icon: Calendar, // Gestión de Servicios
+          subitems: [
+            { nameKey: "sub_1_0_0", href: "/operations/classes" }, // Calendarización de Clases
+            { nameKey: "sub_1_0_1", href: "/operations/reservations" }, // Seguimiento de Reservas
+            { nameKey: "sub_1_0_2", href: "/operations/attendance" }, // Asistencia y Ocupación
           ],
         },
         {
-          name: "Gestion de Clientes",
-          icon: UserIcon,
+          nameKey: "menu_1_1", icon: UsersIcon, // Gestión de Socios/Clientes
           subitems: [
-            { name: "Lista de Clientes", href: "/clients" },
-            { name: "Historial", href: "/clients" },
+            { nameKey: "sub_1_1_0", href: "/crm/clients" }, // Lista de Clientes de la Sede
+            { nameKey: "sub_1_1_1", href: "/crm/clients/blocks" }, // Bloqueos y Justificaciones
+            { nameKey: "sub_1_1_2", href: "/crm/clients/scoring" }, // Scoring y Categorización
           ],
         },
         {
-          name: "Finanzas",
-          icon: CurrencyDollarIcon,
+          nameKey: "menu_1_2", icon: CurrencyDollarIcon, // Membresías y Cobranzas
           subitems: [
-            { name: "Pagos y membresías", href: "/memberships" },
-            { name: "Próximas a vencer", href: "/memberships" },
+            { nameKey: "sub_1_2_0", href: "/billing/memberships" }, // Pagos y Membresías Activas
+            { nameKey: "sub_1_2_1", href: "/billing/expiring" }, // Próximas a Vencer
           ],
         },
-        {
-          name: "Calendario y Reservas",
-          icon: Calendar,
-          subitems: [
-            { name: "Calendario", href: "/calendar" },
-            { name: "Reservas Activas", href: "/reservations" },
-            { name: "Historial de Reservas", href: "/attendance" },
-          ],
-        },
+      ],
+    },
+    {
+      titleKey: "title_2", // Reportes
+      items: [
+        { nameKey: "menu_2_0", icon: ChartBarIcon, href: "/reports/reports" }, // Reporte de Ventas por Sede
+        { nameKey: "menu_2_1", icon: ChartBarIcon, href: "/reports/occupancy" }, // Reporte de Ocupación
       ],
     },
   ],
 
   [UserRole.INSTRUCTOR]: [
     {
-      title: "Panel del Instructor",
+      titleKey: "title_0", // Panel de Instructor
       items: [
-        { name: "Inicio", icon: HomeIcon, href: "/" },
-        { name: "Mis Clases", icon: Calendar, href: "/instructor/classes" },
-        { name: "Asistencia", icon: UsersIcon, href: "/instructor/attendance" },
+        { nameKey: "menu_0_0", icon: HomeIcon, href: "/home" }, // Inicio
+        { nameKey: "menu_0_1", icon: Calendar, href: "/operations/classes" }, // Gestión de Clases Asignadas
+        { nameKey: "menu_0_2", icon: UsersIcon, href: "/operations/attendance" }, // Control de Asistencia
         {
-          name: "Evaluaciones",
-          icon: ChartBarIcon,
-          href: "/instructor/reports",
+          nameKey: "menu_0_3", icon: ChartBarIcon, // Seguimiento de Clientes y Rutinas
+          subitems: [
+            { nameKey: "sub_0_3_0", href: "/instructor/routines/assign" }, // Asignación de Rutinas
+            { nameKey: "sub_0_3_1", href: "/instructor/routines/tracking" }, // Tracking de Progreso de Clientes
+          ],
         },
       ],
     },
@@ -180,42 +224,74 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
 
   [UserRole.ACCOUNTANT]: [
     {
-      title: "Finanzas",
+      titleKey: "title_0", // Módulo Financiero
       items: [
-        { name: "Inicio", icon: HomeIcon, href: "/" },
+        { nameKey: "menu_0_0", icon: HomeIcon, href: "/home" }, // Inicio
         {
-          name: "Facturación",
-          icon: CurrencyDollarIcon,
-          href: "/finance/billing",
+          nameKey: "menu_0_1", icon: CurrencyDollarIcon, // Gestión de Facturación y Pagos
+          subitems: [
+            { nameKey: "sub_0_1_0", href: "/billing/invoicing" }, // Generación y Consulta de Facturas
+            { nameKey: "sub_0_1_1", href: "/billing/payments" }, // Registro de Pagos y Comprobantes
+            { nameKey: "sub_0_1_2", href: "/catalog/fiscalDocument" }, // Tipos de Documento Fiscal
+          ],
         },
-        { name: "Reportes", icon: ChartBarIcon, href: "/finance/reports" },
+        {
+          nameKey: "menu_0_2", icon: ChartBarIcon, // Análisis Financiero
+          subitems: [
+            { nameKey: "sub_0_2_0", href: "/finance/results" }, // Estado de Resultados por Sucursal
+            { nameKey: "sub_0_2_1", href: "/finance/cashflow" }, // Flujo de Caja Proyectado
+            { nameKey: "sub_0_2_2", href: "/finance/profitability" }, // Análisis de Rentabilidad
+          ],
+        },
       ],
     },
   ],
 
   [UserRole.DATA_ANALYST]: [
     {
-      title: "Análisis de Datos",
+      titleKey: "title_0",
       items: [
-        { name: "Inicio", icon: HomeIcon, href: "/" },
-        { name: "Reportes", icon: ChartBarIcon, href: "/analytics/reports" },
-        { name: "Tendencias", icon: ChartBar, href: "/analytics/trends" },
+        { nameKey: "menu_0_0", icon: HomeIcon, href: "/home" },
+        {
+          nameKey: "menu_0_1", icon: ChartBarIcon,
+          subitems: [
+            { nameKey: "sub_0_1_0", href: "/analytics/reports/sales" }, // Reporte Detallado de Ventas
+            { nameKey: "sub_0_1_1", href: "/analytics/reports/clients" }, // Reporte de Clientes y Asistencia
+            { nameKey: "sub_0_1_2", href: "/analytics/reports/finance" }, // Reportes Financieros (Sólo Lectura)
+          ],
+        },
+        {
+          nameKey: "menu_0_2", icon: ChartBar, // Analytics Avanzado
+          subitems: [
+            { nameKey: "sub_0_2_0", href: "/analytics/advanced/clv" }, // CLV y Análisis RFM
+            { nameKey: "sub_0_2_1", href: "/analytics/advanced/benchmarking" }, // Benchmarking y Desempeño Sede
+            { nameKey: "sub_0_2_2", href: "/analytics/advanced/kpis" }, // Métricas Clave (Churn, NPS, RevPAS)
+            { nameKey: "sub_0_2_3", href: "/analytics/advanced/api" }, // Integración con BI Tools
+          ],
+        },
       ],
     },
   ],
 
   [UserRole.RECEPTIONIST]: [
     {
-      title: "Panel de Recepción",
+      titleKey: "title_0", // Panel de Recepción
       items: [
-        { name: "Inicio", icon: HomeIcon, href: "/" },
-        { name: "Clientes", icon: UsersIcon, href: "/clients" },
-        { name: "Reservas", icon: Calendar, href: "/reservations" },
-        { name: "Pagos", icon: CurrencyDollarIcon, href: "/payments" },
+        { nameKey: "menu_0_0", icon: HomeIcon, href: "/" }, // Inicio
+        { nameKey: "menu_0_1", icon: UsersIcon, href: "/reception/checkin" }, // Check-in/out de Clientes
+        {
+          nameKey: "menu_0_2", icon: Calendar, // Gestión de Clases y Aforo
+          subitems: [
+            { nameKey: "sub_0_2_0", href: "/reception/calendar" }, // Calendario de Clases
+            { nameKey: "sub_0_2_1", href: "/reception/capacity" }, // Aforo y Asistencia
+          ],
+        },
+        { nameKey: "menu_0_3", icon: CurrencyDollarIcon, href: "/reception/payments" }, // Venta y Pagos
       ],
     },
   ],
 };
+
 
 
 export default function SidebarDashboard() {
@@ -223,17 +299,36 @@ export default function SidebarDashboard() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
+  const t = useTranslations("sidebar");
+
   if (loading || !user) {
     return <SidebarMenuSkeleton />;
   }
-  const sections = user.role ? sidebarMenusByRole[user.role] : [];
-  
-  const safeSections = sections || [];
 
-  const handleMainModuleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const role = user.role as UserRole;
+  const roleI18nKey = ROLE_I18N_KEY[role];
+
+  if (!roleI18nKey) {
+    console.error("ROLE_I18N_KEY missing for role:", role);
+    return null;
+  }
+
+  const rolePath = `roles.${roleI18nKey}`;
+  const sections = sidebarMenusByRole[role];
+
+  if (!sections) {
+    console.error("No sidebar sections for role:", role);
+    return null;
+  }
+
+  const handleMainModuleClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
     e.preventDefault();
 
-    const currentModule = pathname.split("/")[1];
+    const segments = pathname.split("/").filter(Boolean);
+    const currentModule = segments[1];
     const targetModule = href.split("/")[1];
 
     if (currentModule && targetModule && currentModule !== targetModule) {
@@ -243,72 +338,95 @@ export default function SidebarDashboard() {
     }
   };
 
-  return (
-    <Sidebar
-      collapsible="offcanvas"
-      className="bg-white border-r border-gray-200 shadow-lg w-64"
-    >
-      <SidebarContent className="flex flex-col h-full overflow-y-auto">
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <Image
-            src="/images/isotipo.png"
-            alt="Logo Vitalfit"
-            width={48}
-            height={48}
-            priority
-          />
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-gray-900">VITALFIT</span>
-            <span className="text-xs text-gray-500">
-              {user.role_label}
-            </span>
-          </div>
-          <ChevronDownIcon className="ml-auto h-5 w-5 text-gray-400" />
+return (
+  <Sidebar
+    className="bg-card border-r border-border h-full w-64 flex flex-col"
+  >
+    <SidebarContent className="flex flex-col h-full overflow-y-auto">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border transition-colors cursor-pointer hover:bg-muted/50">
+        <Image
+          src="/images/isotipo.png"
+          alt="Logo Vitalfit"
+          width={40}
+          height={40}
+          priority
+          className="rounded-full border border-border"
+        />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <span className="text-sm font-semibold text-foreground truncate">
+            {t("logoTitle")}
+          </span>
+          <span className="text-xs text-muted-foreground truncate">
+            {user.role_label}
+          </span>
         </div>
+        <ChevronDownIcon className="h-4 w-4 text-muted-foreground ml-auto" />
+      </div>
 
-        {safeSections.map((section, i) => (
-          <SidebarGroup key={i} className="mt-2">
-            {section.title && (
-              <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+      <div className="flex-1 p-2 space-y-4">
+        {sections.map((section, i) => (
+          <SidebarGroup key={i}>
+            {section.titleKey && (
+              <SidebarGroupLabel className="text-xs font-medium text-muted-foreground px-2 mb-1">
+                {t(`${rolePath}.${section.titleKey}`)}
+              </SidebarGroupLabel>
             )}
-            <SidebarMenu className="space-y-1 px-1">
+
+            <SidebarMenu className="space-y-1">
               {section.items.map((item) => {
                 if (isNavItemWithSub(item)) {
                   const isAnySubActive = item.subitems.some(
-                    (sub) => sub.href === pathname,
+                    (sub) => sub.href === pathname
                   );
+
                   return (
-                    <Collapsible key={item.name} defaultOpen={isAnySubActive}>
+                    <Collapsible
+                      key={item.nameKey}
+                      defaultOpen={isAnySubActive}
+                    >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${isAnySubActive
-                              ? "bg-gray-100 text-orange-400 font-medium"
-                              : "text-gray-700 hover:bg-gray-100"
-                              }`}
+                            className={`flex items-center gap-3 w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                              isAnySubActive
+                                ? "bg-orange-50 text-orange-600 font-semibold" 
+                                : "text-foreground hover:bg-muted/50" 
+                            }`}
                           >
                             <item.icon
-                              className={`h-4 w-4 ${isAnySubActive
-                                ? "text-orange-400"
-                                : "text-gray-600"
-                                }`}
+                              className={`h-4 w-4 ${
+                                isAnySubActive
+                                  ? "text-orange-400" 
+                                  : "text-muted-foreground"
+                              }`}
                             />
-                            <span className="flex-1">{item.name}</span>
+                            <span className="flex-1 text-left">
+                              {t(`${rolePath}.${item.nameKey}`)}
+                            </span>
+                            <ChevronDownIcon
+                              className={`h-4 w-4 text-muted-foreground transition-transform ${
+                                isAnySubActive ? "rotate-180" : ""
+                              }`}
+                            />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
+
                         <CollapsibleContent>
-                          <SidebarMenuSub className="pl-6 space-y-1">
+                          <SidebarMenuSub className="pl-6 space-y-1 mt-1">
                             {item.subitems.map((sub) => (
-                              <SidebarMenuSubItem key={sub.name}>
+                              <SidebarMenuSubItem key={sub.nameKey}>
                                 <Link
                                   href={sub.href}
-                                  onClick={(e) => handleMainModuleClick(e, sub.href)}
-                                  className={`block px-2 py-1 rounded-md text-sm transition-colors ${pathname === sub.href
-                                    ? " text-orange-400 font-medium"
-                                    : "text-gray-700 hover:bg-gray-100"
-                                    }`}
+                                  onClick={(e) =>
+                                    handleMainModuleClick(e, sub.href)
+                                  }
+                                  className={`block px-3 py-1.5 text-sm rounded-md transition-colors ${
+                                    pathname === sub.href
+                                      ? "text-orange-600 font-semibold bg-orange-50" 
+                                      : "text-muted-foreground hover:bg-muted/50" 
+                                  }`}
                                 >
-                                  {sub.name}
+                                  {t(`${rolePath}.${sub.nameKey}`)}
                                 </Link>
                               </SidebarMenuSubItem>
                             ))}
@@ -320,26 +438,30 @@ export default function SidebarDashboard() {
                 }
 
                 return (
-                  <SidebarMenuItem key={item.name}>
+                  <SidebarMenuItem key={item.nameKey}>
                     <SidebarMenuButton
                       asChild
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${item.href === pathname
-                        ? "bg-gray-100 text-orange-400 font-medium"
-                        : "text-gray-700 hover:bg-gray-100"
-                        }`}
+                      className={`flex items-center gap-3 w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                        item.href === pathname
+                          ? "bg-orange-50 text-orange-600 font-semibold"
+                          : "text-foreground hover:bg-muted/50"
+                      }`}
                     >
                       <Link
                         href={item.href}
                         onClick={(e) => handleMainModuleClick(e, item.href)}
-                        className="flex items-center gap-2 w-full"
+                        className="flex items-center gap-3 w-full"
                       >
                         <item.icon
-                          className={`h-4 w-4 ${item.href === pathname
-                            ? "text-orange-600"
-                            : "text-gray-600"
-                            }`}
+                          className={`h-4 w-4 ${
+                            item.href === pathname
+                              ? "text-orange-600" 
+                              : "text-muted-foreground"
+                          }`}
                         />
-                        <span>{item.name}</span>
+                        <span className="flex-1 text-left">
+                          {t(`${rolePath}.${item.nameKey}`)}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -348,11 +470,11 @@ export default function SidebarDashboard() {
             </SidebarMenu>
           </SidebarGroup>
         ))}
-
-        <div className="mt-auto border-t border-gray-200 px-3 py-4">
-          <NavUser user={user} />
-        </div>
-      </SidebarContent>
-    </Sidebar>
-  );
+      </div>
+      <div className="mt-auto border-t border-border px-4 py-3">
+        <NavUser user={user} />
+      </div>
+    </SidebarContent>
+  </Sidebar>
+);
 }

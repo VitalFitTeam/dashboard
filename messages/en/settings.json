@@ -1,0 +1,126 @@
+{
+  "sidebar": {
+    "logoTitle": "VITALFIT",
+    "roles": {
+      "SUPER_ADMIN": {
+        "title_0": "Global Control Panel",
+        "menu_0_0": "Home (Dashboard)",
+        "menu_0_1": "Franchise Management",
+        
+        "title_1": "Operational Management",
+        "menu_1_0": "Member/Client Management",
+        "sub_1_0_0": "Client List",
+        "sub_1_0_1": "Segmentation and Categories",
+        "sub_1_0_2": "Complaints and Suggestions",
+        "menu_1_1": "Memberships and Billing",
+        "sub_1_1_0": "Membership Management",
+        "sub_1_1_1": "Expiring Memberships",
+        "sub_1_1_2": "Discounts and Post-Sale",
+        "sub_1_1_3": "Electronic Invoices",
+        "menu_1_2": "Class/Branch Operations",
+        "sub_1_2_0": "Global Calendar",
+        "sub_1_2_1": "Block Reservations",
+        "sub_1_2_2": "Classes",
+        
+        "title_2": "System Administration",
+        "menu_2_0": "User and Role Management",
+        "sub_2_0_0": "User List",
+        "sub_2_0_1": "Roles and Permission Matrix",
+        "sub_2_0_2": "Access History (Audit Log)",
+        "sub_2_0_3": "Security Policies",
+        "menu_2_1": "Master Configuration",
+        "sub_2_1_0": "Membership Types",
+        "sub_2_1_1": "Services and Plans",
+        "sub_2_1_2": "Instructors",
+        "sub_2_1_3": "Equipment and Inventory",
+        "sub_2_1_4": "Promotions and Discounts",
+        "sub_2_1_5": "Payment Methods",
+        "sub_2_1_6": "Cancellation Causes",
+        "sub_2_1_7": "Fiscal Documents",
+        "sub_2_1_8": "Packages/Combos",
+        "menu_2_2": "Marketing and Content",
+        "sub_2_2_0": "Service Gallery (CDN)",
+        "sub_2_2_1": "Prioritization and Merchandising",
+        "sub_2_2_2": "Global Cross-Selling",
+        
+        "title_3": "Reports and Data",
+        "menu_3_0": "Executive Dashboard",
+        "menu_3_1": "Reports and Analytics",
+        "sub_3_1_0": "Operational Reports",
+        "sub_3_1_1": "Financial Reports",
+        "sub_3_1_2": "Export and Automation"
+      },
+      
+      "BRANCH_ADMIN": {
+        "title_0": "Branch Panel",
+        "menu_0_0": "Home (Branch Dashboard)",
+        "menu_0_1": "Branch Configuration",
+        "sub_0_1_0": "My Branch Data",
+        
+        "title_1": "Local Operations",
+        "menu_1_0": "Service Management",
+        "sub_1_0_0": "Class Scheduling",
+        "sub_1_0_1": "Reservation Tracking",
+        "sub_1_0_2": "Attendance and Occupancy",
+        "menu_1_1": "Member/Client Management",
+        "sub_1_1_0": "Branch Client List",
+        "sub_1_1_1": "Blocks and Justifications",
+        "sub_1_1_2": "Scoring and Categorization",
+        "menu_1_2": "Memberships and Collections",
+        "sub_1_2_0": "Active Payments and Memberships",
+        "sub_1_2_1": "Upcoming Expirations",
+        
+        "title_2": "Reports",
+        "menu_2_0": "Branch Sales Report",
+        "menu_2_1": "Occupancy Report"
+      },
+      
+      "INSTRUCTOR": {
+        "title_0": "Instructor Panel",
+        "menu_0_0": "Home",
+        "menu_0_1": "Assigned Classes Management",
+        "menu_0_2": "Attendance Control",
+        "menu_0_3": "Client Tracking and Routines",
+        "sub_0_3_0": "Routine Assignment",
+        "sub_0_3_1": "Client Progress Tracking"
+      },
+      
+      "ACCOUNTANT": {
+        "title_0": "Financial Module",
+        "menu_0_0": "Home",
+        "menu_0_1": "Billing and Payment Management",
+        "sub_0_1_0": "Invoice Generation and Consultation",
+        "sub_0_1_1": "Payment and Receipt Registration",
+        "sub_0_1_2": "Fiscal Document Types",
+        "menu_0_2": "Financial Analysis",
+        "sub_0_2_0": "Income Statement by Branch",
+        "sub_0_2_1": "Projected Cash Flow",
+        "sub_0_2_2": "Profitability Analysis"
+      },
+      
+      "DATA_ANALYST": {
+        "title_0": "Business Intelligence (BI)",
+        "menu_0_0": "Home (Executive Dashboard)",
+        "menu_0_1": "Operational and Financial Reports",
+        "sub_0_1_0": "Detailed Sales Report",
+        "sub_0_1_1": "Client and Attendance Report",
+        "sub_0_1_2": "Financial Reports (Read Only)",
+        "menu_0_2": "Advanced Analytics",
+        "sub_0_2_0": "CLV and RFM Analysis",
+        "sub_0_2_1": "Benchmarking and Branch Performance",
+        "sub_0_2_2": "Key Metrics (Churn, NPS, RevPAS)",
+        "sub_0_2_3": "BI Tools Integration"
+      },
+      
+      "RECEPTIONIST": {
+        "title_0": "Reception Panel",
+        "menu_0_0": "Home",
+        "menu_0_1": "Client Check-in/out",
+        "menu_0_2": "Class and Capacity Management",
+        "sub_0_2_0": "Class Calendar",
+        "sub_0_2_1": "Capacity and Attendance",
+        "menu_0_3": "Sales and Payments"
+      }
+    }
+  }
+}
