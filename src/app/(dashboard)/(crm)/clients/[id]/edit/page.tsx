@@ -6,7 +6,7 @@ import ClientsForm, { ClientData } from "../../ClientsForm";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { GetUserResponse, UpdateUserStaffRequest } from "@vitalfit/sdk";
+import { GetUserResponse, UpdateUserRequest } from "@vitalfit/sdk";
 import { APIError, isAPIError } from "@vitalfit/sdk";
 import { toast } from "sonner";
 
@@ -140,7 +140,7 @@ export default function EditClient() {
         setError(null);
 
         try {
-            const updateData: UpdateUserStaffRequest = {
+            const updateData: UpdateUserRequest = {
                 first_name: client.first_name,
                 last_name: client.last_name,
                 email: client.email,
@@ -151,13 +151,13 @@ export default function EditClient() {
             };
 
             Object.keys(updateData).forEach(key => {
-                const typedKey = key as keyof UpdateUserStaffRequest;
+                const typedKey = key as keyof UpdateUserRequest;
                 if (updateData[typedKey] === undefined || updateData[typedKey] === "") {
                     delete updateData[typedKey];
                 }
             });
 
-            await api.user.updateUserStaff(params.id as string, updateData, token);
+            await api.user.updateUserClient(params.id as string, updateData, token);
 
             toast.success("Cliente actualizado exitosamente");
 

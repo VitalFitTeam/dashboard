@@ -8,7 +8,6 @@ import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Notification } from "@/components/ui/Notification";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface Client {
   client_id: string;
@@ -35,6 +35,7 @@ interface ClientsTableProps {
   page: number;
   pageSize: number;
   totalPages: number;
+  totalItems?: number;
   onPageChange: (page: number) => void;
   filters: { search: string; category: string };
   onFilterChange: (filters: { search?: string; category?: string }) => void;
@@ -46,18 +47,13 @@ export default function ClientsTable({
   page,
   pageSize,
   totalPages,
+  totalItems = 0,
   onPageChange,
   filters,
   onFilterChange,
 }: ClientsTableProps) {
   const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    description: "",
-    title: "",
-    variant: "success" as "success" | "destructive",
-  });
   const [isDeleting, setIsDeleting] = useState(false);
 
   const router = useRouter();
@@ -75,7 +71,7 @@ export default function ClientsTable({
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [searchInput]);
+  }, [searchInput, filters.search, onFilterChange]);
 
   const handleView = (row: Client) => {
     router.replace(`/clients/${row.client_id}`);
@@ -87,11 +83,8 @@ export default function ClientsTable({
 
   const handleDeleteClient = async (client: Client) => {
     if (!token) {
-      setNotification({
-        isVisible: true,
-        title: "Error",
+      toast.error("Error", {
         description: "No hay token de autenticación",
-        variant: "destructive",
       });
       return;
     }
@@ -100,18 +93,17 @@ export default function ClientsTable({
     try {
       await api.user.deleteUser(client.client_id, token);
 
-      setNotification({
-        isVisible: true,
-        title: "Éxito",
+      toast.success("Éxito", {
         description: "Cliente eliminado correctamente",
-        variant: "success",
       });
 
       setDeleteRowId(null);
 
+      // Usar setTimeout para dar tiempo a que se vea el toast
       setTimeout(() => {
         onReload();
       }, 1000);
+
     } catch (error: any) {
       console.error("Error deleting client:", error);
 
@@ -128,19 +120,13 @@ export default function ClientsTable({
         errorMessage = error.messages.join(", ");
       }
 
-      setNotification({
-        isVisible: true,
-        title: "Error",
+      toast.error("Error", {
         description: errorMessage,
-        variant: "destructive",
       });
+
     } finally {
       setIsDeleting(false);
     }
-  };
-
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
   };
 
   const StatusBadge = ({ status }: { status: string }) => {
@@ -229,11 +215,13 @@ export default function ClientsTable({
       </div>
 
       <DataTable<Client>
-        key={`page-${page}-${data.length}`}
+        key={`table-${page}-${data.length}`}
         columns={columns}
         data={data}
         onPageChange={onPageChange}
         totalPages={totalPages}
+        page={page}
+        pageSize={pageSize}
         rowIdKey="client_id"
         actions={(row) => (
           <div className="flex flex-col items-center justify-center w-full">
@@ -271,16 +259,6 @@ export default function ClientsTable({
           </div>
         )}
       />
-
-      {notification.isVisible && (
-        <Notification
-          variant={notification.variant}
-          title={notification.title}
-          description={notification.description}
-          onClose={hideNotification}
-          autoCloseDuration={3000}
-        />
-      )}
     </>
   );
 }

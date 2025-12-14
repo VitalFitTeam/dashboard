@@ -7,14 +7,13 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { DataResponse, User } from "@vitalfit/sdk";
+import { DataResponse, User, PaginatedTotal } from "@vitalfit/sdk";
 
 export default function Clients() {
-  const [allData, setAllData] = useState<User[]>([]);
-  const [paginatedData, setPaginatedData] = useState<User[]>([]);
+  const [data, setData] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [limit] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [reloadTrigger, setReloadTrigger] = useState(0);
 
@@ -23,7 +22,7 @@ export default function Clients() {
     category: "all",
   });
 
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const totalPages = Math.max(1, Math.ceil(totalItems / limit));
 
   const [stats, setStats] = useState({
     total: 0,
@@ -33,100 +32,88 @@ export default function Clients() {
 
   const { token } = useAuth();
 
-  useEffect(() => {
-    const loadAllClients = async () => {
-      if (!token) { return; }
-
-      setIsLoading(true);
-      try {
-        const options = {
-          search: filters.search || undefined,
-          sort: "desc" as "asc" | "desc",
-          role: "client"
-        };
-
-        const response = await api.user.getClientUsers(token, options);
-
-        const allUsers = (response as DataResponse<User[]>).data || [];
-
-        const activeCount = allUsers.filter(user =>
-          user.is_validated === true
-        ).length;
-
-        const blockedCount = allUsers.filter(user =>
-          user.is_validated === false || user.is_validated === undefined
-        ).length;
-
-        setAllData(allUsers);
-        setTotalItems(allUsers.length);
-
-        setStats({
-          total: allUsers.length,
-          active: activeCount,
-          blocked: blockedCount
-        });
-
-      } catch (error) {
-        console.error("Error loading clients:", error);
-        setAllData([]);
-        setTotalItems(0);
-        setStats({
-          total: 0,
-          active: 0,
-          blocked: 0
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadAllClients();
-  }, [filters.search, reloadTrigger, token]);
-
-  // Aplicar paginación cuando cambia la página o los datos
-  useEffect(() => {
-    if (allData.length === 0) {
-      setPaginatedData([]);
+  const loadStats = async () => {
+    if (!token) {
       return;
     }
 
-    // Aplicar paginación manualmente
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginated = allData.slice(startIndex, endIndex);
+    try {
+      const statsResponse = await api.user.getClientUsers(token, {
+        role: "client",
+        limit: 1000
+      });
 
-    setPaginatedData(paginated);
-  }, [allData, page, pageSize]);
+      const response = statsResponse as PaginatedTotal<User[]>;
+      const allUsers = response.data || [];
+
+      const activeCount = allUsers.filter(user =>
+        user.is_validated === true
+      ).length;
+
+      const blockedCount = allUsers.filter(user =>
+        user.is_validated === false || user.is_validated === undefined
+      ).length;
+
+      setStats({
+        total: response.total || allUsers.length,
+        active: activeCount,
+        blocked: blockedCount
+      });
+    } catch (error) {
+      console.error("Error loading stats:", error);
+    }
+  };
+
+  const loadClients = async () => {
+    if (!token) { return; }
+
+    setIsLoading(true);
+    try {
+      const options = {
+        search: filters.search || undefined,
+        page: page,
+        limit: limit,
+        sort: "desc" as "asc" | "desc",
+        role: "client"
+      };
+
+      const response = await api.user.getClientUsers(token, options);
+
+      const paginatedResponse = response as PaginatedTotal<User[]>;
+
+      const users = paginatedResponse.data || [];
+      const total = paginatedResponse.total || 0;
+
+      setData(users);
+      setTotalItems(total);
+
+      await loadStats();
+
+    } catch (error) {
+      console.error("Error loading clients:", error);
+      setData([]);
+      setTotalItems(0);
+      setStats({
+        total: 0,
+        active: 0,
+        blocked: 0
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (allData.length === 0) { return; }
-    let filtered = allData;
+    loadClients();
+  }, [page, filters.search, reloadTrigger, token, limit]);
 
-    setTotalItems(filtered.length);
-
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginated = filtered.slice(startIndex, endIndex);
-
-    setPaginatedData(paginated);
-
-    const activeCount = filtered.filter(user =>
-      user.is_validated === true
-    ).length;
-
-    const blockedCount = filtered.filter(user =>
-      user.is_validated === false || user.is_validated === undefined
-    ).length;
-
-    setStats({
-      total: filtered.length,
-      active: activeCount,
-      blocked: blockedCount
-    });
-  }, [allData, page, pageSize, filters.category]);
+  useEffect(() => {
+    if (filters.search) {
+      setPage(1);
+    }
+  }, [filters.search]);
 
   const handlePageChange = (newPage: number) => {
-    console.log("Changing to page:", newPage);
     setPage(newPage);
   };
 
@@ -135,7 +122,7 @@ export default function Clients() {
     category?: string;
   }) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
-    setPage(1); // Reiniciar a página 1 al filtrar
+    setPage(1);
   };
 
   const handleReload = () => {
@@ -173,7 +160,7 @@ export default function Clients() {
         <div className="text-center p-10">Cargando Clientes...</div>
       ) : (
         <ClientsTable
-          data={paginatedData.map(user => ({
+          data={data.map(user => ({
             client_id: user.user_id,
             first_name: user.first_name,
             last_name: user.last_name,
@@ -183,11 +170,12 @@ export default function Clients() {
           }))}
           onReload={handleReload}
           page={page}
-          pageSize={pageSize}
+          pageSize={limit}
           onPageChange={handlePageChange}
           totalPages={totalPages}
           filters={filters}
           onFilterChange={handleFilterChange}
+          totalItems={totalItems}
         />
       )}
     </div>

@@ -16,18 +16,18 @@ export default function DashboardHome() {
   return (
     <div className="p-6">
       {!hasRole([
-        UserRole.SUPER_ADMIN, 
-        UserRole.BRANCH_ADMIN, 
-        UserRole.ACCOUNTANT, 
+        UserRole.SUPER_ADMIN,
+        UserRole.BRANCH_ADMIN,
+        UserRole.ACCOUNTANT,
         UserRole.INSTRUCTOR
       ]) && (
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Bienvenido, {user.first_name}</h1>
-          <p className="text-gray-600">Tu rol actual es: {user.role_label}</p>
-        </div>
-      )}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">Bienvenido, {user.first_name}</h1>
+            <p className="text-gray-600">Tu rol actual es: {user.role_label}</p>
+          </div>
+        )}
 
-      {hasRole(["super_admin"]) && (
+      {hasRole(UserRole.SUPER_ADMIN) && (
         <SuperAdminDashboard />
       )}
 

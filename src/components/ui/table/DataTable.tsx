@@ -54,10 +54,10 @@ export function DataTable<T extends object>({
   columns,
   data,
   actions,
-  page,
-  pageSize,
+  page = 1, // Valor por defecto
+  pageSize = 10, // Valor por defecto
   onPageChange,
-  totalPages,
+  totalPages = 1, // Valor por defecto
   enableRowSelection = true,
   rowIdKey = "id" as keyof T,
   onFilterChange,
@@ -136,33 +136,21 @@ export function DataTable<T extends object>({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getRowId: (row) => String(row[rowIdKey]),
+    manualPagination: true,
   });
 
-  //Paginación
-  const pageRows = table.getPaginationRowModel().rows;
-  const [internalPage, setInternalPage] = React.useState(1);
-  const [internalPageSize, setInternalPageSize] = React.useState(10);
-
-  const currentPage = page ?? internalPage;
-  const currentPageSize = pageSize ?? internalPageSize;
+  const currentPage = page;
+  const currentPageSize = pageSize;
 
   const handlePageChange = (newPage: number) => {
     if (onPageChange) {
-      onPageChange(newPage); // modo externo (backend)
-    } else {
-      setInternalPage(newPage); // modo interno
-      table.setPageIndex(newPage - 1);
+      onPageChange(newPage);
     }
   };
 
   React.useEffect(() => {
-    if (pageSize) {
-      table.setPageSize(pageSize);
-    }
-    if (page) {
-      table.setPageIndex(page - 1);
-    }
-  }, [table, pageSize, page]);
+    table.setPageIndex(page - 1);
+  }, [table, page]);
 
   const renderFilters = () => (
     <div className="flex flex-wrap gap-4 mb-4">
@@ -181,7 +169,7 @@ export function DataTable<T extends object>({
                     ...prev,
                     [col.accessor as string]: value,
                   }));
-                  onFilterChange?.(col.accessor as string, value); // avisamos al padre
+                  onFilterChange?.(col.accessor as string, value);
                 }}
                 className="border rounded p-2 text-sm"
               >
@@ -202,7 +190,7 @@ export function DataTable<T extends object>({
                     ...prev,
                     [col.accessor as string]: value,
                   }));
-                  onFilterChange?.(col.accessor as string, value); // avisamos al padre
+                  onFilterChange?.(col.accessor as string, value);
                 }}
               />
             )}
@@ -246,8 +234,8 @@ export function DataTable<T extends object>({
             ))}
           </TableHeader>
           <TableBody>
-            {pageRows.length ? (
-              pageRows.map((row) => (
+            {data.length ? (
+              table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -258,22 +246,20 @@ export function DataTable<T extends object>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columns.length + (actions ? 1 : 0) + (enableRowSelection ? 1 : 0)} className="h-24 text-center">
                   No hay datos disponibles
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
-
         </Table>
       </div>
 
       <PaginationControls
         page={currentPage}
-        totalPages={totalPages ?? Math.ceil(data.length / currentPageSize)}
+        totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-
     </div>
   );
 }
