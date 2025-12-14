@@ -2,12 +2,14 @@
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import Image from "next/image";
-import { useSearchParams, useRouter } from "next/navigation";
+
 import { typography } from "@/styles/styles";
 import { Notification } from "@/components/ui/Notification";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { api } from "@/lib/sdk-config";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 function ConfirmEmailContent() {
   const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);

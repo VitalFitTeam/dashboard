@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { typography } from "@/styles/styles";
 import { Notification } from "@/components/ui/Notification";
 import { recoverSchema } from "@/lib/validation/recoverSchema";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/Input";
 import { api } from "@/lib/sdk-config";
+import { useRouter } from "@/i18n/navigation";
 
 export default function ForgotPassword() {
   const [formData, setFormData] = useState({ usuario: "" });

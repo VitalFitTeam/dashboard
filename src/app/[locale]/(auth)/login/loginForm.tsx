@@ -1,20 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   LoginFormData,
   LoginPayload,
-  loginSchema,
-} from "@/lib/validation/loginSchema";
+} from "@/lib/validation/loginSchema"; 
+import { useLoginSchema } from "@/hooks/useLoginSchema"; 
 import { Button } from "@/components/ui/button";
 import { colors, montserrat } from "@/styles/styles";
 import InputField from "@/components/ui/InputField";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation"; 
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,12 +23,15 @@ export default function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
 
+  const t = useTranslations("Auth");
+  const loginSchema = useLoginSchema(); 
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema as any),
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -44,20 +48,23 @@ export default function LoginForm() {
       const token = response.token;
 
       if (!token) {
-        throw new Error("Token no recibido");
+        throw new Error(t("error_token_not_received"));
       }
       login(token);
-      router.replace("/");
+      router.replace("/home");
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
+
       if (err instanceof Error) {
         if ("status" in err && err.status === 401) {
-          setErrorMessage("Credenciales no válidas. Por favor, verifícalas.");
+          setErrorMessage(t("error_credentials"));
+        } else if (err.message === t("error_token_not_received")) {
+          setErrorMessage(t("error_token_not_received"));
         } else {
-          setErrorMessage("Ocurrió un error inesperado. Inténtalo de nuevo.");
+          setErrorMessage(t("error_unexpected"));
         }
       } else {
-        setErrorMessage("Fallo en el inicio de sesión.");
+        setErrorMessage(t("error_login_failed"));
       }
     } finally {
       setIsLoading(false);
@@ -91,37 +98,37 @@ export default function LoginForm() {
         <h2
           className={`text-center text-[1.6rem] font-bold text-[${colors.complementary.black}] mb-2`}
         >
-          Acceso Administrativo
+          {t("title")}
         </h2>
         <p className="text-center text-gray-600 text-sm mb-8">
-          Solo personal autorizado. Ingrese sus credenciales.
+          {t("subtitle")}
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <InputField
-            label="Correo electrónico"
+            label={t("email_label")}
             type="email"
-            placeholder="administrador@vitalfit.com"
+            placeholder={t("email_placeholder")}
             {...register("email")}
-            error={errors.email?.message}
+            error={errors.email?.message} 
           />
 
           <InputField
-            label="Contraseña"
+            label={t("password_label")}
             type="password"
-            placeholder="Ingrese su contraseña"
+            placeholder={t("password_placeholder")}
             {...register("password")}
             error={errors.password?.message}
           />
 
           <div className="text-right text-[0.9rem] mb-6">
-            <a
+            <Link
               href="/forgotPassword"
               style={{ color: colors.primary }}
               className="font-semibold hover:underline transition-colors duration-200"
             >
-              ¿Olvidaste tu contraseña?
-            </a>
+              {t("forgot_password")}
+            </Link>
           </div>
 
           <Button
@@ -132,7 +139,7 @@ export default function LoginForm() {
             variant="primary"
             size="lg"
           >
-            Acceder al Dashboard
+            {t("submit_button")}
           </Button>
         </form>
       </div>

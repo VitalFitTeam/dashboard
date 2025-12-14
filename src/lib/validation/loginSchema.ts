@@ -1,18 +1,19 @@
-import { z } from "zod";
+// src/lib/validation/loginSchema.ts (BASE)
 
-export const loginSchema = z.object({
-  email: z
-    .string()
-    .nonempty("El email es obligatorio")
-    .email("Formato de email inválido"),
-  password: z
-    .string()
-    .nonempty("La contraseña es obligatoria")
-    .min(8, "La contraseña debe tener al menos 8 caracteres")
-    .max(20, "La contraseña no puede exceder los 20 caracteres"),
+import { z, ZodType } from "zod";
+
+// 1. Definición base
+export const loginSchemaBase = z.object({
+  email: z.string().nonempty().email(),
+  password: z.string().nonempty().min(8).max(20),
 });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
+// 2. Exportamos el tipo de Zod de la forma que RHF/Resolver lo esperan.
+export type LoginFormData = z.infer<typeof loginSchemaBase>;
+
+// 3. Exportamos un tipo de ZodType fuertemente tipado para el hook.
+// Esto nos permite usarlo como tipo de retorno en el hook.
+export type TLoginSchema = ZodType<LoginFormData>;
 
 export type LoginPayload = LoginFormData & {
   context: "dashboard";

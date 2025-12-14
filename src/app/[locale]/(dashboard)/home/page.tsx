@@ -5,13 +5,18 @@ import SuperAdminDashboard from "@/components/modules/dashboard/SuperAdminDashbo
 import BranchDashboard from "@/components/modules/dashboard/BranchDashboard";
 import InstructorDashboard from "@/components/modules/dashboard/InstructorDashboard";
 import { UserRole } from "@/lib/roles";
+import { useTranslations } from "next-intl"; 
 
 export default function DashboardHome() {
   const { user, hasRole } = useAuth();
+  const t = useTranslations("Dashboard"); 
 
   if (!user) {
-    return <div className="p-8 text-center">Cargando panel...</div>;
+    return <div className="p-8 text-center">{t("loading")}</div>;
   }
+
+  const firstName = user.first_name; 
+  const roleLabel = user.role_label;
 
   return (
     <div className="p-6">
@@ -22,8 +27,12 @@ export default function DashboardHome() {
         UserRole.INSTRUCTOR
       ]) && (
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Bienvenido, {user.first_name}</h1>
-          <p className="text-gray-600">Tu rol actual es: {user.role_label}</p>
+          <h1 className="text-2xl font-bold">
+            {t("welcome_header", { firstName })}
+          </h1>
+          <p className="text-gray-600">
+            {t("current_role", { roleLabel })}
+          </p>
         </div>
       )}
 
@@ -41,9 +50,10 @@ export default function DashboardHome() {
 
       {hasRole(UserRole.ACCOUNTANT) && (
         <div className="p-4 bg-white shadow rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Panel Financiero</h2>
+          {/* 🛑 5. Traducción del título del panel */}
+          <h2 className="text-lg font-semibold mb-2">{t("finance_panel_title")}</h2>
           <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            Ver reportes financieros
+            {t("view_reports_button")}
           </button>
         </div>
       )}

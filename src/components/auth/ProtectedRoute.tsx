@@ -1,12 +1,14 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import {  usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { sidebarMenusByRole, isNavItemWithSub } from "@/components/layout/Sidebar";
 import ForbiddenError from "@/components/errors/ForbiddenError";
 import Loading from "@/app/loading";
 import { UserRole } from "@/lib/roles";
+import { useRouter } from "@/i18n/navigation";
+
 
 export default function ProtectedRoute({
   children,
@@ -68,9 +70,11 @@ export default function ProtectedRoute({
       return pathname.startsWith(path);
     });
 
-    if (!isAllowed && allowedPaths.length > 0) {
+    if (allowedRoles && !hasRole(allowedRoles)) {
+      // 🛑 Si el useEffect no pudo redirigir, mostramos el error aquí de forma estable.
       return <ForbiddenError />;
-    }
+  }
+    
   }
 
   return <>{children}</>;

@@ -1,0 +1,9 @@
+{
+  "Dashboard": {
+    "loading": "Cargando panel...",
+    "welcome_header": "Bienvenido, {firstName}",
+    "current_role": "Tu rol actual es: {roleLabel}",
+    "finance_panel_title": "Panel Financiero",
+    "view_reports_button": "Ver reportes financieros"
+  }
+}

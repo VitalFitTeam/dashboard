@@ -1,0 +1,9 @@
+{
+  "Dashboard": {
+    "loading": "Loading dashboard...",
+    "welcome_header": "Welcome, {firstName}",
+    "current_role": "Your current role is: {roleLabel}",
+    "finance_panel_title": "Financial Panel",
+    "view_reports_button": "View Financial Reports"
+  }
+}

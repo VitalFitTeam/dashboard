@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { typography } from "@/styles/styles";
 import { passwordSchema } from "@/lib/validation/passwordSchema";
 import { Notification } from "@/components/ui/Notification";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/Input";
 import { api } from "@/lib/sdk-config";
 import InputField from "@/components/ui/InputField";
+import { useRouter } from "@/i18n/navigation";
 
 export default function ChangePassword() {
   const router = useRouter();
