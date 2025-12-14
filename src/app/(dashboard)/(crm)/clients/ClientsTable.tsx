@@ -8,7 +8,6 @@ import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Notification } from "@/components/ui/Notification";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -17,6 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface Client {
   client_id: string;
@@ -33,6 +35,7 @@ interface ClientsTableProps {
   page: number;
   pageSize: number;
   totalPages: number;
+  totalItems?: number;
   onPageChange: (page: number) => void;
   filters: { search: string; category: string };
   onFilterChange: (filters: { search?: string; category?: string }) => void;
@@ -44,20 +47,17 @@ export default function ClientsTable({
   page,
   pageSize,
   totalPages,
+  totalItems = 0,
   onPageChange,
   filters,
   onFilterChange,
 }: ClientsTableProps) {
   const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    description: "",
-    title: "",
-    variant: "success" as "success" | "destructive",
-  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const router = useRouter();
+  const { token } = useAuth();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -71,7 +71,7 @@ export default function ClientsTable({
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [searchInput]);
+  }, [searchInput, filters.search, onFilterChange]);
 
   const handleView = (row: Client) => {
     router.replace(`/clients/${row.client_id}`);
@@ -82,34 +82,51 @@ export default function ClientsTable({
   };
 
   const handleDeleteClient = async (client: Client) => {
-    try {
-      console.log("Deleting client (mock):", client.client_id);
+    if (!token) {
+      toast.error("Error", {
+        description: "No hay token de autenticación",
+      });
+      return;
+    }
 
-      setNotification({
-        isVisible: true,
-        title: "Éxito",
-        description: "Cliente eliminado correctamente (Simulación)",
-        variant: "success",
+    setIsDeleting(true);
+    try {
+      await api.user.deleteUser(client.client_id, token);
+
+      toast.success("Éxito", {
+        description: "Cliente eliminado correctamente",
       });
 
       setDeleteRowId(null);
 
+      // Usar setTimeout para dar tiempo a que se vea el toast
       setTimeout(() => {
         onReload();
       }, 1000);
-    } catch (error) {
-      console.error("Error deleting client:", error);
-      setNotification({
-        isVisible: true,
-        title: "Error",
-        description: "Error al eliminar el cliente",
-        variant: "destructive",
-      });
-    }
-  };
 
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
+    } catch (error: any) {
+      console.error("Error deleting client:", error);
+
+      let errorMessage = "Error al eliminar el cliente";
+
+      if (error.status === 403) {
+        errorMessage = "No tienes permisos para eliminar clientes";
+      } else if (error.status === 404) {
+        errorMessage = "Cliente no encontrado";
+      } else if (error.status === 401) {
+        errorMessage = "Sesión expirada. Por favor inicia sesión nuevamente";
+        router.replace("/login");
+      } else if (error.messages && Array.isArray(error.messages)) {
+        errorMessage = error.messages.join(", ");
+      }
+
+      toast.error("Error", {
+        description: errorMessage,
+      });
+
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const StatusBadge = ({ status }: { status: string }) => {
@@ -129,18 +146,32 @@ export default function ClientsTable({
 
     const normalizedStatus = status?.toLowerCase() || "inactive";
 
+    const displayStatus = normalizedStatus === "blocked" ? "inactive" : normalizedStatus;
+
     return (
-      <Badge variant={variantMap[normalizedStatus] || "default"}>
-        {labels[normalizedStatus] || status}
+      <Badge variant={variantMap[displayStatus] || "default"}>
+        {labels[displayStatus] || status}
       </Badge>
     );
   };
 
   const columns: Column<Client>[] = [
-    { header: "ID", accessor: "client_id", filterType: "text", render: (val) => <span className="text-xs text-muted-foreground">{(val as string).substring(0, 8)}</span> },
-    { header: "Nombre", accessor: "first_name", filterType: "text", render: (_, row) => `${row.first_name} ${row.last_name}` },
-    { header: "Email", accessor: "email", filterType: "text" },
-    { header: "Categoría", accessor: "category", filterType: "text" },
+    {
+      header: "Nombre",
+      accessor: "first_name",
+      filterType: "text",
+      render: (_, row) => `${row.first_name} ${row.last_name}`
+    },
+    {
+      header: "Email",
+      accessor: "email",
+      filterType: "text"
+    },
+    {
+      header: "Categoría",
+      accessor: "category",
+      filterType: "text"
+    },
     {
       header: "Status",
       accessor: "status",
@@ -162,28 +193,35 @@ export default function ClientsTable({
           />
         </div>
 
-        <Select defaultValue="all">
+        <Select
+          value={filters.category}
+          onValueChange={(value) => onFilterChange({ category: value })}
+        >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Rol" />
+            <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Rol</SelectItem>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            <SelectItem value="premium">Premium</SelectItem>
+            <SelectItem value="regular">Regular</SelectItem>
+            <SelectItem value="new">Nuevo</SelectItem>
           </SelectContent>
         </Select>
 
         <Button variant="outline">
           <Download className="mr-2 h-4 w-4" />
-          Descarga
+          Descargar
         </Button>
-
       </div>
 
       <DataTable<Client>
-        key={`page-${page}-${data.length}`}
+        key={`table-${page}-${data.length}`}
         columns={columns}
         data={data}
         onPageChange={onPageChange}
         totalPages={totalPages}
+        page={page}
+        pageSize={pageSize}
         rowIdKey="client_id"
         actions={(row) => (
           <div className="flex flex-col items-center justify-center w-full">
@@ -221,16 +259,6 @@ export default function ClientsTable({
           </div>
         )}
       />
-
-      {notification.isVisible && (
-        <Notification
-          variant={notification.variant}
-          title={notification.title}
-          description={notification.description}
-          onClose={hideNotification}
-          autoCloseDuration={3000}
-        />
-      )}
     </>
   );
 }

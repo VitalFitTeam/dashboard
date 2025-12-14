@@ -103,8 +103,8 @@ export default function ClientsForm({
                 type="radio"
                 id="female"
                 name="gender"
-                value="Femenino"
-                checked={client.gender === "Femenino"}
+                value="female"
+                checked={client.gender === "female"}
                 onChange={(e) => handleChange("gender", e.target.value)}
                 disabled={disabled}
                 className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
@@ -116,8 +116,8 @@ export default function ClientsForm({
                 type="radio"
                 id="male"
                 name="gender"
-                value="Masculino"
-                checked={client.gender === "Masculino"}
+                value="male"
+                checked={client.gender === "male"}
                 onChange={(e) => handleChange("gender", e.target.value)}
                 disabled={disabled}
                 className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
@@ -129,8 +129,8 @@ export default function ClientsForm({
                 type="radio"
                 id="other"
                 name="gender"
-                value="Prefiero no especificarlo"
-                checked={client.gender === "Prefiero no especificarlo"}
+                value="prefer-not-to-say"
+                checked={client.gender === "prefer-not-to-say"}
                 onChange={(e) => handleChange("gender", e.target.value)}
                 disabled={disabled}
                 className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
