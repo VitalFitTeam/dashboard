@@ -163,7 +163,7 @@ export default function EditRolePage() {
 
       setShowSuccess(true);
       setTimeout(() => {
-        router.push("/users/audit");
+        router.push("/users/roles");
       }, 1500);
     } catch (err: unknown) {
       console.error("Error al actualizar rol:", err);
@@ -212,7 +212,7 @@ export default function EditRolePage() {
               <Button
                 variant="secondary"
                 type="button"
-                onClick={() => router.push("/users/audit")}
+                onClick={() => router.push("/users/roles")}
               >
                 Cancelar
               </Button>

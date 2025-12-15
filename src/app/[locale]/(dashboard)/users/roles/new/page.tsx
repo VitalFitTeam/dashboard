@@ -117,7 +117,7 @@ export default function CreateRole() {
 
       setShowSuccess(true);
       setTimeout(() => {
-        router.push("/users/audit");
+        router.push("/users/roles");
       }, 1500);
     } catch (err: unknown) {
       console.error("Error al crear rol:", err);

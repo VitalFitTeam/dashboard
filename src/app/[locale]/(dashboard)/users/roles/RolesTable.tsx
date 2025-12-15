@@ -52,11 +52,11 @@ export default function RolesTable() {
   }, [rolesData, inputFilters.search]);
 
   const handleView = (row: Roles) => {
-    router.push(`/users/audit/${row.id}`);
+    router.push(`/users/roles/${row.id}`);
   };
 
   const handleEdit = (row: Roles) => {
-    router.push(`/users/audit/${row.id}/edit`);
+    router.push(`/users/roles/${row.id}/edit`);
   };
 
   const handleDeleteRole = async (role: Roles) => {

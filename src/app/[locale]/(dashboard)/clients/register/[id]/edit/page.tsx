@@ -2,13 +2,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
-import ClientsForm, { ClientData } from "../../ClientsForm";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { GetUserResponse, UpdateUserRequest } from "@vitalfit/sdk";
 import { APIError, isAPIError } from "@vitalfit/sdk";
 import { toast } from "sonner";
+import ClientsForm, { ClientData } from "../../ClientsForm";
 
 function formatPhoneNumber(phone: string): string {
     if (!phone) { return ""; }

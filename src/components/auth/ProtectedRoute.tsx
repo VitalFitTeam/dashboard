@@ -2,11 +2,12 @@
 
 import { ReactNode, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { sidebarMenusByRole, isNavItemWithSub } from "@/components/layout/Sidebar";
 import ForbiddenError from "@/components/errors/ForbiddenError";
 import { UserRole } from "@/lib/roles";
 import Loading from "@/app/[locale]/loading";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { sidebarMenusByRole } from "../layout/sidebar/sidebar.config";
+import { hasSubItems } from "../layout/sidebar/SidebarItem";
 
 export default function ProtectedRoute({
   children,
@@ -52,7 +53,7 @@ export default function ProtectedRoute({
 
     allowedSections.forEach((section) => {
       section.items.forEach((item) => {
-        if (isNavItemWithSub(item)) {
+        if (hasSubItems(item)) {
           item.subitems.forEach((sub) => allowedPaths.push(sub.href));
         } else {
           allowedPaths.push(item.href);

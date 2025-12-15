@@ -1,7 +1,8 @@
-import SidebarDashboard from "@/components/layout/Sidebar";
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 import MainContent from "@/components/layout/MainContent";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import SidebarDashboard from "@/components/layout/sidebar/Sidebar";
 
 export default function DashboardLayout({
   children,

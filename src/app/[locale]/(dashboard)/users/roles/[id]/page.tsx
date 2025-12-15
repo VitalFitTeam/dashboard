@@ -66,7 +66,7 @@ export default function ViewRolePage() {
   }, [id, token]);
 
   const handleEdit = () => {
-    router.push(`/users/audit/${id}/edit`);
+    router.push(`/users/roles/${id}/edit`);
   };
 
   if (isLoading) {
@@ -82,7 +82,7 @@ export default function ViewRolePage() {
       <div className="flex-1 space-y-6 p-8 pt-6">
         <div className="text-red-500 text-center p-4">{error}</div>
         <div className="flex justify-center">
-          <Button variant="primary" onClick={() => router.push("/users/audit")}>
+          <Button variant="primary" onClick={() => router.push("/users/roles")}>
             Volver a la lista
           </Button>
         </div>
