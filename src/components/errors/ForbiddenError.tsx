@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
 
 export default function ForbiddenError() {
     const router = useRouter();

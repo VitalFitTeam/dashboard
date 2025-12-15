@@ -1,0 +1,24 @@
+{
+  "LoginPage": {
+    "title": "Acceso Administrativo",
+    "subtitle": "Solo personal autorizado. Ingrese sus credenciales.",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "administrador@vitalfit.com",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "Ingrese su contraseña",
+    "forgotPasswordLink": "¿Olvidaste tu contraseña?",
+    "accessButton": "Acceder al Dashboard",
+    "errorCredentials": "Credenciales no válidas. Por favor, verifícalas.",
+    "errorUnexpected": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "errorGeneric": "Fallo en el inicio de sesión."
+  },
+  "DashboardHome": {
+    "loading": "Cargando panel...",
+    "welcomeTitle": "Bienvenido, {firstName}",
+    "roleInfo": "Tu rol actual es: {roleLabel}",
+    "financialPanelTitle": "Panel Financiero",
+    "viewReportsButton": "Ver reportes financieros",
+    "unassignedRoleMessage": "No tienes un panel de control asignado para tu rol. Contacta al Administrador."
+  }
+
+}

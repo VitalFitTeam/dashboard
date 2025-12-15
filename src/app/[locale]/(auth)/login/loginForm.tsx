@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -15,12 +14,16 @@ import { colors, montserrat } from "@/styles/styles";
 import InputField from "@/components/ui/InputField";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { login } = useAuth();
   const router = useRouter();
+
+  const t = useTranslations("LoginPage");
 
   const {
     register,
@@ -46,18 +49,19 @@ export default function LoginForm() {
       if (!token) {
         throw new Error("Token no recibido");
       }
-      login(token);
+
+      await login(token);
       router.replace("/");
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
       if (err instanceof Error) {
         if ("status" in err && err.status === 401) {
-          setErrorMessage("Credenciales no válidas. Por favor, verifícalas.");
+          setErrorMessage(t("errorCredentials"));
         } else {
-          setErrorMessage("Ocurrió un error inesperado. Inténtalo de nuevo.");
+          setErrorMessage(t("errorUnexpected"));
         }
       } else {
-        setErrorMessage("Fallo en el inicio de sesión.");
+        setErrorMessage(t("errorGeneric"));
       }
     } finally {
       setIsLoading(false);
@@ -69,59 +73,58 @@ export default function LoginForm() {
       <div
         className={`bg-white border border-gray-200 shadow-2xl rounded-2xl p-10 w-full max-w-md ${montserrat.className}`}
       >
-        {errorMessage && (
-          <div
-            className="mb-10 p-4 text-center text-red-700 bg-red-50 border border-red-300 rounded-lg font-medium"
-            role="alert"
-          >
-            {errorMessage}
-          </div>
-        )}
+         <div className="flex justify-center mb-4">
 
-        <div className="flex justify-center mb-4">
           <Image
-            src="/logo/isotipo.png"
-            alt="VitalFit Logo"
-            width={120}
-            height={120}
-            className="rounded-full"
-          />
-        </div>
 
+            src="/logo/isotipo.png"
+
+            alt="VitalFit Logo"
+
+            width={120}
+
+            height={120}
+
+            className="rounded-full"
+
+          />
+
+        </div>
+        
         <h2
           className={`text-center text-[1.6rem] font-bold text-[${colors.complementary.black}] mb-2`}
         >
-          Acceso Administrativo
+          {t("title")}
         </h2>
         <p className="text-center text-gray-600 text-sm mb-8">
-          Solo personal autorizado. Ingrese sus credenciales.
+          {t("subtitle")}
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <InputField
-            label="Correo electrónico"
+            label={t("emailLabel")}
             type="email"
-            placeholder="administrador@vitalfit.com"
+            placeholder={t("emailPlaceholder")}
             {...register("email")}
             error={errors.email?.message}
           />
 
           <InputField
-            label="Contraseña"
+            label={t("passwordLabel")}
             type="password"
-            placeholder="Ingrese su contraseña"
+            placeholder={t("passwordPlaceholder")}
             {...register("password")}
             error={errors.password?.message}
           />
 
           <div className="text-right text-[0.9rem] mb-6">
-            <a
+            <Link
               href="/forgotPassword"
               style={{ color: colors.primary }}
               className="font-semibold hover:underline transition-colors duration-200"
             >
-              ¿Olvidaste tu contraseña?
-            </a>
+              {t("forgotPasswordLink")}
+            </Link>
           </div>
 
           <Button
@@ -132,9 +135,18 @@ export default function LoginForm() {
             variant="primary"
             size="lg"
           >
-            Acceder al Dashboard
+            {t("accessButton")}
           </Button>
         </form>
+
+        {errorMessage && (
+          <div
+            className="mb-10 p-4 text-center text-red-700 bg-red-50 border border-red-300 rounded-lg font-medium"
+            role="alert"
+          >
+            {errorMessage}
+          </div>
+        )}
       </div>
     </div>
   );

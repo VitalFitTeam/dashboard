@@ -1,12 +1,12 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { sidebarMenusByRole, isNavItemWithSub } from "@/components/layout/Sidebar";
 import ForbiddenError from "@/components/errors/ForbiddenError";
-import Loading from "@/app/loading";
 import { UserRole } from "@/lib/roles";
+import Loading from "@/app/[locale]/loading";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 export default function ProtectedRoute({
   children,
@@ -69,6 +69,10 @@ export default function ProtectedRoute({
     });
 
     if (!isAllowed && allowedPaths.length > 0) {
+      return <ForbiddenError />;
+    }
+
+    if (allowedRoles && !hasRole(allowedRoles)) {
       return <ForbiddenError />;
     }
   }

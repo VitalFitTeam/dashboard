@@ -1,0 +1,23 @@
+{
+  "LoginPage": {
+    "title": "Administrative Access",
+    "subtitle": "Authorized personnel only. Please enter your credentials.",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "administrator@vitalfit.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "forgotPasswordLink": "Forgot your password?",
+    "accessButton": "Access Dashboard",
+    "errorCredentials": "Invalid credentials. Please verify them.",
+    "errorUnexpected": "An unexpected error occurred. Please try again.",
+    "errorGeneric": "Login failed."
+  },
+  "DashboardHome": {
+    "loading": "Loading dashboard...",
+    "welcomeTitle": "Welcome, {firstName}",
+    "roleInfo": "Your current role is: {roleLabel}",
+    "financialPanelTitle": "Financial Panel",
+    "viewReportsButton": "View financial reports",
+    "unassignedRoleMessage": "You do not have an assigned dashboard for your role. Contact the Administrator."
+  }
+}

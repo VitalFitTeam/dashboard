@@ -29,10 +29,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${montserrat.variable} ${bebas.variable}`}>
+    <html className={`${montserrat.variable} ${bebas.variable}`}> 
       <body>
         <AuthProvider>
-          {children}
+          {children} 
           <ToasterProvider />
         </AuthProvider>
       </body>
