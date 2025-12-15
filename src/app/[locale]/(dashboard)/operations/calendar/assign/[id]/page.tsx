@@ -1,5 +1,4 @@
-import UnderConstruction from "@/app/UnderConstruction";
-
+import UnderConstruction from "@/app/[locale]/UnderConstruction";
 
 export default function AssignClassPage() {
   return <UnderConstruction />;
