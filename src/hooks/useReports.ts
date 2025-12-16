@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { api } from "@/lib/sdk-config";
-import { ChartData, TopBranch } from "@vitalfit/sdk";
+import { ChartData, GlobalStat, TopBranch } from "@vitalfit/sdk";
 
 const reportFetcher = async (action: () => Promise<any>) => {
   try {
@@ -101,7 +101,7 @@ export const useGlobalStats = (token: string | null) => {
   const key = token ? ["globalStats", token] : null;
   const fetcher = () => api.report.globalStats(token || "");
   
-  const { data, error, isLoading } = useSWR<TopBranch[], Error>(key, () =>
+  const { data, error, isLoading } = useSWR<GlobalStat, Error>(key, () =>
     reportFetcher(fetcher)
   );
 
