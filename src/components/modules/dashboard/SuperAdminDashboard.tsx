@@ -64,10 +64,10 @@ export default function SuperAdminDashboard() {
                             <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
                                 {topActiveBranch?.map((branch, index) => (
                                     <FranchisePerformanceItem
-                                        key={branch.branch_name}
-                                        name={branch.branch_name}
-                                        status={branch.label}
-                                        revenue={branch.total_sales}
+                                        key={branch.label}
+                                        name={branch.label}
+                                        status={branch.status}
+                                        revenue={branch.value}
                                         growth={branch.percent_change}
                                         trend={normalizeTrend(branch.trend)}
                                         withBorder={index !== topActiveBranch.length - 1}

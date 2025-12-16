@@ -77,7 +77,10 @@
     "MisReportes": "Mis Reportes",
     "ReportesDetallados": "Reportes Detallados",
     "TendenciasCohortes": "Tendencias y Cohortes",
-    "CheckinCheckout": "Check-in/Check-out"
+    "ReporteClientes": "Reporte de Clientes",
+    "ReporteFinanciero": "Reporte Financiero",
+    "CheckinCheckout": "Check-in/Check-out",
+    "ReporteVentas": "Reporte de Ventas"
   }
 
 }

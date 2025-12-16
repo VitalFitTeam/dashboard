@@ -85,6 +85,9 @@
     "MisReportes": "My Reports",
     "ReportesDetallados": "Detailed Reports",
     "TendenciasCohortes": "Trends and Cohorts",
-    "CheckinCheckout": "Check-in/Check-out"
+    "ReporteClientes": "Customer Report",
+    "ReporteFinanciero": "Financial Report",
+    "CheckinCheckout": "Check-in/Check-out",
+    "ReporteVentas": "Sales Report"
   }
 }

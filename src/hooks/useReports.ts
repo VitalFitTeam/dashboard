@@ -101,7 +101,6 @@ export const useGlobalStats = (token: string | null) => {
   const key = token ? ["globalStats", token] : null;
   const fetcher = () => api.report.globalStats(token || "");
   
-  // Confirma si globalStats devuelve TopBranch[] o un objeto GlobalStats único
   const { data, error, isLoading } = useSWR<TopBranch[], Error>(key, () =>
     reportFetcher(fetcher)
   );

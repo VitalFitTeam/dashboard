@@ -22,6 +22,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useBranches } from "@/hooks/branches/useBranches";
 
 import { DollarSign, Users, ShoppingCart } from "lucide-react";
+import { useGlobalStats } from "@/hooks/useReports";
 
 export default function SalesReport() {
   const { token } = useAuth();
@@ -31,24 +32,21 @@ export default function SalesReport() {
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
 
-  const {
-    branches,
-    isLoading: loadingBranches,
-  } = useBranches({
+  const { branches, isLoading: loadingBranches } = useBranches({
     token: token ?? "",
     limit: 50,
   });
 
-const branchOptions = useMemo(
-  () => [
-    { value: "all", label: "Todas las sucursales" },
-    ...branches.map((branch) => ({
-      value: branch.branch_id,
-      label: branch.name,
-    })),
-  ],
-  [branches],
-);
+  const branchOptions = useMemo(
+    () => [
+      { value: "all", label: "Todas las sucursales" },
+      ...branches.map((branch) => ({
+        value: branch.branch_id,
+        label: branch.name,
+      })),
+    ],
+    [branches]
+  );
 
   const ranges = [
     { value: "today", label: "Hoy" },
@@ -94,15 +92,15 @@ const branchOptions = useMemo(
     }
   }, [rangeValue, startDate, endDate]);
 
-const startDateISO = format(finalStartDate, "yyyy-MM-dd");
-const endDateISO = format(finalEndDate, "yyyy-MM-dd");
+  const startDateISO = format(finalStartDate, "yyyy-MM-dd");
+  const endDateISO = format(finalEndDate, "yyyy-MM-dd");
 
-const handleClearFilters = () => {
-  setBranchValue("all");
-  setRangeValue("this_month");
-  setStartDate(undefined);
-  setEndDate(undefined);
-};
+  const handleClearFilters = () => {
+    setBranchValue("all");
+    setRangeValue("this_month");
+    setStartDate(undefined);
+    setEndDate(undefined);
+  };
 
   if (!token) {
     return (
@@ -115,9 +113,16 @@ const handleClearFilters = () => {
     );
   }
 
+  const {
+    data: gobalSales,
+    isLoading: isLoadingGlobalSales,
+    error: errorGlobalSales,
+  } = useGlobalStats(token);
+
+  console.log(gobalSales);
+
   return (
     <div className="p-6 space-y-10">
-
       <ReportFilters
         branches={branchOptions}
         branchValue={branchValue}
@@ -147,8 +152,19 @@ const handleClearFilters = () => {
         <StatCard
           title="Ventas Totales"
           icon={<DollarSign className="h-4 w-4 text-primary" />}
-          value="-"
-          description={<span className="text-green-500 font-semibold">-</span>}
+          value={gobalSales?.total_current_month}
+          description={
+            <span
+              className={`${gobalSales?.trend === "up"
+                  ? "text-green-500"
+                  : gobalSales?.trend === "down"
+                    ? "text-red-500"
+                    : "text-gray-500"
+                } font-semibold`}
+            >
+              {gobalSales?.total_last_month} vs. Mes Anterior
+            </span>
+          }
           bottomMarkup
         />
 
@@ -198,7 +214,6 @@ const handleClearFilters = () => {
           endDate={endDateISO}
         />
       </section>
-
     </div>
   );
 }
