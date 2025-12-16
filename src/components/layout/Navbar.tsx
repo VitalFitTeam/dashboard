@@ -1,67 +1,101 @@
 "use client";
+
 import React from "react";
+import { useTranslations } from "next-intl"; // Importamos el hook de traducción
 import {
   BellIcon,
-  MagnifyingGlassIcon,
   SunIcon,
 } from "@heroicons/react/24/outline";
-import { typography, colors } from "@/styles/styles";
-import { DynamicBreadcrumb } from "./DynamicBreadcrumb";
+import { Menu, Search } from "lucide-react";
+
 import { useSidebar } from "../ui/sidebar";
 import { Button } from "../ui/button";
-import { Menu } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { DynamicBreadcrumb } from "./DynamicBreadcrumb";
+import LocaleSwitcher from "./localeSwitcher/LocaleSwitcher";
 
 const Navbar: React.FC = () => {
+  const t = useTranslations("Navbar"); // Hook para acceder a las traducciones
   const { toggleSidebar } = useSidebar();
 
   return (
-    <nav className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="hover:bg-gray-100"
-        >
-          <Menu className="h-5 w-5 text-gray-700" />
-        </Button>
-
-        <div className="hidden md:flex">
-          <DynamicBreadcrumb />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="relative hidden lg:block">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar..."
-            className={`pl-10 pr-4 py-1.5 rounded-md border text-sm focus:ring-1 focus:ring-orange-300 focus:border-orange-300 outline-none transition-colors ${typography.body}`}
-            style={{
-              color: colors.complementary.black,
-              borderColor: colors.complementary.lightGray,
-              width: "260px",
-            }}
-          />
+    <nav className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center px-4 md:px-6">
+        
+        {/* IZQUIERDA: Mobile Toggle & Breadcrumbs */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">{t("toggleMenu")}</span>
+          </Button>
+          
+          <div className="hidden sm:block">
+            <DynamicBreadcrumb />
+          </div>
         </div>
 
-        <button
-          type="button"
-          className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
-          aria-label="Notificaciones"
-        >
-          <BellIcon className="w-5 h-5 text-gray-700" />
-          <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-orange-500"></span>
-        </button>
+        {/* DERECHA: Actions & Search */}
+        <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
+          
+          {/* Buscador Responsive */}
+          <div className="w-full flex-1 md:w-auto md:flex-none">
+            <div className="relative hidden md:block">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <input
+                type="search"
+                placeholder={t("searchPlaceholder")}
+                className="flex h-9 w-64 rounded-md border border-input bg-muted/50 px-9 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
+            
+            <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground">
+              <Search className="h-5 w-5" />
+              <span className="sr-only">{t("searchPlaceholder")}</span>
+            </Button>
+          </div>
 
-        <button
-          type="button"
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-          aria-label="Cambiar tema"
-        >
-          <SunIcon className="w-5 h-5 text-gray-700" />
-        </button>
+          <nav className="flex items-center gap-1">
+            <TooltipProvider>
+              {/* Notificaciones */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative h-9 w-9">
+                    <BellIcon className="h-5 w-5 text-muted-foreground" />
+                    <span className="absolute right-2.5 top-2.5 flex h-2 w-2 rounded-full bg-orange-600 border-2 border-background" />
+                    <span className="sr-only">{t("notifications")}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("notifications")}</TooltipContent>
+              </Tooltip>
+
+              {/* Tema */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <SunIcon className="h-5 w-5 text-muted-foreground" />
+                    <span className="sr-only">{t("appearance")}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("appearance")}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <div className="mx-2 hidden h-4 w-[1px] bg-border md:block" />
+
+            {/* Selector de Idioma */}
+            <LocaleSwitcher />
+          </nav>
+        </div>
       </div>
     </nav>
   );
