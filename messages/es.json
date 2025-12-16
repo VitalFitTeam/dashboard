@@ -87,7 +87,15 @@
     "searchPlaceholder": "Buscar...",
     "notifications": "Notificaciones",
     "appearance": "Apariencia",
-    "toggleMenu": "Alternar menú"
+    "toggleMenu": "Alternar menú",
+    "details": "Detalles #{id}"
+  },
+  "UserNav": {
+    "account": "Cuenta",
+    "billing": "Facturación",
+    "notifications": "Notificaciones",
+    "logout": "Cerrar sesión",
+    "language": "Idioma"
   }
 
 }

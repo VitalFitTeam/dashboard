@@ -95,7 +95,17 @@
     "searchPlaceholder": "Search...",
     "notifications": "Notifications",
     "appearance": "Appearance",
-    "toggleMenu": "Toggle menu"
+    "toggleMenu": "Toggle menu",
+    "details": "Details #{id}",
+    "breadcrumb": {
+      "details": "Detail #{id}"
+    }
+  },
+  "UserNav": {
+    "account": "Account",
+    "billing": "Billing",
+    "notifications": "Notifications",
+    "logout": "Log out",
+    "language": "Language"
   }
-  
 }

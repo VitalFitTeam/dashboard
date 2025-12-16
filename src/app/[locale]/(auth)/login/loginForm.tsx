@@ -74,8 +74,6 @@ return (
     <div className="absolute top-4 right-4">
       <LocaleSwitcher />
     </div>
-
-    {/* Header Section */}
     <div className="flex flex-col items-center mb-10">
       <div className="bg-gray-50 p-2 rounded-full mb-6 ring-8 ring-gray-50/50">
         <Image
