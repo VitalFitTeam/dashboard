@@ -86,5 +86,26 @@
     "ReportesDetallados": "Detailed Reports",
     "TendenciasCohortes": "Trends and Cohorts",
     "CheckinCheckout": "Check-in/Check-out"
+  },
+  "LocaleSwitcher": {
+    "label": "Change language",
+    "locale": "{locale, select, es {Spanish} en {English} other {{locale}}}"
+  },
+  "Navbar": {
+    "searchPlaceholder": "Search...",
+    "notifications": "Notifications",
+    "appearance": "Appearance",
+    "toggleMenu": "Toggle menu",
+    "details": "Details #{id}",
+    "breadcrumb": {
+      "details": "Detail #{id}"
+    }
+  },
+  "UserNav": {
+    "account": "Account",
+    "billing": "Billing",
+    "notifications": "Notifications",
+    "logout": "Log out",
+    "language": "Language"
   }
 }
