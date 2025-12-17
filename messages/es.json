@@ -99,6 +99,84 @@
     "notifications": "Notificaciones",
     "logout": "Cerrar sesión",
     "language": "Idioma"
+  },
+  "analytics": {
+    "sales": {
+      "title": "Reporte de Ventas",
+      "stats": {
+        "total_sales": "Ventas Totales",
+        "membership_sales": "Ventas de Membresías",
+        "transactions": "Transacciones",
+        "comparison": "{amount} vs. Mes Anterior"
+      },"filters": {
+        "all_branches": "Todas las sucursales",
+        "ranges": {
+          "today": "Hoy",
+          "this_week": "Esta semana",
+          "this_month": "Este mes",
+          "last_month": "Mes anterior"
+        }
+      },      
+      "charts": {
+        "by_hour": {
+          "title": "Ventas por Hora",
+          "error": "Error al cargar las ventas por hora.",
+          "description": "Ventas desde las {start} hasta las {end}.",
+          "series_label": "Ventas Totales",
+          "footer_change": "↑ 5.2% vs. periodo anterior",
+          "footer_text": "Datos agrupados por hora de cierre de venta."
+        },
+        "payment_method": {
+          "title": "Ventas por Método de Pago",
+          "description": "Preferencia de pago de los clientes",
+          "error": "Error al cargar los métodos de pago.",
+          "no_data": "Sin datos",
+          "footer_total": "Total vendido: ${amount}",
+          "config_label": "Ventas"
+        },
+        "category_sales": {
+          "title": "Ventas por Servicio",
+          "description": "Distribución de ingresos por tipo",
+          "error": "Error al cargar datos de servicios.",
+          "footer_total": "Categorías totales: {count}",
+          "growth_label": "{value}% de crecimiento"
+        },
+        "top_instructors": {
+          "title": "Ventas por Instructor Principal",
+          "description": "Mostrando instructores con mayores ventas entre {start} y {end}.",
+          "error": "Error al cargar datos de instructores.",
+          "no_data": "No hay datos de ventas de instructores para este periodo.",
+          "config": {
+            "value": "Ventas Totales",
+            "label": "Instructor"
+          }
+        }
+      }
+    }
+  },
+  "dashboards": {
+    "super_admin": {
+      "stats": {
+        "global_sales": "Ventas globales",
+        "active_branches": "Sucursales Activas",
+        "total_clients": "Clientes totales",
+        "global_nps": "NPS Global",
+        "vs_last_month": "{value} vs. mes pasado"
+      },
+      "performance": {
+        "title": "Rendimiento por Franquicia",
+        "subtitle": "Top {count} sedes por volumen de ventas"
+      },
+      "alerts": {
+        "title": "Alertas del Sistema",
+        "subtitle": "Notificaciones críticas",
+        "items": {
+          "low_occupancy": "Baja ocupación crítica",
+          "pending_finance": "Reporte financiero pendiente",
+          "new_franchisee": "Nuevo franquiciado",
+          "sync_error": "Error de sincronización"
+        }
+      }
+    }
   }
-
 }

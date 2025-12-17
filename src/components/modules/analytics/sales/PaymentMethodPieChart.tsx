@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useSalesByPaymentMethod } from "@/hooks/useReports";
 import { ChartData } from "@vitalfit/sdk";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,18 +8,10 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ChartConfig } from "@/components/ui/chart";
 import { ReusablePieChart } from "@/components/charts/pie-chart";
 
-
 type PaymentMethodPieChartProps = {
   token: string;
   startDate: string;
   endDate: string;
-};
-
-const paymentChartConfig: ChartConfig = {
-  Sales: {
-    label: "Ventas",
-    color: "hsl(220 89% 63%)",
-  },
 };
 
 export default function PaymentMethodPieChart({
@@ -26,20 +19,29 @@ export default function PaymentMethodPieChart({
   startDate,
   endDate,
 }: PaymentMethodPieChartProps) {
+  const t = useTranslations("analytics.sales.charts.payment_method");
+
   const {
     data: paymentData,
     isLoading: isLoadingPayment,
     error: errorPayment,
   } = useSalesByPaymentMethod(token, startDate, endDate);
 
+  const paymentChartConfig: ChartConfig = {
+    Sales: {
+      label: t("config_label"),
+      color: "hsl(220 89% 63%)",
+    },
+  };
+
   if (errorPayment) {
     return (
       <Card className="h-[400px] border-none">
         <CardHeader>
-          <CardTitle>Ventas por Método de Pago</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent className="text-red-500">
-          Error al cargar métodos de pago.
+          {t("error")}
         </CardContent>
       </Card>
     );
@@ -56,17 +58,19 @@ export default function PaymentMethodPieChart({
 
   const totalSales = chartData.reduce((acc, item) => acc + item.value, 0);
 
-  const safeData = chartData.length > 0 ? chartData : [{ label: "Sin datos", value: 1 }];
+  const safeData = chartData.length > 0 
+    ? chartData 
+    : [{ label: t("no_data"), value: 1 }];
 
   return (
     <ReusablePieChart
-      title="Ventas por Método de Pago"
-      description="Preferencia de pago de clientes"
+      title={t("title")}
+      description={t("description")}
       data={safeData}
       dataKey="value"
       nameKey="label"    
       chartConfig={paymentChartConfig}  
-      footerText={`Total vendido: $${totalSales.toLocaleString()}`}
+      footerText={t("footer_total", { amount: totalSales.toLocaleString() })}
       growth={undefined}   
       colors={[
         "#60a5fa",

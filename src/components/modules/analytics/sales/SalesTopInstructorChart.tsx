@@ -1,11 +1,11 @@
 "use client";
 
-import { useTopInstructors } from "@/hooks/useReports";; 
+import { useTranslations } from "next-intl";
+import { useTopInstructors } from "@/hooks/useReports";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BarChartVertical } from "@/components/charts/bar-chart-vertical";
 import { ChartConfig } from "@/components/ui/chart";
-
 
 type SalesTopInstructorChartProps = {
   token: string;
@@ -18,20 +18,33 @@ export default function SalesTopInstructorChart({
   startDate,
   endDate,
 }: SalesTopInstructorChartProps) {
+  const t = useTranslations("analytics.sales.charts.top_instructors");
+
   const {
     data: salesTopInstructors,
     isLoading: isSalesTopInstructors,
     error: errorSalesTopInstructors,
   } = useTopInstructors(token, startDate, endDate);
 
+  const myChartConfig = {
+    value: { 
+      label: t("config.value"), 
+      color: "hsl(var(--chart-1))", 
+    },
+    label: {
+      label: t("config.label"),
+      color: "hsl(var(--foreground))",
+    }
+  } satisfies ChartConfig;
+
   if (errorSalesTopInstructors) {
     return (
       <Card className="h-[400px] border-none">
         <CardHeader>
-          <CardTitle>Ventas por Instructor Principal</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent className="text-red-500">
-          Error al cargar datos de instructores.
+          {t("error")}
         </CardContent>
       </Card>
     );
@@ -45,30 +58,19 @@ export default function SalesTopInstructorChart({
     return (
       <Card className="h-[400px] border-none">
         <CardHeader>
-          <CardTitle>Ventas por Instructor Principal</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent className="text-muted-foreground text-center py-16">
-          No hay datos de ventas de instructores para este período.
+          {t("no_data")}
         </CardContent>
       </Card>
     );
   }
 
-  const myChartConfig = {
-    value: { 
-      label: "Ventas Totales", 
-      color: "hsl(var(--chart-1))", 
-    },
-    label: {
-      label: "Instructor",
-      color: "hsl(var(--foreground))",
-    }
-  } satisfies ChartConfig;
-
   return (
     <BarChartVertical
-      title="Ventas por Instructor Principal"
-      description={`Mostrando los instructores con mayores ventas entre ${startDate} y ${endDate}.`}
+      title={t("title")}
+      description={t("description", { start: startDate, end: endDate })}
       data={salesTopInstructors}
       categoryKey="label" 
       valueKey="value"    

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useSalesByHour } from "@/hooks/useReports";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -16,6 +17,9 @@ export default function SalesByHourChart({
   startHour,
   endHour,
 }: SalesByHourChartProps) {
+
+  const t = useTranslations("analytics.sales.charts.by_hour");
+
   const {
     data: salesByHour,
     isLoading: isLoadingSalesByHour,
@@ -27,12 +31,11 @@ export default function SalesByHourChart({
       <Card className="h-[420px] border-red-300 shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-semibold text-red-600">
-            Ventas por franja horaria
+            {t("title")}
           </CardTitle>
         </CardHeader>
-
         <CardContent className="text-red-500 text-sm">
-          Error al cargar Ventas por franja horaria.
+          {t("error")}
         </CardContent>
       </Card>
     );
@@ -46,8 +49,7 @@ export default function SalesByHourChart({
     );
   }
 
-  const rawDataArray =
-    (salesByHour as any)?.data || (salesByHour as any);
+  const rawDataArray = (salesByHour as any)?.data || (salesByHour as any);
 
   const adaptedChartData = (rawDataArray as any[]).map((item) => ({
     ...item,
@@ -59,11 +61,14 @@ export default function SalesByHourChart({
     <Card className="shadow-lg rounded-2xl border border-gray-200 bg-white dark:bg-neutral-900">
       <CardHeader className="pb-1">
         <CardTitle className="text-xl font-semibold tracking-tight">
-          Ventas por Hora
+          {t("title")}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Ventas desde las <strong>{startHour}</strong> hasta las{" "}
-          <strong>{endHour}</strong>.
+          {t.rich("description", {
+            start: startHour,
+            end: endHour,
+            strong: (chunks) => <strong>{chunks}</strong>,
+          })}
         </p>
       </CardHeader>
 
@@ -71,9 +76,9 @@ export default function SalesByHourChart({
         <AdaptableLineDotsChart
           description=""
           data={adaptedChartData}
-          seriesLabel="Ventas Totales"
-          footerChange="↑ 5.2% vs. la franja anterior"
-          footerText="Datos agrupados por hora de cierre de venta."
+          seriesLabel={t("series_label")}
+          footerChange={t("footer_change")}
+          footerText={t("footer_text")}
           height={200}
         />
       </CardContent>

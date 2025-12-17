@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   startOfMonth,
   endOfMonth,
@@ -26,6 +27,7 @@ import { useGlobalStats } from "@/hooks/useReports";
 
 export default function SalesReport() {
   const { token } = useAuth();
+  const t = useTranslations("analytics.sales");
 
   const [branchValue, setBranchValue] = useState("all");
   const [rangeValue, setRangeValue] = useState("this_month");
@@ -39,61 +41,46 @@ export default function SalesReport() {
 
   const branchOptions = useMemo(
     () => [
-      { value: "all", label: "Todas las sucursales" },
+      { value: "all", label: t("filters.all_branches") },
       ...branches.map((branch) => ({
         value: branch.branch_id,
         label: branch.name,
       })),
     ],
-    [branches]
+    [branches, t]
   );
 
-  const ranges = [
-    { value: "today", label: "Hoy" },
-    { value: "this_week", label: "Esta semana" },
-    { value: "this_month", label: "Este mes" },
-    { value: "last_month", label: "Mes anterior" },
-  ];
+  const ranges = useMemo(() => [
+    { value: "today", label: t("filters.ranges.today") },
+    { value: "this_week", label: t("filters.ranges.this_week") },
+    { value: "this_month", label: t("filters.ranges.this_month") },
+    { value: "last_month", label: t("filters.ranges.last_month") },
+  ], [t]);
 
   const { finalStartDate, finalEndDate } = useMemo(() => {
     const now = new Date();
-
     if (startDate && endDate) {
-      return {
-        finalStartDate: startDate,
-        finalEndDate: endDate,
-      };
+      return { finalStartDate: startDate, finalEndDate: endDate };
     }
 
     switch (rangeValue) {
-      case "today":
-        return { finalStartDate: now, finalEndDate: now };
-
-      case "this_week":
-        return {
-          finalStartDate: startOfWeek(now, { weekStartsOn: 1 }),
-          finalEndDate: endOfWeek(now, { weekStartsOn: 1 }),
-        };
-
+      case "today": return { finalStartDate: now, finalEndDate: now };
+      case "this_week": return {
+        finalStartDate: startOfWeek(now, { weekStartsOn: 1 }),
+        finalEndDate: endOfWeek(now, { weekStartsOn: 1 }),
+      };
       case "last_month": {
         const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        return {
-          finalStartDate: startOfMonth(lastMonth),
-          finalEndDate: endOfMonth(lastMonth),
-        };
+        return { finalStartDate: startOfMonth(lastMonth), finalEndDate: endOfMonth(lastMonth) };
       }
-
-      case "this_month":
-      default:
-        return {
-          finalStartDate: startOfMonth(now),
-          finalEndDate: endOfMonth(now),
-        };
+      default: return { finalStartDate: startOfMonth(now), finalEndDate: endOfMonth(now) };
     }
   }, [rangeValue, startDate, endDate]);
 
   const startDateISO = format(finalStartDate, "yyyy-MM-dd");
   const endDateISO = format(finalEndDate, "yyyy-MM-dd");
+
+  const { data: gobalSales, isLoading: isLoadingGlobalSales } = useGlobalStats(token ?? "");
 
   const handleClearFilters = () => {
     setBranchValue("all");
@@ -105,21 +92,12 @@ export default function SalesReport() {
   if (!token) {
     return (
       <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Skeleton className="h-28 w-full rounded-xl" />
-        <Skeleton className="h-28 w-full rounded-xl" />
-        <Skeleton className="h-28 w-full rounded-xl" />
-        <Skeleton className="h-28 w-full rounded-xl" />
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-28 w-full rounded-xl" />
+        ))}
       </div>
     );
   }
-
-  const {
-    data: gobalSales,
-    isLoading: isLoadingGlobalSales,
-    error: errorGlobalSales,
-  } = useGlobalStats(token);
-
-  console.log(gobalSales);
 
   return (
     <div className="p-6 space-y-10">
@@ -136,83 +114,55 @@ export default function SalesReport() {
         }}
         startDate={startDate}
         endDate={endDate}
-        onStartDateChange={(date) => {
-          setStartDate(date);
-          setRangeValue("");
-        }}
-        onEndDateChange={(date) => {
-          setEndDate(date);
-          setRangeValue("");
-        }}
+        onStartDateChange={(date) => { setStartDate(date); setRangeValue(""); }}
+        onEndDateChange={(date) => { setEndDate(date); setRangeValue(""); }}
         loadingBranches={loadingBranches}
         onClear={handleClearFilters}
       />
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Ventas Totales"
+          title={t("stats.total_sales")}
           icon={<DollarSign className="h-4 w-4 text-primary" />}
           value={gobalSales?.total_current_month}
           description={
-            <span
-              className={`${gobalSales?.trend === "up"
-                  ? "text-green-500"
-                  : gobalSales?.trend === "down"
-                    ? "text-red-500"
-                    : "text-gray-500"
-                } font-semibold`}
-            >
-              {gobalSales?.total_last_month} vs. Mes Anterior
+            <span className={`${
+              gobalSales?.trend === "up" ? "text-green-500" : 
+              gobalSales?.trend === "down" ? "text-red-500" : "text-gray-500"
+            } font-semibold`}>
+              {t("stats.comparison", { amount: gobalSales?.total_last_month ?? 0 })}
             </span>
           }
           bottomMarkup
         />
 
         <StatCard
-          title="Ventas de Membresías"
+          title={t("stats.membership_sales")}
           icon={<Users className="h-4 w-4 text-primary" />}
           value="-"
-          description={<span className="text-green-500 font-semibold">-</span>}
+          description={<span className="text-gray-400 font-semibold">-</span>}
           bottomMarkup
         />
 
         <StatCard
-          title="Transacciones"
+          title={t("stats.transactions")}
           icon={<ShoppingCart className="h-4 w-4 text-primary" />}
           value="-"
-          description={<span className="text-green-500 font-semibold">-</span>}
+          description={<span className="text-gray-400 font-semibold">-</span>}
           bottomMarkup
         />
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
-          <SalesByHourChart
-            token={token}
-            startHour={startDateISO}
-            endHour={endDateISO}
-          />
+          <SalesByHourChart token={token} startHour={startDateISO} endHour={endDateISO} />
         </div>
-
-        <PaymentMethodPieChart
-          token={token}
-          startDate={startDateISO}
-          endDate={endDateISO}
-        />
+        <PaymentMethodPieChart token={token} startDate={startDateISO} endDate={endDateISO} />
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <ServiceSalesDonutChart
-          token={token}
-          startDate={startDateISO}
-          endDate={endDateISO}
-        />
-
-        <SalesTopInstructorChart
-          token={token}
-          startDate={startDateISO}
-          endDate={endDateISO}
-        />
+        <ServiceSalesDonutChart token={token} startDate={startDateISO} endDate={endDateISO} />
+        <SalesTopInstructorChart token={token} startDate={startDateISO} endDate={endDateISO} />
       </section>
     </div>
   );
