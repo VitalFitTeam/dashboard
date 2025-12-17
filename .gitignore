@@ -20,6 +20,14 @@
 # production
 /build
 
+# electron builder (IMPORTANTE: Evita subir el instalador .exe)
+/dist
+/release
+/*.exe
+/*.dmg
+/*.zip
+/*.app
+
 # misc
 .DS_Store
 *.pem
