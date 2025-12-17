@@ -49,7 +49,9 @@ export default function ProtectedRoute({
 
     const allowedPaths: string[] = [];
     
-    allowedPaths.push("/"); 
+    allowedPaths.push("/");       
+    allowedPaths.push("/settings/profile");  
+    allowedPaths.push("/settings"); 
 
     allowedSections.forEach((section) => {
       section.items.forEach((item) => {

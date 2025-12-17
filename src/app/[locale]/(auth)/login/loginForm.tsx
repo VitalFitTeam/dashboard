@@ -16,6 +16,7 @@ import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import LocaleSwitcher from "@/components/layout/localeSwitcher/LocaleSwitcher";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -68,86 +69,83 @@ export default function LoginForm() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div
-        className={`bg-white border border-gray-200 shadow-2xl rounded-2xl p-10 w-full max-w-md ${montserrat.className}`}
-      >
-         <div className="flex justify-center mb-4">
+return (
+  <div className={`relative bg-white border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl p-8 md:p-12 w-full max-w-md ${montserrat.className}`}>
+    <div className="absolute top-4 right-4">
+      <LocaleSwitcher />
+    </div>
+    <div className="flex flex-col items-center mb-10">
+      <div className="bg-gray-50 p-2 rounded-full mb-6 ring-8 ring-gray-50/50">
+        <Image
+          src="/logo/isotipo.png"
+          alt="VitalFit Logo"
+          width={100}
+          height={100}
+          className="rounded-full"
+          priority
+        />
+      </div>
+      
+      <h2 className="text-center text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
+        {t("title")}
+      </h2>
+      <p className="text-center text-gray-500 text-base max-w-[280px]">
+        {t("subtitle")}
+      </p>
+    </div>
 
-          <Image
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="space-y-4">
+        <InputField
+          label={t("emailLabel")}
+          type="email"
+          placeholder={t("emailPlaceholder")}
+          {...register("email")}
+          error={errors.email?.message}
+          className="hover:border-gray-300 transition-colors"
+        />
 
-            src="/logo/isotipo.png"
-
-            alt="VitalFit Logo"
-
-            width={120}
-
-            height={120}
-
-            className="rounded-full"
-
-          />
-
-        </div>
-        
-        <h2
-          className={`text-center text-[1.6rem] font-bold text-[${colors.complementary.black}] mb-2`}
-        >
-          {t("title")}
-        </h2>
-        <p className="text-center text-gray-600 text-sm mb-8">
-          {t("subtitle")}
-        </p>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <InputField
-            label={t("emailLabel")}
-            type="email"
-            placeholder={t("emailPlaceholder")}
-            {...register("email")}
-            error={errors.email?.message}
-          />
-
+        <div className="space-y-1">
           <InputField
             label={t("passwordLabel")}
             type="password"
             placeholder={t("passwordPlaceholder")}
             {...register("password")}
             error={errors.password?.message}
+            className="hover:border-gray-100 transition-colors"
           />
-
-          <div className="text-right text-[0.9rem] mb-6">
+          <div className="flex justify-end">
             <Link
               href="/forgotPassword"
               style={{ color: colors.primary }}
-              className="font-semibold hover:underline transition-colors duration-200"
+              className="text-sm font-semibold hover:opacity-80 transition-opacity duration-200"
             >
               {t("forgotPasswordLink")}
             </Link>
           </div>
-
-          <Button
-            type="submit"
-            fullWidth
-            isLoading={isLoading}
-            disabled={isLoading}
-            variant="primary"
-            size="lg"
-          >
-            {t("accessButton")}
-          </Button>
-        </form>
-
-        {errorMessage && (
-          <div
-            className="mb-10 p-4 text-center text-red-700 bg-red-50 border border-red-300 rounded-lg font-medium"
-            role="alert"
-          >
-            {errorMessage}
-          </div>
-        )}
+        </div>
       </div>
-    </div>
-  );
+
+      <Button
+        type="submit"
+        fullWidth
+        isLoading={isLoading}
+        disabled={isLoading}
+        variant="primary"
+        size="lg"
+        className="py-4 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-[0.98]"
+      >
+        {t("accessButton")}
+      </Button>
+    </form>
+    {errorMessage && (
+      <div
+        className="mt-6 p-4 text-center text-red-600 bg-red-50 border border-red-100 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-2"
+        role="alert"
+      >
+        {errorMessage}
+      </div>
+    )}
+  </div>
+);
 }
