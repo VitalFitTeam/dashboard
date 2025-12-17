@@ -10,7 +10,7 @@ const createWindow = async () => {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: "Byaku",
+    title: "VitalFit",
     // RUTA DEL ICONO: Debe estar en la carpeta public
     icon: path.join(__dirname, "public", "icon.ico"), 
     webPreferences: {

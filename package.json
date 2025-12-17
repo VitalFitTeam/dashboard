@@ -2,7 +2,7 @@
   "name": "dashboard",
   "version": "0.1.0",
   "private": true,
-  "main": "electron/main.js",
+  "main": "main.js",
   "description": "Aplicación de escritorio para gestión VitalFit",
   "author": "VitalFit Team",
   "scripts": {
