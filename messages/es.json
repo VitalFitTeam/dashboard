@@ -178,5 +178,17 @@
         }
       }
     }
+  },
+  "catalog": {
+    "services": {
+      "title": "SERVICIOS",
+      "add_button": "Agregar Servicio",
+      "stats": {
+        "total": "Total",
+        "featured": "Destacados",
+        "unit": "SERVICIOS"
+      }
+    }
   }
+  
 }

@@ -190,5 +190,16 @@
         }
       }
     }
+  },
+  "catalog": {
+    "services": {
+      "title": "SERVICES",
+      "add_button": "Add Service",
+      "stats": {
+        "total": "Total",
+        "featured": "Featured",
+        "unit": "SERVICES"
+      }
+    }
   }
 }
