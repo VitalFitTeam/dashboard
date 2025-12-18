@@ -2,200 +2,130 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import { StatCard } from "@/components/ui/StatCard";
 import { AlertTriangle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useTopBranches, useTotalActiveBranches, useTotalClients } from "@/hooks/useReports";
+import { BuildingOffice2Icon } from "@heroicons/react/24/solid";
+import { FranchisePerformanceItem } from "../analytics/FranchisePerformanceItem";
 
 export default function SuperAdminDashboard() {
+    const { token } = useAuth();
+
+    const { data: totalActiveBranch, isLoading: isLoadingBranches } = useTotalActiveBranches(token);
+    const { data: topActiveBranch, isLoading: isLoadingTopBranches } = useTopBranches(token);
+    const { data: totalClients, isLoading: isLoadingClients } = useTotalClients(token);
+
+    const normalizeTrend = (value?: string) =>
+        value?.toLowerCase() === "up" || value?.toLowerCase() === "down"
+            ? (value.toLowerCase() as "up" | "down")
+            : undefined;
+
     return (
         <div className="min-h-screen">
             <div className="max-w-7xl mx-auto">
-                <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <StatCard
-                            title="Ventas globales"
-                            value={
-                                <>
-                                <h3 className="ml-1.5 font-normal \0">
-                                    $ 1,250,000
-                                </h3>
-                                </>
-                            }
-                            icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
-                            bottomMarkup={false}
-                            description={
-                                <span className="text-green-600">+20.1% desde el mes pasado</span>
-                            }
-                        />
-                        <StatCard
-                            title="Franquicias Activas"
-                            value={
-                                <>
-                                <h3 className="ml-1.5 font-normal \0">
-                                    12
-                                </h3>
-                                </>
-                            }
-                            icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
-                            bottomMarkup={false}
-                        />
-                        <StatCard
-                            title="Usuarios Totales"
-                            value={
-                                <>
-                                <h3 className="ml-1.5 font-normal \0">
-                                    8,543
-                                </h3>
-                                </>
-                            }
-                            icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
-                            bottomMarkup={false}
-                        />
-                        <StatCard
-                            title="NPS Global"
-                            value={
-                                <>
-                                <h3 className="ml-1.5 font-normal \0">
-                                    8.63
-                                </h3>
-                                </>
-                            }
-                            icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
-                            bottomMarkup={false}
-                            description={
-                                <span className="text-red-600">-1.2% vs. mes anterior</span>
-                            }
-                        />
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <StatCard
+                        title="Ventas globales"
+                        value={<h3 className="ml-1.5 font-normal">$ 1,250,000</h3>}
+                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
+                        description={<span className="text-green-600">+20.1% vs mes pasado</span>}
+                    />
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold">
-                                    Rendimiento por Franquicia
-                                </CardTitle>
-                                <p className="text-sm text-gray-500">
-                                    Top 5 sedes por volumen de ventas
-                                </p>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between pb-4 border-b">
-                                        <div>
-                                            <p className="font-medium">Sede Central CDMX</p>
-                                            <p className="text-sm text-gray-500">Excelente</p>
-                                        </div>
-                                        <div className="text-right flex gap-2">
-                                            <p className="font-semibold">$450,000</p>
-                                            <p className="text-sm text-green-600">+12%</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between pb-4 border-b">
-                                        <div>
-                                            <p className="font-medium">Guadalajara Norte</p>
-                                            <p className="text-sm text-gray-500">Bueno</p>
-                                        </div>
-                                        <div className="text-right flex gap-2">
-                                            <p className="font-semibold">$320,000</p>
-                                            <p className="text-sm text-green-600">+8%</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between pb-4 border-b">
-                                        <div>
-                                            <p className="font-medium">Monterrey Sur</p>
-                                            <p className="text-sm text-gray-500">Excelente</p>
-                                        </div>
-                                        <div className="text-right flex gap-2">
-                                            <p className="font-semibold">$280,000</p>
-                                            <p className="text-sm text-green-600">+15%</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between pb-4 border-b">
-                                        <div>
-                                            <p className="font-medium">Querétaro Centro</p>
-                                            <p className="text-sm text-gray-500">Atención</p>
-                                        </div>
-                                        <div className="text-right flex gap-2">
-                                            <p className="font-semibold">$210,000</p>
-                                            <p className="text-sm text-red-600">-2%</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="font-medium">Puebla Angelópolis</p>
-                                            <p className="text-sm text-gray-500">Bueno</p>
-                                        </div>
-                                        <div className="text-right flex gap-2">
-                                            <p className="font-semibold">$180,000</p>
-                                            <p className="text-sm text-green-600">+5%</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                    <StatCard
+                        title="Sucursales Activas"
+                        value={isLoadingBranches ? "-" : totalActiveBranch}
+                        icon={<BuildingOffice2Icon className="h-5 w-5 text-gray-500" />}
+                    />
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold">
-                                    Alertas del Sistema
-                                </CardTitle>
-                                <p className="text-sm text-gray-500">
-                                    Notificaciones críticas de la red
-                                </p>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    <div className="flex items-start gap-3 p-3 rounded-lg border">
-                                        <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <StatCard
+                        title="Clientes totales"
+                        value={isLoadingClients ? "-" : totalClients}
+                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
+                    />
+
+                    <StatCard
+                        title="NPS Global"
+                        value={<h3 className="ml-1.5 font-normal">8.63</h3>}
+                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
+                        description={<span className="text-red-600">-1.2% vs mes anterior</span>}
+                    />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold">
+                                Rendimiento por Franquicia
+                            </CardTitle>
+                            <p className="text-sm text-gray-500">
+                                Top {isLoadingTopBranches ? "-" : topActiveBranch?.length ?? 0} sedes por volumen de ventas
+                            </p>
+                        </CardHeader>
+
+                        <CardContent>
+                            <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
+                                {topActiveBranch?.map((branch, index) => (
+                                    <FranchisePerformanceItem
+                                        key={branch.label}
+                                        name={branch.label}
+                                        status={branch.status}
+                                        revenue={branch.value}
+                                        growth={branch.percent_change}
+                                        trend={normalizeTrend(branch.trend)}
+                                        withBorder={index !== topActiveBranch.length - 1}
+                                    />
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold">
+                                Alertas del Sistema
+                            </CardTitle>
+                            <p className="text-sm text-gray-500">Notificaciones críticas</p>
+                        </CardHeader>
+
+                        <CardContent>
+                            <div className="space-y-4">
+                                {[
+                                    {
+                                        color: "text-yellow-600",
+                                        title: "Baja ocupación crítica",
+                                        desc: "Sede Querétaro - Clases < 30%",
+                                        time: "2h",
+                                    },
+                                    {
+                                        color: "text-red-600",
+                                        title: "Reporte financiero pendiente",
+                                        desc: "Sede Cancún - Cierre Mes",
+                                        time: "5h",
+                                    },
+                                    {
+                                        color: "text-blue-600",
+                                        title: "Nuevo franquiciado",
+                                        desc: "Proceso de onboarding iniciado",
+                                        time: "1d",
+                                    },
+                                    {
+                                        color: "text-blue-600",
+                                        title: "Error de sincronización",
+                                        desc: "API de pagos",
+                                        time: "1d",
+                                    },
+                                ].map((alert, i) => (
+                                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg border">
+                                        <AlertTriangle className={`h-5 w-5 ${alert.color} mt-0.5`} />
                                         <div className="flex-1">
-                                            <p className="font-medium text-sm">
-                                                Baja ocupación crítica
-                                            </p>
-                                            <p className="text-xs text-gray-600">
-                                                Sede Querétaro - Clases &lt; 30%
-                                            </p>
+                                            <p className="font-medium text-sm">{alert.title}</p>
+                                            <p className="text-xs text-gray-600">{alert.desc}</p>
                                         </div>
-                                        <span className="text-xs text-gray-500">2h</span>
+                                        <span className="text-xs text-gray-500">{alert.time}</span>
                                     </div>
-
-                                    <div className="flex items-start gap-3 p-3 rounded-lg border">
-                                        <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
-                                        <div className="flex-1">
-                                            <p className="font-medium text-sm">
-                                                Reporte financiero pendiente
-                                            </p>
-                                            <p className="text-xs text-gray-600">
-                                                Sede Cancún - Cierre Mes
-                                            </p>
-                                        </div>
-                                        <span className="text-xs text-gray-500">5h</span>
-                                    </div>
-
-                                    <div className="flex items-start gap-3 p-3 rounded-lg border">
-                                        <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
-                                        <div className="flex-1">
-                                            <p className="font-medium text-sm">
-                                                Nuevo franquiciado
-                                            </p>
-                                            <p className="text-xs text-gray-600">
-                                                Proceso de onboarding iniciado
-                                            </p>
-                                        </div>
-                                        <span className="text-xs text-gray-500">1d</span>
-                                    </div>
-
-                                    <div className="flex items-start gap-3 p-3 rounded-lg border">
-                                        <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
-                                        <div className="flex-1">
-                                            <p className="font-medium text-sm">
-                                                Error de sincronización
-                                            </p>
-                                            <p className="text-xs text-gray-600">API de pagos</p>
-                                        </div>
-                                        <span className="text-xs text-gray-500">1d</span>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     );
