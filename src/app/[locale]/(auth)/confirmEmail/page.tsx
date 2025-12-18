@@ -2,14 +2,18 @@
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import Image from "next/image";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { typography } from "@/styles/styles";
 import { Notification } from "@/components/ui/Notification";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { api } from "@/lib/sdk-config";
+import { createConfirmEmailSchema } from "@/lib/validation/confirmEmailSchema";
 
 function ConfirmEmailContent() {
+  const t = useTranslations("ConfirmEmailPage");
   const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [showAlert, setShowAlert] = useState(false);
@@ -80,7 +84,10 @@ function ConfirmEmailContent() {
     e.preventDefault();
 
     const verificationCode = code.join("").trim();
-    if (verificationCode.length !== 6) {
+    const confirmEmailSchema = createConfirmEmailSchema(t);
+    const result = confirmEmailSchema.safeParse({ code: verificationCode });
+
+    if (!result.success) {
       setIncorrectCode(true);
       setLoading(false);
       return;
@@ -132,11 +139,11 @@ function ConfirmEmailContent() {
       {showAlert && (
         <Notification
           variant="success"
-          title={flow === "recover" ? "Email confirmado" : "Registro exitoso"}
+          title={flow === "recover" ? t("successTitleValid") : t("successTitleRegister")}
           description={
             flow === "recover"
-              ? "Email confirmado correctamente"
-              : "¡Te has registrado exitosamente!"
+              ? t("successDescValid")
+              : t("successDescRegister")
           }
           onClose={handleSuccessClose}
         />
@@ -145,8 +152,8 @@ function ConfirmEmailContent() {
       {showAlertConfirmation && (
         <Notification
           variant="success"
-          title="Código de Confirmación Reenviado"
-          description="Se ha enviado un nuevo código a tu correo electrónico"
+          title={t("resendSuccessTitle")}
+          description={t("resendSuccessDesc")}
           onClose={handleConfirmationClose}
         />
       )}
@@ -164,9 +171,9 @@ function ConfirmEmailContent() {
                   className="object-contain"
                 />
               </div>
-              <h2 className={typography.h3}>CONFIRMA TU CORREO ELECTRÓNICO</h2>
+              <h2 className={typography.h3}>{t("title")}</h2>
               <p className="text-sm text-muted-foreground">
-                Introduce el código enviado a tu correo para confirmarlo
+                {t("instruction")}
               </p>
             </CardHeader>
 
@@ -196,7 +203,7 @@ function ConfirmEmailContent() {
                 {incorrectCode && (
                   <div className="text-center">
                     <p className="text-destructive text-sm font-medium">
-                      Error de Código
+                      {t("errorTitle")}
                     </p>
                   </div>
                 )}
@@ -206,7 +213,7 @@ function ConfirmEmailContent() {
                   className="w-full"
                   disabled={!isCodeComplete || loading}
                 >
-                  {loading ? "Verificando..." : "Verificar Correo"}
+                  {loading ? t("submitButtonProcessing") : t("submitButtonDefault")}
                 </Button>
               </form>
             </CardContent>
@@ -218,7 +225,7 @@ function ConfirmEmailContent() {
                 className="text-green-600 hover:text-green-700 font-medium"
                 disabled={loading}
               >
-                Reenviar Código
+                {t("resendButton")}
               </Button>
             </CardFooter>
           </Card>
@@ -229,11 +236,13 @@ function ConfirmEmailContent() {
 }
 
 export default function ConfirmEmail() {
+  const t = useTranslations("ConfirmEmailPage");
+
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p>Cargando...</p>
+          <p>{t("loadingFallback")}</p>
         </div>
       </div>
     }>

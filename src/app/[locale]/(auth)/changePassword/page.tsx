@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { typography } from "@/styles/styles";
-import { passwordSchema } from "@/lib/validation/passwordSchema";
+import { createPasswordSchema } from "@/lib/validation/passwordSchema";
 import { Notification } from "@/components/ui/Notification";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/Input";
 import { api } from "@/lib/sdk-config";
 import InputField from "@/components/ui/InputField";
 
 export default function ChangePassword() {
+  const t = useTranslations("ChangePasswordPage");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -47,6 +48,7 @@ export default function ChangePassword() {
     setIsLoading(true);
     setShowServerError({ visible: false, message: "" });
 
+    const passwordSchema = createPasswordSchema(t);
     const result = passwordSchema.safeParse(formData);
 
     if (!result.success) {
@@ -70,8 +72,7 @@ export default function ChangePassword() {
       if (!tokenCode) {
         setShowServerError({
           visible: true,
-          message:
-            "Error en obtener el código de confirmación. Por favor, solicita nuevamente el restablecimiento de contraseña.",
+          message: t("tokenError"),
         });
         setIsLoading(false);
         return;
@@ -90,7 +91,7 @@ export default function ChangePassword() {
       } else {
         setShowServerError({
           visible: true,
-          message: error.message || "Error al cambiar contraseña. Por favor, intenta nuevamente.",
+          message: error.message || t("genericError"),
         });
       }
     } finally {
@@ -110,7 +111,7 @@ export default function ChangePassword() {
       {showAlert && (
         <Notification
           variant="success"
-          description="¡Contraseña restablecida exitosamente!"
+          description={t("successDescription")}
           onClose={handleSuccessClose}
         />
       )}
@@ -118,8 +119,8 @@ export default function ChangePassword() {
       {showConnectionError && (
         <Notification
           variant="destructive"
-          title="Error de Conexión"
-          description="No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde."
+          title={t("connectionErrorTitle")}
+          description={t("connectionErrorDescription")}
           onClose={() => setShowConnectionError(false)}
         />
       )}
@@ -127,7 +128,7 @@ export default function ChangePassword() {
       {showServerError.visible && (
         <Notification
           variant="destructive"
-          title="Error al Restablecer Contraseña"
+          title={t("serverErrorTitle")}
           description={showServerError.message}
           onClose={() => setShowServerError({ visible: false, message: "" })}
         />
@@ -145,10 +146,10 @@ export default function ChangePassword() {
                 className="object-contain"
               />
             </div>
-            <h2 className={typography.h3}>CAMBIA TU CONTRASEÑA</h2>
+            <h2 className={typography.h3}>{t("title")}</h2>
             <div className="text-left">
               <span className="text-sm text-muted-foreground">
-                Ingrese su nueva contraseña.
+                {t("instruction")}
               </span>
             </div>
           </CardHeader>
@@ -161,9 +162,9 @@ export default function ChangePassword() {
 
 
                   <InputField
-                    label="Nueva Contraseña"
+                    label={t("newPasswordLabel")}
                     type="password"
-                    placeholder="Nueva contraseña"
+                    placeholder={t("newPasswordPlaceholder")}
                     value={formData.password}
                     onChange={handleInputChange("password")}
                     className="bg-background"
@@ -179,9 +180,9 @@ export default function ChangePassword() {
                 {/* Campo Confirmar Contraseña */}
                 <div className="space-y-2">
                   <InputField
-                    label="Confirmar Contraseña"
+                    label={t("confirmPasswordLabel")}
                     type="password"
-                    placeholder="Confirmar contraseña"
+                    placeholder={t("confirmPasswordPlaceholder")}
                     value={formData.confirmPassword}
                     onChange={handleInputChange("confirmPassword")}
                     className="bg-background"
@@ -200,7 +201,7 @@ export default function ChangePassword() {
                 className="w-full"
                 disabled={isLoading}
               >
-                {isLoading ? "Procesando..." : "Continuar"}
+                {isLoading ? t("submitButtonProcessing") : t("submitButtonDefault")}
               </Button>
             </form>
           </CardContent>
@@ -208,14 +209,14 @@ export default function ChangePassword() {
           <CardFooter className="flex justify-center">
             <div className="text-center text-sm">
               <span className="text-muted-foreground">
-                ¿Recuerdas tu Contraseña?{" "}
+                {t("footerText")}{" "}
               </span>
               <Button
                 variant="link"
                 className="p-0 h-auto font-medium"
                 onClick={() => router.replace("/login")}
               >
-                Iniciar Sesión
+                {t("footerLink")}
               </Button>
             </div>
           </CardFooter>

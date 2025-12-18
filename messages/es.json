@@ -12,6 +12,60 @@
     "errorUnexpected": "Ocurrió un error inesperado. Inténtalo de nuevo.",
     "errorGeneric": "Fallo en el inicio de sesión."
   },
+  "ForgotPasswordPage": {
+    "title": "RECUPERAR CONTRASEÑA",
+    "instruction": "Ingresa el correo electrónico asociado a la cuenta para recuperar tu contraseña",
+    "emailLabel": "Correo Electrónico",
+    "emailPlaceholder": "Ingresa tu correo electrónico",
+    "submitButtonProcessing": "Procesando...",
+    "submitButtonDefault": "Enviar Código",
+    "footerText": "¿Recuerdas tu contraseña?",
+    "footerLink": "Iniciar Sesión",
+    "notificationTitle": "Correo registrado",
+    "notificationDescription": "Si tu correo coincide con una cuenta registrada, recibirás un código de verificación.",
+    "emailInvalid": "Correo inválido"
+  },
+  "ConfirmEmailPage": {
+    "title": "CONFIRMA TU CORREO ELECTRÓNICO",
+    "instruction": "Introduce el código enviado a tu correo para confirmarlo",
+    "errorTitle": "Error de Código",
+    "submitButtonProcessing": "Verificando...",
+    "submitButtonDefault": "Verificar Correo",
+    "resendButton": "Reenviar Código",
+    "successTitleValid": "Email confirmado",
+    "successTitleRegister": "Registro exitoso",
+    "successDescValid": "Email confirmado correctamente",
+    "successDescRegister": "¡Te has registrado exitosamente!",
+    "resendSuccessTitle": "Código de Confirmación Reenviado",
+    "resendSuccessDesc": "Se ha enviado un nuevo código a tu correo electrónico",
+    "loadingFallback": "Cargando...",
+    "codeLengthError": "El código debe tener 6 caracteres"
+  },
+  "ChangePasswordPage": {
+    "title": "CAMBIA TU CONTRASEÑA",
+    "instruction": "Ingrese su nueva contraseña.",
+    "newPasswordLabel": "Nueva Contraseña",
+    "newPasswordPlaceholder": "Nueva contraseña",
+    "confirmPasswordLabel": "Confirmar Contraseña",
+    "confirmPasswordPlaceholder": "Confirmar contraseña",
+    "submitButtonProcessing": "Procesando...",
+    "submitButtonDefault": "Continuar",
+    "footerText": "¿Recuerdas tu Contraseña?",
+    "footerLink": "Iniciar Sesión",
+    "successDescription": "¡Contraseña restablecida exitosamente!",
+    "connectionErrorTitle": "Error de Conexión",
+    "connectionErrorDescription": "No se pudo conectar con el servidor. Por favor, inténtalo de nuevo más tarde.",
+    "serverErrorTitle": "Error al Restablecer Contraseña",
+    "tokenError": "Error en obtener el código de confirmación. Por favor, solicita nuevamente el restablecimiento de contraseña.",
+    "genericError": "Error al cambiar contraseña. Por favor, intenta nuevamente.",
+    "passwordRequired": "La contraseña es obligatoria",
+    "passwordMinLength": "La contraseña debe tener al menos 8 caracteres",
+    "passwordUppercase": "La contraseña debe contener al menos una mayúscula",
+    "passwordLowercase": "La contraseña debe contener al menos una minúscula",
+    "passwordNumber": "La contraseña debe contener al menos un número",
+    "confirmPasswordRequired": "Confirmar contraseña es obligatorio",
+    "passwordsMustMatch": "Las contraseñas no coinciden"
+  },
   "DashboardHome": {
     "loading": "Cargando panel...",
     "welcomeTitle": "Bienvenido, {firstName}",
@@ -20,7 +74,7 @@
     "viewReportsButton": "Ver reportes financieros",
     "unassignedRoleMessage": "No tienes un panel de control asignado para tu rol. Contacta al Administrador."
   },
- "Menu": {
+  "Menu": {
     "General": "General",
     "Administracion": "Administración",
     "Operacion": "Operación",
@@ -36,7 +90,6 @@
     "UsuariosSistema": "Usuarios del Sistema",
     "RolesPermisos": "Roles y Permisos",
     "AuditoriaAccesos": "Auditoría de Accesos",
-    
     "CatalogoSistema": "Catálogo de Sistema",
     "TiposMembresia": "Tipos de Membresía",
     "ServiciosClases": "Servicios y Clases",
@@ -82,8 +135,8 @@
   "LocaleSwitcher": {
     "label": "Cambiar idioma",
     "locale": "{locale, select, es {Español} en {English} other {{locale}}}"
-},
-"Navbar": {
+  },
+  "Navbar": {
     "searchPlaceholder": "Buscar...",
     "notifications": "Notificaciones",
     "appearance": "Apariencia",
@@ -97,5 +150,4 @@
     "logout": "Cerrar sesión",
     "language": "Idioma"
   }
-
 }
