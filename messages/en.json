@@ -30,47 +30,47 @@
     "Instructor": "Instructor",
     "Analytics": "Analytics",
     "Recepcion": "Reception",
-    
+
     "Dashboard": "Dashboard",
     "Sucursales": "Branches",
-    
+
     "UsuariosRoles": "Users and Roles",
     "UsuariosSistema": "System Users",
     "RolesPermisos": "Roles and Permissions",
     "AuditoriaAccesos": "Access Audit",
-    
+
     "CatalogoSistema": "System Catalog",
     "TiposMembresia": "Membership Types",
     "ServiciosClases": "Services and Classes",
     "Instructores": "Instructors",
     "InventarioEquipamiento": "Equipment Inventory",
     "PromocionesPaquetes": "Promotions and Packages",
-    
+
     "ClientesSocios": "Clients and Members",
     "RegistroConsulta": "Registration and Inquiry",
     "SegmentacionScoring": "Segmentation and Scoring",
     "QuejasSugerencias": "Complaints and Suggestions",
-    
+
     "CalendarioAsistencia": "Calendar and Attendance",
     "CalendarioClases": "Class Calendar",
     "GestionReservas": "Booking Management",
     "TrackingAsistencia": "Attendance Tracking",
-    
+
     "FacturacionElectronica": "Electronic Invoicing",
     "MembresiasControl": "Memberships and Control",
     "GestionMembresias": "Membership Management",
     "AlertasVencimiento": "Expiration Alerts",
     "ReportesFinancieros": "Financial Reports",
-    
+
     "GestionBanners": "Banner Management",
     "MerchandisingCrosssell": "Merchandising (Cross-sell)",
-    
+
     "AjustesSistema": "System Settings",
     "DocumentosFiscales": "Tax Documents",
     "MetodosPagoGlobal": "Global Payment Methods",
     "CausalesCancelacion": "Cancellation Reasons",
     "PoliticasContrasena": "Password Policies",
-    
+
     "DashboardOperativo": "Operational Dashboard",
     "ConfiguracionLocal": "Local Configuration",
     "InformacionHorarios": "Information and Hours",
@@ -85,7 +85,10 @@
     "MisReportes": "My Reports",
     "ReportesDetallados": "Detailed Reports",
     "TendenciasCohortes": "Trends and Cohorts",
-    "CheckinCheckout": "Check-in/Check-out"
+    "ReporteClientes": "Customer Report",
+    "ReporteFinanciero": "Financial Report",
+    "CheckinCheckout": "Check-in/Check-out",
+    "ReporteVentas": "Sales Report"
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -107,5 +110,96 @@
     "notifications": "Notifications",
     "logout": "Log out",
     "language": "Language"
+  },
+  "analytics": {
+    "sales": {
+      "title": "Sales Report",
+      "stats": {
+        "total_sales": "Total Sales",
+        "membership_sales": "Membership Sales",
+        "transactions": "Transactions",
+        "comparison": "{amount} vs. Last Month"
+      },
+      "filters": {
+        "all_branches": "All branches",
+        "ranges": {
+          "today": "Today",
+          "this_week": "This week",
+          "this_month": "This month",
+          "last_month": "Last month"
+        }
+      },
+      "charts": {
+        "by_hour": {
+          "title": "Sales by Hour",
+          "error": "Error loading sales by hour.",
+          "description": "Sales from {start} to {end}.",
+          "series_label": "Total Sales",
+          "footer_change": "↑ 5.2% vs. previous period",
+          "footer_text": "Data grouped by sale closing time."
+        },
+        "payment_method": {
+          "title": "Sales by Payment Method",
+          "description": "Customer payment preferences",
+          "error": "Error loading payment methods.",
+          "no_data": "No data",
+          "footer_total": "Total sold: ${amount}",
+          "config_label": "Sales"
+        },
+        "category_sales": {
+          "title": "Sales by Service",
+          "description": "Revenue distribution by type",
+          "error": "Error loading service data.",
+          "footer_total": "Total categories: {count}",
+          "growth_label": "{value}% growth"
+        },
+        "top_instructors": {
+          "title": "Sales by Lead Instructor",
+          "description": "Showing top selling instructors from {start} to {end}.",
+          "error": "Error loading instructor data.",
+          "no_data": "No instructor sales data for this period.",
+          "config": {
+            "value": "Total Sales",
+            "label": "Instructor"
+          }
+        }
+      }
+    }
+  },
+  "dashboards": {
+    "super_admin": {
+      "stats": {
+        "global_sales": "Global Sales",
+        "active_branches": "Active Branches",
+        "total_clients": "Total Clients",
+        "global_nps": "Global NPS",
+        "vs_last_month": "{value} vs. last month"
+      },
+      "performance": {
+        "title": "Franchise Performance",
+        "subtitle": "Top {count} branches by sales volume"
+      },
+      "alerts": {
+        "title": "System Alerts",
+        "subtitle": "Critical notifications",
+        "items": {
+          "low_occupancy": "Critical low occupancy",
+          "pending_finance": "Pending financial report",
+          "new_franchisee": "New franchisee",
+          "sync_error": "Synchronization error"
+        }
+      }
+    }
+  },
+  "catalog": {
+    "services": {
+      "title": "SERVICES",
+      "add_button": "Add Service",
+      "stats": {
+        "total": "Total",
+        "featured": "Featured",
+        "unit": "SERVICES"
+      }
+    }
   }
 }

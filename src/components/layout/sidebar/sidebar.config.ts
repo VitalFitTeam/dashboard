@@ -83,8 +83,14 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
             { label: "AlertasVencimiento", href: "/finance/expiration-alerts" },
           ],
         },
-        { label: "ReportesFinancieros", icon: ChartBarIcon, href: "/finance/reports" },
-        
+        { label: "ReportesFinancieros",
+          icon: ChartBarIcon, 
+          subitems: [
+            { label: "ReporteClientes", href: "/analytics/reports/clients" },
+            { label: "ReporteFinanciero", href: "/analytics/reports/financial" },
+            { label: "ReporteVentas", href: "/analytics/reports/sales" },
+          ],
+        },
       ],
     },
     {
