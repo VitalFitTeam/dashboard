@@ -46,7 +46,6 @@ function createMenu(win) {
               const urlObj = new URL(currentURL);
               win.loadURL(`${urlObj.origin}/es/settings/profile`);
             } catch (e) {
-              // Fallback si la URL no es válida
               win.loadURL(
                 dev ? "http://localhost:3000/es/settings/profile" : currentURL
               );
@@ -59,12 +58,12 @@ function createMenu(win) {
     },
     {
       label: "Editar",
-      role: "editMenu", // Habilita Copiar, Pegar, etc.
+      role: "editMenu", 
     },
   ];
 
   const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu); // Aplica el menú a la aplicación
+  Menu.setApplicationMenu(menu); 
 }
 
 const createWindow = async () => {
@@ -72,26 +71,24 @@ const createWindow = async () => {
     width: 1200,
     height: 800,
     title: "VitalFit",
-    icon: path.join(__dirname, "public", "icon.ico"), // Asegúrate que el archivo existe
+    icon: path.join(__dirname, "public", "icon.ico"), 
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: false, // Evita bloqueos de CORS en local
-      preload: path.join(__dirname, "preload.js"), // Puente de seguridad
+      webSecurity: false,
+      preload: path.join(__dirname, "preload.js"), 
     },
-    autoHideMenuBar: false, // Asegura que no se oculte
-    menubarVisibilityState: "visible", // Fuerza a que sea visible desde el inicio
+    autoHideMenuBar: false,
+    menubarVisibilityState: "visible", 
   });
 
-  // Inicializar el Menú
   createMenu(win);
 
   if (dev) {
-    // MODO DESARROLLO: Conecta al servidor de Next.js en ejecución
     win.loadURL("http://localhost:3000/es/login");
     win.webContents.openDevTools();
   } else {
-    // MODO PRODUCCIÓN (El EXE): Levanta servidor Next.js embebido
+
     try {
       const nextApp = next({
         dev: false,
@@ -108,7 +105,6 @@ const createWindow = async () => {
         handle(req, res);
       });
 
-      // Escuchar en puerto aleatorio disponible para evitar conflictos
       server.listen(0, "localhost", () => {
         const port = server.address().port;
         win.loadURL(`http://localhost:${port}/es/login`);
@@ -119,11 +115,8 @@ const createWindow = async () => {
   }
 };
 
-/**
- * Comunicación IPC para los botones de la interfaz
- */
 ipcMain.on("nav-back", (event) => {
-  const webContents = event.sender; // Detecta automáticamente qué ventana envió el mensaje
+  const webContents = event.sender; 
   if (webContents.canGoBack()) {
     webContents.goBack();
   }
@@ -136,7 +129,6 @@ ipcMain.on("nav-forward", (event) => {
   }
 });
 
-// Ciclo de vida de la aplicación
 app.on("ready", createWindow);
 
 app.on("window-all-closed", () => {
