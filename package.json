@@ -9,7 +9,8 @@
     "dev": "concurrently \"npm run next:dev\" \"wait-on tcp:3000 && electron .\"",
     "next:dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "dist": "npm run build && electron-builder",
+    "dist": "npm run clean && npm run build && electron-builder",
+    "clean": "rimraf dist",
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
@@ -25,18 +26,30 @@
       "output": "dist"
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
       "icon": "public/icon.ico"
     },
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "runAfterFinish": true
+    },
     "files": [
-    "package.json",
-    "main.js",
-    "public/**/*",
-    ".next/**/*",
-    "!node_modules/.cache/**/*",
-    "!node_modules/typescript/**/*",
-    "!node_modules/@types/**/*"
-  ]
+      "package.json",
+      "main.js",
+      "public/**/*",
+      ".next/**/*",
+      "!node_modules/.cache/**/*",
+      "!node_modules/typescript/**/*",
+      "!node_modules/@types/**/*",
+      "!dist/**/*"
+    ]
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.19",

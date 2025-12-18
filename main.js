@@ -1,43 +1,104 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain } = require("electron"); // Añadido Menu
 const path = require("path");
 const http = require("http");
 const next = require("next");
 
-// Detectar si es desarrollo
 const dev = !app.isPackaged;
+
+function createMenu(win) {
+  const template = [
+    {
+      label: "Navegación",
+      submenu: [
+        {
+          label: "Atrás",
+          accelerator: "Alt+Left",
+          click: () => {
+            if (win.webContents.canGoBack()) {
+              win.webContents.goBack();
+            }
+          },
+        },
+        {
+          label: "Adelante",
+          accelerator: "Alt+Right",
+          click: () => {
+            if (win.webContents.canGoForward()) {
+              win.webContents.goForward();
+            }
+          },
+        },
+        { type: "separator" },
+        {
+          label: "Recargar",
+          role: "reload",
+        },
+      ],
+    },
+    {
+      label: "VitalFit",
+      submenu: [
+        {
+          label: "Mi Perfil",
+          click: () => {
+            const currentURL = win.webContents.getURL();
+            try {
+              const urlObj = new URL(currentURL);
+              win.loadURL(`${urlObj.origin}/es/settings/profile`);
+            } catch (e) {
+              // Fallback si la URL no es válida
+              win.loadURL(
+                dev ? "http://localhost:3000/es/settings/profile" : currentURL
+              );
+            }
+          },
+        },
+        { type: "separator" },
+        { label: "Salir", role: "quit" },
+      ],
+    },
+    {
+      label: "Editar",
+      role: "editMenu", // Habilita Copiar, Pegar, etc.
+    },
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu); // Aplica el menú a la aplicación
+}
 
 const createWindow = async () => {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
     title: "VitalFit",
-    // RUTA DEL ICONO: Debe estar en la carpeta public
-    icon: path.join(__dirname, "public", "icon.ico"), 
+    icon: path.join(__dirname, "public", "icon.ico"), // Asegúrate que el archivo existe
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: false, // Útil para evitar problemas de CORS locales
+      webSecurity: false, // Evita bloqueos de CORS en local
+      preload: path.join(__dirname, "preload.js"), // Puente de seguridad
     },
-    autoHideMenuBar: true, // Oculta la barra pero permite Alt para mostrarla
+    autoHideMenuBar: false, // Asegura que no se oculte
+    menubarVisibilityState: "visible", // Fuerza a que sea visible desde el inicio
   });
 
-  // ESTA LÍNEA ELIMINA COMPLETAMENTE EL MENÚ (File, Edit...)
-  win.setMenu(null);
+  // Inicializar el Menú
+  createMenu(win);
 
   if (dev) {
-    // MODO DESARROLLO
+    // MODO DESARROLLO: Conecta al servidor de Next.js en ejecución
     win.loadURL("http://localhost:3000/es/login");
     win.webContents.openDevTools();
   } else {
-    // MODO PRODUCCIÓN (El EXE)
+    // MODO PRODUCCIÓN (El EXE): Levanta servidor Next.js embebido
     try {
-      // Iniciamos Next.js apuntando a la carpeta actual del recurso
       const nextApp = next({
         dev: false,
         dir: app.getAppPath(),
         conf: {
-          distDir: ".next", // Carpeta de build de Next
-        }
+          distDir: ".next",
+        },
       });
 
       const handle = nextApp.getRequestHandler();
@@ -47,21 +108,39 @@ const createWindow = async () => {
         handle(req, res);
       });
 
-      // Escuchar en puerto 0 (aleatorio libre)
+      // Escuchar en puerto aleatorio disponible para evitar conflictos
       server.listen(0, "localhost", () => {
         const port = server.address().port;
-        // Cargamos la URL local del servidor que acabamos de crear
-        win.loadURL(`http://localhost:${port}/es/login`); // Cambia /login si tu home es distinta
+        win.loadURL(`http://localhost:${port}/es/login`);
       });
-
     } catch (err) {
-      console.error("Error iniciando servidor Next:", err);
+      console.error("Error iniciando servidor Next en producción:", err);
     }
   }
 };
 
+/**
+ * Comunicación IPC para los botones de la interfaz
+ */
+ipcMain.on("nav-back", (event) => {
+  const webContents = event.sender; // Detecta automáticamente qué ventana envió el mensaje
+  if (webContents.canGoBack()) {
+    webContents.goBack();
+  }
+});
+
+ipcMain.on("nav-forward", (event) => {
+  const webContents = event.sender;
+  if (webContents.canGoForward()) {
+    webContents.goForward();
+  }
+});
+
+// Ciclo de vida de la aplicación
 app.on("ready", createWindow);
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {app.quit();}
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });
