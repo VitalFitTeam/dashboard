@@ -96,7 +96,7 @@ export default function ServiceDetail() {
           <Button variant="outline" onClick={() => router.back()}>
             {t("buttons.cancel")}
           </Button>
-          <Button variant="primary" onClick={() => router.push(`/catalog/services/${serviceId}/edit`)}>
+          <Button variant="default" onClick={() => router.push(`/catalog/services/${serviceId}/edit`)}>
             Modificar
           </Button>
         </div>

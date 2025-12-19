@@ -161,7 +161,7 @@ export default function InstructorForm({
                 const first = raw[0];
                 selectedValue =
                   first?.specialty_id ??
-                  first?.category_id ?? // Ahora busca category_id
+                  first?.category_id ??
                   String(first ?? "");
               } else if (typeof raw === "string") {
                 selectedValue = raw;

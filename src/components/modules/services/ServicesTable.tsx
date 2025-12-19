@@ -1,18 +1,18 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
-import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
+import { MagnifyingGlassIcon, StarIcon } from "@heroicons/react/24/outline";
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
-import { StarIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { ServiceFullDetail, ServiceCategoryInfo } from "@vitalfit/sdk";
 import { useRouter } from "next/navigation";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -20,315 +20,179 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface StatsData {
-  total: number;
-  featured: number;
-}
+import { RowActions } from "@/components/ui/table/RowActions";
 
 interface ServicesTableProps {
-  onServiceUpdate?: (stats: StatsData) => void;
+  data: ServiceFullDetail[];
+  categories: ServiceCategoryInfo[];
+  isLoading: boolean;
+  onReload: () => void;
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  filters: { search: string; category: string };
+  onFilterChange: (newFilters: { search?: string; category?: string }) => void;
 }
 
-export default function ServicesTable({ onServiceUpdate }: ServicesTableProps) {
-  const [data, setData] = useState<ServiceFullDetail[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchInput, setSearchInput] = useState("");
-  const [categories, setCategories] = useState<ServiceCategoryInfo[]>([]);
-  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const { token } = useAuth();
+export default function ServicesTable({
+  data,
+  categories,
+  isLoading,
+  onReload,
+  page,
+  totalPages,
+  onPageChange,
+  filters,
+  onFilterChange,
+}: ServicesTableProps) {
+  const t = useTranslations("catalog.services.table");
   const router = useRouter();
+  const { token } = useAuth();
 
-  const [filters, setFilters] = useState({
-    search: "",
-    category: "",
-  });
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
-  const [stats, setStats] = useState<StatsData>({ total: 0, featured: 0 });
-
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    description: "",
-    title: "",
-  });
-
-  const loadServices = async () => {
-    if (!token) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await api.products.getServices(token, { page });
-      const services = response.data || [];
-      setData(services);
-
-      const totalItems = services.length;
-      setTotalPages(Math.ceil(totalItems / pageSize));
-    } catch (error) {
-      console.error("Error cargando servicios:", error);
-      setNotification({
-        isVisible: true,
-        description: "Error al cargar los servicios",
-        title: "Error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCategories = async () => {
-    if (!token) {
-      return;
-    }
-
-    try {
-      const response = await api.products.getCategories(token);
-      setCategories(response.data || []);
-    } catch (error) {
-      console.error("Error cargando categorías:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (token) {
-      loadServices();
-      loadCategories();
-    }
-  }, [token]);
-
-  useEffect(() => {
-    if (token) {
-      loadServices();
-    }
-  }, [page, token]);
-
-  // Calcular stats cuando cambien los datos o filtros
-  useEffect(() => {
-    const filteredData = getFilteredData();
-    const newStats = {
-      total: filteredData.length,
-      featured: filteredData.filter((service) => service.is_featured).length,
-    };
-
-    setStats(newStats);
-
-    if (onServiceUpdate) {
-      onServiceUpdate(newStats);
-    }
-  }, [data, filters]);
+  const [searchInput, setSearchInput] = useState(filters.search);
+  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (searchInput.trim() === "") {
-        if (filters.search !== "") {
-          setFilters((prev) => ({ ...prev, search: "" }));
-        }
-      } else if (searchInput !== filters.search) {
-        setFilters((prev) => ({ ...prev, search: searchInput }));
+      if (searchInput !== filters.search) {
+        onFilterChange({ search: searchInput });
       }
     }, 500);
-
     return () => clearTimeout(timeout);
-  }, [searchInput, filters.search]);
+  }, [searchInput, filters.search, onFilterChange]);
 
-  const handleCategoryChange = (categoryId: string) => {
-    const newCategory = categoryId === "all" ? "" : categoryId;
-    setFilters((prev) => ({ ...prev, category: newCategory }));
-  };
+  useEffect(() => {
+    setSearchInput(filters.search);
+  }, [filters.search]);
 
-  const getFilteredData = () => {
-    let filtered = data;
-
-    if (filters.search) {
-      filtered = filtered.filter((service) =>
-        service.name.toLowerCase().includes(filters.search.toLowerCase()),
-      );
-    }
-
-    if (filters.category) {
-      filtered = filtered.filter(
-        (service) => service.service_category?.category_id === filters.category,
-      );
-    }
-
-    return filtered;
-  };
-
-  const filteredData = getFilteredData();
-
-  const handleView = (row: ServiceFullDetail) => {
-    router.push(`/services/${row.service_id}`);
-  };
-
-  const handleEdit = (row: ServiceFullDetail) => {
-    router.push(`/services/${row.service_id}/edit`);
-  };
-
-  const handleDeleteService = async (service: ServiceFullDetail) => {
+  const handleDeleteService = async (serviceId: string) => {
     if (!token) {
-      setDeleteRowId(null);
       return;
     }
+
+    const toastId = toast.loading(t("actions.delete") + "...");
     try {
-      await api.products.deleteService(service.service_id, token);
-
-      setNotification({
-        isVisible: true,
-        description: "Servicio borrado exitosamente",
-        title: "Éxito",
-      });
-
-      setDeleteRowId(null);
-
-      setTimeout(() => {
-        loadServices();
-      }, 1000);
+      await api.products.deleteService(serviceId, token);
+      toast.success(t("actions.delete") + " OK", { id: toastId });
+      onReload();
     } catch (error) {
-      console.error("Error al eliminar el servicio:", error);
+      console.error(error);
+      toast.error(t("actions.delete") + " Error", { id: toastId });
+    } finally {
       setDeleteRowId(null);
-
-      setNotification({
-        isVisible: true,
-        description: "Error al borrar el servicio",
-        title: "Error",
-      });
     }
   };
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
-  };
-
-  const formatDuration = (duration: number) => {
-    return `${duration}min`;
-  };
-
-  const getFeaturedIcon = (isFeatured: boolean) => {
-    return isFeatured ? (
-      <StarIcon className="h-5 w-5 fill-black text-black" />
-    ) : (
-      <StarIcon className="h-5 w-5 text-black" />
-    );
-  };
-
-  const getCategoryName = (serviceCategory: ServiceCategoryInfo) => {
-    return serviceCategory?.name || "Sin categoría";
-  };
-
-  const visibleColumns: Column<ServiceFullDetail>[] = [
+  const columns: Column<ServiceFullDetail>[] = [
     {
-      header: "Nombre",
+      header: t("columns.name"),
       accessor: "name",
-      filterType: "text",
-    },
-    {
-      header: "Categoría",
-      accessor: "service_category",
-      render: (category) => (
-        <div className="max-w-[150px] truncate">
-          {getCategoryName(category as ServiceCategoryInfo)}
-        </div>
-      ),
-    },
-    {
-      header: "Duración",
-      accessor: "duration_minutes",
-      render: (duration) => (
-        <span className="text-sm font-medium">
-          {formatDuration(duration as number)}
+      render: (value) => (
+        <span className="font-medium text-slate-900">
+          {String(value)}
         </span>
       ),
     },
     {
-      header: "Destacado",
+      header: t("columns.category"),
+      accessor: "service_category",
+      render: (category) => {
+        const cat = category as ServiceCategoryInfo;
+        return (
+          <span className="text-slate-500">
+            {cat?.name || t("noCategory")}
+          </span>
+        );
+      },
+    },
+    {
+      header: t("columns.duration"),
+      accessor: "duration_minutes",
+      render: (duration) => (
+        <span className="text-sm">
+          {Number(duration)} min
+        </span>
+      ),
+    },
+    {
+      header: t("columns.featured"),
       accessor: "is_featured",
       render: (isFeatured) => (
         <div className="flex justify-center">
-          {getFeaturedIcon(isFeatured as boolean)}
+          <StarIcon
+            className={`h-5 w-5 ${
+              Boolean(isFeatured) 
+                ? "fill-yellow-400 text-yellow-400" 
+                : "text-slate-300"
+            }`}
+          />
         </div>
       ),
     },
   ];
 
-  if (loading && data.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-lg">Cargando servicios...</div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4 flex-1 min-w-[300px]">
-          <div className="relative w-full sm:w-[250px]">
+          <div className="relative w-full sm:w-[300px]">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Filtrar por nombre"
+              placeholder={t("placeholder")}
               className="pl-9"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
 
-          <div className="w-full sm:w-[200px]">
-            <Select
-              value={filters.category || "all"}
-              onValueChange={handleCategoryChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Todas las categorías" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px] overflow-y-auto">
-                <SelectItem value="all">Todas las categorías</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem
-                    key={category.category_id}
-                    value={category.category_id}
-                  >
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select
+            value={filters.category || "all"}
+            onValueChange={(val) => onFilterChange({ category: val })}
+          >
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder={t("columns.category")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("allCategories")}</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.category_id} value={cat.name}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={loadServices} disabled={loading}>
-            <Download className="mr-2 h-4 w-4" />
-            {loading ? "Descargando..." : "Descargar"}
-          </Button>
-        </div>
+        <Button variant="outline" onClick={() => toast.info(t("downloading"))}>
+          <Download className="mr-2 h-4 w-4" />
+          {t("download")}
+        </Button>
       </div>
 
       <DataTable<ServiceFullDetail>
-        key={`services-${filteredData.length}-${filters.category}-${filters.search}`}
-        columns={visibleColumns}
-        data={filteredData}
-        onPageChange={handlePageChange}
+        columns={columns}
+        data={data}
+        isLoading={isLoading}
+        onPageChange={onPageChange}
+        page={page}
         totalPages={totalPages}
         rowIdKey="service_id"
         actions={(row) => (
-          <div className="flex flex-col items-center justify-center w-full">
+          <div className="flex items-center justify-center">
             <RowActions
               actions={[
-                { label: "Ver", icon: Eye, onClick: () => handleView(row) },
                 {
-                  label: "Modificar",
-                  icon: Pencil,
-                  onClick: () => handleEdit(row),
+                  label: t("actions.view"),
+                  icon: Eye,
+                  onClick: () => router.push(`/catalog/services/${row.service_id}`)
                 },
                 {
-                  label: "Eliminar",
+                  label: t("actions.edit"),
+                  icon: Pencil,
+                  onClick: () => router.push(`/catalog/services/${row.service_id}/edit`)
+                },
+                {
+                  label: t("actions.delete"),
                   icon: Trash2,
                   onClick: () => setDeleteRowId(row.service_id),
                   variant: "danger",
@@ -336,32 +200,20 @@ export default function ServicesTable({ onServiceUpdate }: ServicesTableProps) {
                 },
               ]}
             />
-            {deleteRowId === row.service_id && (
-              <GeneralAlertDialog
-                open={deleteRowId === row.service_id}
-                onOpenChange={(open) => !open && setDeleteRowId(null)}
-                trigger={null}
-                title="Confirmar eliminación"
-                description="¿Estás seguro de que deseas eliminar este servicio? Esta acción no se puede deshacer."
-                actionText="Eliminar"
-                cancelText="Cancelar"
-                onAction={() => handleDeleteService(row)}
-                actionVariant="destructive"
-              />
-            )}
+
+            <GeneralAlertDialog
+              open={deleteRowId === row.service_id}
+              onOpenChange={(open) => !open && setDeleteRowId(null)}
+              title={t("deleteDialog.title")}
+              description={t("deleteDialog.description").replace("{name}", row.name)}
+              actionText={t("deleteDialog.confirm")}
+              cancelText={t("deleteDialog.cancel")}
+              onAction={() => handleDeleteService(row.service_id)}
+              actionVariant="destructive"
+            />
           </div>
         )}
       />
-
-      {notification.isVisible && (
-        <Notification
-          title={notification.title}
-          description={notification.description}
-          onClose={hideNotification}
-          autoCloseDuration={3000}
-          variant={notification.title === "Error" ? "destructive" : "success"}
-        />
-      )}
     </>
   );
 }

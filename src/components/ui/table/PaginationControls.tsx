@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Pagination,
   PaginationContent,
@@ -21,68 +23,69 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
 }) => {
   const delta = 2;
 
+  if (totalPages <= 0) {
+    return null;
+  }
+
   const getPageNumbers = () => {
     const range: number[] = [];
-    for (
-      let i = Math.max(2, page - delta);
-      i <= Math.min(totalPages - 1, page + delta);
-      i++
-    ) {
+    const start = Math.max(2, page - delta);
+    const end = Math.min(totalPages - 1, page + delta);
+
+    for (let i = start; i <= end; i++) {
       range.push(i);
     }
     return range;
   };
+
+  const handlePageClick = (e: React.MouseEvent, targetPage: number) => {
+    e.preventDefault();
+    if (targetPage !== page && targetPage >= 1 && targetPage <= totalPages) {
+      onPageChange(targetPage);
+    }
+  };
+
   return (
     <Pagination>
       <PaginationContent>
-        {/* Botón Anterior */}
-        {page !== 1 && (
-          <PaginationItem>
-            <PaginationPrevious
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                if (page > 1) {
-                  onPageChange(page - 1);
-                }
-              }}
-            />
-          </PaginationItem>
-        )}
-        {/* Primera página */}
+        <PaginationItem>
+          <PaginationPrevious
+            href="#"
+            onClick={(e) => handlePageClick(e, page - 1)}
+            className={
+              page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+            }
+          />
+        </PaginationItem>
+
         <PaginationItem>
           <PaginationLink
             href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              onPageChange(1);
-            }}
-            aria-current={page === 1 ? "page" : undefined}
+            onClick={(e) => handlePageClick(e, 1)}
+            isActive={page === 1}
           >
             1
           </PaginationLink>
         </PaginationItem>
+
         {page - delta > 2 && (
           <PaginationItem>
             <PaginationEllipsis />
           </PaginationItem>
         )}
 
-        {/* Páginas intermedias */}
         {getPageNumbers().map((num) => (
           <PaginationItem key={num}>
             <PaginationLink
               href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                onPageChange(num);
-              }}
-              aria-current={page === num ? "page" : undefined}
+              onClick={(e) => handlePageClick(e, num)}
+              isActive={page === num}
             >
               {num}
             </PaginationLink>
           </PaginationItem>
         ))}
+
         {page + delta < totalPages - 1 && (
           <PaginationItem>
             <PaginationEllipsis />
@@ -93,11 +96,8 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
           <PaginationItem>
             <PaginationLink
               href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                onPageChange(totalPages);
-              }}
-              aria-current={page === totalPages ? "page" : undefined}
+              onClick={(e) => handlePageClick(e, totalPages)}
+              isActive={page === totalPages}
             >
               {totalPages}
             </PaginationLink>
@@ -109,10 +109,17 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
             href="#"
             onClick={(e) => {
               e.preventDefault();
+              const nextPage = page + 1;
               if (page < totalPages) {
-                onPageChange(page + 1);
+                console.log(`Petición de cambio: de ${page} a ${nextPage}`);
+                onPageChange(nextPage);
               }
             }}
+            className={
+              page >= totalPages
+                ? "pointer-events-none opacity-50"
+                : "cursor-pointer"
+            }
           />
         </PaginationItem>
       </PaginationContent>

@@ -1,26 +1,26 @@
 import { z } from "zod";
 
-export const passwordSchema = z
-  .object({
+export const createPasswordSchema = (t: (key: string) => string) =>
+  z.object({
     password: z
       .string()
-      .min(1, { message: "La contraseña es obligatoria" })
-      .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
+      .min(1, { message: t("passwordRequired") })
+      .min(8, { message: t("passwordMinLength") })
       .regex(/[A-Z]/, {
-        message: "La contraseña debe contener al menos una mayúscula",
+        message: t("passwordUppercase"),
       })
       .regex(/[a-z]/, {
-        message: "La contraseña debe contener al menos una minúscula",
+        message: t("passwordLowercase"),
       })
       .regex(/[0-9]/, {
-        message: "La contraseña debe contener al menos un número",
+        message: t("passwordNumber"),
       }),
 
     confirmPassword: z
       .string()
-      .min(1, { message: "Confirmar contraseña es obligatorio" }),
+      .min(1, { message: t("confirmPasswordRequired") }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirmPassword"],
-  });
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("passwordsMustMatch"),
+      path: ["confirmPassword"],
+    });

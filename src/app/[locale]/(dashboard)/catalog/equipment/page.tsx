@@ -1,77 +1,43 @@
 "use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import EquipmentTable from "./EquipmentTable";
-import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/sdk-config";
-import { Equipment as EquipmentType, EquipmentCategory } from "@vitalfit/sdk";
-import { useRouter } from "next/navigation";
+import { EquipmentCategory } from "@vitalfit/sdk";
+
+import EquipmentTable from "./EquipmentTable";
+import { useEquipment } from "@/hooks/equipment/useEquipment";
 
 export default function Equipment() {
   const router = useRouter();
   const { token } = useAuth();
-
-  const [equipmentData, setEquipmentData] = useState<EquipmentType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
-
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{ search?: string; category?: EquipmentCategory }>({
     search: "",
-    category: "all",
+    category: undefined,
   });
 
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-
-  const loadEquipmentData = useCallback(async () => {
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const categoryParam =
-        filters.category !== "all"
-          ? (filters.category as EquipmentCategory)
-          : undefined;
-
-      const result = await api.equipment.getEquipment(token, {
-        limit: pageSize,
-        page,
-        search: filters.search || undefined,
-        category: categoryParam,
-      });
-
-      console.log("Datos página", page, ":", result.data?.length, "registros");
-
-      setEquipmentData(result.data || []);
-      setTotalItems(result.total || 0);
-    } catch (error) {
-      console.error("Error cargando equipamiento:", error);
-      setEquipmentData([]);
-      setTotalItems(0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token, page, pageSize, filters]);
-
-  useEffect(() => {
-    loadEquipmentData();
-  }, [loadEquipmentData]);
+  const { 
+    equipmentData, 
+    isLoading, 
+    totalPages, 
+    pageSize, 
+    refresh 
+  } = useEquipment(token, filters, page);
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
   };
 
-  const handleFilterChange = (newFilters: {
-    search?: string;
-    category?: string;
-  }) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
+  const handleFilterChange = (newFilters: { search?: string; category?: EquipmentCategory }) => {
+    setFilters(newFilters);
+    setPage(1); 
   };
 
   return (
@@ -87,11 +53,15 @@ export default function Equipment() {
       </PageHeader>
 
       {isLoading ? (
-        <div className="text-center p-10">Cargando equipamiento...</div>
+        <div className="text-center p-10 py-20">
+          <span className="animate-pulse text-muted-foreground font-medium">
+            Cargando equipamiento...
+          </span>
+        </div>
       ) : (
         <EquipmentTable
           data={equipmentData}
-          onReload={loadEquipmentData}
+          onReload={refresh}
           page={page}
           pageSize={pageSize}
           onPageChange={handlePageChange}

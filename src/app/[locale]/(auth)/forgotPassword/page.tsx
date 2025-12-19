@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { typography } from "@/styles/styles";
 import { Notification } from "@/components/ui/Notification";
-import { recoverSchema } from "@/lib/validation/recoverSchema";
+import { createRecoverSchema } from "@/lib/validation/recoverSchema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/Input";
 import { api } from "@/lib/sdk-config";
 
 export default function ForgotPassword() {
+  const t = useTranslations("ForgotPasswordPage");
   const [formData, setFormData] = useState({ usuario: "" });
   const [error, setError] = useState<{ usuario?: string[] }>({});
   const [showAlert, setShowAlert] = useState(false);
@@ -22,6 +24,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     setIsLoading(true);
 
+    const recoverSchema = createRecoverSchema(t);
     const result = recoverSchema.safeParse(formData);
 
     if (!result.success) {
@@ -66,8 +69,8 @@ export default function ForgotPassword() {
       {showAlert && (
         <Notification
           variant="success"
-          title="Correo registrado"
-          description="Si tu correo coincide con una cuenta registrada, recibirás un código de verificación."
+          title={t("notificationTitle")}
+          description={t("notificationDescription")}
           onClose={handleSuccessClose}
         />
       )}
@@ -85,10 +88,10 @@ export default function ForgotPassword() {
                   className="object-contain"
                 />
               </div>
-              <h2 className={typography.h3}>RECUPERAR CONTRASEÑA</h2>
+              <h2 className={typography.h3}>{t("title")}</h2>
               <div className="text-center">
                 <span className="text-sm text-muted-foreground">
-                  Ingresa el correo electrónico asociado a la cuenta para recuperar tu contraseña
+                  {t("instruction")}
                 </span>
               </div>
             </CardHeader>
@@ -101,13 +104,13 @@ export default function ForgotPassword() {
                       htmlFor="usuario"
                       className="text-sm font-medium leading-none"
                     >
-                      Correo Electrónico
+                      {t("emailLabel")}
                     </label>
                     <Input
                       id="usuario"
                       name="usuario"
                       type="email"
-                      placeholder="Ingresa tu correo electrónico"
+                      placeholder={t("emailPlaceholder")}
                       value={formData.usuario}
                       onChange={handleInputChange}
                       className="bg-background"
@@ -126,7 +129,7 @@ export default function ForgotPassword() {
                   className="w-full"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Procesando..." : "Enviar Código"}
+                  {isLoading ? t("submitButtonProcessing") : t("submitButtonDefault")}
                 </Button>
               </form>
             </CardContent>
@@ -134,14 +137,14 @@ export default function ForgotPassword() {
             <CardFooter className="flex justify-center">
               <div className="text-center text-sm">
                 <span className="text-muted-foreground">
-                  ¿Recuerdas tu contraseña?{" "}
+                  {t("footerText")}{" "}
                 </span>
                 <Button
                   variant="link"
                   className="p-0 h-auto font-medium"
                   onClick={() => router.replace("/login")}
                 >
-                  Iniciar Sesión
+                  {t("footerLink")}
                 </Button>
               </div>
             </CardFooter>
