@@ -8,10 +8,7 @@ import {
   flexRender,
   type ColumnDef,
   type SortingState,
-  ColumnFiltersState,
   VisibilityState,
-  getFilteredRowModel,
-  getPaginationRowModel,
 } from "@tanstack/react-table";
 
 import { PaginationControls } from "./PaginationControls";
@@ -25,7 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from "../table";
-import { Input } from "../Input";
 
 export type Column<T> = {
   header: string;
@@ -48,25 +44,25 @@ export type DataTableProps<T> = {
   enableRowSelection?: boolean;
   rowIdKey?: keyof T;
   onFilterChange?: (key: string, value: string) => void;
+  isLoading?: boolean;
 };
 
 export function DataTable<T extends object>({
   columns,
   data,
   actions,
-  page = 1, // Valor por defecto
-  pageSize = 10, // Valor por defecto
+  page = 1,
+  pageSize = 10,
   onPageChange,
-  totalPages = 1, // Valor por defecto
+  totalPages = 1,
   enableRowSelection = true,
+  isLoading = false,
   rowIdKey = "id" as keyof T,
-  onFilterChange,
 }: DataTableProps<T>) {
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [filters, setFilters] = React.useState<Record<string, string>>({});
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 
   const columnDefs = React.useMemo<ColumnDef<T>[]>(() => {
     const cols: ColumnDef<T>[] = [];
@@ -76,10 +72,9 @@ export function DataTable<T extends object>({
         id: "select",
         header: ({ table }) => (
           <Checkbox
-            checked={table.getIsAllRowsSelected()}
-            onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
-            aria-label="Seleccionar todas las filas"
-            className="translate-y-[2px]"
+            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Seleccionar todos"
           />
         ),
         cell: ({ row }) => (
@@ -87,11 +82,9 @@ export function DataTable<T extends object>({
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
             aria-label="Seleccionar fila"
-            className="translate-y-[2px]"
           />
         ),
         enableSorting: false,
-        enableHiding: false,
       });
     }
 
@@ -99,25 +92,18 @@ export function DataTable<T extends object>({
       ...columns.map((col) => ({
         accessorKey: col.accessor as string,
         header: col.header,
-        cell: ({ getValue, row }: { getValue: any; row: any }) => {
-          const value = getValue() as T[keyof T];
-          const originalRow = row.original;
-          return col.render
-            ? col.render(value, originalRow)
-            : String(value ?? "");
+        cell: ({ getValue, row }: any) => {
+          const value = getValue();
+          return col.render ? col.render(value, row.original) : String(value ?? "");
         },
-      })),
+      }))
     );
 
     if (actions) {
       cols.push({
         id: "actions",
-        header: "Acciones",
-        cell: ({ row }) => (
-          <div className="flex justify-center gap-2">
-            {actions(row.original)}
-          </div>
-        ),
+        header: () => <div className="text-center">Acciones</div>,
+        cell: ({ row }) => actions(row.original),
       });
     }
 
@@ -127,116 +113,64 @@ export function DataTable<T extends object>({
   const table = useReactTable({
     data,
     columns: columnDefs,
-    state: { sorting, rowSelection, columnVisibility },
+    state: {
+      sorting,
+      rowSelection,
+      columnVisibility,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: pageSize,
+      },
+    },
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getRowId: (row) => String(row[rowIdKey]),
     manualPagination: true,
+    pageCount: totalPages,
   });
 
-  const currentPage = page;
-  const currentPageSize = pageSize;
-
-  const handlePageChange = (newPage: number) => {
-    if (onPageChange) {
-      onPageChange(newPage);
-    }
-  };
-
-  React.useEffect(() => {
-    table.setPageIndex(page - 1);
-  }, [table, page]);
-
-  const renderFilters = () => (
-    <div className="flex flex-wrap gap-4 mb-4">
-      {columns
-        .filter((col) => col.filterable)
-        .map((col) => (
-          <div key={String(col.accessor)} className="flex flex-col">
-            <label className="text-sm font-medium">{col.header}</label>
-
-            {col.filterType === "select" && col.filterOptions ? (
-              <select
-                value={filters[col.accessor as string] || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFilters((prev) => ({
-                    ...prev,
-                    [col.accessor as string]: value,
-                  }));
-                  onFilterChange?.(col.accessor as string, value);
-                }}
-                className="border rounded p-2 text-sm"
-              >
-                <option value="">Todos</option>
-                {col.filterOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <Input
-                placeholder={`Buscar ${col.header}`}
-                value={filters[col.accessor as string] || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFilters((prev) => ({
-                    ...prev,
-                    [col.accessor as string]: value,
-                  }));
-                  onFilterChange?.(col.accessor as string, value);
-                }}
-              />
-            )}
-          </div>
-        ))}
-    </div>
-  );
-
   return (
-    <div className="w-full">
-      {renderFilters()}
-
-      <div className="overflow-hidden rounded-md border">
+    <div className="w-full space-y-4">
+      <div className="overflow-hidden rounded-md border border-gray-200 bg-white">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
+                    className={header.column.getCanSort() ? "cursor-pointer select-none" : ""}
                     onClick={header.column.getToggleSortingHandler()}
-                    className="cursor-pointer select-none"
                   >
-                    {header.isPlaceholder ? null : (
-                      <span className="inline-flex items-center">
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {header.column.getIsSorted() === "asc" && (
-                          <ArrowUp className="ml-1 h-4 w-4" />
-                        )}
-                        {header.column.getIsSorted() === "desc" && (
-                          <ArrowDown className="ml-1 h-4 w-4" />
-                        )}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{
+                        asc: <ArrowUp className="h-3 w-3" />,
+                        desc: <ArrowDown className="h-3 w-3" />,
+                      }[header.column.getIsSorted() as string] ?? null}
+                    </div>
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {data.length ? (
+         <TableBody>
+            {/* VALIDACIÓN DE CARGA */}
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columnDefs.length} className="h-24 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+                    <span>Cargando datos...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -246,8 +180,8 @@ export function DataTable<T extends object>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length + (actions ? 1 : 0) + (enableRowSelection ? 1 : 0)} className="h-24 text-center">
-                  No hay datos disponibles
+                <TableCell colSpan={columnDefs.length} className="h-24 text-center">
+                  No se encontraron resultados.
                 </TableCell>
               </TableRow>
             )}
@@ -255,11 +189,18 @@ export function DataTable<T extends object>({
         </Table>
       </div>
 
-      <PaginationControls
-        page={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+      <div className="flex items-center justify-between px-2">
+        <div className="text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} de{" "}
+          {data.length} fila(s) seleccionadas.
+        </div>
+
+        <PaginationControls
+          page={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange ?? (() => { })}
+        />
+      </div>
     </div>
   );
 }

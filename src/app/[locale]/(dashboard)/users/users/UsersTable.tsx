@@ -1,10 +1,7 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { api } from "@/lib/sdk-config";
+
+import { useState, useEffect } from "react";
 import { DataTable, Column } from "@/components/ui/table/DataTable";
-import { Eye, Pencil, Trash2 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,240 +11,190 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
-import { SelectValue } from "@radix-ui/react-select";
 import { MagnifyingGlassIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner";
+import { User } from "@vitalfit/sdk";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/sdk-config";
 
-export type StaffUserTable = {
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  role_id: string;
-  role_name: string;
-  email: string;
-  identity_document: string;
-  is_validated: boolean;
+
+const ROLE_LABELS: Record<string, string> = {
+  super_admin: "Super Admin",
+  branch_admin: "Admin de Sede",
+  instructor: "Instructor",
+  accountant: "Contador",
+  data_analyst: "Analista de Datos",
+  recepcionist: "Recepcionista",
 };
 
-export default function UsersTable() {
-  const [users, setUsers] = useState<StaffUserTable[]>([]);
-  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [inputFilters, setInputFilters] = useState<{ search?: string; status?: string }>({});
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    description: "",
-    title: "",
-  });
+export type UserTableProps = {
+  data: User[];
+  isLoading: boolean;
+  onReload: () => void;
+  filters: { search?: string; role?: string };
+  onFilterChange: (filters: { search?: string; role?: string }) => void;
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+};
 
+export default function UsersTable({
+  data,
+  isLoading,
+  onReload,
+  filters,
+  onFilterChange,
+  page,
+  totalPages,
+  onPageChange,
+}: UserTableProps) {
   const router = useRouter();
   const { token } = useAuth();
 
-  const fetchUsers = useCallback(async () => {
-    if (!token) {
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await api.user.getStaffUsers({ limit: 100 }, token);
-      const mapped = (response.data as any[]).map((u) => ({
-        user_id: u.user_id,
-        first_name: u.first_name,
-        last_name: u.last_name,
-        role_id: u.role_id,
-        role_name: u.role_name,
-        email: u.email,
-        identity_document: u.identity_document,
-        is_validated: u.is_validated,
-      })) as StaffUserTable[];
-      setUsers(mapped);
-    } catch (error) {
-      console.error("Error al cargar usuarios:", error);
-      setNotification({
-        isVisible: true,
-        description: "Error al cargar usuarios",
-        title: "Error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+  const [searchInput, setSearchInput] = useState(filters.search || "");
+  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  const handleView = (user: StaffUserTable) => router.replace(`/users/${user.user_id}`);
-  const handleEdit = (user: StaffUserTable) => router.replace(`/users/${user.user_id}/edit`);
+    const timeout = setTimeout(() => {
+      if (searchInput !== (filters.search || "")) {
+        onFilterChange({ ...filters, search: searchInput });
+      }
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
 
   const handleDeleteUser = async () => {
-    if (!token || !deleteRowId) { return; }
-
-    const userToDelete = users.find(u => u.user_id === deleteRowId);
-    if (!userToDelete) { return; }
+    if (!token || !deleteRowId) {
+      return;
+    }
+    const toastId = toast.loading("Eliminando usuario...");
 
     try {
-      await api.user.deleteUser(userToDelete.user_id, token);
-
-      setNotification({
-        isVisible: true,
-        description: "Usuario eliminado exitosamente",
-        title: "Éxito",
+      await api.user.deleteUser(deleteRowId, token);
+      toast.success("Usuario eliminado", {
+        id: toastId,
+        description: "El registro ha sido borrado correctamente.",
       });
-
-      setDeleteRowId(null);
-
-      setTimeout(() => {
-        fetchUsers();
-      }, 1000);
-
+      onReload();
     } catch (error) {
-      console.error("Error eliminando usuario:", error);
-      setNotification({
-        isVisible: true,
-        description: "Error al eliminar el usuario",
-        title: "Error",
+      toast.error("Error", {
+        id: toastId,
+        description: "No se pudo eliminar el usuario.",
       });
+    } finally {
       setDeleteRowId(null);
     }
   };
 
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
-  };
-
-  const columns: Column<StaffUserTable>[] = [
+  const columns: Column<User>[] = [
     {
       header: "Nombre",
       accessor: "first_name",
       render: (_, row) => `${row.first_name} ${row.last_name}`,
     },
     { header: "Email", accessor: "email" },
-    { header: "Rol", accessor: "role_name", render: (value) => value },
+    { 
+      header: "Rol", 
+      accessor: "role_name" as keyof User,
+      render: (value) => (
+        <Badge variant="secondary" className="font-normal">
+          {ROLE_LABELS[String(value)] || String(value)}
+        </Badge>
+      )
+    },
     {
       header: "Status",
       accessor: "is_validated",
       render: (value) =>
         value ? (
-          <Badge variant="outline" className="border text-green-700 border-green-300">
-            Activo
-          </Badge>
+          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">Activo</Badge>
         ) : (
-          <Badge variant="outline" className="border text-red-700 border-red-300">
-            Inactivo
-          </Badge>
+          <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50">Inactivo</Badge>
         ),
     },
   ];
 
-  // aplicar filtros
-  const filteredUsers = users.filter((u) => {
-    const searchMatch = inputFilters.search
-      ? `${u.first_name} ${u.last_name} ${u.identity_document}`
-        .toLowerCase()
-        .includes(inputFilters.search.toLowerCase())
-      : true;
-
-    const statusMatch = inputFilters.status
-      ? inputFilters.status === "active"
-        ? u.is_validated
-        : inputFilters.status === "inactive"
-          ? !u.is_validated
-          : true
-      : true;
-
-    return searchMatch && statusMatch;
-  });
-
   return (
-    <div>
-      {loading && users.length === 0 && <p>Cargando usuarios...</p>}
-      <div className="flex items-center justify-between mb-4">
-
-        <div className="flex items-center gap-4">
-          <div className="relative w-full sm:w-[250px]">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative w-full sm:w-[350px]">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nombre o RIF"
+              placeholder="Buscar por nombre, apellido o email..."
               className="pl-9"
-              value={inputFilters.search || ""}
-              onChange={(e) =>
-                setInputFilters((prev) => ({ ...prev, search: e.target.value }))
-              }
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
 
           <Select
-            value={inputFilters.status || ""}
+            value={filters.role || "all"}
             onValueChange={(value) =>
-              setInputFilters((prev) => ({ ...prev, status: value }))
+              onFilterChange({ ...filters, role: value === "all" ? "" : value })
             }
           >
-            <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <SelectValue placeholder="Estado" />
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Filtrar por Rol" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Activa</SelectItem>
-              <SelectItem value="inactive">Inactiva</SelectItem>
+              <SelectItem value="all">Todos los Roles</SelectItem>
+              <SelectItem value="super_admin">Super Admin</SelectItem>
+              <SelectItem value="branch_admin">Admin de Sede</SelectItem>
+              <SelectItem value="instructor">Instructor</SelectItem>
+              <SelectItem value="accountant">Contador</SelectItem>
+              <SelectItem value="data_analyst">Analista de Datos</SelectItem>
+              <SelectItem value="recepcionist">Recepcionista</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <Button variant="outline" className="ml-auto">
+        <Button variant="outline" onClick={() => toast.info("Función de exportación en desarrollo")}>
           <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
-          Download CSV
+          Exportar CSV
         </Button>
       </div>
 
-      <DataTable<StaffUserTable>
+      <DataTable<User>
+        key={`users-table-page-${page}`}
         columns={columns}
-        data={filteredUsers}
-        pageSize={10}
+        data={data}
+        isLoading={isLoading}
         rowIdKey="user_id"
+        page={page}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
         actions={(row) => (
-          <div className="flex flex-col items-center justify-center w-full">
-            <RowActions
-              actions={[
-                { label: "Ver Detalles", icon: Eye, onClick: () => handleView(row) },
-                { label: "Modificar", icon: Pencil, onClick: () => handleEdit(row) },
-                {
-                  label: "Eliminar",
-                  icon: Trash2,
-                  onClick: () => setDeleteRowId(row.user_id),
-                  variant: "danger",
-                  separatorBefore: true,
-                },
-              ]}
-            />
-          </div>
+          <RowActions
+            actions={[
+              { label: "Ver Detalles", icon: Eye, onClick: () => router.push(`/users/${row.user_id}`) },
+              { label: "Modificar", icon: Pencil, onClick: () => router.push(`/users/${row.user_id}/edit`) },
+              {
+                label: "Eliminar",
+                icon: Trash2,
+                onClick: () => setDeleteRowId(row.user_id),
+                variant: "danger",
+                separatorBefore: true,
+              },
+            ]}
+          />
         )}
       />
 
       <GeneralAlertDialog
         open={!!deleteRowId}
-        onOpenChange={(open) => {
-          if (!open) { setDeleteRowId(null); }
-        }}
-        trigger={null}
-        title="Confirmar Eliminación"
-        description="¿Estás seguro de que deseas eliminar este Usuario? Esta acción no se puede deshacer."
+        onOpenChange={(open) => !open && setDeleteRowId(null)}
+        title="¿Estás seguro?"
+        description="Esta acción eliminará al usuario permanentemente."
         actionText="Eliminar"
-        cancelText="Cancelar"
         onAction={handleDeleteUser}
         actionVariant="destructive"
       />
-
-      {notification.isVisible && (
-        <Notification
-          title={notification.title}
-          description={notification.description}
-          onClose={hideNotification}
-          autoCloseDuration={3000}
-          variant={notification.title === "Error" ? "destructive" : "success"}
-        />
-      )}
     </div>
   );
 }

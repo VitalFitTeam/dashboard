@@ -1,115 +1,78 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { InstructorDataList } from "@vitalfit/sdk";
 import { useRouter } from "next/navigation";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner"; 
 
-interface instructorsTableProps {
+interface InstructorsTableProps {
   data: InstructorDataList[];
+  isLoading: boolean; 
   onReload: () => void;
   page: number;
-  pageSize: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  filters: { search: string; category: string };
-  onFilterChange: (filters: { search?: string; category?: string }) => void;
+  filters: { search: string; sort: string }; // Actualizado según tu API
+  onFilterChange: (filters: { search?: string; sort?: string }) => void;
 }
 
-export default function instructorsTable({
+export default function InstructorsTable({
   data,
+  isLoading,
   onReload,
   page,
-  pageSize,
   totalPages,
   onPageChange,
   filters,
   onFilterChange,
-}: instructorsTableProps) {
+}: InstructorsTableProps) {
   const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const { token } = useAuth();
   const router = useRouter();
 
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    description: "",
-    title: "",
-  });
-
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (searchInput.trim() === "") {
-        if (filters.search !== "") {
-          onFilterChange({ search: "" });
-        }
-      } else if (searchInput !== filters.search) {
-        onFilterChange({ search: searchInput });
+      if (searchInput !== filters.search) {
+        onFilterChange({ ...filters, search: searchInput });
       }
     }, 500);
-
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  const handleView = (row: InstructorDataList) => {
-    router.push(`/instructors/${row.instructor_id}`);
-  };
-
-  const handleEdit = (row: InstructorDataList) => {
-    router.push(`/instructors/${row.instructor_id}/edit`);
-  };
-
-  const handleDeleteinstructors = async (instructors: InstructorDataList) => {
+  const handleDeleteInstructor = async (instructor: InstructorDataList) => {
     if (!token) {
-      console.error("sesion no autenticada");
-      setDeleteRowId(null);
       return;
     }
+
+    const toastId = toast.loading("Eliminando instructor...");
     try {
-      await api.instructor.deleteInstructor(instructors.instructor_id, token);
-
-      setNotification({
-        isVisible: true,
-        description: "Registro borrado exitosamente",
-        title: "Éxito",
-      });
-
-      setDeleteRowId(null);
-
-      setTimeout(() => {
-        onReload();
-      }, 1000);
+      await api.instructor.deleteInstructor(instructor.instructor_id, token);
+      toast.success("Instructor eliminado", { id: toastId });
+      onReload();
     } catch (error) {
-      console.error("Error al eliminar el Instructor:", error);
+      console.error("Error al eliminar:", error);
+      toast.error("Error al borrar el registro", { id: toastId });
+    } finally {
       setDeleteRowId(null);
-
-      setNotification({
-        isVisible: true,
-        description: "Error al borrar el registro",
-        title: "Error",
-      });
     }
   };
 
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
-  };
-
-  const visibleColumns: Column<InstructorDataList>[] = [
+  const columns: Column<InstructorDataList>[] = [
     {
       header: "Nombre",
       accessor: "first_name",
-      filterType: "text",
       render: (value, row) => (
-        <div>
+        <div className="font-medium text-slate-900">
           {value} {row.last_name}
         </div>
       ),
@@ -117,27 +80,29 @@ export default function instructorsTable({
     {
       header: "Email",
       accessor: "email",
-      filterType: "text",
       render: (email) => (
-        <div className="hover:text-blue-800 cursor-pointer">{email}</div>
+        <div className="text-slate-500 hover:text-orange-400 transition-colors cursor-default">
+          {email}
+        </div>
       ),
     },
-  ];
-
-  const invisibleColumns: Column<InstructorDataList>[] = [
-    { header: "Fecha de nacimiento", accessor: "birth_date" },
-    { header: "Género", accessor: "gender" },
-    { header: "Biografía", accessor: "biography" },
-    { header: "Foto", accessor: "profile_picture_url" },
+    {
+      header: "Documento",
+      accessor: "identity_document",
+    },
+    {
+      header: "Teléfono",
+      accessor: "phone",
+    },
   ];
 
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="relative w-full sm:w-[250px]">
+        <div className="relative w-full sm:w-[350px]">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Filtrar por nombre, email o documento"
+            placeholder="Buscar por nombre, apellido o email..."
             className="pl-9"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -145,29 +110,35 @@ export default function instructorsTable({
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => toast.info("Exportación iniciada...")}>
             <Download className="mr-2 h-4 w-4" />
-            Descarga
+            Descargar CSV
           </Button>
         </div>
       </div>
 
       <DataTable<InstructorDataList>
-        key={`page-${page}-${data.length}`}
-        columns={visibleColumns}
+        key={`instructor-page-${page}`} 
+        columns={columns}
         data={data}
+        isLoading={isLoading}
         onPageChange={onPageChange}
+        page={page}
         totalPages={totalPages}
         rowIdKey="instructor_id"
         actions={(row) => (
           <div className="flex flex-col items-center justify-center w-full">
             <RowActions
               actions={[
-                { label: "Ver", icon: Eye, onClick: () => handleView(row) },
+                { 
+                  label: "Ver Detalles", 
+                  icon: Eye, 
+                  onClick: () => router.push(`/instructors/${row.instructor_id}`) 
+                },
                 {
                   label: "Modificar",
                   icon: Pencil,
-                  onClick: () => handleEdit(row),
+                  onClick: () => router.push(`/instructors/${row.instructor_id}/edit`),
                 },
                 {
                   label: "Eliminar",
@@ -178,32 +149,18 @@ export default function instructorsTable({
                 },
               ]}
             />
-            {deleteRowId === row.instructor_id && (
-              <GeneralAlertDialog
-                open={deleteRowId === row.instructor_id}
-                onOpenChange={(open) => !open && setDeleteRowId(null)}
-                trigger={null}
-                title="Confirmar eliminación"
-                description="¿Estás seguro de que deseas eliminar este Instructor? Esta acción no se puede deshacer."
-                actionText="Eliminar"
-                cancelText="Cancelar"
-                onAction={() => handleDeleteinstructors(row)}
-                actionVariant="destructive"
-              />
-            )}
+            <GeneralAlertDialog
+              open={deleteRowId === row.instructor_id}
+              onOpenChange={(open) => !open && setDeleteRowId(null)}
+              title="¿Estás seguro?"
+              description={`Se eliminará permanentemente al instructor ${row.first_name} ${row.last_name}.`}
+              actionText="Eliminar"
+              onAction={() => handleDeleteInstructor(row)}
+              actionVariant="destructive"
+            />
           </div>
         )}
       />
-
-      {notification.isVisible && (
-        <Notification
-          title={notification.title}
-          description={notification.description}
-          onClose={hideNotification}
-          autoCloseDuration={3000}
-          variant={notification.title === "Error" ? "destructive" : "success"}
-        />
-      )}
     </>
   );
 }
