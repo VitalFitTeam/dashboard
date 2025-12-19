@@ -5,9 +5,10 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import ServicesTable from "./ServicesTable";
+
 import { StatCard } from "@/components/ui/StatCard";
 import { useRouter } from "@/i18n/navigation";
+import ServicesTable from "@/components/modules/services/ServicesTable";
 
 interface StatsData {
   total: number;
@@ -24,17 +25,16 @@ export default function ServicesPage() {
   const router = useRouter();
   const [statsData, setStatsData] = useState<StatsData>(initialStatsData);
 
-  // Configuramos las cards dentro del componente para usar 't'
   const statCardsConfig = useMemo(() => [
     {
       title: t("stats.total"),
       valueKey: "total" as const,
-      fontColor: "text-black-600",
+      fontColor: "text-green-600",
     },
     {
       title: t("stats.featured"),
       valueKey: "featured" as const,
-      fontColor: "text-yellow-600",
+      fontColor: "text-orange-600",
     },
   ], [t]);
 
@@ -64,7 +64,7 @@ export default function ServicesPage() {
       <PageHeader title={t("title")}>
         <Button
           className="bg-transparent text-black border border-gray-100"
-          onClick={() => router.push("/services/new")}
+          onClick={() => router.push("/catalog/services/new")}
         >
           <PlusIcon className="h-5 w-5 mr-2" />
           {t("add_button")}

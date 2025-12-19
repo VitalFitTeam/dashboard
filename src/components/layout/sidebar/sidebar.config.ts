@@ -39,11 +39,13 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
           icon: UsersIcon,
           subitems: [
             { label: "TiposMembresia",  href: "/catalog/memberships" },
-            { label: "RolesPermisos", href: "/users/roles" },
-            { label: "ServiciosClases",  href: "/catalog/services" },
+            { label: "Servicios",  href: "/catalog/services" },
             { label: "Instructores", href: "/catalog/instructors" },
             { label: "InventarioEquipamiento",  href: "/catalog/equipment" },
             { label: "PromocionesPaquetes",href: "/catalog/promotions" },
+            { label: "DocumentosFiscales", href: "/catalog/fiscal-documents" },
+            { label: "MetodosPagoGlobal", href: "/catalog/payment-methods" },
+            { label: "CausalesCancelacion", href: "/catalog/cancellation-causes" },
           ],
         },
       ],
@@ -107,9 +109,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
             label: "AjustesSistema", 
             icon: Cog6ToothIcon, 
             subitems: [
-                { label: "DocumentosFiscales", href: "/catalog/fiscal-documents" },
-                { label: "MetodosPagoGlobal", href: "/catalog/payment-methods" },
-                { label: "CausalesCancelacion", href: "/catalog/cancellation-causes" },
                 { label: "PoliticasContrasena", href: "/catalog/password" },
             ]
         },

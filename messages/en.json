@@ -2,8 +2,8 @@
   "LoginPage": {
     "title": "Administrative Access",
     "subtitle": "Authorized personnel only. Please enter your credentials.",
-    "emailLabel": "Email Address",
-    "emailPlaceholder": "administrator@vitalfit.com",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "admin@vitalfit.com",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
     "forgotPasswordLink": "Forgot your password?",
@@ -13,12 +13,12 @@
     "errorGeneric": "Login failed."
   },
   "DashboardHome": {
-    "loading": "Loading dashboard...",
+    "loading": "Loading panel...",
     "welcomeTitle": "Welcome, {firstName}",
     "roleInfo": "Your current role is: {roleLabel}",
     "financialPanelTitle": "Financial Panel",
     "viewReportsButton": "View financial reports",
-    "unassignedRoleMessage": "You do not have an assigned dashboard for your role. Contact the Administrator."
+    "unassignedRoleMessage": "You do not have a control panel assigned to your role. Please contact the Administrator."
   },
   "Menu": {
     "General": "General",
@@ -30,61 +30,52 @@
     "Instructor": "Instructor",
     "Analytics": "Analytics",
     "Recepcion": "Reception",
-
     "Dashboard": "Dashboard",
     "Sucursales": "Branches",
-
-    "UsuariosRoles": "Users and Roles",
+    "UsuariosRoles": "Users & Roles",
     "UsuariosSistema": "System Users",
-    "RolesPermisos": "Roles and Permissions",
+    "RolesPermisos": "Roles & Permissions",
     "AuditoriaAccesos": "Access Audit",
-
     "CatalogoSistema": "System Catalog",
     "TiposMembresia": "Membership Types",
-    "ServiciosClases": "Services and Classes",
+    "Servicios": "Services",
     "Instructores": "Instructors",
     "InventarioEquipamiento": "Equipment Inventory",
-    "PromocionesPaquetes": "Promotions and Packages",
-
-    "ClientesSocios": "Clients and Members",
-    "RegistroConsulta": "Registration and Inquiry",
-    "SegmentacionScoring": "Segmentation and Scoring",
-    "QuejasSugerencias": "Complaints and Suggestions",
-
-    "CalendarioAsistencia": "Calendar and Attendance",
+    "PromocionesPaquetes": "Promotions & Packages",
+    "ClientesSocios": "Clients & Members",
+    "RegistroConsulta": "Registration & Inquiry",
+    "SegmentacionScoring": "Segmentation & Scoring",
+    "QuejasSugerencias": "Complaints & Suggestions",
+    "CalendarioAsistencia": "Calendar & Attendance",
     "CalendarioClases": "Class Calendar",
     "GestionReservas": "Booking Management",
     "TrackingAsistencia": "Attendance Tracking",
-
-    "FacturacionElectronica": "Electronic Invoicing",
-    "MembresiasControl": "Memberships and Control",
+    "FacturacionElectronica": "E-Invoicing",
+    "MembresiasControl": "Memberships & Control",
     "GestionMembresias": "Membership Management",
     "AlertasVencimiento": "Expiration Alerts",
     "ReportesFinancieros": "Financial Reports",
-
     "GestionBanners": "Banner Management",
     "MerchandisingCrosssell": "Merchandising (Cross-sell)",
-
     "AjustesSistema": "System Settings",
     "DocumentosFiscales": "Tax Documents",
     "MetodosPagoGlobal": "Global Payment Methods",
     "CausalesCancelacion": "Cancellation Reasons",
     "PoliticasContrasena": "Password Policies",
-
-    "DashboardOperativo": "Operational Dashboard",
+    "DashboardOperativo": "Operations Dashboard",
     "ConfiguracionLocal": "Local Configuration",
-    "InformacionHorarios": "Information and Hours",
-    "CapacidadAforo": "Capacity and Occupancy",
-    "AgendaCalendario": "Agenda and Calendar",
+    "InformacionHorarios": "Info & Schedules",
+    "CapacidadAforo": "Capacity & Occupancy",
+    "AgendaCalendario": "Schedule & Calendar",
     "ReservasActivas": "Active Bookings",
-    "RegistroAsistencia": "Attendance Log",
-    "RegistroPagos": "Payment Log",
-    "MembresiasVencer": "Expiring Memberships",
+    "RegistroAsistencia": "Attendance Logging",
+    "RegistroPagos": "Payment Logging",
+    "MembresiasVencer": "Memberships to Expire",
     "ReporteVentasLocal": "Local Sales Report",
     "MiCalendario": "My Calendar",
     "MisReportes": "My Reports",
     "ReportesDetallados": "Detailed Reports",
-    "TendenciasCohortes": "Trends and Cohorts",
+    "TendenciasCohortes": "Trends & Cohorts",
     "ReporteClientes": "Customer Report",
     "ReporteFinanciero": "Financial Report",
     "CheckinCheckout": "Check-in/Check-out",
@@ -99,10 +90,7 @@
     "notifications": "Notifications",
     "appearance": "Appearance",
     "toggleMenu": "Toggle menu",
-    "details": "Details #{id}",
-    "breadcrumb": {
-      "details": "Detail #{id}"
-    }
+    "details": "Details #{id}"
   },
   "UserNav": {
     "account": "Account",
@@ -118,7 +106,7 @@
         "total_sales": "Total Sales",
         "membership_sales": "Membership Sales",
         "transactions": "Transactions",
-        "comparison": "{amount} vs. Last Month"
+        "comparison": "{amount} vs. Previous Month"
       },
       "filters": {
         "all_branches": "All branches",
@@ -126,7 +114,7 @@
           "today": "Today",
           "this_week": "This week",
           "this_month": "This month",
-          "last_month": "Last month"
+          "last_month": "Previous month"
         }
       },
       "charts": {
@@ -136,11 +124,11 @@
           "description": "Sales from {start} to {end}.",
           "series_label": "Total Sales",
           "footer_change": "↑ 5.2% vs. previous period",
-          "footer_text": "Data grouped by sale closing time."
+          "footer_text": "Data grouped by sale closing hour."
         },
         "payment_method": {
           "title": "Sales by Payment Method",
-          "description": "Customer payment preferences",
+          "description": "Customer payment preference",
           "error": "Error loading payment methods.",
           "no_data": "No data",
           "footer_total": "Total sold: ${amount}",
@@ -155,7 +143,7 @@
         },
         "top_instructors": {
           "title": "Sales by Lead Instructor",
-          "description": "Showing top selling instructors from {start} to {end}.",
+          "description": "Showing instructors with highest sales between {start} and {end}.",
           "error": "Error loading instructor data.",
           "no_data": "No instructor sales data for this period.",
           "config": {
@@ -177,7 +165,7 @@
       },
       "performance": {
         "title": "Franchise Performance",
-        "subtitle": "Top {count} branches by sales volume"
+        "subtitle": "Top {count} locations by sales volume"
       },
       "alerts": {
         "title": "System Alerts",
@@ -186,7 +174,7 @@
           "low_occupancy": "Critical low occupancy",
           "pending_finance": "Pending financial report",
           "new_franchisee": "New franchisee",
-          "sync_error": "Synchronization error"
+          "sync_error": "Sync error"
         }
       }
     }
@@ -199,7 +187,124 @@
         "total": "Total",
         "featured": "Featured",
         "unit": "SERVICES"
+      },
+      "table": {
+        "placeholder": "Filter by name",
+        "allCategories": "All categories",
+        "download": "Download",
+        "downloading": "Downloading...",
+        "noCategory": "No category",
+        "columns": {
+          "name": "Name",
+          "category": "Category",
+          "duration": "Duration",
+          "featured": "Featured"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "deleteDialog": {
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete this service? This action cannot be undone.",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "notifications": {
+        "missingImages": "Missing images",
+        "missingImagesDesc": "The service requires at least one image.",
+        "uploadingImages": "Uploading images...",
+        "processError": "Error processing the service",
+        "tryAgain": "Try again later",
+        "imageTooHeavy": "Image is too heavy (Max 5MB)",
+        "loadError": "Error loading services",
+        "deleteSuccess": "Service deleted successfully",
+        "deleteError": "Error deleting the service",
+        "errorTitle": "Error",
+        "successTitle": "Success"
+      },
+      "CreateService": {
+        "title": "CREATE NEW SERVICE",
+        "title_edit": "EDIT SERVICE",
+        "subtitle": "Complete the information",
+        "subtitle_edit": "Modify the necessary fields",
+        "loadingData": "Loading catalog information...",
+        "tabs": {
+          "general": "General Information",
+          "images": "Images & Banner"
+        },
+        "fields": {
+          "name": "Service Name",
+          "namePlaceholder": "Ex: Personalized Training",
+          "category": "Category",
+          "categoryPlaceholder": "Select category",
+          "description": "Detailed Description",
+          "descriptionPlaceholder": "Write a description here...",
+          "duration": "Duration (Minutes)",
+          "priority": "Priority",
+          "featured": "Featured",
+          "banner": "Promotional Banner",
+          "bannerPlaceholder": "Select banner",
+          "imagesTitle": "Image Gallery",
+          "imagesHelper": "The first selected image will be set as primary."
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "create": "Save Service",
+          "uploading": "Uploading photos...",
+          "saving": "Saving changes..."
+        },
+        "ImageUploader": {
+          "dropzone": "Drag and drop service photos or browse",
+          "dropToReorder": "Drop to reorder images",
+          "movingImage": "Moving image #{index}",
+          "dragging": "Dragging...",
+          "primary": "Primary",
+          "descriptionPlaceholder": "Add a description for this image",
+          "status": {
+            "pending": "Pending",
+            "cropped": "Cropped",
+            "uploading": "Uploading...",
+            "uploaded": "✓ Uploaded",
+            "error": "Error"
+          },
+          "actions": {
+            "view": "View image",
+            "crop": "Crop image",
+            "revert": "Revert crop",
+            "remove": "Remove image",
+            "setPrimary": "Set as primary"
+          },
+          "previewModal": {
+            "title": "Image Preview",
+            "helper": "Click outside the image or press ESC to close",
+            "close": "Close"
+          },
+          "cropModal": {
+            "title": "Crop Image",
+            "helper": "Drag to adjust crop • Use mouse wheel to zoom",
+            "zoom": "Zoom",
+            "rotation": "Rotation",
+            "rotateLeft": "Rotate left",
+            "rotateRight": "Rotate right",
+            "cancel": "Cancel",
+            "apply": "Apply crop"
+          }
+        }
       }
     }
+  },
+"common": {
+  "Validations": {
+    "required": "This field is required",
+    "minChars": "Must be at least {min} characters",
+    "maxChars": "Cannot exceed {max} characters",
+    "invalidFormat": "Invalid characters",
+    "invalidUuid": "Invalid selection",
+    "positiveNumber": "Must be a positive number",
+    "invalidSelection": "Invalid selection"
   }
+}
 }

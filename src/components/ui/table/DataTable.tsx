@@ -14,7 +14,6 @@ import {
   getPaginationRowModel,
 } from "@tanstack/react-table";
 
-import { PaginationControls } from "./PaginationControls";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { Checkbox } from "../checkbox";
 import {
@@ -26,6 +25,7 @@ import {
   TableRow,
 } from "../table";
 import { Input } from "../Input";
+import { PaginationControls } from "./PaginationControls";
 
 export type Column<T> = {
   header: string;

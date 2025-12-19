@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "./card";
 export type StatCardProps = {
   title: string;
   value?: React.ReactNode;
-  icon?: React.ReactNode; // 👇 Este es el único cambio que necesitas
+  icon?: React.ReactNode;
   bottomMarkup?: boolean;
   description?: React.ReactNode;
   className?: string;
