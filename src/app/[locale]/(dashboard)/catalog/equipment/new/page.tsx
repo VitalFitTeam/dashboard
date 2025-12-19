@@ -127,7 +127,7 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
         <Button
           type="submit"
           className="w-full"
-          variant="primary"
+          variant="default"
           disabled={isLoading}
         >
           {isLoading ? "Guardando..." : "Crear"}

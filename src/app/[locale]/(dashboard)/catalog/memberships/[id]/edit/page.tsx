@@ -190,7 +190,7 @@ export default function EditMembership() {
           >
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" disabled={isLoading}>
+          <Button type="submit" variant="default" disabled={isLoading}>
             {isLoading ? "Guardando..." : "Guardar Cambios"}
           </Button>
         </PageHeader>

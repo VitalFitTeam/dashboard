@@ -79,7 +79,7 @@ export default function PackageDetailPage() {
     <>
       <PageHeader title="DETALLES DEL PAQUETE">
         <Button
-          variant="primary"
+          variant="default"
           onClick={() => {
             router.push(`/packages/${id}/edit`);
           }}

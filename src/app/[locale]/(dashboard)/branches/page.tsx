@@ -159,7 +159,7 @@ export default function HomeBranches() {
         title="SUCURSALES"
         actionButton={
           <Button
-            variant="primary"
+            variant="default"
             onClick={() => router.push("/branches/new")}
           >
             <PlusIcon className="h-5 w-5" />

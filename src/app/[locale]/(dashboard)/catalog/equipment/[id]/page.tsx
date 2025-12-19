@@ -65,7 +65,7 @@ export default function EquipmentDetailPage() {
               Volver
             </Button>
             <Button
-              variant="primary"
+              variant="default"
               type="button"
               onClick={() => router.push(`/equipment/edit/${id}`)}
             >

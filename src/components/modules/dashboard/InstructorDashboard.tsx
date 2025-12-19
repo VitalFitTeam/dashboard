@@ -169,7 +169,7 @@ export default function InstructorDashboard() {
                                                 <p className="text-xs text-gray-600">{classItem.instructor} · {classItem.location}</p>
                                             </div>
                                         </div>
-                                        <Button variant={getButtonText(classItem.action) === "Ver lista" ? "secondary" : "primary"} >
+                                        <Button variant={getButtonText(classItem.action) === "Ver lista" ? "secondary" : "default"} >
                                             {getButtonText(classItem.action)}
                                         </Button>
                                     </div>

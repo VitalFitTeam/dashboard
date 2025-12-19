@@ -144,7 +144,7 @@ export default function Activate() {
                 </div>
 
                 <div className="mt-4 w-full">
-                  <Button fullWidth type="submit" disabled={isLoading}>
+                  <Button  type="submit" disabled={isLoading}>
                     {isLoading ? "Procesando..." : "Confirmar"}
                   </Button>
                 </div>

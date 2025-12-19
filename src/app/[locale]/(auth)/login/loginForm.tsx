@@ -128,10 +128,8 @@ return (
 
       <Button
         type="submit"
-        fullWidth
-        isLoading={isLoading}
         disabled={isLoading}
-        variant="primary"
+        variant="default"
         size="lg"
         className="py-4 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-[0.98]"
       >

@@ -160,7 +160,7 @@ export default function NewPaymentMethodPage() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <form onSubmit={handleSubmit} className="space-y-2">
         <PageHeader title="CREAR MÉTODO DE PAGO">
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit" variant="default" disabled={isSubmitting}>
             {isSubmitting ? "Creando..." : "Crear Método de Pago"}
           </Button>
         </PageHeader>

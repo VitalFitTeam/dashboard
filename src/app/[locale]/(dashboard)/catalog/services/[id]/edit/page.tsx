@@ -116,7 +116,7 @@ export default function EditService() {
             {t("CreateService.buttons.cancel")}
           </Button>
           <Button 
-            variant="primary" 
+            variant="default" 
             type="submit" 
             form="service-edit-form" 
             disabled={formHook.isSubmitting || imgHook.isUploading}

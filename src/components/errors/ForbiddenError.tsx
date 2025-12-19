@@ -17,7 +17,7 @@ export default function ForbiddenError() {
                 <Button variant="outline" onClick={() => router.back()}>
                     Volver
                 </Button>
-                <Button variant="dark" onClick={() => router.replace("/")}>
+                <Button variant="secondary" onClick={() => router.replace("/")}>
                     Volver a Inicio
                 </Button>
             </div>
