@@ -1,7 +1,8 @@
 import { api } from "@/lib/sdk-config";
-import { ServiceCategoryInfo, ServiceFullDetail } from "@vitalfit/sdk";
+import { ServiceCategoryInfo, ServiceFullDetail, ServicesSummary } from "@vitalfit/sdk";
 import { useCallback, useState, useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface Filters {
     search: string;
@@ -9,8 +10,11 @@ interface Filters {
 }
 
 export function useServices(token: string | null, page: number, filters: Filters) {
+    const t = useTranslations("catalog.services"); // Scope principal
+    
     const [services, setServices] = useState<ServiceFullDetail[]>([]);
     const [categories, setCategories] = useState<ServiceCategoryInfo[]>([]);
+    const [summary, setSummary] = useState<ServicesSummary>();
     const [isLoading, setIsLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
 
@@ -23,8 +27,9 @@ export function useServices(token: string | null, page: number, filters: Filters
         }
 
         let toastId: string | number | undefined;
+        
         if (isManual) {
-            toastId = toast.loading("Actualizando catálogo...");
+            toastId = toast.loading(t("table.downloading")); 
         }
 
         setIsLoading(true);
@@ -34,7 +39,7 @@ export function useServices(token: string | null, page: number, filters: Filters
                 ? undefined
                 : filters.category;
 
-            const [servicesRes, categoriesRes] = await Promise.all([
+            const [servicesRes, categoriesRes, serviceSummary] = await Promise.all([
                 api.products.getServices(token, {
                     page: page,
                     limit: 10,
@@ -43,42 +48,44 @@ export function useServices(token: string | null, page: number, filters: Filters
                     category: categoryParam,
                 }),
                 api.products.getCategories(token),
+                api.products.getSummary(token)
             ]);
 
             const newData = servicesRes.data || [];
             const serverTotal = Number(servicesRes.total) || 0;
+            const serviceSumm = serviceSummary.data;
 
             setServices(newData);
             setCategories(categoriesRes.data || []);
+            setSummary(serviceSumm);
 
             setTotalItems((prevTotal) => {
                 if (filtersKey !== lastFiltersRef.current) {
                     lastFiltersRef.current = filtersKey;
                     return serverTotal;
                 }
-
                 if (serverTotal === 0 && newData.length > 0) {
                     return prevTotal;
                 }
-
                 return serverTotal;
             });
 
             if (isManual && toastId){
-                toast.success("Sincronizado correctamente", { id: toastId });
+                // Usamos una notificación de éxito genérica
+                toast.success(t("notifications.successTitle"), { id: toastId });
             }
                 
         } catch (error) {
             console.error("Error en useServices:", error);
             if (isManual) {
-                toast.error("No se pudo actualizar", { id: toastId });
+                toast.error(t("notifications.processError"), { id: toastId });
             } else {
-                toast.error("Error al cargar servicios");
+                toast.error(t("notifications.loadError"));
             }
         } finally {
             setIsLoading(false);
         }
-    }, [token, page, filtersKey]);
+    }, [token, page, filtersKey, t]);
 
     useEffect(() => {
         loadData();
@@ -94,6 +101,7 @@ export function useServices(token: string | null, page: number, filters: Filters
         isLoading,
         totalPages,
         totalItems,
+        summary,
         refresh: () => loadData(true),
     };
 }

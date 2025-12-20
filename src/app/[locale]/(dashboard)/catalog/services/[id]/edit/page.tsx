@@ -17,9 +17,8 @@ export default function EditService() {
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuth();
-  
   const t = useTranslations("catalog.services");
-  
+
   const abortControllerRef = useRef<AbortController | null>(null);
   const serviceId = id as string;
 
@@ -31,50 +30,41 @@ export default function EditService() {
   });
 
   useEffect(() => {
-    if (service) {
-      formHook.fillForm(service);
+    if (service && service.service_id && categories.length > 0) {
       
-      const initialImgs = service.images.map((img, i) => ({
+      formHook.fillForm(service);
+
+      const initialImgs = service.images?.map((img: any, i: number) => ({
         id: img.image_id || `idx-${i}`,
-        file: new File([], "existing_file"), 
+        file: new File([], "existing_file"),
         preview: img.image_url,
-        originalPreview: img.image_url,
+        originalPreview: img.image_url, 
         url: img.image_url,
         status: "uploaded" as const,
         isPrimary: img.is_primary,
         order: img.display_order || i,
         description: img.alt_text || "",
-      }));
+      })) || [];
       
       imgHook.setServiceImages(initialImgs);
     }
-  }, [service]);
+  }, [service, categories.length, formHook.fillForm]); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formHook.validate()) {
-      return;
-    }
+    e.stopPropagation();
 
     abortControllerRef.current = new AbortController();
     let toastId: string | number | undefined;
 
     try {
-      toastId = toast.loading(t("notifications.uploadingImages"), {
-        action: { 
-          label: t("CreateService.buttons.cancel"), 
-          onClick: () => {
-             abortControllerRef.current?.abort();
-             toast.dismiss(toastId);
-          }
-        }
-      });
+      toastId = toast.loading(t("notifications.uploadingImages"));
 
       const imagesPayload = await imgHook.processAndUpload(
-        formHook.formData.name, 
+        formHook.formData.name,
         abortControllerRef.current.signal
       );
-      
+
       toast.dismiss(toastId);
 
       await formHook.submitUpdate(imagesPayload);
@@ -83,11 +73,13 @@ export default function EditService() {
       if (toastId) {
         toast.dismiss(toastId);
       }
-      
-      if (error.name === "AbortError" || error.message === "AbortError") {
+      if (error.name === "AbortError") {
         return;
       }
-      toast.error(t("notifications.processError"), { description: error.message });
+
+      toast.error(t("notifications.processError"), {
+        description: error.message || "Ocurrió un error inesperado"
+      });
     }
   };
 
@@ -102,35 +94,13 @@ export default function EditService() {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <div className="flex items-center justify-between border-b pb-4">
-        <PageHeader 
-          title={t("CreateService.title_edit")} 
-          subtitle={`${t("CreateService.subtitle_edit")}: ${service.name}`} 
+        <PageHeader
+          title={t("CreateService.title_edit")}
+          subtitle={`${t("CreateService.subtitle_edit")}: ${service.name}`}
         />
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            type="button" 
-            onClick={() => router.back()}
-            disabled={formHook.isSubmitting}
-          >
-            {t("CreateService.buttons.cancel")}
-          </Button>
-          <Button 
-            variant="default" 
-            type="submit" 
-            form="service-edit-form" 
-            disabled={formHook.isSubmitting || imgHook.isUploading}
-          >
-            {imgHook.isUploading 
-              ? t("CreateService.buttons.uploading") 
-              : formHook.isSubmitting 
-                ? t("CreateService.buttons.saving") 
-                : t("CreateService.buttons.create")}
-          </Button>
-        </div>
       </div>
 
-      <form id="service-edit-form" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-8">
         <ServiceForm
           mode="edit"
           formData={formHook.formData}
@@ -143,6 +113,30 @@ export default function EditService() {
           isSubmitting={formHook.isSubmitting}
           isUploadingImages={imgHook.isUploading}
         />
+
+        <div className="flex justify-end gap-3 pt-4 border-t">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => router.back()}
+            disabled={formHook.isSubmitting || imgHook.isUploading}
+          >
+            {t("CreateService.buttons.cancel")}
+          </Button>
+
+          <Button
+            variant="default"
+            type="submit"
+            disabled={formHook.isSubmitting || imgHook.isUploading}
+            className="min-w-[120px]"
+          >
+            {imgHook.isUploading
+              ? t("CreateService.buttons.uploading")
+              : formHook.isSubmitting
+                ? t("CreateService.buttons.saving")
+                : t("CreateService.buttons.create")}
+          </Button>
+        </div>
       </form>
     </div>
   );
