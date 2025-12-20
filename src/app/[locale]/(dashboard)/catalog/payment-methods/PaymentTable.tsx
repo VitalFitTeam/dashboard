@@ -43,7 +43,6 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Memoizar la función getFilteredData para evitar recreaciones innecesarias
   const getFilteredData = useCallback(() => {
     let filtered = data;
 
@@ -51,9 +50,10 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
       filtered = filtered.filter(
         (payment) =>
           payment.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-          payment.description
-            ?.toLowerCase()
-            .includes(filters.search.toLowerCase()),
+          (typeof payment.description === "string" &&
+            payment.description
+              .toLowerCase()
+              .includes(filters.search.toLowerCase())),
       );
     }
 
@@ -74,7 +74,6 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
     return filtered;
   }, [data, filters.search, filters.type, filters.status]);
 
-  // Función para notificar estadísticas
   const notifyStats = useCallback(
     (paymentMethods: PaymentMethod[]) => {
       if (onStatsUpdate) {
@@ -143,12 +142,11 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   const handleStatusChange = (status: string) => {
     const newStatus = status === "all" ? "" : status;
     setFilters((prev) => ({ ...prev, status: newStatus }));
-    setPage(1); // Reset to first page on filter change
+    setPage(1);
   };
 
   const filteredData = getFilteredData();
 
-  // Actualizar total de páginas cuando cambian los datos filtrados
   useEffect(() => {
     setTotalPages(Math.ceil(filteredData.length / pageSize));
   }, [filteredData.length, pageSize]);
@@ -241,16 +239,6 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   };
 
   const columns: Column<PaymentMethod>[] = [
-    /*{
-      header: "ID",
-      accessor: "method_id",
-      render: (id) => (
-        <div className="w-28 truncate font-mono text-sm" title={id as string}>
-          {id as string}
-        </div>
-      ),
-    },
-    */
     {
       header: t("table.columns.name"),
       accessor: "name",
@@ -266,7 +254,8 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
       header: t("table.columns.description"),
       accessor: "description",
       filterType: "text",
-      render: (description) => description || "-",
+      render: (description) =>
+        (typeof description === "string" && description) ? description : "-",
     },
     {
       header: t("table.columns.status"),

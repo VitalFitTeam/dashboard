@@ -123,7 +123,7 @@ export default function PaymentForm({
       <div className="flex flex-col col-span-1 md:col-span-2">
         <label className="text-sm font-medium mb-1">{t("form.labels.description")}</label>
         <Textarea
-          value={formData.description ?? ""}
+          value={typeof formData.description === "string" ? formData.description : ""}
           onChange={(e) => onChange("description", e.target.value)}
           onBlur={() => onBlur?.("description")}
           placeholder={t("form.placeholders.description")}
