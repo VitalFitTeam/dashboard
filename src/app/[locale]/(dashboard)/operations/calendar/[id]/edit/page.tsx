@@ -313,7 +313,7 @@ export default function EditClassPage() {
           >
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit" variant="dafault" disabled={isSubmitting}>
             {isSubmitting ? "Actualizando..." : "Guardar Cambios"}
           </Button>
         </PageHeader>
