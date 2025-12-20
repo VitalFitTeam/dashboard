@@ -123,7 +123,7 @@ export default function CreateInstructor() {
                     title="CREAR RESERVA"
                     subtitle="crear las reservas en pocos pasos"
                 >
-                    <Button variant="primary" type="submit">Crear</Button>
+                    <Button variant="default" type="submit">Crear</Button>
                 </PageHeader>
                 <p className="text-md font-bold mb-3">Información Básica</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -63,7 +63,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
       </div>
 
       <div className="pt-4">
-        <Button fullWidth variant="primary" disabled>
+        <Button  variant="default" disabled>
           Actualizar datos
         </Button>
       </div>

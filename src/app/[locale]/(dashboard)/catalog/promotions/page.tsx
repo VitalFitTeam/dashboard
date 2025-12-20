@@ -331,7 +331,7 @@ export default function PromotionsPage() {
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title="PROMOCIONES Y DESCUENTOS">
         <Button
-          variant="primary"
+          variant="default"
           onClick={() => setShowForm(true)}
           className="flex items-center gap-2"
         >

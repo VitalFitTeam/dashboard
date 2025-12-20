@@ -90,9 +90,10 @@
     "UsuariosSistema": "Usuarios del Sistema",
     "RolesPermisos": "Roles y Permisos",
     "AuditoriaAccesos": "Auditoría de Accesos",
+
     "CatalogoSistema": "Catálogo de Sistema",
     "TiposMembresia": "Tipos de Membresía",
-    "ServiciosClases": "Servicios y Clases",
+    "Servicios": "Servicios",
     "Instructores": "Instructores",
     "InventarioEquipamiento": "Inventario de Equipamiento",
     "PromocionesPaquetes": "Promociones y Paquetes",
@@ -161,7 +162,8 @@
         "membership_sales": "Ventas de Membresías",
         "transactions": "Transacciones",
         "comparison": "{amount} vs. Mes Anterior"
-      },"filters": {
+      },
+      "filters": {
         "all_branches": "Todas las sucursales",
         "ranges": {
           "today": "Hoy",
@@ -169,7 +171,7 @@
           "this_month": "Este mes",
           "last_month": "Mes anterior"
         }
-      },      
+      },
       "charts": {
         "by_hour": {
           "title": "Ventas por Hora",
@@ -240,8 +242,124 @@
         "total": "Total",
         "featured": "Destacados",
         "unit": "SERVICIOS"
+      },
+      "table": {
+        "placeholder": "Filtrar por nombre",
+        "allCategories": "Todas las categorías",
+        "download": "Descargar",
+        "downloading": "Descargando...",
+        "noCategory": "Sin categoría",
+        "columns": {
+          "name": "Nombre",
+          "category": "Categoría",
+          "duration": "Duración",
+          "featured": "Destacado"
+        },
+        "actions": {
+          "view": "Ver",
+          "edit": "Modificar",
+          "delete": "Eliminar"
+        },
+        "deleteDialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar este servicio? Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "notifications": {
+        "missingImages": "Faltan imágenes",
+        "missingImagesDesc": "El servicio requiere al menos una imagen.",
+        "uploadingImages": "Subiendo imágenes...",
+        "processError": "Error al procesar el servicio",
+        "tryAgain": "Inténtalo de nuevo más tarde",
+        "imageTooHeavy": "La imagen es muy pesada (Máx 5MB)",
+        "loadError": "Error al cargar los servicios",
+        "deleteSuccess": "Servicio borrado exitosamente",
+        "deleteError": "Error al borrar el servicio",
+        "errorTitle": "Error",
+        "successTitle": "Éxito"
+      },
+      "CreateService": {
+        "title": "CREAR NUEVO SERVICIO",
+        "title_edit": "EDITAR SERVICIO",
+        "subtitle": "Complete la información",
+        "subtitle_edit": "Modifica los campos necesarios",
+        "loadingData": "Cargando información del catálogo...",
+        "tabs": {
+          "general": "Información General",
+          "images": "Imágenes y Banner"
+        },
+        "fields": {
+          "name": "Nombre del Servicio",
+          "namePlaceholder": "Ej: Entrenamiento Personalizado",
+          "category": "Categoría",
+          "categoryPlaceholder": "Seleccionar categoría",
+          "description": "Descripción detallada",
+          "descriptionPlaceholder": "Escribe una descripción aquí...",
+          "duration": "Duración (Minutos)",
+          "priority": "Prioridad",
+          "featured": "Destacado",
+          "banner": "Banner Promocional",
+          "bannerPlaceholder": "Seleccionar banner",
+          "imagesTitle": "Galería de Imágenes",
+          "imagesHelper": "La primera imagen seleccionada será establecida como principal."
+        },
+        "buttons": {
+          "cancel": "Cancelar",
+          "create": "Guardar Servicio",
+          "uploading": "Subiendo fotos...",
+          "saving": "Guardando cambios..."
+        },
+        "ImageUploader": {
+          "dropzone": "Arrastra y suelta las fotos para el servicio o búscalas",
+          "dropToReorder": "Suelta para reordenar las imágenes",
+          "movingImage": "Moviendo imagen #{index}",
+          "dragging": "Arrastrando...",
+          "primary": "Principal",
+          "descriptionPlaceholder": "Agrega una descripción para esta imagen",
+          "status": {
+            "pending": "Pendiente",
+            "cropped": "Recortada",
+            "uploading": "Subiendo...",
+            "uploaded": "✓ Subida",
+            "error": "Error"
+          },
+          "actions": {
+            "view": "Ver imagen",
+            "crop": "Recortar imagen",
+            "revert": "Revertir recorte",
+            "remove": "Quitar imagen",
+            "setPrimary": "Marcar como principal"
+          },
+          "previewModal": {
+            "title": "Vista previa de imagen",
+            "helper": "Haz clic fuera de la imagen o presiona ESC para cerrar",
+            "close": "Cerrar"
+          },
+          "cropModal": {
+            "title": "Recortar imagen",
+            "helper": "Arrastra para ajustar el recorte • Usa la rueda del mouse para hacer zoom",
+            "zoom": "Zoom",
+            "rotation": "Rotación",
+            "rotateLeft": "Girar izquierda",
+            "rotateRight": "Girar derecha",
+            "cancel": "Cancelar",
+            "apply": "Aplicar recorte"
+          }
+        }
       }
     }
+  },
+  "common": {
+    "Validations": {
+      "required": "Este campo es requerido",
+      "minChars": "Debe tener al menos {min} caracteres",
+      "maxChars": "No puede exceder los {max} caracteres",
+      "invalidFormat": "Caracteres no permitidos",
+      "invalidUuid": "Seleccion no válido",
+      "positiveNumber": "Debe ser un número positivo",
+      "invalidSelection": "Selección no válida"
+    }
   }
-  
 }

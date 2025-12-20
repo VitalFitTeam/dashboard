@@ -376,7 +376,7 @@ export default function ClassDetailPage() {
           {isDeleting ? "Eliminando..." : "Eliminar"}
         </Button>
         <Button
-          variant="primary"
+          variant="default"
           onClick={() => {
             router.push(`/classes/${classId}/edit?branch=${branchId}`);
           }}

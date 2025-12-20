@@ -65,7 +65,7 @@ export default function PaymentMethodDetailPage() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <PageHeader title="DETALLES DE MÉTODO DE PAGO">
         <Button
-          variant="primary"
+          variant="default"
           onClick={() => router.push(`/payment-methods/${id}/edit`)}
         >
           Modificar

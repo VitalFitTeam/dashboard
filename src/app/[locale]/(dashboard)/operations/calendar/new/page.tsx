@@ -298,7 +298,7 @@ export default function NewClassPage() {
           </Button>
           <Button
             type="submit"
-            variant="primary"
+            variant="default"
             className="flex-1"
             disabled={isSubmitting}
           >

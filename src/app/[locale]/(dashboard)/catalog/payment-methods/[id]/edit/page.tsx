@@ -208,7 +208,7 @@ export default function EditPaymentMethodPage() {
           >
             Cancelar
           </Button>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit" variant="default" disabled={isSubmitting}>
             {isSubmitting ? "Guardando..." : "Guardar Cambios"}
           </Button>
         </PageHeader>

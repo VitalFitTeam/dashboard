@@ -46,7 +46,7 @@ export default function CreateUser({ onBack }: CreateUsersProps) {
           <Button className="w-full" variant="secondary" onClick={onBack}>
             Cancelar
           </Button>
-          <Button className="w-full" variant="primary">
+          <Button className="w-full" variant="default">
             Agregar Usuario
           </Button>
         </div>

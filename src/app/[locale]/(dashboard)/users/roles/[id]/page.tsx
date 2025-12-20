@@ -82,7 +82,7 @@ export default function ViewRolePage() {
       <div className="flex-1 space-y-6 p-8 pt-6">
         <div className="text-red-500 text-center p-4">{error}</div>
         <div className="flex justify-center">
-          <Button variant="primary" onClick={() => router.push("/users/roles")}>
+          <Button variant="default" onClick={() => router.push("/users/roles")}>
             Volver a la lista
           </Button>
         </div>
@@ -97,7 +97,7 @@ export default function ViewRolePage() {
         subtitle={`Información completa del rol y sus permisos: ${formData.name}`}
         actionButton={
           <div className="flex gap-2">
-            <Button type="button" variant="primary" onClick={handleEdit}>
+            <Button type="button" variant="default" onClick={handleEdit}>
               Modificar
             </Button>
           </div>

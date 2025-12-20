@@ -83,7 +83,7 @@ export default function EditEquipmentPage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="default">
                 Guardar cambios
               </Button>
             </div>

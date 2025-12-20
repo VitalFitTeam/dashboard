@@ -27,7 +27,7 @@ export default function ViewMembership({ membership }: ViewMembershipProps) {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <PageHeader title="DETALLES DE MEMBRESÍA">
         <Button
-          variant="primary"
+          variant="default"
           onClick={() => {
             router.push(`/memberships/${id}/edit`);
           }}

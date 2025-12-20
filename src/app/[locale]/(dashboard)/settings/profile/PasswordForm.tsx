@@ -81,7 +81,7 @@ export const PasswordForm: React.FC = () => {
       </div>
 
       <div className="pt-4">
-        <Button fullWidth variant="primary" type="submit">
+        <Button  variant="default" type="submit">
           Actualizar Contraseña
         </Button>
       </div>

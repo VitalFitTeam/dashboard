@@ -165,7 +165,7 @@ export default function CreateUserPage() {
                     </Button>
                     <Button
                         type="submit"
-                        variant="primary"
+                        variant="default"
                         disabled={isLoading}
                         className="flex-1"
                     >

@@ -119,7 +119,7 @@ export default function InstructorDetailPage() {
     <>
       <PageHeader title="DETALLES DE INSTRUCTOR">
         <Button
-          variant="primary"
+          variant="default"
           onClick={() => {
             router.push(`/instructors/${id}/edit`);
           }}

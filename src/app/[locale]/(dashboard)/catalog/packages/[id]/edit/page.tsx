@@ -136,7 +136,7 @@ export default function EditPackagePage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" disabled={isLoading}>
+              <Button type="submit" variant="default" disabled={isLoading}>
                 {isLoading ? "Guardando..." : "Guardar cambios"}
               </Button>
             </div>

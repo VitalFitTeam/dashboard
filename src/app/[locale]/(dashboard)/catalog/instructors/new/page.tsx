@@ -260,7 +260,7 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
 
         <Button
           type="button"
-          variant="primary"
+          variant="default"
           disabled={isLoading}
           className="flex-1 relative w-full"
           style={{ position: "relative" }}

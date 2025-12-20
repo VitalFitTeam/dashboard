@@ -5,53 +5,68 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import ServicesTable from "./ServicesTable";
 import { StatCard } from "@/components/ui/StatCard";
 import { useRouter } from "@/i18n/navigation";
-
-interface StatsData {
-  total: number;
-  featured: number;
-}
-
-const initialStatsData: StatsData = {
-  total: 0,
-  featured: 0,
-};
+import ServicesTable from "@/components/modules/services/ServicesTable";
+import { useAuth } from "@/context/AuthContext";
+import { useServices } from "@/hooks/services/useServices";
 
 export default function ServicesPage() {
   const t = useTranslations("catalog.services");
   const router = useRouter();
-  const [statsData, setStatsData] = useState<StatsData>(initialStatsData);
+  const { token } = useAuth();
 
-  // Configuramos las cards dentro del componente para usar 't'
+  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState({ search: "", category: "all" });
+
+  const {
+    services,
+    categories,
+    isLoading,
+    totalPages,
+    totalItems,
+    refresh, 
+  } = useServices(token, page, filters);
+
+  const handlePageChange = (newPage: number) => setPage(newPage);
+  
+  const handleFilterChange = (newFilters: { search?: string; category?: string }) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setPage(1); 
+  };
+
+  const featuredCount = useMemo(
+    () => services.filter((s) => s.is_featured).length,
+    [services]
+  );
+
   const statCardsConfig = useMemo(() => [
     {
       title: t("stats.total"),
-      valueKey: "total" as const,
-      fontColor: "text-black-600",
+      value: totalItems, 
+      fontColor: "text-green-600",
     },
     {
       title: t("stats.featured"),
-      valueKey: "featured" as const,
-      fontColor: "text-yellow-600",
+      value: featuredCount,
+      fontColor: "text-orange-600",
     },
-  ], [t]);
+  ], [t, totalItems, featuredCount]);
 
-  const handleServiceUpdate = (stats: StatsData) => {
-    setStatsData(stats);
-  };
+  if (!token) {
+    return null;
+  }
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <div className="grid gap-4 md:grid-cols-2">
-        {statCardsConfig.map((card) => (
+        {statCardsConfig.map((card, idx) => (
           <StatCard
-            key={card.valueKey}
+            key={idx}
             title={card.title}
             value={
               <>
-                {statsData[card.valueKey] ?? 0}
+                {card.value}
                 <span className={`ml-1.5 font-normal ${card.fontColor}`}>
                   {t("stats.unit")}
                 </span>
@@ -62,16 +77,26 @@ export default function ServicesPage() {
       </div>
 
       <PageHeader title={t("title")}>
-        <Button
-          className="bg-transparent text-black border border-gray-100"
-          onClick={() => router.push("/services/new")}
+        <Button 
+          className="bg-primary text-white"
+          onClick={() => router.push("/catalog/services/new")}
         >
           <PlusIcon className="h-5 w-5 mr-2" />
           {t("add_button")}
         </Button>
       </PageHeader>
 
-      <ServicesTable onServiceUpdate={handleServiceUpdate} />
+      <ServicesTable
+        data={services}
+        categories={categories}
+        isLoading={isLoading}
+        onReload={refresh}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+      />
     </div>
   );
 }

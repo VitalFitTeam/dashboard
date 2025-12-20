@@ -167,7 +167,7 @@ export default function CreateRole() {
         <div className="flex gap-4 pt-4">
           <Button
             type="submit"
-            variant="primary"
+            variant="default"
             disabled={isLoading}
             className="flex-1"
           >
