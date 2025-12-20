@@ -348,6 +348,110 @@
           }
         }
       }
+    },
+    "payment_methods": {
+      "title": "MÉTODOS DE PAGO",
+      "add_button": "Agregar un método de pago",
+      "stats": {
+        "total": "TOTAL",
+        "cash": "EFECTIVO",
+        "gateway": "GATEWAY",
+        "digital": "DIGITAL",
+        "unit": "MÉTODOS"
+      },
+      "table": {
+        "filter_placeholder": "Filtrar por nombre",
+        "category": "Categoría",
+        "all_types": "Todos los tipos",
+        "all_statuses": "Todos los estados",
+        "update_button": "Actualizar",
+        "updating": "Actualizando...",
+        "columns": {
+          "name": "Nombre",
+          "type": "Tipo",
+          "description": "Descripción",
+          "status": "Estado"
+        },
+        "types": {
+          "cash": "Efectivo",
+          "card": "Tarjeta",
+          "transfer": "Transferencia",
+          "other": "Otro"
+        },
+        "status": {
+          "active": "Activo",
+          "inactive": "Inactivo"
+        },
+        "actions": {
+          "view": "Ver",
+          "edit": "Modificar",
+          "delete": "Eliminar"
+        },
+        "delete_dialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar este método de pago? Esta acción no se puede deshacer.",
+          "action_delete": "Eliminar",
+          "action_cancel": "Cancelar"
+        }
+      },
+      "notifications": {
+        "load_error": "Error al cargar los métodos de pago",
+        "delete_success": "Método de pago eliminado exitosamente",
+        "delete_error": "Error al eliminar el método de pago",
+        "success_title": "Éxito",
+        "error_title": "Error",
+        "validation_error_title": "Error de validación",
+        "validation_error_description": "Por favor corrige los errores en el formulario",
+        "update_success": "Método de pago actualizado exitosamente",
+        "update_error": "Error al actualizar el método de pago",
+        "create_success": "Método de pago creado exitosamente",
+        "create_error": "Error al crear el método de pago"
+      },
+      "validations": {
+        "name_required": "El nombre es obligatorio",
+        "name_max": "El nombre no puede tener más de 100 caracteres",
+        "name_format": "El nombre solo puede contener letras, números y espacios",
+        "type_required": "Selecciona un tipo",
+        "processing_type_required": "Selecciona un tipo de procesamiento",
+        "description_max": "La descripción no puede tener más de 500 caracteres"
+      },
+      "form": {
+        "labels": {
+          "name": "Nombre",
+          "type": "Tipo",
+          "processing_type": "Tipo de Procesamiento",
+          "description": "Descripción",
+          "status": "Estado Global"
+        },
+        "placeholders": {
+          "name": "Ej: Efectivo, Stripe, PayPal",
+          "description": "Breve descripción del método de pago"
+        },
+        "processing_types": {
+          "gateway": "Gateway",
+          "offline": "Offline"
+        }
+      },
+      "edit": {
+        "title": "EDITAR MÉTODO DE PAGO",
+        "subtitle": "Modifique la información del método de pago",
+        "save_button": "Guardar Cambios",
+        "saving": "Guardando...",
+        "cancel_button": "Cancelar"
+      },
+      "new": {
+        "title": "CREAR MÉTODO DE PAGO",
+        "subtitle": "Complete la información para crear un nuevo método de pago",
+        "create_button": "Crear Método de Pago",
+        "creating": "Creando..."
+      },
+      "view": {
+        "title": "DETALLES DE MÉTODO DE PAGO",
+        "subtitle": "Información detallada del método de pago",
+        "edit_button": "Modificar",
+        "loading": "Cargando...",
+        "not_found": "Método de pago no encontrado"
+      }
     }
   },
   "common": {

@@ -348,6 +348,110 @@
           }
         }
       }
+    },
+    "payment_methods": {
+      "title": "PAYMENT METHODS",
+      "add_button": "Add a payment method",
+      "stats": {
+        "total": "TOTAL",
+        "cash": "CASH",
+        "gateway": "GATEWAY",
+        "digital": "DIGITAL",
+        "unit": "METHODS"
+      },
+      "table": {
+        "filter_placeholder": "Filter by name",
+        "category": "Category",
+        "all_types": "All types",
+        "all_statuses": "All statuses",
+        "update_button": "Update",
+        "updating": "Updating...",
+        "columns": {
+          "name": "Name",
+          "type": "Type",
+          "description": "Description",
+          "status": "Status"
+        },
+        "types": {
+          "cash": "Cash",
+          "card": "Card",
+          "transfer": "Transfer",
+          "other": "Other"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Modify",
+          "delete": "Delete"
+        },
+        "delete_dialog": {
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete this payment method? This action cannot be undone.",
+          "action_delete": "Delete",
+          "action_cancel": "Cancel"
+        }
+      },
+      "notifications": {
+        "load_error": "Error loading payment methods",
+        "delete_success": "Payment method deleted successfully",
+        "delete_error": "Error deleting payment method",
+        "success_title": "Success",
+        "error_title": "Error",
+        "validation_error_title": "Validation Error",
+        "validation_error_description": "Please correct the errors in the form",
+        "update_success": "Payment method updated successfully",
+        "update_error": "Error updating payment method",
+        "create_success": "Payment method created successfully",
+        "create_error": "Error creating payment method"
+      },
+      "validations": {
+        "name_required": "Name is required",
+        "name_max": "Name cannot exceed 100 characters",
+        "name_format": "Name can only contain letters, numbers and spaces",
+        "type_required": "Please select a type",
+        "processing_type_required": "Please select a processing type",
+        "description_max": "Description cannot exceed 500 characters"
+      },
+      "form": {
+        "labels": {
+          "name": "Name",
+          "type": "Type",
+          "processing_type": "Processing Type",
+          "description": "Description",
+          "status": "Global Status"
+        },
+        "placeholders": {
+          "name": "Ex: Cash, Stripe, PayPal",
+          "description": "Short description of the payment method"
+        },
+        "processing_types": {
+          "gateway": "Gateway",
+          "offline": "Offline"
+        }
+      },
+      "edit": {
+        "title": "EDIT PAYMENT METHOD",
+        "subtitle": "Modify the payment method information",
+        "save_button": "Save Changes",
+        "saving": "Saving...",
+        "cancel_button": "Cancel"
+      },
+      "new": {
+        "title": "CREATE PAYMENT METHOD",
+        "subtitle": "Complete the information to create a new payment method",
+        "create_button": "Create Payment Method",
+        "creating": "Creating..."
+      },
+      "view": {
+        "title": "PAYMENT METHOD DETAILS",
+        "subtitle": "Detailed information about the payment method",
+        "edit_button": "Modify",
+        "loading": "Loading...",
+        "not_found": "Payment method not found"
+      }
     }
   },
   "common": {

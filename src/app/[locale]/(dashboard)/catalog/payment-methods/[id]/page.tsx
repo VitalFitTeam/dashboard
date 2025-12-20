@@ -2,13 +2,16 @@
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { PaymentMethod } from "@vitalfit/sdk";
 import PaymentForm from "../PaymentForm";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
+import { useTranslations } from "next-intl";
 
 export default function PaymentMethodDetailPage() {
+  const t = useTranslations("catalog.payment_methods");
   const router = useRouter();
   const params = useParams();
   const { token } = useAuth();
@@ -48,7 +51,7 @@ export default function PaymentMethodDetailPage() {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[400px]">
-        <div className="text-lg">Cargando...</div>
+        <div className="text-lg">{t("view.loading")}</div>
       </div>
     );
   }
@@ -56,30 +59,30 @@ export default function PaymentMethodDetailPage() {
   if (!paymentMethod) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[400px]">
-        <div className="text-lg">Método de pago no encontrado</div>
+        <div className="text-lg">{t("view.not_found")}</div>
       </div>
     );
   }
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
-      <PageHeader title="DETALLES DE MÉTODO DE PAGO">
+      <PageHeader title={t("view.title")}>
         <Button
           variant="default"
-          onClick={() => router.push(`/payment-methods/${id}/edit`)}
+          onClick={() => router.push(`/catalog/payment-methods/${id}/edit`)}
         >
-          Modificar
+          {t("view.edit_button")}
         </Button>
       </PageHeader>
 
       <p className="text-sm text-muted-foreground">
-        Información detallada del método de pago
+        {t("view.subtitle")}
       </p>
 
       <div className="bg-white rounded-lg">
         <PaymentForm
           formData={paymentMethod}
-          onChange={() => {}}
+          onChange={() => { }}
           disabled={true}
         />
       </div>

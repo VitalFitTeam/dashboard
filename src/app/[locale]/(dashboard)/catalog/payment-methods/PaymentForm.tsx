@@ -10,17 +10,18 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/Textarea";
+import { useTranslations } from "next-intl";
 
 interface PaymentFormProps {
   formData:
-    | PaymentMethod
-    | {
-        name: string;
-        type: string;
-        processing_type: string;
-        description?: string;
-        global_status?: boolean;
-      };
+  | PaymentMethod
+  | {
+    name: string;
+    type: string;
+    processing_type: string;
+    description?: string;
+    global_status?: boolean;
+  };
   errors?: {
     name?: string;
     type?: string;
@@ -39,25 +40,17 @@ export default function PaymentForm({
   onBlur,
   disabled = false,
 }: PaymentFormProps) {
-  const getTypeDisplayName = (type: string) => {
-    const typeMap: { [key: string]: string } = {
-      Cash: "Efectivo",
-      Card: "Tarjeta",
-      Transfer: "Transferencia",
-      Other: "Otro",
-    };
-    return typeMap[type] || type;
-  };
+  const t = useTranslations("catalog.payment_methods");
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <div className="flex flex-col">
-        <label className="text-sm font-medium mb-1">Nombre</label>
+        <label className="text-sm font-medium mb-1">{t("form.labels.name")}</label>
         <Input
           value={formData.name}
           onChange={(e) => onChange("name", e.target.value)}
           onBlur={() => onBlur?.("name")}
-          placeholder="Nombre del método de pago"
+          placeholder={t("form.placeholders.name")}
           disabled={disabled}
           required
         />
@@ -67,20 +60,20 @@ export default function PaymentForm({
       </div>
 
       <div className="flex flex-col" onBlur={() => onBlur?.("type")}>
-        <label className="text-sm font-medium mb-1">Tipo</label>
+        <label className="text-sm font-medium mb-1">{t("form.labels.type")}</label>
         <Select
           value={formData.type}
           onValueChange={(value) => onChange("type", value)}
           disabled={disabled}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar tipo" />
+            <SelectValue placeholder={t("table.all_types")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Cash">Efectivo</SelectItem>
-            <SelectItem value="Card">Tarjeta</SelectItem>
-            <SelectItem value="Transfer">Transferencia</SelectItem>
-            <SelectItem value="Other">Otro</SelectItem>
+            <SelectItem value="Cash">{t("table.types.cash")}</SelectItem>
+            <SelectItem value="Card">{t("table.types.card")}</SelectItem>
+            <SelectItem value="Transfer">{t("table.types.transfer")}</SelectItem>
+            <SelectItem value="Other">{t("table.types.other")}</SelectItem>
           </SelectContent>
         </Select>
         {errors?.type && (
@@ -89,25 +82,25 @@ export default function PaymentForm({
       </div>
 
       <div className="flex flex-col" onBlur={() => onBlur?.("global_status")}>
-        <label className="text-sm font-medium mb-1">Estado</label>
+        <label className="text-sm font-medium mb-1">{t("form.labels.status")}</label>
         <Select
           value={formData.global_status?.toString() || "true"}
           onValueChange={(value) => onChange("global_status", value)}
           disabled={disabled}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar estado" />
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="true">Activo</SelectItem>
-            <SelectItem value="false">Inactivo</SelectItem>
+            <SelectItem value="true">{t("table.status.active")}</SelectItem>
+            <SelectItem value="false">{t("table.status.inactive")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="flex flex-col" onBlur={() => onBlur?.("processing_type")}>
         <label className="text-sm font-medium mb-1">
-          Tipo de Procesamiento
+          {t("form.labels.processing_type")}
         </label>
         <Select
           value={formData.processing_type || "Offline"}
@@ -115,11 +108,11 @@ export default function PaymentForm({
           disabled={disabled}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar procesamiento" />
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Gateway">Gateway</SelectItem>
-            <SelectItem value="Offline">Offline</SelectItem>
+            <SelectItem value="Gateway">{t("form.processing_types.gateway")}</SelectItem>
+            <SelectItem value="Offline">{t("form.processing_types.offline")}</SelectItem>
           </SelectContent>
         </Select>
         {errors?.processing_type && (
@@ -128,12 +121,12 @@ export default function PaymentForm({
       </div>
 
       <div className="flex flex-col col-span-1 md:col-span-2">
-        <label className="text-sm font-medium mb-1">Descripción</label>
+        <label className="text-sm font-medium mb-1">{t("form.labels.description")}</label>
         <Textarea
           value={formData.description ?? ""}
           onChange={(e) => onChange("description", e.target.value)}
           onBlur={() => onBlur?.("description")}
-          placeholder="Descripción del método de pago"
+          placeholder={t("form.placeholders.description")}
           rows={3}
           disabled={disabled}
         />

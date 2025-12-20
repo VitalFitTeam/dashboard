@@ -1,19 +1,21 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { CreatePaymentMethod, BranchPaymentVisibility } from "@vitalfit/sdk";
 import PaymentForm from "../PaymentForm";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   PaymentMethodFormData,
-  paymentMethodSchema,
+  getPaymentMethodSchema,
 } from "@/lib/validation/paymentMethodSchema";
 
 export default function NewPaymentMethodPage() {
+  const t = useTranslations("catalog.payment_methods");
   const router = useRouter();
   const { token } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,12 +31,6 @@ export default function NewPaymentMethodPage() {
   const [errors, setErrors] = useState<
     Partial<Record<keyof PaymentMethodFormData, string>>
   >({});
-
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    description: "",
-    title: "",
-  });
 
   if (!token) {
     return null;
@@ -52,7 +48,7 @@ export default function NewPaymentMethodPage() {
   };
 
   const validateForm = (): boolean => {
-    const result = paymentMethodSchema.safeParse(formData);
+    const result = getPaymentMethodSchema(t).safeParse(formData);
 
     if (!result.success) {
       const newErrors: Partial<Record<keyof PaymentMethodFormData, string>> =
@@ -72,12 +68,12 @@ export default function NewPaymentMethodPage() {
   };
 
   const validateField = (field: keyof PaymentMethodFormData): boolean => {
-    const fieldSchema = paymentMethodSchema.pick({ [field]: true });
+    const fieldSchema = getPaymentMethodSchema(t).pick({ [field]: true } as any);
     const result = fieldSchema.safeParse({ [field]: formData[field] });
 
     if (!result.success) {
       const errorMessage =
-        result.error.issues[0]?.message || "Error de validación";
+        result.error.issues[0]?.message || t("notifications.error_title");
       setErrors((prev) => ({ ...prev, [field]: errorMessage }));
       return false;
     }
@@ -105,10 +101,8 @@ export default function NewPaymentMethodPage() {
     e.preventDefault();
 
     if (!validateForm()) {
-      setNotification({
-        isVisible: true,
-        description: "Por favor corrige los errores en el formulario",
-        title: "Error de validación",
+      toast.error(t("notifications.validation_error_title"), {
+        description: t("notifications.validation_error_description"),
       });
       return;
     }
@@ -131,41 +125,33 @@ export default function NewPaymentMethodPage() {
 
       await api.paymentMethod.createPaymentMethod(createData, token);
 
-      setNotification({
-        isVisible: true,
-        description: "Método de pago creado exitosamente",
-        title: "Éxito",
+      toast.success(t("notifications.success_title"), {
+        description: t("notifications.create_success"),
       });
 
       setTimeout(() => {
-        router.push("/payment-methods");
+        router.replace("/catalog/payment-methods");
       }, 1500);
     } catch (error) {
       console.error("Error creating payment method:", error);
-      setNotification({
-        isVisible: true,
-        description: "Error al crear el método de pago",
-        title: "Error",
+      toast.error(t("notifications.error_title"), {
+        description: t("notifications.create_error"),
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
-  };
-
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <form onSubmit={handleSubmit} className="space-y-2">
-        <PageHeader title="CREAR MÉTODO DE PAGO">
+        <PageHeader title={t("new.title")}>
           <Button type="submit" variant="default" disabled={isSubmitting}>
-            {isSubmitting ? "Creando..." : "Crear Método de Pago"}
+            {isSubmitting ? t("new.creating") : t("new.create_button")}
           </Button>
         </PageHeader>
         <p className="text-sm text-muted-foreground">
-          Complete la información para crear un nuevo método de pago
+          {t("new.subtitle")}
         </p>
         <PaymentForm
           formData={formData}
@@ -174,16 +160,6 @@ export default function NewPaymentMethodPage() {
           onBlur={handleBlur}
         />
       </form>
-
-      {notification.isVisible && (
-        <Notification
-          title={notification.title}
-          description={notification.description}
-          onClose={hideNotification}
-          autoCloseDuration={3000}
-          variant={notification.title === "Error" ? "destructive" : "success"}
-        />
-      )}
     </div>
   );
 }

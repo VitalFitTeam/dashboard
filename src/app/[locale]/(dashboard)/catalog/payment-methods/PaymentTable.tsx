@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,8 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { PaymentMethod } from "@vitalfit/sdk";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   Select,
   SelectContent,
@@ -25,10 +26,11 @@ interface PaymentTableProps {
 }
 
 export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
+  const t = useTranslations("catalog.payment_methods");
   const [data, setData] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
-  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
+  const [deleteRow, setDeleteRow] = useState<PaymentMethod | null>(null);
   const { token } = useAuth();
   const router = useRouter();
 
@@ -40,12 +42,6 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    description: "",
-    title: "",
-  });
 
   // Memoizar la función getFilteredData para evitar recreaciones innecesarias
   const getFilteredData = useCallback(() => {
@@ -103,11 +99,9 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
 
       notifyStats(paymentMethods);
     } catch (error) {
-      console.error("Error cargando métodos de pago:", error);
-      setNotification({
-        isVisible: true,
-        description: "Error al cargar los métodos de pago",
-        title: "Error",
+      console.error("Error loading payment methods:", error);
+      toast.error(t("notifications.error_title"), {
+        description: t("notifications.load_error"),
       });
     } finally {
       setLoading(false);
@@ -121,12 +115,6 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   }, [token]);
 
   useEffect(() => {
-    if (token) {
-      fetchPaymentMethods();
-    }
-  }, [page, token]);
-
-  useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchInput.trim() === "") {
         if (filters.search !== "") {
@@ -134,6 +122,7 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
         }
       } else if (searchInput !== filters.search) {
         setFilters((prev) => ({ ...prev, search: searchInput }));
+        setPage(1);
       }
     }, 500);
 
@@ -148,50 +137,58 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   const handleTypeChange = (type: string) => {
     const newType = type === "all" ? "" : type;
     setFilters((prev) => ({ ...prev, type: newType }));
+    setPage(1);
   };
 
   const handleStatusChange = (status: string) => {
     const newStatus = status === "all" ? "" : status;
     setFilters((prev) => ({ ...prev, status: newStatus }));
+    setPage(1); // Reset to first page on filter change
   };
 
   const filteredData = getFilteredData();
 
+  // Actualizar total de páginas cuando cambian los datos filtrados
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredData.length / pageSize));
+  }, [filteredData.length, pageSize]);
+
+  const paginatedData = filteredData.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   const handleView = (row: PaymentMethod) => {
-    router.push(`/payment-methods/${row.method_id}`);
+    router.push(`/catalog/payment-methods/${row.method_id}`);
   };
 
   const handleEdit = (row: PaymentMethod) => {
-    router.push(`/payment-methods/${row.method_id}/edit`);
+    router.push(`/catalog/payment-methods/${row.method_id}/edit`);
   };
 
   const handleDeletePaymentMethod = async (payment: PaymentMethod) => {
     if (!token) {
-      setDeleteRowId(null);
+      setDeleteRow(null);
       return;
     }
     try {
       await api.paymentMethod.deletePaymentMethod(payment.method_id, token);
 
-      setNotification({
-        isVisible: true,
-        description: "Método de pago eliminado exitosamente",
-        title: "Éxito",
+      toast.success(t("notifications.success_title"), {
+        description: t("notifications.delete_success"),
       });
 
-      setDeleteRowId(null);
+      setDeleteRow(null);
 
       setTimeout(() => {
         fetchPaymentMethods();
       }, 1000);
     } catch (error) {
-      console.error("Error al eliminar el método de pago:", error);
-      setDeleteRowId(null);
+      console.error("Error deleting payment method:", error);
+      setDeleteRow(null);
 
-      setNotification({
-        isVisible: true,
-        description: "Error al eliminar el método de pago",
-        title: "Error",
+      toast.error(t("notifications.error_title"), {
+        description: t("notifications.delete_error"),
       });
     }
   };
@@ -200,16 +197,12 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
     setPage(newPage);
   };
 
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
-  };
-
   const getTypeDisplayName = (type: string) => {
     const typeMap: { [key: string]: string } = {
-      Cash: "Efectivo",
-      Card: "Tarjeta",
-      Transfer: "Transferencia",
-      Other: "Otro",
+      Cash: t("table.types.cash"),
+      Card: t("table.types.card"),
+      Transfer: t("table.types.transfer"),
+      Other: t("table.types.other"),
     };
     return typeMap[type] || type;
   };
@@ -237,13 +230,12 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   const getStatusBadge = (status: boolean) => {
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          status
-            ? "text-green-800 border-green-200"
-            : "text-red-800 border-red-200"
-        }`}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${status
+          ? "text-green-800 border-green-200"
+          : "text-red-800 border-red-200"
+          }`}
       >
-        {status ? "Activo" : "Inactivo"}
+        {status ? t("table.status.active") : t("table.status.inactive")}
       </span>
     );
   };
@@ -260,24 +252,24 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
     },
     */
     {
-      header: "Nombre",
+      header: t("table.columns.name"),
       accessor: "name",
       filterType: "text",
     },
     {
-      header: "Tipo",
+      header: t("table.columns.type"),
       accessor: "type",
       filterType: "text",
       render: (type) => getTypeBadge(type as string),
     },
     {
-      header: "Descripción",
+      header: t("table.columns.description"),
       accessor: "description",
       filterType: "text",
       render: (description) => description || "-",
     },
     {
-      header: "Estado",
+      header: t("table.columns.status"),
       accessor: "global_status",
       filterType: "text",
       render: (status) => getStatusBadge(status as boolean),
@@ -287,7 +279,7 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   if (loading && data.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-lg">Cargando métodos de pago...</div>
+        <div className="text-lg">{t("view.loading")}</div>
       </div>
     );
   }
@@ -299,7 +291,7 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
           <div className="relative w-full sm:w-[250px]">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Filtrar por nombre"
+              placeholder={t("table.filter_placeholder")}
               className="pl-9"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -312,14 +304,14 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
               onValueChange={handleTypeChange}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Todos los tipos" />
+                <SelectValue placeholder={t("table.all_types")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los tipos</SelectItem>
-                <SelectItem value="Cash">Efectivo</SelectItem>
-                <SelectItem value="Card">Tarjeta</SelectItem>
-                <SelectItem value="Transfer">Transferencia</SelectItem>
-                <SelectItem value="Other">Otro</SelectItem>
+                <SelectItem value="all">{t("table.all_types")}</SelectItem>
+                <SelectItem value="Cash">{t("table.types.cash")}</SelectItem>
+                <SelectItem value="Card">{t("table.types.card")}</SelectItem>
+                <SelectItem value="Transfer">{t("table.types.transfer")}</SelectItem>
+                <SelectItem value="Other">{t("table.types.other")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -330,12 +322,12 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
               onValueChange={handleStatusChange}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Todos los estados" />
+                <SelectValue placeholder={t("table.all_statuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="active">Activo</SelectItem>
-                <SelectItem value="inactive">Inactivo</SelectItem>
+                <SelectItem value="all">{t("table.all_statuses")}</SelectItem>
+                <SelectItem value="active">{t("table.status.active")}</SelectItem>
+                <SelectItem value="inactive">{t("table.status.inactive")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -348,15 +340,15 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
             disabled={loading}
           >
             <Download className="mr-2 h-4 w-4" />
-            {loading ? "Actualizando..." : "Actualizar"}
+            {loading ? t("table.updating") : t("table.update_button")}
           </Button>
         </div>
       </div>
 
       <DataTable<PaymentMethod>
-        key={`payment-methods-${filteredData.length}-${filters.type}-${filters.status}-${filters.search}`}
+        key={`payment-methods-${filteredData.length}-${filters.type}-${filters.status}-${filters.search}-${page}`}
         columns={columns}
-        data={filteredData}
+        data={paginatedData}
         page={page}
         pageSize={pageSize}
         onPageChange={handlePageChange}
@@ -366,47 +358,36 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
           <div className="flex flex-col items-center justify-center w-full">
             <RowActions
               actions={[
-                { label: "Ver", icon: Eye, onClick: () => handleView(row) },
+                { label: t("table.actions.view"), icon: Eye, onClick: () => handleView(row) },
                 {
-                  label: "Modificar",
+                  label: t("table.actions.edit"),
                   icon: Pencil,
                   onClick: () => handleEdit(row),
                 },
                 {
-                  label: "Eliminar",
+                  label: t("table.actions.delete"),
                   icon: Trash2,
-                  onClick: () => setDeleteRowId(row.method_id),
+                  onClick: () => setDeleteRow(row),
                   variant: "danger",
                   separatorBefore: true,
                 },
               ]}
             />
-            {deleteRowId === row.method_id && (
-              <GeneralAlertDialog
-                open={deleteRowId === row.method_id}
-                onOpenChange={(open) => !open && setDeleteRowId(null)}
-                trigger={null}
-                title="Confirmar eliminación"
-                description="¿Estás seguro de que deseas eliminar este método de pago? Esta acción no se puede deshacer."
-                actionText="Eliminar"
-                cancelText="Cancelar"
-                onAction={() => handleDeletePaymentMethod(row)}
-                actionVariant="destructive"
-              />
-            )}
           </div>
         )}
       />
 
-      {notification.isVisible && (
-        <Notification
-          title={notification.title}
-          description={notification.description}
-          onClose={hideNotification}
-          autoCloseDuration={3000}
-          variant={notification.title === "Error" ? "destructive" : "success"}
-        />
-      )}
+      <GeneralAlertDialog
+        open={!!deleteRow}
+        onOpenChange={(open) => !open && setDeleteRow(null)}
+        trigger={null}
+        title={t("table.delete_dialog.title")}
+        description={t("table.delete_dialog.description")}
+        actionText={t("table.delete_dialog.action_delete")}
+        cancelText={t("table.delete_dialog.action_cancel")}
+        onAction={() => deleteRow && handleDeletePaymentMethod(deleteRow)}
+        actionVariant="destructive"
+      />
     </>
   );
 }
