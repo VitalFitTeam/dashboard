@@ -350,15 +350,254 @@
       }
     }
   },
-"common": {
-  "Validations": {
-    "required": "This field is required",
-    "minChars": "Must be at least {min} characters",
-    "maxChars": "Cannot exceed {max} characters",
-    "invalidFormat": "Invalid characters",
-    "invalidUuid": "Invalid selection",
-    "positiveNumber": "Must be a positive number",
-    "invalidSelection": "Invalid selection"
+  "common": {
+    "Validations": {
+      "required": "This field is required",
+      "minChars": "Must be at least {min} characters",
+      "maxChars": "Cannot exceed {max} characters",
+      "invalidFormat": "Invalid characters",
+      "invalidUuid": "Invalid selection",
+      "positiveNumber": "Must be a positive number",
+      "invalidSelection": "Invalid selection"
+    }
+  },
+  "roles": {
+    "title": "ROLES & PERMISSIONS",
+    "add_button": "Add a role",
+    "table": {
+      "filter_placeholder": "Filter by name",
+      "download": "Download",
+      "columns": {
+        "name": "Name",
+        "description": "Description",
+        "permissions": "Permissions"
+      },
+      "permissions_count": "{count} {count, plural, one {permission} other {permissions}}",
+      "loading": "Loading roles...",
+      "actions": {
+        "view": "View Details",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "delete_dialog": {
+        "title": "Delete role",
+        "description": "Are you sure you want to delete this role? This action cannot be undone.",
+        "action_delete": "Delete",
+        "action_deleting": "Deleting..."
+      }
+    },
+    "form": {
+      "fields": {
+        "name": "Name*",
+        "name_placeholder": "Role name",
+        "description": "Description*",
+        "description_placeholder": "Role description and its permissions",
+        "permissions": "Permissions*",
+        "loading_permissions": "Loading permissions...",
+        "no_permissions": "No permissions available",
+        "permissions_selected": "{selected} of {total} permissions selected"
+      },
+      "errors": {
+        "no_token": "No authentication token available",
+        "load_permissions_failed": "Could not load permissions",
+        "server_error": "Error loading permissions from the server"
+      },
+      "validations": {
+        "name_required": "The role name is required",
+        "name_max": "The name cannot have more than 50 characters",
+        "description_required": "The description is required",
+        "description_max": "The description cannot have more than 200 characters",
+        "permissions_min": "At least one permission must be selected",
+        "permissions_max": "No more than 20 permissions can be selected"
+      }
+    },
+    "create": {
+      "title": "CREATE NEW ROLE",
+      "subtitle": "Complete the information for the new role",
+      "button": "Create Role",
+      "loading": "Creating...",
+      "success": "Role created successfully!",
+      "error": "Error creating role",
+      "auth_error": "You are not authenticated. Please log in again.",
+      "conflict_error": "A role with this name already exists. Please check the entered data."
+    },
+    "edit": {
+      "title": "EDIT ROLE",
+      "subtitle": "Modify the information and permissions for the role: {name}",
+      "button": "Save",
+      "loading": "Saving...",
+      "success": "Role updated successfully!",
+      "error": "Error updating role",
+      "load_error": "Could not load role information."
+    },
+    "common": {
+      "cancel": "Cancel",
+      "delete_success": "The role has been successfully deleted",
+      "delete_id_error": "Cannot delete: Invalid role ID",
+      "unknown_error": "Unknown error deleting the role"
+    },
+    "view": {
+      "title": "View Role",
+      "subtitle": "Complete information of the role and its permissions: {name}",
+      "button_edit": "Modify",
+      "back_button": "Back to list",
+      "error_not_found": "The requested role was not found"
+    }
+  },
+  "clients": {
+    "title": "CLIENTS",
+    "add_button": "Add a Client",
+    "stats": {
+      "total": "TOTAL",
+      "active": "ACTIVE",
+      "inactive": "INACTIVE/BLOCKED",
+      "unit": "CLIENTS"
+    },
+    "table": {
+      "filter_placeholder": "Filter name or email",
+      "all_categories": "All categories",
+      "category": "Category",
+      "categories": {
+        "premium": "Premium",
+        "regular": "Regular",
+        "new": "New"
+      },
+      "download": "Download",
+      "loading": "Loading Clients...",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "category": "Category",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "blocked": "Blocked",
+        "pending": "Pending"
+      },
+      "actions": {
+        "view": "View Details",
+        "edit": "Modify",
+        "delete": "Delete"
+      },
+      "delete_dialog": {
+        "title": "Confirm deletion",
+        "description": "Are you sure you want to delete this client? This action cannot be undone.",
+        "action_delete": "Delete",
+        "action_cancel": "Cancel",
+        "action_deleting": "Deleting..."
+      }
+    },
+    "notifications": {
+      "delete_success": "Client deleted successfully",
+      "delete_error": "Error deleting the client",
+      "no_token": "No authentication token",
+      "permission_error": "You do not have permissions to delete clients",
+      "not_found": "Client not found",
+      "session_expired": "Session expired. Please log in again",
+      "stats_error": "Error loading statistics",
+      "load_error": "Error loading clients",
+      "success_title": "Success",
+      "error_title": "Error"
+    },
+    "form": {
+      "sections": {
+        "basic": "Basic Information",
+        "identity": "Identification & Contact"
+      },
+      "labels": {
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "email": "Email Address",
+        "birth_date": "Birth Date*",
+        "gender": "Gender*",
+        "identity_document": "Identity Document*",
+        "phone": "Phone",
+        "category": "Client Category",
+        "status": "Status"
+      },
+      "gender": {
+        "female": "Female",
+        "male": "Male",
+        "other": "Prefer not to say"
+      },
+      "categories": {
+        "vip": "VIP",
+        "regular": "Regular",
+        "new": "New"
+      },
+      "placeholder": {
+        "select": "Select an item"
+      },
+      "validations": {
+        "first_name_required": "First name is required",
+        "last_name_required": "Last name is required",
+        "email_required": "Email address is required",
+        "email_invalid": "Email address is invalid",
+        "identity_document_required": "Identity document is required",
+        "birth_date_required": "Birth date is required",
+        "birth_date_future": "Birth date cannot be in the future",
+        "gender_required": "Gender is required"
+      }
+    },
+    "edit": {
+      "title": "EDIT CLIENT",
+      "subtitle": "Modify client information for {name}",
+      "save_button": "Save Changes",
+      "saving": "Saving...",
+      "cancel_button": "Cancel",
+      "success": "Client updated successfully",
+      "load_error": "Error loading client data",
+      "save_error": "Error saving client changes",
+      "loading": "Loading client data...",
+      "error_title": "ERROR",
+      "error_subtitle": "An error occurred while loading client data",
+      "back_button": "Back",
+      "auth_error": "Token or User ID not available",
+      "validation_error": "Validation error: {errors}",
+      "invalid_data": "Invalid data. Please verify information.",
+      "email_in_use": "Email address is already in use."
+    },
+    "view": {
+      "title": "CLIENT DETAILS",
+      "subtitle": "Detailed information for {name}",
+      "sections": {
+        "personal": "Personal Information",
+        "actions": "Quick Actions",
+        "membership": "Membership Information"
+      },
+      "fields": {
+        "id": "Client Code",
+        "category": "Category",
+        "full_name": "Full Name",
+        "phone": "Phone",
+        "email": "Email Address",
+        "identity": "Identity Document",
+        "birth_date": "Birth Date",
+        "gender": "Gender",
+        "role": "Role",
+        "scoring": "Scoring",
+        "created_at": "Created At",
+        "status": "Status"
+      },
+      "actions": {
+        "edit": "Edit Client",
+        "membership_history": "Membership & Payment History",
+        "attendance_history": "Attendance History",
+        "complaints": "View Complaints & Suggestions",
+        "activity": "View Activity & Scoring",
+        "rfm": "View RFM Analysis"
+      },
+      "category_active_membership": "Active Membership",
+      "category_regular": "Regular Client",
+      "loading": "LOADING...",
+      "loading_subtitle": "Getting client information",
+      "loading_message": "Loading client data...",
+      "error_title": "ERROR",
+      "error_subtitle": "Could not load client information",
+      "not_found": "Client not found",
+      "back_button": "Back to list"
+    }
   }
-}
 }

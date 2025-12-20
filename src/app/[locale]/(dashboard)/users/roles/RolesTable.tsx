@@ -1,119 +1,105 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Roles } from "@/models/roles";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
-import { DataResponse, RoleResponse, Permission } from "@vitalfit/sdk";
+import { RoleResponse, Permission } from "@vitalfit/sdk";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
-import { Notification } from "@/components/ui/Notification";
+import { useRouter } from "@/i18n/navigation";
+import { toast } from "sonner";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 
 export default function RolesTable() {
+  const t = useTranslations("roles");
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [selectedRole, setSelectedRole] = useState<Roles | null>(null);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [showDeleteNotification, setShowDeleteNotification] = useState(false);
 
   const { token } = useAuth();
   const router = useRouter();
 
   const [rolesData, setRolesData] = useState<Roles[]>([]);
 
-  // Calcular total de páginas
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-  const filteredData = useMemo(() => {
-    if (!inputFilters.search) {
-      return rolesData;
-    }
-
-    const searchTerm = inputFilters.search.toLowerCase().trim();
-
-    return rolesData.filter(
-      (role) =>
-        role.name?.toLowerCase().includes(searchTerm) ||
-        role.description?.toLowerCase().includes(searchTerm) ||
-        role.id?.toLowerCase().includes(searchTerm),
-    );
-  }, [rolesData, inputFilters.search]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(inputFilters.search || "");
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [inputFilters.search]);
 
   const handleView = (row: Roles) => {
-    router.push(`/users/roles/${row.id}`);
+    router.replace(`/users/roles/${row.id}`);
   };
 
   const handleEdit = (row: Roles) => {
-    router.push(`/users/roles/${row.id}/edit`);
+    router.replace(`/users/roles/${row.id}/edit`);
   };
 
   const handleDeleteRole = async (role: Roles) => {
     if (!token) {
-      setDeleteError("No hay token de autenticación disponible");
+      toast.error(t("form.errors.no_token"));
       return;
     }
 
     if (!role?.id) {
-      setDeleteError("No se puede eliminar: ID de rol no válido");
+      toast.error(t("common.delete_id_error"));
       return;
     }
 
     setIsDeleting(true);
-    setDeleteError(null);
 
     try {
       const response = await api.RBAC.deleteRole(role.id, token);
 
       console.warn("Respuesta de eliminación:", response);
-      setShowDeleteNotification(true);
+      toast.success(t("common.delete_success"));
 
       setDeleteRowId(null);
       setSelectedRole(null);
 
-      // Recargar los datos manteniendo la página actual
       fetchRoles(page);
     } catch (error) {
       console.error("Error al eliminar rol:", error);
-      setDeleteError(
+      const errorMessage =
         error instanceof Error
           ? error.message
-          : "Error desconocido al eliminar el rol",
-      );
+          : t("common.unknown_error");
+      toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Función para mostrar permisos de forma resumida
   const getPermissionsCount = (
     permissions: Permission[] | undefined,
   ): string => {
-    if (!permissions || permissions.length === 0) {
-      return "0 permisos";
-    }
-    return `${permissions.length} permiso${permissions.length !== 1 ? "s" : ""}`;
+    const count = permissions?.length || 0;
+    return t("table.permissions_count", { count });
   };
 
   const columns: Column<Roles>[] = [
     {
-      header: "Nombre",
+      header: t("table.columns.name"),
       accessor: "name",
       filterType: "text",
     },
     {
-      header: "Descripción",
+      header: t("table.columns.description"),
       accessor: "description",
       filterType: "text",
       render: (description) => (
@@ -123,7 +109,7 @@ export default function RolesTable() {
       ),
     },
     {
-      header: "Permisos",
+      header: t("table.columns.permissions"),
       accessor: "Permission",
       render: (permissions) => (
         <div className="max-w-[100px] truncate">
@@ -141,24 +127,22 @@ export default function RolesTable() {
 
     setIsLoading(true);
     try {
-      // Llamar a la API con los parámetros de paginación
       const response = await api.RBAC.getRoles(
         {
           page: currentPage,
           limit: pageSize,
-          search: inputFilters.search || undefined,
+          search: debouncedSearch || undefined,
           sort: "desc",
         },
         token,
       );
 
       const rolesArray = response.data || [];
-      const total = response.total || 0;
+      const total = response.total || response.count || 0;
 
       setTotalItems(total);
 
       if (Array.isArray(rolesArray)) {
-        // Primero establecer los datos básicos
         const rolesWithoutPermissions = rolesArray.map(
           (role: RoleResponse) => ({
             id: role.role_id,
@@ -170,7 +154,6 @@ export default function RolesTable() {
 
         setRolesData(rolesWithoutPermissions);
 
-        // Cargar los permisos en segundo plano
         const rolesWithPermissions = await Promise.all(
           rolesArray.map(async (role: RoleResponse) => {
             try {
@@ -216,21 +199,15 @@ export default function RolesTable() {
     }
   };
 
-  // Efecto para cargar datos cuando cambia la página o los filtros
   useEffect(() => {
-    // Resetear a página 1 cuando cambia el filtro de búsqueda
-    if (inputFilters.search !== undefined) {
-      setPage(1);
-      fetchRoles(1);
-    }
-  }, [inputFilters.search]);
+    setPage(1);
+    fetchRoles(1);
+  }, [debouncedSearch]);
 
-  // Efecto para cargar datos cuando cambia la página
   useEffect(() => {
     fetchRoles(page);
   }, [page, token]);
 
-  // Función para manejar cambios en el filtro de búsqueda con debounce
   const handleSearchChange = (value: string) => {
     setInputFilters((prev) => ({ ...prev, search: value }));
   };
@@ -238,7 +215,7 @@ export default function RolesTable() {
   if (isLoading && rolesData.length === 0) {
     return (
       <div className="flex justify-center items-center p-8">
-        <div>Cargando roles...</div>
+        <div>{t("table.loading")}</div>
       </div>
     );
   }
@@ -249,7 +226,7 @@ export default function RolesTable() {
         <div className="relative w-full sm:w-[250px]">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Filtrar por nombre"
+            placeholder={t("table.filter_placeholder")}
             className="pl-9"
             value={inputFilters.search || ""}
             onChange={(e) => handleSearchChange(e.target.value)}
@@ -259,32 +236,19 @@ export default function RolesTable() {
         <div className="flex items-center gap-4">
           <Button variant="outline">
             <ArrowDownTray className="mr-2 h-4 w-4" />
-            Descargar
+            {t("table.download")}
           </Button>
         </div>
       </div>
 
-      {deleteError && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{deleteError}</AlertDescription>
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-2"
-            onClick={() => setDeleteError(null)}
-          >
-            Cerrar
-          </Button>
-        </Alert>
-      )}
-
       <DataTable<Roles>
+        key={`roles-table-${page}-${debouncedSearch}`}
         columns={columns}
-        data={filteredData}
+        data={rolesData}
         page={page}
         pageSize={pageSize}
         totalPages={totalPages}
+        isLoading={isLoading}
         onPageChange={(newPage) => {
           setPage(newPage);
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -294,17 +258,17 @@ export default function RolesTable() {
             <RowActions
               actions={[
                 {
-                  label: "Ver Detalles",
+                  label: t("table.actions.view"),
                   icon: Eye,
                   onClick: () => handleView(row),
                 },
                 {
-                  label: "Modificar",
+                  label: t("table.actions.edit"),
                   icon: Pencil,
                   onClick: () => handleEdit(row),
                 },
                 {
-                  label: "Eliminar",
+                  label: t("table.actions.delete"),
                   icon: Trash2,
                   onClick: () => setDeleteRowId(row.id),
                   variant: "danger",
@@ -316,10 +280,10 @@ export default function RolesTable() {
               <GeneralAlertDialog
                 open={true}
                 onOpenChange={(open) => !open && setDeleteRowId(null)}
-                title="Eliminar rol"
-                description="¿Seguro que deseas eliminar este rol? Esta acción no se puede deshacer."
+                title={t("table.delete_dialog.title")}
+                description={t("table.delete_dialog.description")}
                 type="confirmation"
-                actionText={isDeleting ? "Eliminando..." : "Eliminar"}
+                actionText={isDeleting ? t("table.delete_dialog.action_deleting") : t("table.delete_dialog.action_delete")}
                 actionVariant="destructive"
                 onAction={() => handleDeleteRole(row)}
               />
@@ -327,16 +291,6 @@ export default function RolesTable() {
           </div>
         )}
       />
-
-      {showDeleteNotification && (
-        <Notification
-          variant="success"
-          title="¡Éxito!"
-          description="El rol ha sido eliminado correctamente"
-          onClose={() => setShowDeleteNotification(false)}
-          autoCloseDuration={2000}
-        />
-      )}
     </>
   );
 }

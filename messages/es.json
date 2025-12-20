@@ -90,7 +90,6 @@
     "UsuariosSistema": "Usuarios del Sistema",
     "RolesPermisos": "Roles y Permisos",
     "AuditoriaAccesos": "Auditoría de Accesos",
-
     "CatalogoSistema": "Catálogo de Sistema",
     "TiposMembresia": "Tipos de Membresía",
     "Servicios": "Servicios",
@@ -360,6 +359,245 @@
       "invalidUuid": "Seleccion no válido",
       "positiveNumber": "Debe ser un número positivo",
       "invalidSelection": "Selección no válida"
+    }
+  },
+  "roles": {
+    "title": "ROLES Y PERMISOS",
+    "add_button": "Agregar un rol",
+    "table": {
+      "filter_placeholder": "Filtrar por nombre",
+      "download": "Descargar",
+      "columns": {
+        "name": "Nombre",
+        "description": "Descripción",
+        "permissions": "Permisos"
+      },
+      "permissions_count": "{count} {count, plural, one {permiso} other {permisos}}",
+      "loading": "Cargando roles...",
+      "actions": {
+        "view": "Ver Detalles",
+        "edit": "Modificar",
+        "delete": "Eliminar"
+      },
+      "delete_dialog": {
+        "title": "Eliminar rol",
+        "description": "¿Seguro que deseas eliminar este rol? Esta acción no se puede deshacer.",
+        "action_delete": "Eliminar",
+        "action_deleting": "Eliminando..."
+      }
+    },
+    "form": {
+      "fields": {
+        "name": "Nombre*",
+        "name_placeholder": "Nombre del rol",
+        "description": "Descripción*",
+        "description_placeholder": "Descripción del rol y sus permisos",
+        "permissions": "Permisos*",
+        "loading_permissions": "Cargando permisos...",
+        "no_permissions": "No hay permisos disponibles",
+        "permissions_selected": "{selected} de {total} permisos seleccionados"
+      },
+      "errors": {
+        "no_token": "No hay token de autenticación disponible",
+        "load_permissions_failed": "No se pudieron cargar los permisos",
+        "server_error": "Error al cargar los permisos desde el servidor"
+      },
+      "validations": {
+        "name_required": "El nombre del rol es requerido",
+        "name_max": "El nombre no puede tener más de 50 caracteres",
+        "description_required": "La descripción es requerida",
+        "description_max": "La descripción no puede tener más de 200 caracteres",
+        "permissions_min": "Debe seleccionar al menos un permiso",
+        "permissions_max": "No puede seleccionar más de 20 permisos"
+      }
+    },
+    "create": {
+      "title": "CREAR NUEVO ROL",
+      "subtitle": "Complete la información del nuevo rol",
+      "button": "Crear Rol",
+      "loading": "Creando...",
+      "success": "¡Rol creado exitosamente!",
+      "error": "Error al crear rol",
+      "auth_error": "No estás autenticado. Por favor, inicia sesión nuevamente.",
+      "conflict_error": "Ya existe un rol con este nombre. Verifica los datos ingresados."
+    },
+    "edit": {
+      "title": "EDITAR ROL",
+      "subtitle": "Modifica la información y permisos del rol: {name}",
+      "button": "Guardar",
+      "loading": "Guardando...",
+      "success": "¡Rol actualizado exitosamente!",
+      "error": "Error al actualizar rol",
+      "load_error": "No se pudo cargar la información del rol."
+    },
+    "common": {
+      "cancel": "Cancelar",
+      "delete_success": "El rol ha sido eliminado correctamente",
+      "delete_id_error": "No se puede eliminar: ID de rol no válido",
+      "unknown_error": "Error desconocido al eliminar el rol"
+    },
+    "view": {
+      "title": "Ver Rol",
+      "subtitle": "Información completa del rol y sus permisos: {name}",
+      "button_edit": "Modificar",
+      "back_button": "Volver a la lista",
+      "error_not_found": "No se encontró el rol solicitado"
+    }
+  },
+  "clients": {
+    "title": "CLIENTES",
+    "add_button": "Agregar un Cliente",
+    "stats": {
+      "total": "TOTAL",
+      "active": "ACTIVOS",
+      "inactive": "INACTIVOS/BLOQUEADOS",
+      "unit": "CLIENTES"
+    },
+    "table": {
+      "filter_placeholder": "Filtrar nombre o email",
+      "all_categories": "Todas las categorías",
+      "category": "Categoría",
+      "categories": {
+        "premium": "Premium",
+        "regular": "Regular",
+        "new": "Nuevo"
+      },
+      "download": "Descargar",
+      "loading": "Cargando Clientes...",
+      "columns": {
+        "name": "Nombre",
+        "email": "Email",
+        "category": "Categoría",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "blocked": "Bloqueado",
+        "pending": "Pendiente"
+      },
+      "actions": {
+        "view": "Ver Detalles",
+        "edit": "Modificar",
+        "delete": "Eliminar"
+      },
+      "delete_dialog": {
+        "title": "Confirmar eliminación",
+        "description": "¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.",
+        "action_delete": "Eliminar",
+        "action_cancel": "Cancelar",
+        "action_deleting": "Eliminando..."
+      }
+    },
+    "notifications": {
+      "delete_success": "Cliente eliminado correctamente",
+      "delete_error": "Error al eliminar el cliente",
+      "no_token": "No hay token de autenticación",
+      "permission_error": "No tienes permisos para eliminar clientes",
+      "not_found": "Cliente no encontrado",
+      "session_expired": "Sesión expirada. Por favor inicia sesión nuevamente",
+      "stats_error": "Error al cargar estadísticas",
+      "load_error": "Error al cargar clientes",
+      "success_title": "Éxito",
+      "error_title": "Error"
+    },
+    "form": {
+      "sections": {
+        "basic": "Información Básica",
+        "identity": "Identificación y Contacto"
+      },
+      "labels": {
+        "first_name": "Nombre",
+        "last_name": "Apellido",
+        "email": "Correo electrónico",
+        "birth_date": "Fecha de nacimiento*",
+        "gender": "Género*",
+        "identity_document": "Documento de identidad*",
+        "phone": "Teléfono",
+        "category": "Categoría del cliente",
+        "status": "Estado"
+      },
+      "gender": {
+        "female": "Femenino",
+        "male": "Masculino",
+        "other": "Prefiero no especificarlo"
+      },
+      "categories": {
+        "vip": "VIP",
+        "regular": "Regular",
+        "new": "Nuevo"
+      },
+      "placeholder": {
+        "select": "Selecciona un elemento"
+      },
+      "validations": {
+        "first_name_required": "El nombre es requerido",
+        "last_name_required": "El apellido es requerido",
+        "email_required": "El correo electrónico es requerido",
+        "email_invalid": "El correo electrónico no es válido",
+        "identity_document_required": "El documento de identidad es requerido",
+        "birth_date_required": "La fecha de nacimiento es requerida",
+        "birth_date_future": "La fecha de nacimiento no puede ser futura",
+        "gender_required": "El género es requerido"
+      }
+    },
+    "edit": {
+      "title": "EDITAR CLIENTE",
+      "subtitle": "Modifica la información del cliente {name}",
+      "save_button": "Guardar Cambios",
+      "saving": "Guardando...",
+      "cancel_button": "Cancelar",
+      "success": "Cliente actualizado exitosamente",
+      "load_error": "Error al cargar los datos del cliente",
+      "save_error": "Error al guardar los cambios del cliente",
+      "loading": "Cargando datos del cliente...",
+      "error_title": "ERROR",
+      "error_subtitle": "Ocurrió un error al cargar los datos del cliente",
+      "back_button": "Volver",
+      "auth_error": "Token o ID de usuario no disponible",
+      "validation_error": "Error de validación: {errors}",
+      "invalid_data": "Datos inválidos. Por favor verifica la información.",
+      "email_in_use": "El correo electrónico ya está en uso."
+    },
+    "view": {
+      "title": "DETALLES DEL CLIENTE",
+      "subtitle": "Información detallada de {name}",
+      "sections": {
+        "personal": "Información Personal",
+        "actions": "Acciones Rápidas",
+        "membership": "Información de Membresía"
+      },
+      "fields": {
+        "id": "Código Cliente",
+        "category": "Categoría",
+        "full_name": "Nombre Completo",
+        "phone": "Teléfono",
+        "email": "Correo electrónico",
+        "identity": "Documento de identidad",
+        "birth_date": "Fecha de Nacimiento",
+        "gender": "Género",
+        "role": "Rol",
+        "scoring": "Scoring",
+        "created_at": "Fecha de creación",
+        "status": "Estado"
+      },
+      "actions": {
+        "edit": "Editar Cliente",
+        "membership_history": "Historial de Membresías y Pago",
+        "attendance_history": "Historial de asistencia",
+        "complaints": "Ver Quejas y Sugerencias",
+        "activity": "Ver Actividad y Scoring",
+        "rfm": "Ver Análisis RFM"
+      },
+      "category_active_membership": "Membresía Activa",
+      "category_regular": "Cliente Regular",
+      "loading": "CARGANDO...",
+      "loading_subtitle": "Obteniendo información del cliente",
+      "loading_message": "Cargando datos del cliente...",
+      "error_title": "ERROR",
+      "error_subtitle": "No se pudo cargar la información del cliente",
+      "not_found": "Cliente no encontrado",
+      "back_button": "Volver a la lista"
     }
   }
 }

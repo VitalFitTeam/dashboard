@@ -1,14 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { GetUserResponse, UpdateUserRequest } from "@vitalfit/sdk";
-import { APIError, isAPIError } from "@vitalfit/sdk";
+import { isAPIError } from "@vitalfit/sdk";
 import { toast } from "sonner";
 import ClientsForm, { ClientData } from "../../ClientsForm";
+import { useTranslations } from "next-intl";
 
 function formatPhoneNumber(phone: string): string {
     if (!phone) { return ""; }
@@ -32,25 +34,25 @@ function formatPhoneNumber(phone: string): string {
     return cleaned;
 }
 
-function validateClientData(client: ClientData): { isValid: boolean; errors: string[] } {
+function validateClientData(client: ClientData, t: any): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (!client.first_name?.trim()) { errors.push("El nombre es requerido"); }
-    if (!client.last_name?.trim()) { errors.push("El apellido es requerido"); }
-    if (!client.email?.trim()) { errors.push("El correo electrónico es requerido"); }
-    if (!client.identity_document?.trim()) { errors.push("El documento de identidad es requerido"); }
-    if (!client.birth_date) { errors.push("La fecha de nacimiento es requerida"); }
+    if (!client.first_name?.trim()) { errors.push(t("first_name_required")); }
+    if (!client.last_name?.trim()) { errors.push(t("last_name_required")); }
+    if (!client.email?.trim()) { errors.push(t("email_required")); }
+    if (!client.identity_document?.trim()) { errors.push(t("identity_document_required")); }
+    if (!client.birth_date) { errors.push(t("birth_date_required")); }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (client.email && !emailRegex.test(client.email)) {
-        errors.push("El correo electrónico no es válido");
+        errors.push(t("email_invalid"));
     }
 
     if (client.birth_date) {
         const birthDate = new Date(client.birth_date);
         const today = new Date();
         if (birthDate > today) {
-            errors.push("La fecha de nacimiento no puede ser futura");
+            errors.push(t("birth_date_future"));
         }
     }
 
@@ -61,6 +63,9 @@ function validateClientData(client: ClientData): { isValid: boolean; errors: str
 }
 
 export default function EditClient() {
+    const t = useTranslations("clients.edit");
+    const tForm = useTranslations("clients.form.validations");
+    const tNotifications = useTranslations("clients.notifications");
     const params = useParams();
     const router = useRouter();
     const { token } = useAuth();
@@ -114,7 +119,7 @@ export default function EditClient() {
                 if (isAPIError(error)) {
                     setError(`Error: ${error.messages.join(", ")}`);
                 } else {
-                    setError("Error al cargar los datos del cliente");
+                    setError(t("load_error"));
                 }
             } finally {
                 setIsLoading(false);
@@ -122,17 +127,17 @@ export default function EditClient() {
         };
 
         loadClient();
-    }, [params.id, token]);
+    }, [params.id, token, router, t, tNotifications]);
 
     const handleSave = async () => {
         if (!token || !params.id) {
-            setError("Token o ID de usuario no disponible");
+            setError(t("auth_error"));
             return;
         }
 
-        const validation = validateClientData(client);
+        const validation = validateClientData(client, tForm);
         if (!validation.isValid) {
-            setError(`Error de validación: ${validation.errors.join(", ")}`);
+            setError(t("validation_error", { errors: validation.errors.join(", ") }));
             return;
         }
 
@@ -159,31 +164,31 @@ export default function EditClient() {
 
             await api.user.updateUserClient(params.id as string, updateData, token);
 
-            toast.success("Cliente actualizado exitosamente");
+            toast.success(t("success"));
 
             setTimeout(() => {
-                router.replace("/clients");
+                router.replace("/clients/register");
             }, 1000);
 
         } catch (error) {
             console.error("Error updating client:", error);
 
-            let errorMessage = "Error al guardar los cambios del cliente";
+            let errorMessage = t("save_error");
 
             if (isAPIError(error)) {
                 errorMessage = `Error: ${error.messages.join(", ")}`;
 
                 if (error.status === 400) {
-                    errorMessage = "Datos inválidos. Por favor verifica la información.";
+                    errorMessage = t("invalid_data");
                 } else if (error.status === 401) {
-                    errorMessage = "Sesión expirada. Por favor inicia sesión nuevamente.";
-                    router.push("/login");
+                    errorMessage = tNotifications("session_expired");
+                    router.replace("/login");
                 } else if (error.status === 403) {
-                    errorMessage = "No tienes permisos para editar este cliente.";
+                    errorMessage = tNotifications("permission_error");
                 } else if (error.status === 404) {
-                    errorMessage = "Cliente no encontrado.";
+                    errorMessage = t("not_found");
                 } else if (error.status === 409) {
-                    errorMessage = "El correo electrónico ya está en uso.";
+                    errorMessage = t("email_in_use");
                 }
             }
 
@@ -196,14 +201,14 @@ export default function EditClient() {
     };
 
     const handleCancel = () => {
-        router.replace("/clients");
+        router.replace("/clients/register");
     };
 
     if (isLoading) {
         return (
             <div className="flex-1 space-y-8 p-8 pt-6">
                 <div className="flex items-center justify-center h-64">
-                    <div className="text-lg">Cargando datos del cliente...</div>
+                    <div className="text-lg">{t("loading")}</div>
                 </div>
             </div>
         );
@@ -213,11 +218,11 @@ export default function EditClient() {
         return (
             <div className="flex-1 space-y-8 p-8 pt-6">
                 <PageHeader
-                    title="ERROR"
-                    subtitle="Ocurrió un error al cargar los datos del cliente"
+                    title={t("error_title")}
+                    subtitle={t("error_subtitle")}
                 >
                     <Button variant="outline" onClick={() => router.replace("/clients")}>
-                        Volver
+                        {t("back_button")}
                     </Button>
                 </PageHeader>
                 <div className="p-4 bg-red-50 border border-red-200 rounded-md">
@@ -230,20 +235,20 @@ export default function EditClient() {
     return (
         <div className="flex-1 space-y-8 p-8 pt-6">
             <PageHeader
-                title="EDITAR CLIENTE"
-                subtitle={`Modifica la información del cliente ${client.first_name} ${client.last_name}`}
+                title={t("title")}
+                subtitle={t("subtitle", { name: `${client.first_name} ${client.last_name}` })}
             >
                 <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
-                    Cancelar
+                    {t("cancel_button")}
                 </Button>
                 <Button onClick={handleSave} disabled={isSaving}>
                     {isSaving ? (
                         <>
-                            <span className="mr-2">Guardando...</span>
+                            <span className="mr-2">{t("saving")}</span>
                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                         </>
                     ) : (
-                        "Guardar Cambios"
+                        t("save_button")
                     )}
                 </Button>
             </PageHeader>

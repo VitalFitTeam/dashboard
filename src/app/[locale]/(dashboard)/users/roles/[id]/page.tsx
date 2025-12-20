@@ -1,5 +1,6 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Roles } from "@/models/roles";
 import { RoleResponse, DataResponse } from "@vitalfit/sdk";
 
 export default function ViewRolePage() {
+  const t = useTranslations("roles");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { token } = useAuth();
@@ -28,7 +30,7 @@ export default function ViewRolePage() {
   useEffect(() => {
     const loadRole = async () => {
       if (!id || !token) {
-        setError("No se pudo cargar el rol");
+        setError(t("edit.load_error"));
         setIsLoading(false);
         return;
       }
@@ -52,11 +54,11 @@ export default function ViewRolePage() {
             roleData.permissions?.map((p: any) => p.permission_id) || [];
           setSelectedPermissions(permissionIds);
         } else {
-          setError("No se encontró el rol solicitado");
+          setError(t("view.error_not_found"));
         }
       } catch (err) {
         console.error("Error cargando rol:", err);
-        setError("No se pudo cargar la información del rol.");
+        setError(t("edit.load_error"));
       } finally {
         setIsLoading(false);
       }
@@ -72,7 +74,7 @@ export default function ViewRolePage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
-        <div>Cargando rol...</div>
+        <div>{t("edit.loading")}</div>
       </div>
     );
   }
@@ -83,7 +85,7 @@ export default function ViewRolePage() {
         <div className="text-red-500 text-center p-4">{error}</div>
         <div className="flex justify-center">
           <Button variant="default" onClick={() => router.push("/users/roles")}>
-            Volver a la lista
+            {t("view.back_button")}
           </Button>
         </div>
       </div>
@@ -93,12 +95,12 @@ export default function ViewRolePage() {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <PageHeader
-        title="Ver Rol"
-        subtitle={`Información completa del rol y sus permisos: ${formData.name}`}
+        title={t("view.title")}
+        subtitle={t("view.subtitle", { name: formData.name })}
         actionButton={
           <div className="flex gap-2">
             <Button type="button" variant="default" onClick={handleEdit}>
-              Modificar
+              {t("view.button_edit")}
             </Button>
           </div>
         }
@@ -106,10 +108,10 @@ export default function ViewRolePage() {
 
       <RolesForm
         formData={formData}
-        onChange={() => {}} // No-op en modo visualización
+        onChange={() => { }}
         selectedPermissions={selectedPermissions}
-        onPermissionChange={() => {}} // No-op en modo visualización
-        disabled={true} // Deshabilitado en modo visualización
+        onPermissionChange={() => { }}
+        disabled={true}
       />
     </div>
   );

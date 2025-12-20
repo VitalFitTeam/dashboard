@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Roles } from "@/models/roles";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -32,6 +33,7 @@ export default function RolesForm({
   errors = {},
   onFieldBlur,
 }: RolesFormProps) {
+  const t = useTranslations("roles.form");
   const { token } = useAuth();
   const [permissions, setPermissions] = useState<PermissionOption[]>([]);
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
@@ -47,11 +49,10 @@ export default function RolesForm({
     return errors[field];
   };
 
-  // Cargar permisos desde la API
   useEffect(() => {
     const loadPermissions = async () => {
       if (!token) {
-        setPermissionsError("No hay token de autenticación disponible");
+        setPermissionsError(t("errors.no_token"));
         setIsLoadingPermissions(false);
         return;
       }
@@ -62,7 +63,6 @@ export default function RolesForm({
 
         const response = await api.RBAC.getPermissions(token);
 
-        // Mapear la respuesta de la API al formato esperado
         if (response && Array.isArray(response.data)) {
           const mappedPermissions: PermissionOption[] = response.data.map(
             (permission: Permission) => ({
@@ -72,12 +72,12 @@ export default function RolesForm({
           );
           setPermissions(mappedPermissions);
         } else {
-          setPermissionsError("No se pudieron cargar los permisos");
+          setPermissionsError(t("errors.load_permissions_failed"));
           setPermissions([]);
         }
       } catch (error) {
         console.error("Error al cargar permisos:", error);
-        setPermissionsError("Error al cargar los permisos desde el servidor");
+        setPermissionsError(t("errors.server_error"));
         setPermissions([]);
       } finally {
         setIsLoadingPermissions(false);
@@ -96,12 +96,12 @@ export default function RolesForm({
               htmlFor="nombre"
               className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
             >
-              Nombre*
+              {t("fields.name")}
             </label>
             <Input
               id="nombre"
               name="nombre"
-              placeholder="Nombre del rol"
+              placeholder={t("fields.name_placeholder")}
               disabled={disabled}
               value={formData.name}
               onChange={(e) => onChange("name", e.target.value)}
@@ -123,13 +123,13 @@ export default function RolesForm({
             htmlFor="description"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Descripción*
+            {t("fields.description")}
           </label>
           <Textarea
             id="description"
             name="description"
             rows={2}
-            placeholder="Descripción del rol y sus permisos"
+            placeholder={t("fields.description_placeholder")}
             disabled={disabled}
             value={formData.description}
             onChange={(e) => onChange("description", e.target.value)}
@@ -146,11 +146,11 @@ export default function RolesForm({
 
       <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
         <div className="mt-6 w-full">
-          <span className="font-semibold text-gray-700 mb-4">Permisos*</span>
+          <span className="font-semibold text-gray-700 mb-4">{t("fields.permissions")}</span>
 
           {isLoadingPermissions && (
             <div className="text-sm text-gray-500 mb-4">
-              Cargando permisos...
+              {t("fields.loading_permissions")}
             </div>
           )}
 
@@ -162,11 +162,10 @@ export default function RolesForm({
             !permissionsError &&
             permissions.length === 0 && (
               <div className="text-sm text-gray-500 mb-4">
-                No hay permisos disponibles
+                {t("fields.no_permissions")}
               </div>
             )}
 
-          {/* Contenedor con scroll para los permisos - Versión Tailwind */}
           <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <div className="space-y-2">
               {permissions.map(({ key, label }) => {
@@ -183,9 +182,8 @@ export default function RolesForm({
                       onChange={(e) =>
                         onPermissionChange(key, e.target.checked)
                       }
-                      className={`h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 ${
-                        getFieldError("permissionsID") ? "border-red-500" : ""
-                      }`}
+                      className={`h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 ${getFieldError("permissionsID") ? "border-red-500" : ""
+                        }`}
                     />
                     <span className="text-sm text-gray-800 flex-1">
                       {label}
@@ -196,13 +194,11 @@ export default function RolesForm({
             </div>
           </div>
 
-          {/* Contador de permisos seleccionados */}
           {!isLoadingPermissions &&
             !permissionsError &&
             permissions.length > 0 && (
               <div className="text-sm text-gray-600 mt-2">
-                {selectedPermissions.length} de {permissions.length} permisos
-                seleccionados
+                {t("fields.permissions_selected", { selected: selectedPermissions.length, total: permissions.length })}
               </div>
             )}
 

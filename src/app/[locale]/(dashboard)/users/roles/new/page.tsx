@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import RolesForm from "../RolesForm";
 import { api } from "@/lib/sdk-config";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
 import { Roles } from "@/models/roles";
 import {
   validateRole,
@@ -16,6 +17,8 @@ import {
 import type { CreateRole } from "@vitalfit/sdk";
 
 export default function CreateRole() {
+  const t = useTranslations("roles.create");
+  const tForm = useTranslations("roles.form");
   const router = useRouter();
   const { token } = useAuth();
 
@@ -31,23 +34,16 @@ export default function CreateRole() {
     Partial<Record<keyof RoleFormData, string>>
   >({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
 
   const handleChange = (field: keyof Roles, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Limpiar error del campo cuando el usuario escribe
     if (errors[field as keyof RoleFormData]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleFieldBlur = (field: keyof Roles, value: string) => {
-    // Validación en tiempo real al perder el foco
-    const result = validateRoleField(field, value);
+    const result = validateRoleField(field, value, tForm);
     if (!result.success && result.error) {
       setErrors((prev) => ({ ...prev, [field]: result.error }));
     } else {
@@ -62,8 +58,7 @@ export default function CreateRole() {
 
     setSelectedPermissions(newPermissions);
 
-    // Validar permisos cuando cambian
-    const result = validateRoleField("permissionsID", newPermissions);
+    const result = validateRoleField("permissionsID", newPermissions, tForm);
     if (!result.success && result.error) {
       setErrors((prev) => ({ ...prev, permissionsID: result.error }));
     } else {
@@ -73,14 +68,9 @@ export default function CreateRole() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowServerError({ visible: false, message: "" });
 
-    // Validar token
     if (!token) {
-      setShowServerError({
-        visible: true,
-        message: "No estás autenticado. Por favor, inicia sesión nuevamente.",
-      });
+      toast.error(t("auth_error"));
       return;
     }
 
@@ -90,7 +80,7 @@ export default function CreateRole() {
       permissionsID: selectedPermissions,
     };
 
-    const validationResult = validateRole(formDataToValidate);
+    const validationResult = validateRole(formDataToValidate, tForm);
     if (!validationResult.success) {
       const newErrors: Partial<Record<keyof RoleFormData, string>> = {};
       validationResult.error.issues.forEach((issue) => {
@@ -115,7 +105,7 @@ export default function CreateRole() {
     try {
       await api.RBAC.createRole(payload, token);
 
-      setShowSuccess(true);
+      toast.success(t("success"));
       setTimeout(() => {
         router.push("/users/roles");
       }, 1500);
@@ -125,22 +115,12 @@ export default function CreateRole() {
       if (err && typeof err === "object" && "messages" in err) {
         const error = err as { messages: string[]; error?: string };
         if (error.messages[0] === "conflict") {
-          setShowServerError({
-            visible: true,
-            message:
-              "Ya existe un rol con este nombre. Verifica los datos ingresados.",
-          });
+          toast.error(t("conflict_error"));
         } else {
-          setShowServerError({
-            visible: true,
-            message: error.error || "Error desconocido al crear rol",
-          });
+          toast.error(error.error || t("error"));
         }
       } else {
-        setShowServerError({
-          visible: true,
-          message: "Error desconocido al crear rol",
-        });
+        toast.error(t("error"));
       }
     } finally {
       setIsLoading(false);
@@ -151,8 +131,8 @@ export default function CreateRole() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <form onSubmit={handleSubmit} className="space-y-6">
         <PageHeader
-          title="CREAR NUEVO ROL"
-          subtitle="Complete la información del nuevo rol"
+          title={t("title")}
+          subtitle={t("subtitle")}
         />
 
         <RolesForm
@@ -171,26 +151,10 @@ export default function CreateRole() {
             disabled={isLoading}
             className="flex-1"
           >
-            {isLoading ? "Creando..." : "Crear Rol"}
+            {isLoading ? t("loading") : t("button")}
           </Button>
         </div>
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="¡Rol creado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al crear rol"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

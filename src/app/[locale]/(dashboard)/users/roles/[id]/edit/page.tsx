@@ -6,16 +6,19 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import RolesForm from "../../RolesForm";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { Roles } from "@/models/roles";
 import {
   validateRole,
   validateRoleField,
   RoleFormData,
 } from "@/lib/validation/roleSchema";
-import { Notification } from "@/components/ui/Notification";
 import { RoleResponse, CreateRole, DataResponse } from "@vitalfit/sdk";
 
 export default function EditRolePage() {
+  const t = useTranslations("roles.edit");
+  const tForm = useTranslations("roles.form");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { token } = useAuth();
@@ -33,11 +36,6 @@ export default function EditRolePage() {
   >({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
 
   useEffect(() => {
     const loadRole = async () => {
@@ -64,17 +62,11 @@ export default function EditRolePage() {
             roleData.permissions?.map((p: any) => p.permission_id) || [];
           setSelectedPermissions(permissionIds);
         } else {
-          setShowServerError({
-            visible: true,
-            message: "No se pudo cargar la información del rol.",
-          });
+          toast.error(t("load_error"));
         }
       } catch (err) {
         console.error("Error cargando rol:", err);
-        setShowServerError({
-          visible: true,
-          message: "No se pudo cargar la información del rol.",
-        });
+        toast.error(t("load_error"));
       } finally {
         setIsLoading(false);
       }
@@ -91,7 +83,7 @@ export default function EditRolePage() {
   };
 
   const handleFieldBlur = (field: keyof Roles, value: string) => {
-    const result = validateRoleField(field, value);
+    const result = validateRoleField(field, value, tForm);
     if (!result.success && result.error) {
       setErrors((prev) => ({ ...prev, [field]: result.error }));
     } else {
@@ -106,8 +98,7 @@ export default function EditRolePage() {
 
     setSelectedPermissions(newPermissions);
 
-    // Validar permisos cuando cambian
-    const result = validateRoleField("permissionsID", newPermissions);
+    const result = validateRoleField("permissionsID", newPermissions, tForm);
     if (!result.success && result.error) {
       setErrors((prev) => ({ ...prev, permissionsID: result.error }));
     } else {
@@ -121,17 +112,13 @@ export default function EditRolePage() {
       return;
     }
 
-    setShowServerError({ visible: false, message: "" });
-
-    // Preparar datos para validación
     const formDataToValidate = {
       name: formData.name,
       description: formData.description,
       permissionsID: selectedPermissions,
     };
 
-    // Validar formulario completo con Zod
-    const validationResult = validateRole(formDataToValidate);
+    const validationResult = validateRole(formDataToValidate, tForm);
     if (!validationResult.success) {
       const newErrors: Partial<Record<keyof RoleFormData, string>> = {};
       validationResult.error.issues.forEach((issue) => {
@@ -148,7 +135,6 @@ export default function EditRolePage() {
 
     setIsSaving(true);
     try {
-      // Actualizar datos básicos del rol
       const payload: CreateRole = {
         name: formData.name,
         description: formData.description,
@@ -161,7 +147,7 @@ export default function EditRolePage() {
         await api.RBAC.addPermission(formData.id, selectedPermissions, token);
       }
 
-      setShowSuccess(true);
+      toast.success(t("success"));
       setTimeout(() => {
         router.push("/users/roles");
       }, 1500);
@@ -171,22 +157,12 @@ export default function EditRolePage() {
       if (err && typeof err === "object" && "messages" in err) {
         const error = err as { messages: string[]; error?: string };
         if (error.messages[0] === "conflict") {
-          setShowServerError({
-            visible: true,
-            message:
-              "Ya existe un rol con este nombre. Verifica los datos ingresados.",
-          });
+          toast.error(t("conflict_error"));
         } else {
-          setShowServerError({
-            visible: true,
-            message: error.error || "Error desconocido al actualizar rol",
-          });
+          toast.error(error.error || t("error"));
         }
       } else {
-        setShowServerError({
-          visible: true,
-          message: "Error desconocido al actualizar rol",
-        });
+        toast.error(t("error"));
       }
     } finally {
       setIsSaving(false);
@@ -196,7 +172,7 @@ export default function EditRolePage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
-        <div>Cargando rol...</div>
+        <div>{t("loading")}</div>
       </div>
     );
   }
@@ -205,8 +181,8 @@ export default function EditRolePage() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <form onSubmit={handleSubmit} className="space-y-6">
         <PageHeader
-          title="Editar Rol"
-          subtitle={`Modifica la información y permisos del rol: ${formData.name}`}
+          title={t("title")}
+          subtitle={t("subtitle", { name: formData.name })}
           actionButton={
             <div className="flex gap-2">
               <Button
@@ -214,10 +190,10 @@ export default function EditRolePage() {
                 type="button"
                 onClick={() => router.push("/users/roles")}
               >
-                Cancelar
+                {t("common.cancel")}
               </Button>
               <Button type="submit" variant="default" disabled={isSaving}>
-                {isSaving ? "Guardando..." : "Guardar"}
+                {isSaving ? t("loading") : t("button")}
               </Button>
             </div>
           }
@@ -232,22 +208,6 @@ export default function EditRolePage() {
           errors={errors}
         />
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="¡Rol actualizado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al actualizar rol"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

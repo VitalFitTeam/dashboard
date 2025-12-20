@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { DataResponse, User, PaginatedTotal } from "@vitalfit/sdk";
+import { User, PaginatedTotal } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export default function Clients() {
+  const t = useTranslations("clients");
   const [data, setData] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -61,6 +64,7 @@ export default function Clients() {
       });
     } catch (error) {
       console.error("Error loading stats:", error);
+      toast.error(t("notifications.stats_error"));
     }
   };
 
@@ -91,6 +95,7 @@ export default function Clients() {
 
     } catch (error) {
       console.error("Error loading clients:", error);
+      toast.error(t("notifications.load_error"));
       setData([]);
       setTotalItems(0);
       setStats({
@@ -133,31 +138,31 @@ export default function Clients() {
     <div className="flex-1 space-y-8 p-8 pt-6">
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard
-          title="TOTAL"
-          value={<h3 className="text-4xl">{stats.total} CLIENTES</h3>}
+          title={t("stats.total")}
+          value={<h3 className="text-4xl">{stats.total} {t("stats.unit")}</h3>}
           bottomMarkup={true}
         />
         <StatCard
-          title="ACTIVOS"
-          value={<h3 className="text-4xl text-green-500">{stats.active} CLIENTES</h3>}
+          title={t("stats.active")}
+          value={<h3 className="text-4xl text-green-500">{stats.active} {t("stats.unit")}</h3>}
           bottomMarkup={true}
         />
         <StatCard
-          title="INACTIVOS/BLOQUEADOS"
-          value={<h3 className="text-4xl text-red-500">{stats.blocked} CLIENTES</h3>}
+          title={t("stats.inactive")}
+          value={<h3 className="text-4xl text-red-500">{stats.blocked} {t("stats.unit")}</h3>}
           bottomMarkup={true}
         />
       </div>
 
-      <PageHeader title="CLIENTES" >
+      <PageHeader title={t("title")} >
         <Button variant="outline">
           <PlusIcon className="mr-2 h-4 w-4" />
-          Agregar un Cliente
+          {t("add_button")}
         </Button>
       </PageHeader>
 
       {isLoading ? (
-        <div className="text-center p-10">Cargando Clientes...</div>
+        <div className="text-center p-10">{t("table.loading")}</div>
       ) : (
         <ClientsTable
           data={data.map(user => ({
@@ -176,6 +181,7 @@ export default function Clients() {
           filters={filters}
           onFilterChange={handleFilterChange}
           totalItems={totalItems}
+          isLoading={isLoading}
         />
       )}
     </div>
