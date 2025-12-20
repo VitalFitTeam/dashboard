@@ -95,7 +95,7 @@
     "Servicios": "Services",
     "Instructores": "Instructors",
     "InventarioEquipamiento": "Equipment Inventory",
-    "PromocionesPaquetes": "Promotions & Packages",
+    "Promociones": "Promotions & Discounts",
     "ClientesSocios": "Clients & Members",
     "RegistroConsulta": "Registration & Inquiry",
     "SegmentacionScoring": "Segmentation & Scoring",
@@ -133,7 +133,8 @@
     "ReporteClientes": "Customer Report",
     "ReporteFinanciero": "Financial Report",
     "CheckinCheckout": "Check-in/Check-out",
-    "ReporteVentas": "Sales Report"
+    "ReporteVentas": "Sales Report",
+    "CombosPaquetes": "Combos/Packages"
   },
   "LocaleSwitcher": {
     "label": "Change language",
