@@ -135,7 +135,7 @@ export default function ViewUserPage() {
             <div className="flex-1 space-y-6 p-8 pt-6">
                 <div className="text-red-500 text-center p-4">{error || "Usuario no encontrado"}</div>
                 <div className="flex justify-center">
-                    <Button variant="primary" onClick={() => router.replace("/users")}>
+                    <Button variant="default" onClick={() => router.replace("/users")}>
                         Volver a la lista
                     </Button>
                 </div>

@@ -52,7 +52,7 @@ export default function EditUser({ user, onBack }: EditUserProps) {
           <Button className="w-full" variant="secondary" onClick={onBack}>
             Cancelar
           </Button>
-          <Button className="w-full" variant="primary">
+          <Button className="w-full" variant="default">
             Guardar Cambios
           </Button>
         </div>

@@ -216,7 +216,7 @@ export default function EditRolePage() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" disabled={isSaving}>
+              <Button type="submit" variant="default" disabled={isSaving}>
                 {isSaving ? "Guardando..." : "Guardar"}
               </Button>
             </div>

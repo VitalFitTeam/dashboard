@@ -241,7 +241,7 @@ export default function EditUserPage() {
                     </Button>
                     <Button
                         type="submit"
-                        variant="primary"
+                        variant="default"
                         disabled={isSaving}
                         className="flex-1"
                     >
