@@ -57,7 +57,7 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
           label: "ClientesSocios", 
           icon: UserIcon,
           subitems: [
-            { label: "RegistroConsulta", href: "/clients/clients" }, 
+            { label: "RegistroConsulta", href: "/clients/register" }, 
             { label: "SegmentacionScoring", href: "/clients/scoring" },
             { label: "QuejasSugerencias", href: "/clients/feedback" },
           ],
