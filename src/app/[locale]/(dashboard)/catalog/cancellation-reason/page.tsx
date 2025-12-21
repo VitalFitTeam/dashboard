@@ -1,98 +1,125 @@
 "use client";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import CausesTable from "./CausesTable";
-import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { mockCauses, Cause } from "./data";
+import { PlusIcon, Loader2} from "lucide-react";
+import { useCancellation } from "@/hooks/cancellation-reason/useCancellation";
+import { useAuth } from "@/context/AuthContext";
+import { useState, useCallback, useMemo } from "react";
+import CancellationTable from "@/components/modules/cancellation/CausesTable";
+import { useTranslations } from "next-intl";
+import { CancellationModal } from "@/components/modules/cancellation/CancellationModal";
+import { toast } from "sonner";
+import { api } from "@/lib/sdk-config";
 
-export default function Causes() {
-  const router = useRouter();
+export default function CancellationReasonPage() {
+  const { token } = useAuth();
+  const t = useTranslations("catalog.cancellationReason");
 
-  const [causesData, setCausesData] = useState<Cause[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit" | "view">("create");
+  const [selectedCancellation, setSelectedCancellation] = useState<any>({ description: "", is_active: true });
+  const [isSaving, setIsSaving] = useState(false);
+  const memoizedFilters = useMemo(() => ({ search }), [search]);
 
-  const [filters, setFilters] = useState({
-    search: "",
-    category: "all",
-  });
-
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-
-  const loadCausesData = useCallback(async () => {
-    setIsLoading(true);
-    
-    // Simular carga de datos
-    setTimeout(() => {
-      let filteredData = [...mockCauses];
-      
-      // Aplicar filtro de búsqueda
-      if (filters.search) {
-        filteredData = filteredData.filter(cause => 
-          cause.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-          cause.description.toLowerCase().includes(filters.search.toLowerCase())
-        );
-      }
-      
-      // Aplicar filtro de estado
-      if (filters.category !== "all") {
-        filteredData = filteredData.filter(cause => 
-          cause.status === filters.category
-        );
-      }
-      
-      setCausesData(filteredData);
-      setTotalItems(filteredData.length);
-      setIsLoading(false);
-    }, 500);
-  }, [page, pageSize, filters]);
-
-  useEffect(() => {
-    loadCausesData();
-  }, [loadCausesData]);
+  const {
+    cancellationData,
+    isLoading,
+    totalPages,
+    totalItems,
+    refresh
+  } = useCancellation(token, memoizedFilters, page);
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
   };
 
-  const handleFilterChange = (newFilters: {
-    search?: string;
-    category?: string;
-  }) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-    setPage(1); // Resetear a primera página al filtrar
+  const handleFilterChange = (newSearch: string) => {
+    setSearch(newSearch);
+    setPage(1); 
+  };
+
+  const handleOpenCreate = () => {
+    setSelectedCancellation({ description: "", is_active: true });
+    setModalMode("create");
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = useCallback((row: any) => {
+    setSelectedCancellation(row);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  }, []);
+
+  const handleOpenView = useCallback((row: any) => {
+    setSelectedCancellation(row);
+    setModalMode("view");
+    setIsModalOpen(true);
+  }, []);
+
+  const handleSave = async () => {
+    if (!token) {
+      return;
+      setIsSaving(true);
+    }
+    try {
+      if (modalMode === "create") {
+        await api.membership.createCancelReason(selectedCancellation, token);
+      } else {
+        await api.membership.updateCancelReason(selectedCancellation.reason_id, selectedCancellation, token);
+      }
+      setIsModalOpen(false);
+      refresh();
+      toast.success("Operación exitosa");
+    } catch (err) {
+      toast.error("Error al guardar");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <PageHeader title="CAUSALES DE CANCELACIÓN">
-        <Button
-          className="bg-transparent text-black border border-gray-100"
-          onClick={() => router.push("/causes/new")}
-        >
-          <PlusIcon className="h-5 w-5" />
-          Agregar Causales
+      <PageHeader title={t("title")}>
+        <Button onClick={handleOpenCreate} className="bg-[#FF6600] text-white">
+          <PlusIcon className="h-5 w-5 mr-2" />
+          {t("addButton")}
         </Button>
       </PageHeader>
 
-      {isLoading ? (
-        <div className="text-center p-10">Cargando Causales...</div>
-      ) : (
-        <CausesTable
-          data={causesData}
-          onReload={loadCausesData}
+      <div className="bg-white rounded-lg shadow-sm p-4 relative min-h-[400px]">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center rounded-lg">
+            <Loader2 className="h-8 w-8 animate-spin text-[#FF6600]" />
+          </div>
+        )}
+
+        <CancellationTable
+          data={cancellationData}
+          onReload={refresh}
           page={page}
-          pageSize={pageSize}
+          pageSize={10}
           onPageChange={handlePageChange}
           totalPages={totalPages}
-          filters={filters}
-          onFilterChange={handleFilterChange}
+          filters={memoizedFilters}
+          onFilterChange={(f) => handleFilterChange(f.search || "")}
+          onEdit={handleOpenEdit}
+          onView={handleOpenView}
         />
-      )}
+      </div>
+
+      <CancellationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        mode={modalMode}
+        cancellation={selectedCancellation}
+        onChange={(field, value) => setSelectedCancellation((prev: any) => ({ ...prev, [field]: value }))}
+        onSave={handleSave}
+        isLoading={isSaving}
+      />
     </div>
   );
 }
