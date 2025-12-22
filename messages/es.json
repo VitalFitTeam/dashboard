@@ -135,7 +135,8 @@
     "ReporteFinanciero": "Reporte Financiero",
     "CheckinCheckout": "Check-in/Check-out",
     "ReporteVentas": "Reporte de Ventas",
-    "CombosPaquetes": "Combos/Paquetes"
+    "CombosPaquetes": "Combos/Paquetes",
+    "GestionMarketing": "Gestión Maketing"
   },
   "LocaleSwitcher": {
     "label": "Cambiar idioma",
@@ -386,6 +387,100 @@
         "success": "Reason deleted successfully",
         "error": "Could not delete the reason"
       }
+    }
+  },"Promotions": {
+    "title": "PROMOCIONES Y DESCUENTOS",
+    "add_button": "Agregar Promoción",
+    "error_loading": "Error al cargar promociones",
+    "stats": {
+      "total": "Total",
+      "active": "Activas",
+      "inactive": "Inactivas",
+      "unit": "Promos"
+    },
+    "table": {
+      "columns": {
+        "promotion": "Promoción",
+        "benefit": "Beneficio",
+        "validity": "Vigencia",
+        "status": "Estatus"
+      },
+      "status": {
+        "active": "Activa",
+        "inactive": "Inactiva",
+        "expired": "Expirada"
+      },
+      "filters": {
+        "search_placeholder": "Buscar por nombre o código...",
+        "clear": "Limpiar"
+      },
+      "export": "Exportar",
+      "delete_dialog": {
+        "title": "¿Eliminar promoción?",
+        "description": "Esta acción no se puede deshacer. Se eliminará permanentemente la promoción \"{name}\".",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    },
+    "actions": {
+      "view": "Ver detalles",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "delete_loading": "Eliminando promoción...",
+      "delete_success": "Promoción eliminada correctamente",
+      "delete_error": "Error al eliminar"
+    },
+    "form": {
+      "labels": {
+        "name": "Nombre de la Promoción",
+        "code": "Código (Cupón)",
+        "type": "Tipo de Descuento",
+        "value": "Valor del Descuento",
+        "start_date": "Fecha de Inicio",
+        "end_date": "Fecha de Finalización",
+        "is_active": "Promoción activa y visible"
+      },
+      "placeholders": {
+        "name": "Ej: Verano Fitness",
+        "code": "VERANO2025",
+        "type": "Seleccionar tipo",
+        "percentage": "Porcentaje (%)",
+        "fixed": "Monto Fijo ($)"
+      }
+    },
+    "create": {
+      "title": "NUEVA PROMOCIÓN",
+      "subtitle": "Configure los detalles del cupón para sus socios.",
+      "button_cancel": "Cancelar",
+      "button_submit": "Crear Promoción",
+      "button_loading": "Guardando...",
+      "success_title": "¡Promoción creada!",
+      "success_description": "El código {code} ha sido registrado exitosamente.",
+      "error_title": "Error al guardar",
+      "error_default": "Ocurrió un problema con los datos enviados."
+    },
+    "edit": {
+      "title": "EDITAR PROMOCIÓN",
+      "subtitle": "Modifica los parámetros de la promoción seleccionada para actualizar sus beneficios.",
+      "loading": "Cargando datos de la promoción...",
+      "error_fetch": "No se pudo cargar la promoción",
+      "not_found": "Promoción no encontrada",
+      "success_update": "Promoción actualizada correctamente",
+      "error_update": "Error al actualizar",
+      "button_cancel": "Cancelar",
+      "button_submit": "Actualizar Promoción",
+      "button_loading": "Guardando cambios...",
+      "error_update_description": "No se detectaron cambios para guardar."
+    },
+    "details": {
+      "title": "DETALLES DE LA PROMOCIÓN",
+      "subtitle": "Información detallada sobre el cupón, vigencia y beneficios configurados.",
+      "not_found": "Promoción no encontrada",
+      "loading": "Cargando detalles...",
+      "error_fetch": "No se pudo cargar la información de la promoción",
+      "button_back": "Volver",
+      "button_edit": "Modificar",
+      "button_list": "Volver al listado"
     }
   }
   },

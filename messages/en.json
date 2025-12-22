@@ -134,7 +134,8 @@
     "ReporteFinanciero": "Financial Report",
     "CheckinCheckout": "Check-in/Check-out",
     "ReporteVentas": "Sales Report",
-    "CombosPaquetes": "Combos/Packages"
+    "CombosPaquetes": "Combos/Packages",
+    "GestionMarketing": "Maketing Management"
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -385,6 +386,101 @@
         "success": "Reason deleted successfully.",
         "error": "Could not delete the reason."
       }
+    }
+  },
+  "Promotions": {
+    "title": "PROMOTIONS AND DISCOUNTS",
+    "add_button": "Add Promotion",
+    "error_loading": "Error loading promotions",
+    "stats": {
+      "total": "Total",
+      "active": "Active",
+      "inactive": "Inactive",
+      "unit": "Promos"
+    },
+    "table": {
+      "columns": {
+        "promotion": "Promotion",
+        "benefit": "Benefit",
+        "validity": "Validity",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "expired": "Expired"
+      },
+      "filters": {
+        "search_placeholder": "Search by name or code...",
+        "clear": "Clear"
+      },
+      "export": "Export",
+      "delete_dialog": {
+        "title": "Delete promotion?",
+        "description": "This action cannot be undone. The promotion \"{name}\" will be permanently deleted.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      }
+    },
+    "actions": {
+      "view": "View details",
+      "edit": "Edit",
+      "delete": "Delete",
+      "delete_loading": "Deleting promotion...",
+      "delete_success": "Promotion successfully deleted",
+      "delete_error": "Error during deletion"
+    },
+    "form": {
+      "labels": {
+        "name": "Promotion Name",
+        "code": "Code (Coupon)",
+        "type": "Discount Type",
+        "value": "Discount Value",
+        "start_date": "Start Date",
+        "end_date": "End Date",
+        "is_active": "Active and visible promotion"
+      },
+      "placeholders": {
+        "name": "e.g., Summer Fitness",
+        "code": "SUMMER2025",
+        "type": "Select type",
+        "percentage": "Percentage (%)",
+        "fixed": "Fixed Amount ($)"
+      }
+    },
+    "create": {
+      "title": "NEW PROMOTION",
+      "subtitle": "Configure the coupon details for your members.",
+      "button_cancel": "Cancel",
+      "button_submit": "Create Promotion",
+      "button_loading": "Saving...",
+      "success_title": "Promotion created!",
+      "success_description": "The code {code} has been successfully registered.",
+      "error_title": "Save error",
+      "error_default": "A problem occurred with the submitted data."
+    },
+    "edit": {
+      "title": "EDIT PROMOTION",
+      "subtitle": "Modify the selected promotion parameters to update its benefits.",
+      "loading": "Loading promotion data...",
+      "error_fetch": "Could not load promotion",
+      "not_found": "Promotion not found",
+      "success_update": "Promotion updated successfully",
+      "error_update": "Update error",
+      "error_update_description": "No changes were detected to save.",
+      "button_cancel": "Cancel",
+      "button_submit": "Update Promotion",
+      "button_loading": "Saving changes..."
+    },
+    "details": {
+      "title": "PROMOTION DETAILS",
+      "subtitle": "Detailed information about the coupon, validity, and configured benefits.",
+      "not_found": "Promotion not found",
+      "loading": "Loading details...",
+      "error_fetch": "Could not load promotion information",
+      "button_back": "Back",
+      "button_edit": "Modify",
+      "button_list": "Back to list"
     }
   }
   },

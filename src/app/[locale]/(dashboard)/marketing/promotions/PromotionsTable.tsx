@@ -4,54 +4,17 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Download, Eye, Pencil, Trash2, Search } from "lucide-react";
+import { Download, Eye, Pencil, Trash2, Search, X } from "lucide-react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
+import { Promotion } from "@vitalfit/sdk";
+import { useRouter } from "@/i18n/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { api } from "@/lib/sdk-config";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import { useTranslations } from "next-intl";
 
-// Tipos de datos para promociones
-export interface Promotion {
-  promotion_id: string;
-  code: string;
-  name: string;
-  description?: string;
-  type: "percentage" | "fixed_amount";
-  discount: number;
-  min_amount?: number;
-  max_discount?: number;
-  start_date: string;
-  end_date: string;
-  usage_limit?: number;
-  used_count: number;
-  status: "Active" | "Inactive" | "Expired";
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CreatePromotionDTO {
-  code: string;
-  name: string;
-  description?: string;
-  type: "percentage" | "fixed_amount";
-  discount: number;
-  min_amount?: number;
-  max_discount?: number;
-  start_date: string;
-  end_date: string;
-  usage_limit?: number;
-}
-
-export interface UpdatePromotionDTO extends Partial<CreatePromotionDTO> {
-  status?: "Active" | "Inactive";
-}
-
-// Props del componente
 interface PromotionsTableProps {
   data: Promotion[];
   isLoading: boolean;
@@ -62,9 +25,7 @@ interface PromotionsTableProps {
   onPageSizeChange: (size: number) => void;
   onFilterChange: (key: string, value: string | undefined) => void;
   filterValues: Record<string, string | undefined>;
-  onEdit?: (promotion: Promotion) => void;
-  onDelete?: (promotion: Promotion) => void;
-  onView?: (promotion: Promotion) => void;
+  onReload: () => void;
 }
 
 export default function PromotionsTable({
@@ -76,237 +37,190 @@ export default function PromotionsTable({
   onPageChange,
   onPageSizeChange,
   onFilterChange,
+  onReload,
   filterValues,
-  onEdit,
-  onDelete,
-  onView,
 }: PromotionsTableProps) {
-  const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
+  
+  const t = useTranslations("catalog.Promotions.table");
+  const tActions = useTranslations("catalog.Promotions.actions");
+  
+  const { token } = useAuth();
+  const router = useRouter();
+  
+  const [deleteTarget, setDeleteTarget] = useState<Promotion | null>(null);
 
-  // Acciones de la tabla
-  const handleView = (row: Promotion) => {
-    onView?.(row);
-  };
+  const [inputFilters, setInputFilters] = useState<Record<string, string>>({
+    search: filterValues.search || "",
+  });
 
-  const handleEdit = (row: Promotion) => {
-    onEdit?.(row);
-  };
-
-  const handleDelete = (row: Promotion) => {
-    onDelete?.(row);
-  };
-
-  // Función para formatear el descuento
-  const formatDiscount = (promotion: Promotion) => {
-    if (promotion.type === "percentage") {
-      return `${promotion.discount}%`;
-    } else {
-      return `$${promotion.discount.toFixed(2)}`;
-    }
-  };
-
-  // Definición de columnas
   const columns: Column<Promotion>[] = [
-    { header: "Código", accessor: "code" },
-    { header: "Nombre", accessor: "name" },
     {
-      header: "Tipo",
-      accessor: "type",
-      render: (value) => (value === "percentage" ? "Porcentaje" : "Monto Fijo"),
+      header: t("columns.promotion"),
+      accessor: "name",
+      render: (value, row) => (
+        <div className="flex flex-col gap-0.5">
+          <span className="font-semibold text-sm text-slate-900 leading-none">{value}</span>
+          <span className="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
+            {row.code}
+          </span>
+        </div>
+      ),
     },
     {
-      header: "Descuento",
-      accessor: "discount",
-      render: (value, row) => formatDiscount(row),
+      header: t("columns.benefit"),
+      accessor: "discount_value",
+      render: (_, row) => (
+        <div className="flex items-baseline gap-1">
+          <span className="font-bold text-slate-800">
+            {row.discount_type === "Percentage"
+              ? `${row.discount_value}%`
+              : `$${row.discount_value.toLocaleString()}`}
+          </span>
+          <span className="text-[10px] font-medium text-slate-400 uppercase">Off</span>
+        </div>
+      ),
     },
     {
-      header: "Fecha de inicio",
+      header: t("columns.validity"),
       accessor: "start_date",
-      render: (value) => {
-        if (!value) {return "-";}
-        const date = new Date(value);
-        if (isNaN(date.getTime())) {return "Fecha inválida";}
-        return date.toLocaleDateString("es-VE", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-      },
-    },
-    {
-      header: "Fecha de finalización",
-      accessor: "end_date",
-      render: (value) => {
-        if (!value) {return "-";}
-        const date = new Date(value);
-        if (isNaN(date.getTime())) {return "Sin fecha";}
-        return date.toLocaleDateString("es-VE", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-      },
-    },
-    {
-      header: "Estatus",
-      accessor: "status",
-      render: (value) => {
-        const statusConfig = {
-          Active: {
-            text: "Activa",
-            color: "text-green-700 border-green-300 bg-green-50",
-          },
-          Inactive: {
-            text: "Inactiva",
-            color: "text-red-700 border-red-300 bg-red-50",
-          },
-          Expired: {
-            text: "Expirada",
-            color: "text-yellow-700 border-yellow-300 bg-yellow-50",
-          },
-        };
-        const config = statusConfig[value as keyof typeof statusConfig] ?? {
-          text: "Desconocido",
-          color: "text-gray-700 border-gray-300 bg-gray-50",
-        };
+      render: (_, row) => {
+        const formatDate = (dateStr: string) =>
+          new Date(dateStr).toLocaleDateString("es-VE", {
+            day: "2-digit",
+            month: "short",
+          });
+
         return (
-          <Badge variant="outline" className={`border ${config.color}`}>
-            {config.text}
-          </Badge>
+          <div className="flex items-center text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded-md w-fit border border-slate-100 font-medium">
+            <span>{formatDate(row.start_date)}</span>
+            <span className="mx-2 text-slate-300">—</span>
+            <span>{formatDate(row.end_date)}</span>
+          </div>
         );
+      },
+    },
+    {
+      header: t("columns.status"),
+      accessor: "is_active",
+      render: (isActive, row) => {
+        const now = new Date();
+        const isExpired = new Date(row.end_date) < now;
+
+        if (!isActive) {
+          return <Badge variant="secondary">{t("status.inactive")}</Badge>;
+        }
+        if (isExpired) {
+          return <Badge variant="warning">{t("status.expired")}</Badge>;
+        }
+        return <Badge variant="success">{t("status.active")}</Badge>;
       },
     },
   ];
 
-  // Manejo de filtros con debounce
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (inputFilters.search) {
-        onFilterChange?.("search", inputFilters.search);
-      } else {
-        onFilterChange?.("search", undefined);
-      }
-
-      if (inputFilters.status) {
-        onFilterChange?.("status", inputFilters.status);
-      }
-
-      if (inputFilters.dateRange) {
-        onFilterChange?.("dateRange", inputFilters.dateRange);
-      }
+      onFilterChange("search", inputFilters.search || undefined);
     }, 500);
-
     return () => clearTimeout(timer);
-  }, [inputFilters]);
+  }, [inputFilters.search]);
+
+  const clearFilters = () => {
+    setInputFilters({ search: "" });
+    onFilterChange("search", undefined);
+  };
+
+  const handleDelete = async () => {
+    if (!token || !deleteTarget) {
+      return;
+    }
+
+    const toastId = toast.loading(tActions("delete_loading"));
+    try {
+      await api.marketing.deletePromotion(deleteTarget.promotion_id, token);
+      toast.success(tActions("delete_success"), { id: toastId });
+      onReload();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || tActions("delete_error"), { id: toastId });
+    } finally {
+      setDeleteTarget(null);
+    }
+  };
 
   return (
     <>
-      {/* Barra de filtros */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        {/* Búsqueda */}
-        <div className="relative w-full sm:w-[250px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nombre o código"
-            className="pl-9 w-90"
-            value={inputFilters.search || ""}
-            onChange={(e) =>
-              setInputFilters((prev) => ({ ...prev, search: e.target.value }))
-            }
-          />
-        </div>
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-1 flex-wrap items-center gap-3">
+            <div className="relative w-full sm:w-[300px]">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder={t("filters.search_placeholder")}
+                className="pl-9 h-10"
+                value={inputFilters.search}
+                onChange={(e) => setInputFilters(prev => ({ ...prev, search: e.target.value }))}
+              />
+            </div>
 
-        {/* Filtro de estatus */}
-        <Select
-          value={inputFilters.status || ""}
-          onValueChange={(value) =>
-            setInputFilters((prev) => ({ ...prev, status: value }))
-          }
-        >
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Estatus" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Active">Activa</SelectItem>
-            <SelectItem value="Inactive">Inactiva</SelectItem>
-            <SelectItem value="Expired">Expirada</SelectItem>
-          </SelectContent>
-        </Select>
+            {inputFilters.search && (
+              <Button variant="ghost" onClick={clearFilters} className="h-10 text-muted-foreground">
+                <X className="mr-2 h-4 w-4" />
+                {t("filters.clear")}
+              </Button>
+            )}
+          </div>
 
-        {/* Fecha de finalización */}
-        <Select
-          value={inputFilters.dateRange || ""}
-          onValueChange={(value) =>
-            setInputFilters((prev) => ({ ...prev, dateRange: value }))
-          }
-        >
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Fecha de finalización" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="this_month">Este mes</SelectItem>
-            <SelectItem value="next_month">Próximo mes</SelectItem>
-            <SelectItem value="next_3_months">Próximos 3 meses</SelectItem>
-            <SelectItem value="expired">Ya expiradas</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Limpiar filtros */}
-        {(filterValues.search ||
-          filterValues.status ||
-          filterValues.dateRange) && (
-          <Button
-            variant="outline"
-            className="mt-2 sm:mt-0"
-            onClick={() => {
-              onFilterChange("search", undefined);
-              onFilterChange("status", undefined);
-              onFilterChange("dateRange", undefined);
-              setInputFilters({});
-            }}
-          >
-            Limpiar filtros
-          </Button>
-        )}
-
-        {/* Botón extra*/}
-        <div className="flex items-center gap-4">
-          <Button variant="outline">
+          <Button variant="outline" className="h-10">
             <Download className="mr-2 h-4 w-4" />
-            Descargar CSV
+            {t("export")}
           </Button>
         </div>
+
+        <DataTable
+          columns={columns}
+          data={data}
+          isLoading={isLoading}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+          onPageSizeChange={onPageSizeChange}
+          totalPages={totalPages}
+          rowIdKey="promotion_id"
+          actions={(row) => (
+            <RowActions
+              actions={[
+                { 
+                  label: tActions("view"), 
+                  icon: Eye, 
+                  onClick: () => router.push(`/marketing/promotions/${row.promotion_id}`) 
+                },
+                { 
+                  label: tActions("edit"), 
+                  icon: Pencil, 
+                  onClick: () => router.push(`/marketing/promotions/${row.promotion_id}/edit`) 
+                },
+                {
+                  label: tActions("delete"),
+                  icon: Trash2,
+                  onClick: () => setDeleteTarget(row),
+                  variant: "danger",
+                  separatorBefore: true,
+                },
+              ]}
+            />
+          )}
+        />
       </div>
 
-      {/* Tabla de datos */}
-      <DataTable
-        columns={columns}
-        data={data}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
-        onPageSizeChange={onPageSizeChange}
-        totalPages={totalPages}
-        rowIdKey="promotion_id"
-        actions={(row) => (
-          <RowActions
-            actions={[
-              { label: "Ver", icon: Eye, onClick: () => handleView(row) },
-              {
-                label: "Modificar",
-                icon: Pencil,
-                onClick: () => handleEdit(row),
-              },
-              {
-                label: "Eliminar",
-                icon: Trash2,
-                onClick: () => handleDelete(row),
-                variant: "danger",
-                separatorBefore: true,
-              },
-            ]}
-          />
-        )}
+      <GeneralAlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title={t("delete_dialog.title")}
+        description={t("delete_dialog.description", { name: deleteTarget?.name ?? "" })}
+        actionText={t("delete_dialog.confirm")}
+        cancelText={t("delete_dialog.cancel")}
+        onAction={handleDelete}
+        actionVariant="destructive"
       />
     </>
   );

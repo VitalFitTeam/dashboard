@@ -1,5 +1,5 @@
 import { api } from "@/lib/sdk-config";
-import { CancellationReason, Promotion } from "@vitalfit/sdk";
+import { Promotion } from "@vitalfit/sdk";
 import { useCallback, useEffect, useState } from "react";
 
 interface Filters {
@@ -15,6 +15,7 @@ export function usePromotions(token: string | null, filters: Filters, page: numb
 
   const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
 
+  // Debounce para evitar llamadas excesivas a la API mientras el usuario escribe
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(filters.search);
@@ -23,6 +24,7 @@ export function usePromotions(token: string | null, filters: Filters, page: numb
     return () => clearTimeout(handler);
   }, [filters.search]);
 
+  // Función principal de carga, expuesta como 'mutate' para recargas manuales
   const loadData = useCallback(async () => {
     if (!token) {
       setIsLoading(false);
@@ -38,18 +40,21 @@ export function usePromotions(token: string | null, filters: Filters, page: numb
         search: debouncedSearch?.trim() || undefined,
       });
 
+      // Validamos que la respuesta contenga los datos esperados
       setPromotionData(response.data || []);
       setTotalItems(response.total || 0); 
       setError(null);
-    } catch (err) {
-      console.error("Error al cargar razones:", err);
+    } catch (err: any) {
+      console.error("Error al cargar promociones:", err);
       setError(err as Error);
       setPromotionData([]);
+      setTotalItems(0);
     } finally {
       setIsLoading(false);
     }
   }, [token, debouncedSearch, page]); 
 
+  // Efecto disparador basado en cambios de página, búsqueda o token
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -60,6 +65,6 @@ export function usePromotions(token: string | null, filters: Filters, page: numb
     error,
     totalItems,
     totalPages: Math.ceil(totalItems / pageSize),
-    refresh: loadData
+    mutate: loadData 
   };
 }
