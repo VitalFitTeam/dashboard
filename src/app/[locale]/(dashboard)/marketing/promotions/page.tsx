@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import PromotionsTable from "./PromotionsTable";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
@@ -10,6 +9,7 @@ import { usePromotions } from "@/hooks/promotions/usePromotions";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl"; 
+import PromotionsTable from "@/components/modules/promotions/PromotionsTable";
 
 export default function PromotionsPage() {
   const t = useTranslations("catalog.Promotions");

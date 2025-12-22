@@ -149,7 +149,7 @@ export default function ClientsTable({
     const displayStatus = normalizedStatus === "blocked" ? "inactive" : normalizedStatus;
 
     return (
-      <Badge variant={variantMap[displayStatus] || "default"}>
+      <Badge variant={ "default"}>
         {labels[displayStatus] || status}
       </Badge>
     );

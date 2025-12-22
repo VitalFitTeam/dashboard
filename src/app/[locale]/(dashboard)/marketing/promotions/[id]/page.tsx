@@ -8,10 +8,10 @@ import { api } from "@/lib/sdk-config";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
-import PromotionForm from "../PromotionForm";
 import { Promotion } from "@vitalfit/sdk";
 import { ArrowLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import PromotionForm from "@/components/modules/promotions/PromotionForm";
 
 export default function PromotionDetails() {
   const t = useTranslations("catalog.Promotions.details");
@@ -91,7 +91,7 @@ export default function PromotionDetails() {
       <p className="text-sm text-muted-foreground">
         {t("subtitle")}
       </p>
-      <PromotionForm 
+      <PromotionForm
         mode="view" 
         initialData={promotion} 
         onSubmit={() => {}} 

@@ -10,8 +10,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { promotionSchema } from "@/lib/validation/promotionSchema";
-import PromotionForm from "../../PromotionForm";
 import { useTranslations } from "next-intl";
+import PromotionForm from "@/components/modules/promotions/PromotionForm";
 
 type PromotionFormValues = z.infer<typeof promotionSchema>;
 

@@ -6,11 +6,11 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import PromotionForm from "../PromotionForm";
 import { z } from "zod";
 import { promotionSchema } from "@/lib/validation/promotionSchema";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import PromotionForm from "@/components/modules/promotions/PromotionForm";
 
 interface CreatePromotionProps {
   onBack?: () => void;
