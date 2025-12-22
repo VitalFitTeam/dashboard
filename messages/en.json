@@ -523,7 +523,8 @@
       "success": "Role created successfully!",
       "error": "Error creating role",
       "auth_error": "You are not authenticated. Please log in again.",
-      "conflict_error": "A role with this name already exists. Please check the entered data."
+      "conflict_error": "A role with this name already exists. Please check the entered data.",
+      "cancel": "Cancel"
     },
     "edit": {
       "title": "EDIT ROLE",
@@ -532,7 +533,8 @@
       "loading": "Saving...",
       "success": "Role updated successfully!",
       "error": "Error updating role",
-      "load_error": "Could not load role information."
+      "load_error": "Could not load role information.",
+      "cancel": "Cancel"
     },
     "common": {
       "cancel": "Cancel",

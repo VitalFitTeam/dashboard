@@ -133,6 +133,20 @@ export default function CreateRole() {
         <PageHeader
           title={t("title")}
           subtitle={t("subtitle")}
+          actionButton={
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => router.push("/users/roles")}
+              >
+                {t("cancel")}
+              </Button>
+              <Button type="submit" variant="default" disabled={isLoading}>
+                {isLoading ? t("loading") : t("button")}
+              </Button>
+            </div>
+          }
         />
 
         <RolesForm
@@ -143,17 +157,6 @@ export default function CreateRole() {
           onFieldBlur={handleFieldBlur}
           errors={errors}
         />
-
-        <div className="flex gap-4 pt-4">
-          <Button
-            type="submit"
-            variant="default"
-            disabled={isLoading}
-            className="flex-1"
-          >
-            {isLoading ? t("loading") : t("button")}
-          </Button>
-        </div>
       </form>
     </div>
   );

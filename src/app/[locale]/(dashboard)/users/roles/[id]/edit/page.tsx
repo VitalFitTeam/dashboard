@@ -190,7 +190,7 @@ export default function EditRolePage() {
                 type="button"
                 onClick={() => router.push("/users/roles")}
               >
-                {t("common.cancel")}
+                {t("cancel")}
               </Button>
               <Button type="submit" variant="default" disabled={isSaving}>
                 {isSaving ? t("loading") : t("button")}

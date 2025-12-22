@@ -523,7 +523,8 @@
       "success": "¡Rol creado exitosamente!",
       "error": "Error al crear rol",
       "auth_error": "No estás autenticado. Por favor, inicia sesión nuevamente.",
-      "conflict_error": "Ya existe un rol con este nombre. Verifica los datos ingresados."
+      "conflict_error": "Ya existe un rol con este nombre. Verifica los datos ingresados.",
+      "cancel": "Cancelar"
     },
     "edit": {
       "title": "EDITAR ROL",
@@ -532,7 +533,8 @@
       "loading": "Guardando...",
       "success": "¡Rol actualizado exitosamente!",
       "error": "Error al actualizar rol",
-      "load_error": "No se pudo cargar la información del rol."
+      "load_error": "No se pudo cargar la información del rol.",
+      "cancel": "Cancelar"
     },
     "common": {
       "cancel": "Cancelar",
