@@ -1,6 +1,6 @@
 // @ts-nocheck
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import PromotionsTable, {
   Promotion,
   CreatePromotionDTO,
@@ -13,6 +13,9 @@ import { StatCard } from "@/components/ui/StatCard";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import AlertConfirm from "@/components/ui/alertConfirm";
+import { usePromotions } from "@/hooks/promotions/usePromotions";
+import { Search } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 // Mock service - reemplaza con tu API real
 const promotionService = {
@@ -176,10 +179,23 @@ export default function PromotionsPage() {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isViewer, setIsViewer] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const {token} = useAuth();
+
+
+  const { 
+    isLoading, 
+    promotionData, 
+    error, 
+    totalItems, 
+    totalPages, 
+    refresh 
+  } = usePromotions(token, filters, page);
+
+  console.log(promotionData);
 
   const [statsData, setStatsData] = useState<PromotionStatusCount>({
     Active: 0,
@@ -196,7 +212,6 @@ export default function PromotionsPage() {
   const [pageSize, setPageSize] = useState(10);
   const [totalPromotions, setTotalPromotions] = useState(0);
 
-  const totalPages = Math.max(1, Math.ceil(totalPromotions / pageSize));
 
   // Cargar datos
   useEffect(() => {
@@ -340,7 +355,6 @@ export default function PromotionsPage() {
         </Button>
       </PageHeader>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {statCardsConfig.map((card) => (
           <StatCard

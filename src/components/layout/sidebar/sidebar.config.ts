@@ -42,7 +42,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
             { label: "Servicios",  href: "/catalog/services" },
             { label: "Instructores", href: "/catalog/instructors" },
             { label: "InventarioEquipamiento",  href: "/catalog/equipment" },
-            { label: "PromocionesPaquetes",href: "/catalog/promotions" },
             { label: "DocumentosFiscales", href: "/catalog/fiscal-documents" },
             { label: "MetodosPagoGlobal", href: "/catalog/payment-methods" },
             { label: "CausalesCancelacion", href: "/catalog/cancellation-causes" },
@@ -98,8 +97,15 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
     {
       title: "Marketing",
       items: [
-        { label: "GestionBanners", icon: Megaphone, href: "/marketing/banners" },
-        { label: "MerchandisingCrosssell", icon: ChartBar, href: "/marketing/merchandising" },
+         { 
+          label: "GestionMarketing",
+          icon: Megaphone, 
+          subitems: [
+            { label: "GestionBanners",  href: "/marketing/banners" },
+            { label: "Promociones",href: "/marketing/promotions" },
+            { label: "MerchandisingCrosssell", href: "/marketing/merchandising" },
+          ],
+        },
       ],
     },
     {
