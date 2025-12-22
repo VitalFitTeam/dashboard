@@ -209,7 +209,7 @@ export default function ClientDetails() {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Estado</p>
-                            <Badge variant={client.status === "active" ? "default" : "destructive"}>
+                            <Badge variant={client.status === "active" ? "success" : "error"}>
                                 {client.status === "active" ? "Activo" : "Inactivo"}
                             </Badge>
                         </div>
@@ -269,7 +269,7 @@ export default function ClientDetails() {
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Estado</p>
-                                <Badge variant={client.client_membership.status === "active" ? "default" : "destructive"}>
+                                <Badge variant={client.client_membership.status === "active" ? "success" : "error"}>
                                     {client.client_membership.status}
                                 </Badge>
                             </div>
