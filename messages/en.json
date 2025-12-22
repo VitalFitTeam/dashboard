@@ -95,7 +95,7 @@
     "Servicios": "Services",
     "Instructores": "Instructors",
     "InventarioEquipamiento": "Equipment Inventory",
-    "PromocionesPaquetes": "Promotions & Packages",
+    "Promociones": "Promotions & Discounts",
     "ClientesSocios": "Clients & Members",
     "RegistroConsulta": "Registration & Inquiry",
     "SegmentacionScoring": "Segmentation & Scoring",
@@ -133,7 +133,8 @@
     "ReporteClientes": "Customer Report",
     "ReporteFinanciero": "Financial Report",
     "CheckinCheckout": "Check-in/Check-out",
-    "ReporteVentas": "Sales Report"
+    "ReporteVentas": "Sales Report",
+    "CombosPaquetes": "Combos/Packages"
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -348,7 +349,44 @@
           }
         }
       }
+    },
+    "cancellationReason": {
+    "title": "Cancellation Reasons",
+    "addButton": "Add Reason",
+    "loading": "Loading reasons...",
+    "error": "There was an error loading the data.",
+    "retry": "Retry",
+    "CausesTable": {
+      "searchPlaceholder": "Filter by description...",
+      "download": "Download",
+      "columns": {
+        "description": "Description",
+        "status": "Status",
+        "descriptionPlaceholder": "e.g., Moved away, financial reasons, etc."
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "createModeHelp": "* New cancellation reasons are created as active by default.",
+      "descriptionHelp": "Clearly describe the reason why the customer is canceling their subscription.",
+      "actions": {
+        "view": "View",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "deleteModal": {
+        "title": "Confirm Deletion",
+        "description": "Are you sure you want to delete this reason? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel",
+        "success": "Reason deleted successfully.",
+        "error": "Could not delete the reason."
+      }
     }
+  }
   },
 "common": {
   "Validations": {
