@@ -208,11 +208,7 @@ export default function ClientDetails() {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Estado</p>
-<<<<<<< HEAD
-                            <Badge variant={client.status === "a" ? "success" : "error"}>
-=======
                             <Badge variant={client.status === "active" ? "success" : "error"}>
->>>>>>> development
                                 {client.status === "active" ? "Activo" : "Inactivo"}
                             </Badge>
                         </div>
