@@ -42,10 +42,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
             { label: "Servicios",  href: "/catalog/services" },
             { label: "Instructores", href: "/catalog/instructors" },
             { label: "InventarioEquipamiento",  href: "/catalog/equipment" },
-<<<<<<< HEAD
-            { label: "Promociones",href: "/catalog/promotions" },
-=======
->>>>>>> development
             { label: "DocumentosFiscales", href: "/catalog/fiscal-documents" },
             { label: "MetodosPagoGlobal", href: "/catalog/payment-methods" },
             { label: "CausalesCancelacion", href: "/catalog/cancellation-reason" },
