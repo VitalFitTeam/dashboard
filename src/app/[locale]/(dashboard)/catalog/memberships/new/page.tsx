@@ -3,14 +3,15 @@
 import { useState } from "react";
 import type { MembershipType } from "@vitalfit/sdk";
 import type { CreateMembershipType } from "@vitalfit/sdk";
-import { membershipSchema } from "@/lib/validation/membershipSchema";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import MembershipForm from "../MembershipForm";
 import { api } from "@/lib/sdk-config";
-import { Notification } from "@/components/ui/Notification";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
+import { createMembershipSchema } from "@/lib/validation/membershipSchema";
+import { toast } from "sonner";
 
 type ValidationResult = {
   success: boolean;
@@ -24,6 +25,7 @@ type MembershipFormData = Omit<MembershipType, "duration_days" | "price"> & {
 };
 
 export default function CreateMembership() {
+  const t = useTranslations("catalog.memberships");
   const router = useRouter();
 
   const [formData, setFormData] = useState<MembershipFormData>({
@@ -39,12 +41,6 @@ export default function CreateMembership() {
     Partial<Record<keyof MembershipType, string>>
   >({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
-  const [showConnectionError, setShowConnectionError] = useState(false);
 
   const handleChange = (field: keyof MembershipType, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -53,7 +49,8 @@ export default function CreateMembership() {
 
   const validateMembership = (data: MembershipFormData): ValidationResult => {
     try {
-      // Convertir campos numéricos de string a number para validación
+      const schema = createMembershipSchema((key) => t(`validations.${key.split('.').pop()}`));
+
       const dataToValidate = {
         ...data,
         duration_days:
@@ -61,7 +58,7 @@ export default function CreateMembership() {
         price: data.price === "" ? 0 : Number(data.price),
       };
 
-      const validatedData = membershipSchema.parse(dataToValidate);
+      const validatedData = schema.parse(dataToValidate);
       return {
         success: true,
         data: validatedData,
@@ -90,7 +87,7 @@ export default function CreateMembership() {
         success: false,
         data: null,
         errors: {
-          name: "Error de validación inesperado",
+          name: t("validations.validation_error"),
         },
       };
     }
@@ -98,8 +95,8 @@ export default function CreateMembership() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowServerError({ visible: false, message: "" });
-    setShowConnectionError(false);
+
+
 
     const validation = validateMembership(formData);
     if (!validation.success) {
@@ -117,10 +114,7 @@ export default function CreateMembership() {
 
     const token = localStorage.getItem("access_token");
     if (!token || typeof token !== "string" || token.length < 10) {
-      setShowServerError({
-        visible: true,
-        message: "Token de autenticación no encontrado.",
-      });
+      toast.error(t("create.error_auth"));
       return;
     }
 
@@ -135,9 +129,9 @@ export default function CreateMembership() {
     setIsLoading(true);
     try {
       await api.membership.createMembershipType(payload, token);
-      setShowSuccess(true);
+      toast.success(t("create.success"));
       setTimeout(() => {
-        router.push("/memberships");
+        router.push("/catalog/memberships");
       }, 1500);
     } catch (err: unknown) {
       console.error("Error al crear membresía:", err);
@@ -147,15 +141,12 @@ export default function CreateMembership() {
           response?: { data?: { error?: string } };
         };
         if (errorWithResponse.response?.data?.error) {
-          setShowServerError({
-            visible: true,
-            message: errorWithResponse.response.data.error,
-          });
+          toast.error(errorWithResponse.response.data.error);
         } else {
-          setShowConnectionError(true);
+          toast.error(t("create.error_connection_description"));
         }
       } else {
-        setShowConnectionError(true);
+        toast.error(t("create.error_connection_description"));
       }
     } finally {
       setIsLoading(false);
@@ -165,9 +156,9 @@ export default function CreateMembership() {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <form onSubmit={handleSubmit} className="space-y-2">
-        <PageHeader title="CREAR MEMBRESÍA"></PageHeader>
+        <PageHeader title={t("create.title")}></PageHeader>
         <p className="text-sm text-muted-foreground">
-          Agrega la información de la membresía
+          {t("create.subtitle")}
         </p>
 
         <MembershipForm
@@ -182,33 +173,9 @@ export default function CreateMembership() {
           variant="default"
           disabled={isLoading}
         >
-          {isLoading ? "Guardando..." : "Crear"}
+          {isLoading ? t("create.button_saving") : t("create.button_create")}
         </Button>
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="Membresía creada exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-      {showConnectionError && (
-        <Notification
-          variant="destructive"
-          title="Error de conexión"
-          description="No se pudo conectar con el servidor. Intenta más tarde."
-          onClose={() => setShowConnectionError(false)}
-        />
-      )}
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al crear membresía"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

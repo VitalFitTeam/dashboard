@@ -7,7 +7,6 @@ import {
   BranchStatusCount,
   Pagination,
   PaymentMethod,
-  User,
 } from "@vitalfit/sdk";
 import {
   BanknotesIcon,
@@ -17,32 +16,13 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
-import { Instructor } from "@/models/instructor";
-import { City, State, Country } from "@/models/location";
-import { Service } from "@/models/service";
-import { Equipment } from "@/models/equipment";
+import { Country } from "@/models/location";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
-
-const statCardsConfig: {
-  title: string;
-  valueKey: keyof BranchStatusCount | "Total";
-}[] = [
-  { title: "Total", valueKey: "Total" },
-  { title: "Activas", valueKey: "Active" },
-  { title: "Inactivas", valueKey: "Inactive" },
-  { title: "Mantenimiento", valueKey: "Maintenance" },
-];
-
-type StatsData = {
-  total: number;
-  active: number;
-  inactive: number;
-  maintenance: number;
-};
+import { useTranslations } from "next-intl";
 
 export type PaymentMethodUI = PaymentMethod & {
   icon?: React.ElementType;
@@ -72,9 +52,9 @@ function mapApiPaymentMethodsToUI(methods: PaymentMethod[]): PaymentMethodUI[] {
 }
 
 export default function HomeBranches() {
+  const t = useTranslations("branches");
   const { token } = useAuth();
   const router = useRouter();
-  const [isLoadingStatic, setIsLoadingStatic] = useState(true);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isLoadingBranches, setIsLoadingBranches] = useState(true);
@@ -104,6 +84,16 @@ export default function HomeBranches() {
       [key]: value,
     }));
   };
+
+  const statCardsConfig: {
+    title: string;
+    valueKey: keyof BranchStatusCount | "Total";
+  }[] = [
+      { title: t("stats.total"), valueKey: "Total" },
+      { title: t("stats.active"), valueKey: "Active" },
+      { title: t("stats.inactive"), valueKey: "Inactive" },
+      { title: t("stats.maintenance"), valueKey: "Maintenance" },
+    ];
 
   useEffect(() => {
     async function loadBranchesData() {
@@ -156,14 +146,14 @@ export default function HomeBranches() {
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader
-        title="SUCURSALES"
+        title={t("title")}
         actionButton={
           <Button
             variant="default"
             onClick={() => router.push("/branches/new")}
           >
             <PlusIcon className="h-5 w-5" />
-            Crear Sucursal
+            {t("add_button")}
           </Button>
         }
       />
@@ -177,10 +167,10 @@ export default function HomeBranches() {
               <>
                 {card.valueKey === "Total"
                   ? statsData.Active +
-                    statsData.Inactive +
-                    statsData.Maintenance
+                  statsData.Inactive +
+                  statsData.Maintenance
                   : (statsData[card.valueKey] ?? 0)}
-                <span className="ml-1.5 text-base font-normal">SUCURSALES</span>
+                <span className="ml-1.5 text-base font-normal">{t("stats.unit")}</span>
               </>
             }
           />
@@ -204,9 +194,9 @@ export default function HomeBranches() {
         onOpenChange={setShowSuccessAlert}
         trigger={<span />}
         type="info"
-        title="¡Sucursal Creada!"
-        description="La nueva sucursal ha sido registrada exitosamente en el sistema."
-        actionText="Entendido"
+        title={t("notifications.success_title")}
+        description={t("notifications.success_description")}
+        actionText={t("notifications.action_text")}
       />
     </div>
   );

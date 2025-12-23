@@ -1,13 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import EyeIcon from "@heroicons/react/24/outline/EyeIcon";
-import PencilIcon from "@heroicons/react/24/outline/PencilIcon";
 import { useEffect, useState } from "react";
-import { Instructor } from "@/models/instructor";
-import { Service } from "@/models/service";
-import { Equipment } from "@/models/equipment";
-import { PaymentMethodUI } from "./page";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { PaginatedBranch } from "@vitalfit/sdk";
@@ -48,6 +42,8 @@ interface BranchRow {
   name: string;
 }
 
+import { useTranslations } from "next-intl";
+
 export default function BranchesTable({
   data,
   isLoading,
@@ -60,6 +56,7 @@ export default function BranchesTable({
   onPageSizeChange,
   onBranchDeleted,
 }: BranchesTableProps) {
+  const t = useTranslations("branches");
   const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
 
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
@@ -70,11 +67,11 @@ export default function BranchesTable({
   const router = useRouter();
 
   const handleView = (row: BranchRow) => {
-    router.push(`/branches/${row.branch_id}`);
+    router.replace(`/branches/${row.branch_id}`);
   };
 
   const handleEdit = (row: BranchRow) => {
-    router.push(`/branches/${row.branch_id}/edit`);
+    router.replace(`/branches/${row.branch_id}/edit`);
   };
 
   const confirmDelete = (row: BranchRow) => {
@@ -89,13 +86,13 @@ export default function BranchesTable({
     api.branch
       .delete(pendingRow.branch_id, token || "")
       .then(() => {
-        setDeleteSuccess(`Sucursal eliminada: ${pendingRow.name}`);
+        setDeleteSuccess(t("table.delete_dialog.success", { name: pendingRow.name }));
         if (typeof onBranchDeleted === "function") {
           onBranchDeleted();
         }
       })
       .catch((error) => {
-        setDeleteError("Error al eliminar la sucursal. Intenta nuevamente.");
+        setDeleteError(t("table.delete_dialog.error"));
         console.error("Error al eliminar (directo del SDK):", error);
       })
       .finally(() => {
@@ -107,35 +104,35 @@ export default function BranchesTable({
   const columns: Column<PaginatedBranch>[] = [
     {
       accessor: "name",
-      header: "Nombre",
+      header: t("table.columns.name"),
     },
-    { header: "taxId", accessor: "tax_id" },
+    { header: t("table.columns.tax_id"), accessor: "tax_id" },
     {
-      header: "Administrador",
+      header: t("table.columns.manager"),
       accessor: "manager_name",
       render: (_, row) => `${row.manager_name} ${row.manager_last_name}`,
     },
     {
-      header: "País",
+      header: t("table.columns.country"),
       accessor: "country_name",
     },
     {
       accessor: "status",
-      header: "Estado",
+      header: t("table.columns.status"),
       render: (value) => {
         const statusConfig = {
-          Active: { text: "Activa", color: "text-green-700 border-green-300" },
+          Active: { text: t("table.status.active"), color: "text-green-700 border-green-300" },
           Inactive: {
-            text: "Inactiva",
+            text: t("table.status.inactive"),
             color: "text-red-700 border-red-300",
           },
           Maintenance: {
-            text: "En mantenimiento",
+            text: t("table.status.maintenance"),
             color: "text-yellow-700 border-yellow-300",
           },
         };
         const config = statusConfig[value as keyof typeof statusConfig] ?? {
-          text: "Desconocido",
+          text: t("table.status.unknown"),
           color: "bg-gray-100 text-gray-700 border-gray-300",
         };
         return (
@@ -181,7 +178,7 @@ export default function BranchesTable({
         <div className="relative w-full sm:w-[250px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nombre o RIF"
+            placeholder={t("table.placeholder")}
             className="pl-9"
             value={inputFilters.search || ""}
             onChange={(e) =>
@@ -196,12 +193,12 @@ export default function BranchesTable({
           }
         >
           <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <SelectValue placeholder="Estatus" />
+            <SelectValue placeholder={t("table.filter_status")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Active">Activa</SelectItem>
-            <SelectItem value="Inactive">Inactiva</SelectItem>
-            <SelectItem value="Maintenance">Mantenimiento</SelectItem>
+            <SelectItem value="Active">{t("table.status.active")}</SelectItem>
+            <SelectItem value="Inactive">{t("table.status.inactive")}</SelectItem>
+            <SelectItem value="Maintenance">{t("table.status.maintenance")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -216,24 +213,23 @@ export default function BranchesTable({
               setInputFilters({});
             }}
           >
-            Limpiar filtros
+            {t("table.clear_filters")}
           </Button>
         ) : null}
 
         <div className="flex items-center gap-4">
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
-            Download CSV
+            {t("table.download")}
           </Button>
         </div>
       </div>
 
       {deleteRowId && pendingRow && (
         <Alert className="mt-2 w-full max-w-md">
-          <AlertTitle className="text-black">Confirmar Eliminación</AlertTitle>
+          <AlertTitle className="text-black">{t("table.delete_dialog.title")}</AlertTitle>
           <AlertDescription className="text-gray-900">
-            ¿Estás seguro de que deseas eliminar este servicio? Esta acción no
-            se puede deshacer.
+            {t("table.delete_dialog.description")}
           </AlertDescription>
           <div className="flex justify-end gap-2 mt-4">
             <Button
@@ -244,7 +240,7 @@ export default function BranchesTable({
                 setPendingRow(null);
               }}
             >
-              Cancelar
+              {t("table.delete_dialog.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -252,7 +248,7 @@ export default function BranchesTable({
               onClick={handleDelete}
             >
               <Trash2 className="h-4 w-4 text-white" />
-              Eliminar
+              {t("table.delete_dialog.confirm")}
             </Button>
           </div>
         </Alert>
@@ -260,14 +256,14 @@ export default function BranchesTable({
 
       {deleteSuccess && (
         <Alert className="w-full max-w-md border-green-300 bg-white text-green-800 mb-4">
-          <AlertTitle>Eliminación exitosa</AlertTitle>
+          <AlertTitle>{t("table.delete_dialog.success_title")}</AlertTitle>
           <AlertDescription>{deleteSuccess}</AlertDescription>
         </Alert>
       )}
 
       {deleteError && (
         <Alert className="w-full max-w-md border-red-300 bg-white text-red-800 mb-4">
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t("table.delete_dialog.error_title")}</AlertTitle>
           <AlertDescription>{deleteError}</AlertDescription>
         </Alert>
       )}
@@ -284,14 +280,14 @@ export default function BranchesTable({
         actions={(row) => (
           <RowActions
             actions={[
-              { label: "Ver", icon: Eye, onClick: () => handleView(row) },
+              { label: t("table.actions.view"), icon: Eye, onClick: () => handleView(row) },
               {
-                label: "Modificar",
+                label: t("table.actions.edit"),
                 icon: Pencil,
                 onClick: () => handleEdit(row),
               },
               {
-                label: "Eliminar",
+                label: t("table.actions.delete"),
                 icon: Trash2,
                 onClick: () => confirmDelete(row),
                 variant: "danger",

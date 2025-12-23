@@ -1,14 +1,16 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-// 1. Importa el CONTENEDOR, no el JSON
 import BranchFormContainer from "../components/BranchFormContainer";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
 import { BranchDetails } from "@vitalfit/sdk";
 
+import { useTranslations } from "next-intl";
+
 export default function EditBranchPage() {
+  const t = useTranslations("branches");
   const params = useParams();
   const router = useRouter();
   const { token } = useAuth();
@@ -46,7 +48,7 @@ export default function EditBranchPage() {
           router.replace("/branches");
         } else {
           console.error("Error cargando sucursal:", err);
-          setError("No se pudo cargar la información de la sucursal.");
+          setError(t("details.error_loading"));
         }
       } finally {
         if (mounted) {
@@ -60,7 +62,7 @@ export default function EditBranchPage() {
   }, [id, token, router]);
 
   if (loading) {
-    return <div className="p-6">Cargando sucursal...</div>;
+    return <div className="p-6">{t("details.loading")}</div>;
   }
 
   if (error) {
@@ -68,7 +70,7 @@ export default function EditBranchPage() {
   }
 
   if (!branch) {
-    return <div className="p-6">No se encontró la sucursal.</div>;
+    return <div className="p-6">{t("details.not_found")}</div>;
   }
 
   return <BranchFormContainer mode="edit" branch={branch} />;

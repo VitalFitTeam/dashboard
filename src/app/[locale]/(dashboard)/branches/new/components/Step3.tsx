@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { User } from "@vitalfit/sdk";
 import { api } from "@/lib/sdk-config";
 
+import { useTranslations } from "next-intl";
+
 type StepProps = {
   formData: any;
   handleChange?: (
@@ -23,16 +25,6 @@ type StepProps = {
   formErrors?: Record<string, string>;
   allBranchAdmins?: User[];
 };
-
-const diasSemana = [
-  { id: "lunes", label: "Lunes" },
-  { id: "martes", label: "Martes" },
-  { id: "miercoles", label: "Miércoles" },
-  { id: "jueves", label: "Jueves" },
-  { id: "viernes", label: "Viernes" },
-  { id: "sabado", label: "Sábado" },
-  { id: "domingo", label: "Domingo" },
-];
 
 const horasApertura = [
   "6:00 AM",
@@ -64,6 +56,18 @@ export default function Step3({
   formErrors = {},
   allBranchAdmins = [],
 }: StepProps) {
+  const t = useTranslations("branches");
+
+  const diasSemana = [
+    { id: "lunes", label: t("create.form.admin.days.monday") },
+    { id: "martes", label: t("create.form.admin.days.tuesday") },
+    { id: "miercoles", label: t("create.form.admin.days.wednesday") },
+    { id: "jueves", label: t("create.form.admin.days.thursday") },
+    { id: "viernes", label: t("create.form.admin.days.friday") },
+    { id: "sabado", label: t("create.form.admin.days.saturday") },
+    { id: "domingo", label: t("create.form.admin.days.sunday") },
+  ];
+
   const handleHorarioChange = (dia: string, campo: string, valor: any) => {
     const horarios = formData.horarios || {};
     const horarioDia = horarios[dia] || {
@@ -96,11 +100,10 @@ export default function Step3({
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-1">
-          Administración
+          {t("create.form.admin.title")}
         </h3>
         <p className="text-sm text-gray-600">
-          Asigne el gerente responsable, defina la capacidad y configure los
-          horarios de operación para cada día de la semana
+          {t("create.form.admin.subtitle")}
         </p>
       </div>
 
@@ -108,14 +111,14 @@ export default function Step3({
         <div>
           <label className="block">
             <span className="text-sm font-medium text-gray-700">
-              Gerente Responsable *
+              {t("create.form.admin.manager")}
             </span>
             <Select
               value={formData.manager_id || ""}
               onValueChange={(value) => handleCustomChange("manager_id", value)}
             >
               <SelectTrigger className="mt-1 w-full">
-                <SelectValue placeholder="Seleccione un Gerente" />
+                <SelectValue placeholder={t("create.form.admin.manager_placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 {allBranchAdmins.map((admin) => (
@@ -136,7 +139,7 @@ export default function Step3({
         <div>
           <label className="block">
             <span className="text-sm font-medium text-gray-700">
-              Capacidad de Miembros *
+              {t("create.form.admin.capacity")}
             </span>
             <input
               type="number"
@@ -144,13 +147,12 @@ export default function Step3({
               onChange={(e) =>
                 handleCustomChange("capacidadMiembros", e.target.value)
               }
-              placeholder="Ejemplo: 400"
+              placeholder={t("create.form.admin.capacity_placeholder")}
               min="1"
-              className={`mt-1 block w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
-                formErrors?.["capacidadMiembros"]
+              className={`mt-1 block w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${formErrors?.["capacidadMiembros"]
                   ? "border-red-500 focus:ring-red-500"
                   : "border-gray-300 focus:ring-orange-500"
-              }`}
+                }`}
             />
             {formErrors?.["capacidadMiembros"] && (
               <p className="text-sm text-red-500 mt-1">
@@ -167,16 +169,16 @@ export default function Step3({
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">
-                  Día
+                  {t("create.form.admin.table.day")}
                 </th>
                 <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-r border-gray-300">
-                  Apertura
+                  {t("create.form.admin.table.opening")}
                 </th>
                 <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-r border-gray-300">
-                  Cierre
+                  {t("create.form.admin.table.closing")}
                 </th>
                 <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
-                  Cerrado
+                  {t("create.form.admin.table.closed")}
                 </th>
               </tr>
             </thead>
