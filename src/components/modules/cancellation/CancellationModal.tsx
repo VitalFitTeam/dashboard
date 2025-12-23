@@ -12,13 +12,14 @@ import { useTranslations } from "next-intl";
 import { CancellationReason, CreateCancellationReason } from "@vitalfit/sdk";
 import { Loader2 } from "lucide-react";
 import CancellationForm from "./cancellationForm";
+import { useState, useEffect } from "react";
 
 interface CancellationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: () => void;
+  // Cambiamos onSave para que reciba los datos finales
+  onSave: (data: any) => void; 
   cancellation: CancellationReason | CreateCancellationReason;
-  onChange: (field: any, value: any) => void;
   mode: "create" | "edit" | "view";
   isLoading?: boolean;
   errors?: any;
@@ -29,20 +30,33 @@ export function CancellationModal({
   onClose,
   onSave,
   cancellation,
-  onChange,
   mode,
   isLoading,
   errors,
 }: CancellationModalProps) {
-
   const t = useTranslations("catalog.cancellationReason");
+
+  // --- ESTADO LOCAL ---
+  // Este estado mantiene los cambios mientras el usuario escribe
+  const [localCancellation, setLocalCancellation] = useState(cancellation);
+
+  // Sincronizar el estado local cuando el modal se abre o cambia la prop 'cancellation'
+  useEffect(() => {
+    if (isOpen) {
+      setLocalCancellation(cancellation);
+    }
+  }, [isOpen, cancellation]);
+
+  const handleLocalChange = (field: any, value: any) => {
+    setLocalCancellation((prev) => ({ ...prev, [field]: value }));
+  };
 
   const getTitle = () => {
     if (mode === "create"){
-         return t("addButton");
+       return t("addButton");
     }
-    if (mode === "edit"){
-         return t("CausesTable.actions.edit");
+    if (mode === "edit") {
+      return t("CausesTable.actions.edit");
     }
     return t("CausesTable.actions.view");
   };
@@ -58,8 +72,8 @@ export function CancellationModal({
 
         <div className="py-2">
           <CancellationForm
-            cancellation={cancellation}
-            onChange={onChange}
+            cancellation={localCancellation}
+            onChange={handleLocalChange}
             mode={mode}
             errors={errors}
           />
@@ -76,7 +90,7 @@ export function CancellationModal({
 
           {mode !== "view" && (
             <Button 
-              onClick={onSave} 
+              onClick={() => onSave(localCancellation)} 
               disabled={isLoading}
               className="min-w-[120px] bg-[#FF6600] hover:bg-[#E65C00] text-white" 
             >

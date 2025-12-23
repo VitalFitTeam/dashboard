@@ -10,7 +10,6 @@ import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { GetUserResponse, User, APIError, isAPIError } from "@vitalfit/sdk";
 
-// Función para formatear fecha
 function formatDate(dateString: string): string {
     if (!dateString) { return "N/A"; }
     try {

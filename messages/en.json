@@ -388,6 +388,7 @@
         "error": "Could not delete the reason."
       }
     }
+  }
   },
   "Promotions": {
     "title": "PROMOTIONS AND DISCOUNTS",
@@ -483,7 +484,6 @@
       "button_edit": "Modify",
       "button_list": "Back to list"
     }
-  }
   },
 "common": {
   "Validations": {

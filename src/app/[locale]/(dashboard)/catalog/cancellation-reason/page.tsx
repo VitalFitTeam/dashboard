@@ -1,7 +1,7 @@
 "use client";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, Loader2} from "lucide-react";
+import { PlusIcon, Loader2 } from "lucide-react";
 import { useCancellation } from "@/hooks/cancellation-reason/useCancellation";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useMemo } from "react";
@@ -39,7 +39,7 @@ export default function CancellationReasonPage() {
 
   const handleFilterChange = (newSearch: string) => {
     setSearch(newSearch);
-    setPage(1); 
+    setPage(1);
   };
 
   const handleOpenCreate = () => {
@@ -60,16 +60,18 @@ export default function CancellationReasonPage() {
     setIsModalOpen(true);
   }, []);
 
-  const handleSave = async () => {
+  const handleSave = async (dataFromModal: any) => {
     if (!token) {
       return;
-      setIsSaving(true);
     }
+
+    setIsSaving(true);
     try {
       if (modalMode === "create") {
-        await api.membership.createCancelReason(selectedCancellation, token);
+        await api.membership.createCancelReason(dataFromModal, token);
       } else {
-        await api.membership.updateCancelReason(selectedCancellation.reason_id, selectedCancellation, token);
+
+        await api.membership.updateCancelReason(dataFromModal.reason_id, dataFromModal, token);
       }
       setIsModalOpen(false);
       refresh();
@@ -80,7 +82,6 @@ export default function CancellationReasonPage() {
       setIsSaving(false);
     }
   };
-
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title={t("title")}>
@@ -116,8 +117,7 @@ export default function CancellationReasonPage() {
         onClose={() => setIsModalOpen(false)}
         mode={modalMode}
         cancellation={selectedCancellation}
-        onChange={(field, value) => setSelectedCancellation((prev: any) => ({ ...prev, [field]: value }))}
-        onSave={handleSave}
+        onSave={handleSave} 
         isLoading={isSaving}
       />
     </div>
