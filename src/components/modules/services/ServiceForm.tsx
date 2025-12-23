@@ -42,11 +42,11 @@ export function ServiceForm({
   serviceImages,
   onImagesChange,
   onPreviewImage,
-  isSubmitting,
-  isUploadingImages,
 }: ServiceFormProps) {
   const t = useTranslations("catalog.services.CreateService");
   const isView = mode === "view";
+
+  if (!formData) {return null;}
 
   return (
     <Tabs defaultValue="general" className="w-full">
@@ -58,57 +58,61 @@ export function ServiceForm({
       <div className="space-y-6 pt-6">
         <TabsContent value="general" className="space-y-6 outline-none">
           <div className="grid gap-4 md:grid-cols-2">
+
             <div className="space-y-2">
-              <Label className={formErrors.name ? "text-red-500" : ""}>{t("fields.name")} *</Label>
+              <Label className={formErrors?.name ? "text-red-500" : ""}>{t("fields.name")} *</Label>
               <Input
-                value={formData.name}
+                value={formData.name || ""}
                 onChange={(e) => handleChange("name", e.target.value)}
                 disabled={isView}
-                className={`${isView ? "bg-gray-50" : ""} ${formErrors.name ? "border-red-500" : ""}`}
+                className={`${isView ? "bg-gray-50" : ""} ${formErrors?.name ? "border-red-500" : ""}`}
                 placeholder={t("fields.namePlaceholder")}
               />
-              {formErrors.name && <p className="text-xs text-red-500">{formErrors.name}</p>}
+              {formErrors?.name && <p className="text-xs text-red-500">{formErrors.name}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label className={formErrors.category_id ? "text-red-500" : ""}>{t("fields.category")} *</Label>
-              <Select 
-                value={formData.category_id} 
+              <Label className={formErrors?.category_id ? "text-red-500" : ""}>{t("fields.category")} *</Label>
+              <Select
+                value={formData.category_id || ""}
                 onValueChange={(v) => handleChange("category_id", v)}
                 disabled={isView}
               >
-                <SelectTrigger className={`${isView ? "bg-gray-50" : ""} ${formErrors.category_id ? "border-red-500" : ""}`}>
+                <SelectTrigger className={`${isView ? "bg-gray-50" : ""} ${formErrors?.category_id ? "border-red-500" : ""}`}>
                   <SelectValue placeholder={t("fields.categoryPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
-                    <SelectItem key={c.category_id} value={c.category_id}>{c.name}</SelectItem>
+                    <SelectItem key={c.category_id} value={c.category_id}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {formErrors.category_id && <p className="text-xs text-red-500">{formErrors.category_id}</p>}
+              {formErrors?.category_id && <p className="text-xs text-red-500">{formErrors.category_id}</p>}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className={formErrors.description ? "text-red-500" : ""}>{t("fields.description")} *</Label>
+            <Label className={formErrors?.description ? "text-red-500" : ""}>{t("fields.description")} *</Label>
             <Textarea
-              value={formData.description}
+              value={formData.description || ""}
               onChange={(e) => handleChange("description", e.target.value)}
               disabled={isView}
-              className={`${isView ? "bg-gray-50" : ""} ${formErrors.description ? "border-red-500" : ""}`}
+              className={`${isView ? "bg-gray-50" : ""} ${formErrors?.description ? "border-red-500" : ""}`}
               rows={4}
             />
-            {formErrors.description && <p className="text-xs text-red-500">{formErrors.description}</p>}
+            {formErrors?.description && <p className="text-xs text-red-500">{formErrors.description}</p>}
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
+
             <div className="space-y-2">
               <Label>{t("fields.duration")} *</Label>
               <Input
                 type="number"
-                value={formData.duration_minutes}
-                onChange={(e) => handleChange("duration_minutes", e.target.value)}
+                value={formData.duration || ""}
+                onChange={(e) => handleChange("duration", e.target.value)}
                 disabled={isView}
                 className={isView ? "bg-gray-50" : ""}
               />
@@ -116,22 +120,34 @@ export function ServiceForm({
 
             <div className="space-y-2">
               <Label>{t("fields.priority") || "Prioridad"}</Label>
-              <Select 
-                value={formData.priority_score} 
-                onValueChange={(v) => handleChange("priority_score", v)}
+              <Select
+                value={formData.priority?.toString() || ""}
+                onValueChange={(v) => handleChange("priority", v)}
                 disabled={isView}
               >
-                <SelectTrigger className={isView ? "bg-gray-50" : ""}><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {["1", "2", "3", "4", "5"].map(n => <SelectItem key={n} value={n}>Nivel {n}</SelectItem>)}
+                <SelectTrigger className={isView ? "bg-gray-50" : ""}>
+                  <SelectValue placeholder="Seleccionar prioridad" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px]">
+                  {Array.from(new Set(["1", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100", formData.priority?.toString()]))
+                    .filter(Boolean)
+                    .sort((a, b) => Number(a) - Number(b))
+                    .map((n) => (
+                      <SelectItem key={n} value={n!.toString()}>
+                        Nivel {n} {n === "1" ? "(Bajo)" : n === "100" ? "(Máximo)" : ""}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
+              {formErrors?.priority && (
+                <p className="text-xs text-red-500">{formErrors.priority}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label>{t("fields.featured") || "Destacado"}</Label>
-              <Select 
-                value={formData.is_featured} 
+              <Select
+                value={formData.is_featured?.toString() || "false"}
                 onValueChange={(v) => handleChange("is_featured", v)}
                 disabled={isView}
               >
@@ -146,10 +162,11 @@ export function ServiceForm({
         </TabsContent>
 
         <TabsContent value="images" className="space-y-6 outline-none">
+
           <div className="space-y-2">
             <Label>{t("fields.banner")} *</Label>
-            <Select 
-              value={formData.banner_id} 
+            <Select
+              value={formData.banner_id || ""}
               onValueChange={(v) => handleChange("banner_id", v)}
               disabled={isView}
             >
@@ -166,7 +183,6 @@ export function ServiceForm({
 
           <div className="space-y-4">
             <Label className="text-lg font-semibold">{t("fields.imagesTitle")}</Label>
-            
             {isView ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {serviceImages.map((img) => (
@@ -175,7 +191,11 @@ export function ServiceForm({
                     <div className="p-3 flex items-center justify-between bg-white">
                       <div className="truncate">
                         <p className="text-xs font-medium truncate">{img.fileName || img.description}</p>
-                        {img.isPrimary && <span className="text-[10px] text-yellow-600 font-bold flex items-center gap-1"><StarIconSolid className="w-3 h-3"/> Principal</span>}
+                        {img.isPrimary && (
+                          <span className="text-[10px] text-yellow-600 font-bold flex items-center gap-1">
+                            <StarIconSolid className="w-3 h-3" /> Principal
+                          </span>
+                        )}
                       </div>
                       <Button size="icon" variant="ghost" onClick={() => onPreviewImage?.(img)}>
                         <EyeIcon className="w-4 h-4" />

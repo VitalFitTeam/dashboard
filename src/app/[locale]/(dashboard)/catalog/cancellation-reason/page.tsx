@@ -67,7 +67,11 @@ export default function CancellationReasonPage() {
     }
     try {
       if (modalMode === "create") {
+<<<<<<< HEAD
         await api.membership.getCancelReasons( token, selectedCancellation);
+=======
+        await api.membership.createCancelReason(selectedCancellation, token);
+>>>>>>> development
       } else {
         await api.membership.updateCancelReason(selectedCancellation.reason_id, selectedCancellation, token);
       }

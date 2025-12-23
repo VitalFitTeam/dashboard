@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
 import { api } from "@/lib/sdk-config";
-import { ServiceFullDetail, ServiceCategoryInfo, Banner } from "@vitalfit/sdk";
+import { Banner, ServiceCategoryInfo, ServiceFullDetail } from "@vitalfit/sdk";
+import { useEffect, useState } from "react";
 
 export function useEditServiceData(serviceId: string, token: string | null) {
   const [data, setData] = useState<{
@@ -16,16 +16,20 @@ export function useEditServiceData(serviceId: string, token: string | null) {
       if (!token || !serviceId) {
         return;
       }
+      
       try {
-        const [srv, cats, bans] = await Promise.all([
+        const [srvRes, catsRes, bansRes] = await Promise.all([
           api.products.getServiceByID(serviceId, token),
           api.products.getCategories(token),
           api.marketing.getBanner(token),
         ]);
+        
+        const serviceData = srvRes.data || srvRes.data; 
+        console.log(serviceData);
         setData({
-          service: srv.data,
-          categories: cats.data || [],
-          banners: bans.data || [],
+          service: serviceData,
+          categories: catsRes.data || [],
+          banners: bansRes.data || [],
         });
       } catch (error) {
         console.error("Error loading edit data:", error);
