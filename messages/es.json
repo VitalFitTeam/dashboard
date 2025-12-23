@@ -135,7 +135,12 @@
     "CheckinCheckout": "Check-in/Check-out",
     "ReporteVentas": "Reporte de Ventas",
     "CombosPaquetes": "Combos/Paquetes",
-    "GestionMarketing": "Gestión Maketing"
+    "GestionMarketing": "Gestión Maketing",
+    "branches_label": "Sedes de {name}",
+    "select_branch": "Seleccionar Sede",
+    "available_branches": "Sedes disponibles",
+    "no_branches": "No hay sedes asignadas",
+    "system_footer": "Sistema Vitalfit"
   },
   "LocaleSwitcher": {
     "label": "Cambiar idioma",
