@@ -12,7 +12,11 @@ import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { GetUserResponse, User, APIError, isAPIError } from "@vitalfit/sdk";
 
+<<<<<<< HEAD
 function formatDate(dateString: string, locale: string): string {
+=======
+function formatDate(dateString: string): string {
+>>>>>>> development
     if (!dateString) { return "N/A"; }
     try {
         return new Date(dateString).toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
@@ -228,9 +232,9 @@ export default function ClientDetails() {
                             <p className="font-medium">{getCreatedAt()}</p>
                         </div>
                         <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.status")}</p>
-                            <Badge variant={client.status === "active" ? "default" : "destructive"}>
-                                {client.status === "active" ? tStatus("active") : tStatus("inactive")}
+                            <p className="text-sm text-muted-foreground">Estado</p>
+                            <Badge variant={client.status === "active" ? "success" : "error"}>
+                                {client.status === "active" ? "Activo" : "Inactivo"}
                             </Badge>
                         </div>
                     </CardContent>
@@ -289,7 +293,7 @@ export default function ClientDetails() {
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Estado</p>
-                                <Badge variant={client.client_membership.status === "active" ? "default" : "destructive"}>
+                                <Badge variant={client.client_membership.status === "active" ? "success" : "error"}>
                                     {client.client_membership.status}
                                 </Badge>
                             </div>

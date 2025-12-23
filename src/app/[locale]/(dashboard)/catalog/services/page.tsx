@@ -25,33 +25,34 @@ export default function ServicesPage() {
     isLoading,
     totalPages,
     totalItems,
-    refresh, 
+    summary,
+    refresh,
   } = useServices(token, page, filters);
 
   const handlePageChange = (newPage: number) => setPage(newPage);
-  
+
   const handleFilterChange = (newFilters: { search?: string; category?: string }) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
-    setPage(1); 
+    setPage(1);
   };
-
-  const featuredCount = useMemo(
-    () => services.filter((s) => s.is_featured).length,
-    [services]
-  );
 
   const statCardsConfig = useMemo(() => [
     {
       title: t("stats.total"),
-      value: totalItems, 
+      value: summary?.total,
+      fontColor: "text-blue-600",
+    },
+    {
+      title: t("stats.actives"),
+      value: summary?.actives,
       fontColor: "text-green-600",
     },
     {
       title: t("stats.featured"),
-      value: featuredCount,
-      fontColor: "text-orange-600",
+      value: summary?.featured,
+      fontColor: "text-purple-600",
     },
-  ], [t, totalItems, featuredCount]);
+  ], [t, summary]);
 
   if (!token) {
     return null;
@@ -59,15 +60,15 @@ export default function ServicesPage() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         {statCardsConfig.map((card, idx) => (
           <StatCard
             key={idx}
             title={card.title}
             value={
               <>
-                {card.value}
-                <span className={`ml-1.5 font-normal ${card.fontColor}`}>
+                <span className="font-bold text-2xl">{card.value}</span>
+                <span className={`ml-1.5 font-semibold uppercase ${card.fontColor}`}>
                   {t("stats.unit")}
                 </span>
               </>
@@ -77,7 +78,7 @@ export default function ServicesPage() {
       </div>
 
       <PageHeader title={t("title")}>
-        <Button 
+        <Button
           className="bg-primary text-white"
           onClick={() => router.push("/catalog/services/new")}
         >

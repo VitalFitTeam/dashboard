@@ -22,17 +22,17 @@ export const getServiceSchema = (t: TranslationFn) =>
       .min(1, t("required"))
       .uuid(t("invalidUuid")),
 
-    duration_minutes: z
+    duration: z
       .string()
       .min(1, t("required"))
       .refine((val) => !isNaN(parseInt(val)) && parseInt(val) > 0, {
         message: t("positiveNumber"),
       }),
 
-    priority_score: z
+    priority: z
       .string()
       .min(1, t("required"))
-      .refine((val) => ["1", "2", "3", "4", "5"].includes(val), {
+      .refine((val) => ["1", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"].includes(val), {
         message: t("invalidSelection"),
       }),
 

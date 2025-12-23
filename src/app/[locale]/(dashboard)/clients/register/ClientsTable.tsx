@@ -9,7 +9,7 @@ import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Badge } from "@/components/ui/badge";
+import { Badge, badgeVariants } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -134,12 +134,11 @@ export default function ClientsTable({
   };
 
   const StatusBadge = ({ status }: { status: string }) => {
-    const variantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      active: "secondary",
-      inactive: "destructive",
-      blocked: "destructive",
-      pending: "outline"
-    };
+    const variantMap: Record<string, any> = {
+  active: "success",
+  inactive: "error",
+  pending: "warning",
+};
 
     const displays: Record<string, string> = {
       active: t("table.status.active"),
@@ -148,13 +147,13 @@ export default function ClientsTable({
       pending: t("table.status.pending")
     };
 
-    const normalizedStatus = status?.toLowerCase() || "inactive";
-    const displayStatus = normalizedStatus === "blocked" ? "inactive" : normalizedStatus;
+    const normalizedStatus = (status || "inactive").toLowerCase();
+    const variant = (variantMap[normalizedStatus] || "default") as "default" | "success" | "error" | "warning" | "info" | "secondary" | "outline";
 
     return (
-      <Badge variant={variantMap[displayStatus] || "default"}>
-        {displays[displayStatus] || status}
-      </Badge>
+     <Badge variant={variant}>
+    {status}
+  </Badge>
     );
   };
 
