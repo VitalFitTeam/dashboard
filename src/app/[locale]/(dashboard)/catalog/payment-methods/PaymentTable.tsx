@@ -237,11 +237,10 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
   const getStatusBadge = (status: boolean) => {
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-          status
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${status
             ? "text-green-800 border-green-200"
             : "text-red-800 border-red-200"
-        }`}
+          }`}
       >
         {status ? "Activo" : "Inactivo"}
       </span>
