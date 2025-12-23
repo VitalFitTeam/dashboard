@@ -229,13 +229,8 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
     return (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${status
-<<<<<<< HEAD
           ? "text-green-800 border-green-200"
           : "text-red-800 border-red-200"
-=======
-            ? "text-green-800 border-green-200"
-            : "text-red-800 border-red-200"
->>>>>>> development
           }`}
       >
         {status ? t("table.status.active") : t("table.status.inactive")}
@@ -259,17 +254,8 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
       header: t("table.columns.description"),
       accessor: "description",
       filterType: "text",
-<<<<<<< HEAD
       render: (description) =>
         (typeof description === "string" && description) ? description : "-",
-=======
-      render: (description) => {
-        if (typeof description === "string" || typeof description === "number") {
-          return description.toString() || "-";
-        }
-        return "-";
-      },
->>>>>>> development
     },
     {
       header: t("table.columns.status"),
