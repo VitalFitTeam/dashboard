@@ -5,11 +5,13 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import PaymentTable from "./PaymentTable";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { StatCard } from "@/components/ui/StatCard";
 import { PaymentMethod } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
 
 export default function PaymentMethodsPage() {
+  const t = useTranslations("catalog.payment_methods");
   const router = useRouter();
   const { token } = useAuth();
   const [stats, setStats] = useState({
@@ -49,42 +51,42 @@ export default function PaymentMethodsPage() {
     <div className="flex-1 space-y-8 p-8 pt-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard
-          title="TOTAL"
+          title={t("stats.total")}
           value={
             <>
-              <h3 className={"ml-1.5 font-heading"}>{stats.total} MÉTODOS</h3>
+              <h3 className={"ml-1.5 font-heading text-primary"}>{stats.total} {t("stats.unit")}</h3>
             </>
           }
           description=""
         />
         <StatCard
-          title="EFECTIVO"
+          title={t("stats.cash")}
           value={
             <>
               <h3 className={"ml-1.5 font-heading text-green-500"}>
-                {stats.cash} MÉTODOS
+                {stats.cash} {t("stats.unit")}
               </h3>
             </>
           }
           description=""
         />
         <StatCard
-          title="GATEWAY"
+          title={t("stats.gateway")}
           value={
             <>
               <h3 className={"ml-1.5 font-heading text-blue-500"}>
-                {stats.gateway} MÉTODOS
+                {stats.gateway} {t("stats.unit")}
               </h3>
             </>
           }
           description=""
         />
         <StatCard
-          title="DIGITAL"
+          title={t("stats.digital")}
           value={
             <>
               <h3 className={"ml-1.5 font-heading text-primary"}>
-                {stats.digital} MÉTODOS
+                {stats.digital} {t("stats.unit")}
               </h3>
             </>
           }
@@ -92,13 +94,13 @@ export default function PaymentMethodsPage() {
         />
       </div>
 
-      <PageHeader title="MÉTODOS DE PAGO">
+      <PageHeader title={t("title")}>
         <Button
           className="bg-transparent text-black border border-gray-100"
-          onClick={() => router.push("/payment-methods/new")}
+          onClick={() => router.push("/catalog/payment-methods/new")}
         >
-          <PlusIcon className="h-5 w-5" />
-          Agregar un metodo de pago
+          <PlusIcon className="h-5 w-5 mr-2" />
+          {t("add_button")}
         </Button>
       </PageHeader>
 

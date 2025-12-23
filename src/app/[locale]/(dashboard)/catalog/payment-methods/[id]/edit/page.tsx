@@ -1,24 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import {
   PaymentMethod,
   CreatePaymentMethod,
-  PaymentConfiguration,
   BranchPaymentVisibility,
 } from "@vitalfit/sdk";
 import PaymentForm from "../../PaymentForm";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   PaymentMethodFormData,
-  paymentMethodSchema,
+  getPaymentMethodSchema,
 } from "@/lib/validation/paymentMethodSchema";
 
 export default function EditPaymentMethodPage() {
+  const t = useTranslations("catalog.payment_methods");
   const router = useRouter();
   const params = useParams();
   const { token } = useAuth();
@@ -42,12 +44,6 @@ export default function EditPaymentMethodPage() {
     Partial<Record<keyof PaymentMethodFormData, string>>
   >({});
 
-  const [notification, setNotification] = useState({
-    isVisible: false,
-    description: "",
-    title: "",
-  });
-
   if (!token) {
     return null;
   }
@@ -59,7 +55,7 @@ export default function EditPaymentMethodPage() {
   }, [id, token]);
 
   const validateForm = (): boolean => {
-    const result = paymentMethodSchema.safeParse(formData);
+    const result = getPaymentMethodSchema(t).safeParse(formData);
 
     if (!result.success) {
       const newErrors: Partial<Record<keyof PaymentMethodFormData, string>> =
@@ -79,12 +75,12 @@ export default function EditPaymentMethodPage() {
   };
 
   const validateField = (field: keyof PaymentMethodFormData): boolean => {
-    const fieldSchema = paymentMethodSchema.pick({ [field]: true });
+    const fieldSchema = getPaymentMethodSchema(t).pick({ [field]: true } as any);
     const result = fieldSchema.safeParse({ [field]: formData[field] });
 
     if (!result.success) {
       const errorMessage =
-        result.error.issues[0]?.message || "Error de validación";
+        result.error.issues[0]?.message || t("notifications.error_title");
       setErrors((prev) => ({ ...prev, [field]: errorMessage }));
       return false;
     }
@@ -109,10 +105,8 @@ export default function EditPaymentMethodPage() {
       });
     } catch (error) {
       console.error("Error loading payment method:", error);
-      setNotification({
-        isVisible: true,
-        description: "Error al cargar el método de pago",
-        title: "Error",
+      toast.error(t("notifications.error_title"), {
+        description: t("edit.load_error"),
       });
     } finally {
       setIsLoading(false);
@@ -138,10 +132,8 @@ export default function EditPaymentMethodPage() {
     e.preventDefault();
 
     if (!validateForm()) {
-      setNotification({
-        isVisible: true,
-        description: "Por favor corrige los errores en el formulario",
-        title: "Error de validación",
+      toast.error(t("notifications.validation_error_title"), {
+        description: t("notifications.validation_error_description"),
       });
       return;
     }
@@ -164,35 +156,27 @@ export default function EditPaymentMethodPage() {
 
       await api.paymentMethod.updatePaymentMethod(id, updateData, token);
 
-      setNotification({
-        isVisible: true,
-        description: "Método de pago actualizado exitosamente",
-        title: "Éxito",
+      toast.success(t("notifications.success_title"), {
+        description: t("edit.success_title") || t("notifications.update_success"),
       });
 
       setTimeout(() => {
-        router.push("/payment-methods");
+        router.replace("/catalog/payment-methods");
       }, 1500);
     } catch (error) {
       console.error("Error updating payment method:", error);
-      setNotification({
-        isVisible: true,
-        description: "Error al actualizar el método de pago",
-        title: "Error",
+      toast.error(t("notifications.error_title"), {
+        description: t("edit.save_error"),
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const hideNotification = () => {
-    setNotification((prev) => ({ ...prev, isVisible: false }));
-  };
-
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[400px]">
-        Cargando...
+        {t("view.loading")}
       </div>
     );
   }
@@ -200,20 +184,20 @@ export default function EditPaymentMethodPage() {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <form onSubmit={handleSubmit} className="space-y-2">
-        <PageHeader title="EDITAR MÉTODO DE PAGO">
+        <PageHeader title={t("edit.title")}>
           <Button
             type="button"
             variant="secondary"
-            onClick={() => router.push("/payment-methods")}
+            onClick={() => router.replace("/catalog/payment-methods")}
           >
-            Cancelar
+            {t("edit.cancel_button")}
           </Button>
           <Button type="submit" variant="default" disabled={isSubmitting}>
-            {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+            {isSubmitting ? t("edit.saving") : t("edit.save_button")}
           </Button>
         </PageHeader>
         <p className="text-sm text-muted-foreground">
-          Modifique la información del método de pago
+          {t("edit.subtitle")}
         </p>
         <PaymentForm
           formData={formData}
@@ -222,16 +206,6 @@ export default function EditPaymentMethodPage() {
           onBlur={handleBlur}
         />
       </form>
-
-      {notification.isVisible && (
-        <Notification
-          title={notification.title}
-          description={notification.description}
-          onClose={hideNotification}
-          autoCloseDuration={3000}
-          variant={notification.title === "Error" ? "destructive" : "success"}
-        />
-      )}
     </div>
   );
 }
