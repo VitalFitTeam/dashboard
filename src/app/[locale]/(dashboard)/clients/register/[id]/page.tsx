@@ -12,11 +12,7 @@ import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { GetUserResponse, User, APIError, isAPIError } from "@vitalfit/sdk";
 
-<<<<<<< HEAD
 function formatDate(dateString: string, locale: string): string {
-=======
-function formatDate(dateString: string): string {
->>>>>>> development
     if (!dateString) { return "N/A"; }
     try {
         return new Date(dateString).toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
