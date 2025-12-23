@@ -240,6 +240,7 @@
       "add_button": "Agregar Servicio",
       "stats": {
         "total": "Total",
+        "actives": "Activos",
         "featured": "Destacados",
         "unit": "SERVICIOS"
       },

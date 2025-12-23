@@ -274,7 +274,12 @@ export default function PaymentTable({ onStatsUpdate }: PaymentTableProps) {
       header: "Descripción",
       accessor: "description",
       filterType: "text",
-      render: (description) => description || "-",
+      render: (description) => {
+        if (typeof description === "string" || typeof description === "number") {
+          return description.toString() || "-";
+        }
+        return "-";
+      },
     },
     {
       header: "Estado",

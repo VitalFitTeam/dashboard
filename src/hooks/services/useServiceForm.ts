@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { z } from "zod";
 import { api } from "@/lib/sdk-config";
 import {
     getServiceSchema,
@@ -20,9 +19,9 @@ export function useServiceForm(token: string | null, onSuccess: () => void) {
         name: "",
         description: "",
         category_id: "",
-        duration_minutes: "",
-        priority_score: "5",
-        is_featured: "false",
+        duration: "",
+        priority: "5",
+        is_featured: "true",
         banner_id: "",
     });
 
@@ -63,8 +62,8 @@ export function useServiceForm(token: string | null, onSuccess: () => void) {
 
         const promise = async () => {
             const {
-                duration_minutes,
-                priority_score,
+                duration,
+                priority,
                 is_featured,
                 banner_id,
                 ...rest
@@ -73,12 +72,11 @@ export function useServiceForm(token: string | null, onSuccess: () => void) {
             const payload: CreateServiceType = {
                 ...rest,
                 banner_id: banner_id as string,
-                duration: parseInt(duration_minutes),
-                priority: parseInt(priority_score),
+                duration: parseInt(duration),
+                priority: parseInt(priority),
                 is_featured: is_featured === "true",
                 service_images: imagesPayload,
             };
-
             await api.products.createService(payload, token);
             onSuccess();
         };

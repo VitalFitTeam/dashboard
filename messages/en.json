@@ -239,6 +239,7 @@
       "add_button": "Add Service",
       "stats": {
         "total": "Total",
+        "actives": "Actives",
         "featured": "Featured",
         "unit": "SERVICES"
       },
