@@ -21,7 +21,6 @@ interface JwtPayload {
   roles?: string[];
 }
 
-// Extendemos la interfaz del usuario para incluir las sucursales
 export interface SessionUser extends Omit<SdkUser, "role"> {
   role: UserRole;
   role_label: string;
@@ -41,7 +40,7 @@ interface AuthContextType {
   login: (token: string, remember?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   hasRole: (roles: UserRole | UserRole[]) => boolean;
-  switchBranch: (branch: BranchStaff) => void; // Agregado a la interfaz
+  switchBranch: (branch: BranchStaff) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -52,7 +51,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: async () => {},
   hasRole: () => false,
-  switchBranch: () => {}, // Valor por defecto
+  switchBranch: () => {},
 });
 
 const decodeToken = (token: string): JwtPayload | null => {
@@ -77,12 +76,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const getUserProfile = useCallback(
     async (token: string): Promise<SessionUser | null> => {
       const decoded = decodeToken(token);
-      if (!decoded) {
-        return null;
-      }
+      if (!decoded) return null;
 
       try {
-        // Ejecutamos las 3 llamadas en paralelo para máxima velocidad
         const [profileResponse, branchesRes, managedRes] = await Promise.all([
           api.user.WhoAmI(token),
           api.staff.getStaffBranches(token),
@@ -90,27 +86,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         ]);
 
         const sdkData = profileResponse.user;
-        if (!sdkData) {
-          return null;
-        }
+        if (!sdkData) return null;
 
         const rawRoleName = (sdkData.role as any)?.name?.toLowerCase();
         const userRole = rawRoleName as UserRole;
 
-        if (!VALID_ROLES.includes(userRole)) {
-          console.error(`Rol '${rawRoleName}' no permitido.`);
-          return null;
-        }
+        if (!VALID_ROLES.includes(userRole)) return null;
 
         const assignedBranches = branchesRes.data || [];
         const managedBranches = managedRes.data || [];
+        
+        // Unificamos todas las ramas para encontrar una activa por defecto
+        const allAvailableBranches = [...assignedBranches, ...managedBranches];
 
-        // Lógica de sucursal activa: 1. LocalStorage, 2. Primera sucursal asignada, 3. null
+        // Lógica de sucursal activa: 1. LocalStorage, 2. Primera disponible, 3. undefined
         const savedBranchId = localStorage.getItem("active_branch_id");
         const activeBranch = 
-          assignedBranches.find(b => b.id === savedBranchId) || 
-          assignedBranches[0] || 
+          allAvailableBranches.find(b => b.id === savedBranchId) || 
+          allAvailableBranches[0] || 
           undefined;
+
+        // Si se seleccionó una por defecto (y no estaba en storage), la guardamos
+        if (activeBranch && !savedBranchId) {
+          localStorage.setItem("active_branch_id", activeBranch.id);
+        }
 
         return {
           ...sdkData,
@@ -131,9 +130,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const switchBranch = useCallback((branch: BranchStaff) => {
     setUser((prev) => {
-      if (!prev) {
-        return null;
-      }
+      if (!prev) return null;
       return { ...prev, activeBranch: branch, branch_id: branch.id };
     });
     localStorage.setItem("active_branch_id", branch.id);
@@ -197,9 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const hasRole = useCallback(
     (roles: UserRole | UserRole[]) => {
-      if (!user?.role){
-        return false;
-      }
+      if (!user?.role) return false;
       const allowed = Array.isArray(roles) ? roles : [roles];
       return allowed.includes(user.role);
     },
@@ -216,7 +211,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         hasRole,
-        switchBranch, // Expuesto correctamente
+        switchBranch,
       }}
     >
       {children}

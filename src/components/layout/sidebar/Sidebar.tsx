@@ -37,6 +37,7 @@ export default function SidebarDashboard() {
     return <SidebarMenuSkeleton />;
   }
 
+  // Combinamos ramas evitando duplicados mediante el ID
   const allAvailableBranches = Array.from(
     new Map(
       [...(user.assignedBranches || []), ...(user.managedBranches || [])].map(
@@ -54,9 +55,13 @@ export default function SidebarDashboard() {
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
+                {/* El Trigger ahora es dinámico: 
+                  Si hay más de una sucursal, permite abrir el menú. 
+                */}
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     size="lg"
+                    disabled={allAvailableBranches.length <= 1}
                     className="w-full transition-all duration-200 hover:bg-slate-100 data-[state=open]:bg-sidebar-accent"
                   >
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
@@ -65,28 +70,34 @@ export default function SidebarDashboard() {
 
                     <div className="grid flex-1 text-left text-sm leading-tight ml-2">
                       <span className="truncate font-bold text-slate-900">
+                        {/* Priorizamos la sucursal activa del contexto */}
                         {user.activeBranch?.name || t("select_branch")}
                       </span>
                       <span className="truncate text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">
                         {user.role_label}
                       </span>
                     </div>
-                    <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
+                    
+                    {/* Solo mostramos las flechas si hay opciones de cambio */}
+                    {allAvailableBranches.length > 1 && (
+                      <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
+                    )}
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent
-                  className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-xl p-2 shadow-xl"
-                  align="start"
-                  side="bottom"
-                  sideOffset={8}
-                >
-                  <DropdownMenuLabel className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {t("branches_label", { name: user.first_name })}
-                  </DropdownMenuLabel>
+                {/* Contenido del Dropdown solo si hay más de una sucursal */}
+                {allAvailableBranches.length > 1 && (
+                  <DropdownMenuContent
+                    className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-xl p-2 shadow-xl"
+                    align="start"
+                    side="bottom"
+                    sideOffset={8}
+                  >
+                    <DropdownMenuLabel className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      {t("branches_label", { name: user.first_name })}
+                    </DropdownMenuLabel>
 
-                  {allAvailableBranches.length > 0 ? (
-                    allAvailableBranches.map((branch, index) => (
+                    {allAvailableBranches.map((branch, index) => (
                       <DropdownMenuItem
                         key={branch.id}
                         onClick={() => switchBranch(branch)}
@@ -117,31 +128,27 @@ export default function SidebarDashboard() {
                            </DropdownMenuShortcut>
                         )}
                       </DropdownMenuItem>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-xs text-muted-foreground italic">
-                      {t("no_branches")}
-                    </div>
-                  )}
+                    ))}
 
-                  <DropdownMenuSeparator className="my-2" />
-                  
-                  <div className="px-2 py-2">
-                    <div className="flex items-center gap-2 rounded-lg bg-slate-50 p-2 border border-slate-100">
-                      <div className="flex size-6 items-center justify-center rounded-md bg-white border shadow-xs">
-                        <Image
-                          src="/images/isotipo.png"
-                          alt="Vitalfit"
-                          width={14}
-                          height={14}
-                        />
+                    <DropdownMenuSeparator className="my-2" />
+                    
+                    <div className="px-2 py-2">
+                      <div className="flex items-center gap-2 rounded-lg bg-slate-50 p-2 border border-slate-100">
+                        <div className="flex size-6 items-center justify-center rounded-md bg-white border shadow-xs">
+                          <Image
+                            src="/images/isotipo.png"
+                            alt="Vitalfit"
+                            width={14}
+                            height={14}
+                          />
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">
+                          {t("system_footer")}
+                        </span>
                       </div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">
-                        {t("system_footer")}
-                      </span>
                     </div>
-                  </div>
-                </DropdownMenuContent>
+                  </DropdownMenuContent>
+                )}
               </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
