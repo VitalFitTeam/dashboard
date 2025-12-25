@@ -150,7 +150,7 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
     {
       title: "Finanzas",
       items: [
-        { label: "RegistroPagos", icon: CurrencyDollarIcon, href: "/finance/payments" },
+        { label: "RegistroPagos", icon: CurrencyDollarIcon, href: "/finance/billing"},
         { label: "MembresiasVencer", icon: CurrencyDollarIcon, href: "/finance/alerts" },
         { label: "ReporteVentasLocal", icon: ChartBarIcon, href: "/finance/sales-report" },
       ],
