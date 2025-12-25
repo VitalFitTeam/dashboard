@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-// 1. Importa el CONTENEDOR, no el JSON
 import BranchFormContainer from "../components/BranchFormContainer";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
