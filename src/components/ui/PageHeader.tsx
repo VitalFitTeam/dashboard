@@ -18,7 +18,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   actionButton,
 }) => {
   return (
-    <div className="flex items-start justify-between pb-4 border-b">
+    <div className="flex items-start justify-between pb-4 ">
       <div>
         <h2 className={cn(typography.heading, "text-4xl")}>{title}</h2>
         {subtitle && <p className="mt-1 text-base text-gray-600">{subtitle}</p>}
