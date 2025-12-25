@@ -1,138 +1,230 @@
 "use client";
 
-import { PaymentMethod } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/Textarea";
-import { useTranslations } from "next-intl";
+import { Label } from "@/components/ui/Label";
+import { CreatePaymentMethod, PaymentMethod } from "@vitalfit/sdk";
+
+type FormMode = "create" | "edit" | "view";
+
+type PaymentFormData = PaymentMethod | CreatePaymentMethod;
 
 interface PaymentFormProps {
-  formData:
-  | PaymentMethod
-  | {
-    name: string;
-    type: string;
-    processing_type: string;
-    description?: string;
-    global_status?: boolean;
-  };
-  errors?: {
-    name?: string;
-    type?: string;
-    processing_type?: string;
-    description?: string;
-  };
-  onChange: (field: string, value: string) => void;
-  onBlur?: (field: string) => void;
-  disabled?: boolean;
+  formData: PaymentFormData;
+  errors?: Record<string, string>;
+  onChange: (field: string, value: any) => void;
+  mode: FormMode;
 }
 
-export default function PaymentForm({
-  formData,
-  errors,
-  onChange,
-  onBlur,
-  disabled = false,
-}: PaymentFormProps) {
+export default function PaymentForm({ formData, errors, onChange, mode }: PaymentFormProps) {
   const t = useTranslations("catalog.payment_methods");
+  
+  const isView = mode === "view";
+  const isEdit = mode === "edit";
+
+  const updateConfig = (key: string, val: any) => {
+    if (isView) {
+      return;
+    }
+    const currentConfig = formData.configuration || {};
+    onChange("configuration", { ...currentConfig, [key]: val });
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-      <div className="flex flex-col">
-        <label className="text-sm font-medium mb-1">{t("form.labels.name")}</label>
-        <Input
-          value={formData.name}
-          onChange={(e) => onChange("name", e.target.value)}
-          onBlur={() => onBlur?.("name")}
-          placeholder={t("form.placeholders.name")}
-          disabled={disabled}
-          required
-        />
-        {errors?.name && (
-          <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-        )}
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold capitalize">
+          {t(`form.modes.${mode}`)} {t("form.title_suffix")}
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="name">{t("form.labels.name")}</Label>
+            <Input
+              id="name"
+              value={formData.name || ""}
+              onChange={(e) => onChange("name", e.target.value)}
+              disabled={isView}
+              className={isView ? "bg-muted/50 cursor-default" : ""}
+            />
+            {errors?.name && <p className="text-xs font-medium text-destructive">{errors.name}</p>}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="display_name">{t("form.labels.display_name")}</Label>
+            <Input
+              id="display_name"
+              value={(formData as any).display_name || formData.name || ""}
+              onChange={(e) => onChange("display_name", e.target.value)}
+              disabled={isView}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid gap-2">
+            <Label>{t("form.labels.type")}</Label>
+            <Select
+              value={formData.type || ""}
+              onValueChange={(v) => {
+                onChange("type", v);
+                onChange("configuration", {}); 
+              }}
+              disabled={isView || isEdit}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Cash">Efectivo</SelectItem>
+                <SelectItem value="Card">Tarjeta</SelectItem>
+                <SelectItem value="Transfer">Transferencia</SelectItem>
+                <SelectItem value="Other">Otro (Zelle / Pago Móvil)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label>Procesamiento</Label>
+            <Select
+              value={formData.processing_type || ""}
+              onValueChange={(v) => onChange("processing_type", v)}
+              disabled={isView}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Offline">Manual (Offline)</SelectItem>
+                <SelectItem value="Gateway">Pasarela (Gateway)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col" onBlur={() => onBlur?.("type")}>
-        <label className="text-sm font-medium mb-1">{t("form.labels.type")}</label>
-        <Select
-          value={formData.type}
-          onValueChange={(value) => onChange("type", value)}
-          disabled={disabled}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t("table.all_types")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Cash">{t("table.types.cash")}</SelectItem>
-            <SelectItem value="Card">{t("table.types.card")}</SelectItem>
-            <SelectItem value="Transfer">{t("table.types.transfer")}</SelectItem>
-            <SelectItem value="Other">{t("table.types.other")}</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors?.type && (
-          <p className="text-red-500 text-xs mt-1">{errors.type}</p>
-        )}
+      <Separator />
+
+      <div className="rounded-lg border bg-muted/40 p-4 space-y-4">
+        <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+          Configuración de {formData.type || "Método"}
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {formData.type === "Transfer" && (
+            <>
+              <div className="grid gap-2">
+                <Label className="text-xs">Nombre del Banco</Label>
+                <Input 
+                  value={(formData.configuration as any)?.bank_name || ""} 
+                  onChange={(e) => updateConfig("bank_name", e.target.value)} 
+                  disabled={isView}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-xs">Número de Cuenta</Label>
+                <Input 
+                  value={(formData.configuration as any)?.account_number || ""} 
+                  onChange={(e) => updateConfig("account_number", e.target.value)} 
+                  disabled={isView}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-xs">RIF / Tax ID</Label>
+                <Input 
+                  value={(formData.configuration as any)?.tax_id || ""} 
+                  onChange={(e) => updateConfig("tax_id", e.target.value)} 
+                  disabled={isView}
+                />
+              </div>
+            </>
+          )}
+
+          {formData.type === "Other" && (
+            <>
+              <div className="grid gap-2 col-span-2 md:col-span-1">
+                <Label className="text-xs">Subtipo de Pago</Label>
+                <Select 
+                  value={(formData.configuration as any)?.sub_type || "zelle"}
+                  onValueChange={(v) => updateConfig("sub_type", v)}
+                  disabled={isView}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="zelle">Zelle</SelectItem>
+                    <SelectItem value="pago_movil">Pago Móvil</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {(formData.configuration as any)?.sub_type === "pago_movil" ? (
+                <>
+                  <div className="grid gap-2">
+                    <Label className="text-xs">Teléfono</Label>
+                    <Input value={(formData.configuration as any)?.phone || ""} onChange={(e) => updateConfig("phone", e.target.value)} disabled={isView}/>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="text-xs">ID Banco (V01, etc)</Label>
+                    <Input value={(formData.configuration as any)?.bank_id || ""} onChange={(e) => updateConfig("bank_id", e.target.value)} disabled={isView}/>
+                  </div>
+                </>
+              ) : (
+                <div className="grid gap-2">
+                  <Label className="text-xs">Correo Electrónico (Zelle)</Label>
+                  <Input type="email" value={(formData.configuration as any)?.email || ""} onChange={(e) => updateConfig("email", e.target.value)} disabled={isView}/>
+                </div>
+              )}
+            </>
+          )}
+
+          {(formData.type === "Cash" || formData.type === "Card") && (
+            <p className="text-sm text-muted-foreground italic col-span-2">
+              No se requiere información adicional para este método.
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-col" onBlur={() => onBlur?.("global_status")}>
-        <label className="text-sm font-medium mb-1">{t("form.labels.status")}</label>
-        <Select
-          value={formData.global_status?.toString() || "true"}
-          onValueChange={(value) => onChange("global_status", value)}
-          disabled={disabled}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="true">{t("table.status.active")}</SelectItem>
-            <SelectItem value="false">{t("table.status.inactive")}</SelectItem>
-          </SelectContent>
-        </Select>
+      <Separator />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label>Recargo Fijo</Label>
+          <Input 
+            type="number" 
+            value={formData.surcharge_fixed ?? 0} 
+            onChange={(e) => onChange("surcharge_fixed", Number(e.target.value))} 
+            disabled={isView}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label>Recargo Porcentual (%)</Label>
+          <Input 
+            type="number" 
+            value={formData.surcharge_percentage ?? 0} 
+            onChange={(e) => onChange("surcharge_percentage", Number(e.target.value))} 
+            disabled={isView}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col" onBlur={() => onBlur?.("processing_type")}>
-        <label className="text-sm font-medium mb-1">
-          {t("form.labels.processing_type")}
-        </label>
-        <Select
-          value={formData.processing_type || "Offline"}
-          onValueChange={(value) => onChange("processing_type", value)}
-          disabled={disabled}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Gateway">{t("form.processing_types.gateway")}</SelectItem>
-            <SelectItem value="Offline">{t("form.processing_types.offline")}</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors?.processing_type && (
-          <p className="text-red-500 text-xs mt-1">{errors.processing_type}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col col-span-1 md:col-span-2">
-        <label className="text-sm font-medium mb-1">{t("form.labels.description")}</label>
+      <div className="grid gap-2">
+        <Label>{t("form.labels.description")}</Label>
         <Textarea
-          value={typeof formData.description === "string" ? formData.description : ""}
+          value={formData.description || ""}
           onChange={(e) => onChange("description", e.target.value)}
-          onBlur={() => onBlur?.("description")}
-          placeholder={t("form.placeholders.description")}
           rows={3}
-          disabled={disabled}
+          disabled={isView}
         />
-        {errors?.description && (
-          <p className="text-red-500 text-xs mt-1">{errors.description}</p>
-        )}
       </div>
     </div>
   );
