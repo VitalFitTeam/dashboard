@@ -12,6 +12,7 @@ import BranchEquipmentPanel from "./BranchEquipmentPanel";
 import BranchPaymentMethodPanel from "./BranchPaymentMethodsPanel";
 
 import { BranchDetails, ServiceFullDetail } from "@vitalfit/sdk";
+import BranchStaffManager from "./BranchStaffManager";
 
 interface BranchFormContainerProps {
   mode?: "view" | "edit";
@@ -66,6 +67,16 @@ export default function BranchFormContainer({
       value: "equipment",
       label: t("details.tabs.equipment"),
       content: <BranchEquipmentPanel mode={mode} branchId={branch.branch_id} />,
+    },
+    {
+      value: "Staff",
+      label: "Staff",
+      content: <BranchStaffManager  mode={mode}  branchId={branch.branch_id} />,
+    },
+    {
+      value: "Politicas comerciales",
+      label: "Politicas",
+      content: <p>Politicas comerciales de la sucursal</p>,
     },
   ];
 
