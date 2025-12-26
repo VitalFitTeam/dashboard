@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { InvoiceList } from "@vitalfit/sdk";
 import { Eye, DollarSign, Trash2, AlertTriangle } from "lucide-react";
 
@@ -18,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useRouter } from "@/i18n/navigation";
 
 interface InvoiceTableProps {
   data: InvoiceList[];
@@ -42,7 +42,7 @@ export function InvoiceTable({
   );
 
   const handleView = (id: string) => {
-    router.push(`/billing/invoices/${id}`);
+    router.push(`/finance/billing/${id}`);
   };
 
   const handlePay = (id: string) => {
