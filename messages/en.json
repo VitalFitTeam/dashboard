@@ -135,7 +135,13 @@
     "CheckinCheckout": "Check-in/Check-out",
     "ReporteVentas": "Sales Report",
     "CombosPaquetes": "Combos/Packages",
-    "GestionMarketing": "Maketing Management"
+    "GestionMarketing": "Maketing Management",
+    "branches_label": "{name}'s Branches",
+    "select_branch": "Select Branch",
+    "available_branches": "Available branches",
+    "no_branches": "No branches assigned",
+    "system_footer": "Vitalfit System"
+    
   },
   "LocaleSwitcher": {
     "label": "Change language",
