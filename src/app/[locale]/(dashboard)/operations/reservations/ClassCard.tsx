@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { CalendarIcon, ClockIcon, MapPinIcon } from "@heroicons/react/24/solid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "@/i18n/navigation";
 
 interface Reservation {
     id: string;
