@@ -4,7 +4,6 @@ import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Eye, Pencil, Trash2 } from "lucide-react";
@@ -13,8 +12,9 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { useRouter } from "next/navigation";
 import { MembershipType } from "@vitalfit/sdk";
-import { Notification } from "@/components/ui/Notification";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface MembershipTableProps {
   data: MembershipType[];
@@ -37,16 +37,13 @@ export default function MembershipTable({
   filters,
   onFilterChange,
 }: MembershipTableProps) {
+  const t = useTranslations("catalog.memberships");
   const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [pendingRow, setPendingRow] = useState<string | null>(null);
 
   const { token } = useAuth();
   const router = useRouter();
 
-  // 🔍 Manejo del campo de búsqueda
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchInput.trim() === "") {
@@ -61,51 +58,46 @@ export default function MembershipTable({
   }, [searchInput]);
 
   const handleView = (row: MembershipType) => {
-    router.push(`/memberships/${row.membership_type_id}`);
+    router.replace(`/catalog/memberships/${row.membership_type_id}`);
   };
 
   const handleEdit = (row: MembershipType) => {
-    router.push(`/memberships/${row.membership_type_id}/edit`);
+    router.replace(`/catalog/memberships/${row.membership_type_id}/edit`);
   };
 
   const handleDelete = async (membership: MembershipType) => {
     const membershipId = membership.membership_type_id;
 
     if (!token) {
-      setDeleteError("No estás autenticado para realizar esta acción.");
+      toast.error(t("notifications.delete_auth_error"));
       setDeleteRowId(null);
       return;
     }
 
-    setPendingRow(membershipId);
-    setDeleteError(null);
-
     try {
       await api.membership.deleteMembershipType(membershipId, token);
-      setShowSuccess(true);
+      toast.success(t("notifications.delete_success"));
       onReload();
-      setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
       console.error("Error al eliminar la membresía:", error);
-      setDeleteError("Error al eliminar la membresía. Intenta nuevamente.");
+      toast.error(t("notifications.delete_error"));
     } finally {
       setDeleteRowId(null);
-      setPendingRow(null);
     }
   };
 
   const columns: Column<MembershipType>[] = [
-    { header: "Nombre", accessor: "name" },
-    { header: "Descripción", accessor: "description" },
-    { header: "Duración (días)", accessor: "duration_days" },
-    { header: "Precio", accessor: "price" },
+    { header: t("table.columns.name"), accessor: "name" },
+    { header: t("table.columns.description"), accessor: "description" },
+    { header: t("table.columns.duration"), accessor: "duration_days" },
+    { header: t("table.columns.price"), accessor: "price" },
     {
-      header: "Status",
+      header: t("table.columns.status"),
       accessor: "is_active",
       render: (value) => {
         const config = value
-          ? { text: "Activa", color: "text-green-700 border-green-300" }
-          : { text: "Inactiva", color: "text-yellow-700 border-yellow-300" };
+          ? { text: t("table.status.active"), color: "text-green-700 border-green-300" }
+          : { text: t("table.status.inactive"), color: "text-yellow-700 border-yellow-300" };
         return (
           <Badge variant="outline" className={`border ${config.color}`}>
             {config.text}
@@ -118,11 +110,10 @@ export default function MembershipTable({
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        {/* 🔍 Campo de búsqueda */}
         <div className="relative w-full sm:w-[250px]">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar membresía por nombre"
+            placeholder={t("table.placeholder")}
             className="pl-9"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -132,7 +123,7 @@ export default function MembershipTable({
         <div className="flex items-center gap-4">
           <Button variant="outline">
             <ArrowDownTray className="mr-2 h-4 w-4" />
-            Descargar
+            {t("table.download")}
           </Button>
         </div>
       </div>
@@ -141,6 +132,8 @@ export default function MembershipTable({
         key={`page-${page}-${data.length}`}
         columns={columns}
         data={data}
+        page={page}
+        pageSize={pageSize}
         onPageChange={onPageChange}
         totalPages={totalPages}
         rowIdKey="membership_type_id"
@@ -149,17 +142,17 @@ export default function MembershipTable({
             <RowActions
               actions={[
                 {
-                  label: "Ver Detalles",
+                  label: t("table.actions.view"),
                   icon: Eye,
                   onClick: () => handleView(row),
                 },
                 {
-                  label: "Modificar",
+                  label: t("table.actions.edit"),
                   icon: Pencil,
                   onClick: () => handleEdit(row),
                 },
                 {
-                  label: "Eliminar",
+                  label: t("table.actions.delete"),
                   icon: Trash2,
                   onClick: () => setDeleteRowId(row.membership_type_id),
                   variant: "danger",
@@ -172,10 +165,10 @@ export default function MembershipTable({
                 open={deleteRowId === row.membership_type_id}
                 onOpenChange={(open) => !open && setDeleteRowId(null)}
                 trigger={null}
-                title="Confirmar eliminación"
-                description="¿Estás seguro de que deseas eliminar esta membresía? Esta acción no se puede deshacer."
-                actionText="Eliminar"
-                cancelText="Cancelar"
+                title={t("table.delete_dialog.title")}
+                description={t("table.delete_dialog.description")}
+                actionText={t("table.delete_dialog.confirm")}
+                cancelText={t("table.delete_dialog.cancel")}
                 onAction={() => handleDelete(row)}
                 actionVariant="destructive"
               />
@@ -183,22 +176,6 @@ export default function MembershipTable({
           </div>
         )}
       />
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="Membresía eliminada correctamente"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-
-      {deleteError && (
-        <Notification
-          variant="destructive"
-          description={deleteError}
-          onClose={() => setDeleteError(null)}
-        />
-      )}
     </>
   );
 }

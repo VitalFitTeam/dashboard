@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { SelectValue } from "@radix-ui/react-select";
 import { MembershipType } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
 
 type MembershipFormData = Omit<MembershipType, "duration_days" | "price"> & {
   duration_days: number | string;
@@ -31,6 +32,8 @@ export default function MembershipForm({
   disabled = false,
   errors = {},
 }: MembershipFormProps) {
+  const t = useTranslations("catalog.memberships");
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -40,12 +43,12 @@ export default function MembershipForm({
               htmlFor="nombre"
               className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
             >
-              Nombre*
+              {t("form.labels.name")}
             </label>
             <Input
               id="nombre"
               name="nombre"
-              placeholder="Ej: Membresía Premium"
+              placeholder={t("form.placeholders.name")}
               disabled={disabled}
               value={formData.name}
               onChange={(e) => onChange("name", e.target.value)}
@@ -64,13 +67,13 @@ export default function MembershipForm({
             htmlFor="description"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Descripción*
+            {t("form.labels.description")}
           </label>
           <Textarea
             id="description"
             name="description"
             rows={3}
-            placeholder="Ej: Acceso ilimitado a todas las instalaciones"
+            placeholder={t("form.placeholders.description")}
             disabled={disabled}
             value={formData.description}
             onChange={(e) => onChange("description", e.target.value)}
@@ -88,7 +91,7 @@ export default function MembershipForm({
             htmlFor="duration_days"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Duración (Días)*
+            {t("form.labels.duration_days")}
           </label>
           <Input
             id="duration_days"
@@ -96,7 +99,7 @@ export default function MembershipForm({
             type="number"
             min="0"
             max="3650"
-            placeholder="Ej: 30"
+            placeholder={t("form.placeholders.duration_days")}
             disabled={disabled}
             value={formData.duration_days}
             onChange={(e) => onChange("duration_days", e.target.value)}
@@ -111,7 +114,7 @@ export default function MembershipForm({
             htmlFor="price"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Precio ($)*
+            {t("form.labels.price")}
           </label>
           <Input
             id="price"
@@ -120,7 +123,7 @@ export default function MembershipForm({
             step="0.01"
             min="0"
             max="999999.99"
-            placeholder="Ej: 99.99"
+            placeholder={t("form.placeholders.price")}
             disabled={disabled}
             value={formData.price}
             onChange={(e) => onChange("price", e.target.value)}
@@ -138,7 +141,7 @@ export default function MembershipForm({
             htmlFor="is_active"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Status
+            {t("form.labels.status")}
           </label>
           <Select
             name="is_active"
@@ -147,12 +150,12 @@ export default function MembershipForm({
           >
             <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <SelectValue>
-                {formData.is_active ? "Activa" : "Inactiva"}
+                {formData.is_active ? t("table.status.active") : t("table.status.inactive")}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Activa</SelectItem>
-              <SelectItem value="inactive">Inactiva</SelectItem>
+              <SelectItem value="active">{t("table.status.active")}</SelectItem>
+              <SelectItem value="inactive">{t("table.status.inactive")}</SelectItem>
             </SelectContent>
           </Select>
           {errors.is_active && (

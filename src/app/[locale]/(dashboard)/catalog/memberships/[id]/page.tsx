@@ -6,8 +6,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
 import { MembershipType, DataResponse } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
 
 export default function ViewMembershipPage() {
+  const t = useTranslations("catalog.memberships");
   const params = useParams();
   const router = useRouter();
   const { token } = useAuth();
@@ -18,7 +20,7 @@ export default function ViewMembershipPage() {
 
   useEffect(() => {
     if (!id) {
-      router.replace("/memberships");
+      router.replace("/catalog/memberships");
       return;
     }
     if (!token) {
@@ -48,14 +50,14 @@ export default function ViewMembershipPage() {
         const status = err?.response?.status ?? err?.status ?? null;
 
         if (status === 404) {
-          router.replace("/memberships");
+          router.replace("/catalog/memberships");
         } else if (status === 401) {
           setError(
-            "Sesión expirada o no autorizada. Intenta ingresar de nuevo.",
+            t("view.error_auth"),
           );
         } else {
-          console.error("Error cargando membresía:", err);
-          setError("No se pudo cargar la información de la membresía.");
+          console.error("Error cargando membresia:", err);
+          setError(t("view.error_load"));
         }
       } finally {
         if (mounted) {
@@ -72,7 +74,7 @@ export default function ViewMembershipPage() {
   }, [id, token, router]);
 
   if (loading) {
-    return <div className="p-6">Cargando Membresías...</div>;
+    return <div className="p-6">{t("view.loading")}</div>;
   }
 
   if (error) {
@@ -82,7 +84,7 @@ export default function ViewMembershipPage() {
   if (!membership) {
     return (
       <div className="p-6 text-gray-500">
-        Membresía no encontrada o no disponible.
+        {t("view.not_found")}
       </div>
     );
   }

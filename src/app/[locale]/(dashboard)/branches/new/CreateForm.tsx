@@ -28,12 +28,16 @@ interface BranchFromProps {
   allCities: City[];
 }
 
+import { useTranslations } from "next-intl";
+
 export default function CreateForm({
   allCountries,
   allStates,
   allCities,
 }: BranchFromProps) {
+  const t = useTranslations("branches");
   const router = useRouter();
+  // ... existing states ...
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [currentStep, setCurrentStep] = useState(1);
   const [allBranchAdmins, setAllBranchAdmins] = useState<User[]>([]);
@@ -60,10 +64,10 @@ export default function CreateForm({
   });
 
   const steps = [
-    { id: 1, name: "Información Básica", description: "Datos" },
-    { id: 2, name: "Ubicación", description: "Dirección" },
-    { id: 3, name: "Administración", description: "Gestión" },
-    { id: 4, name: "Confirmación", description: "Revisión" },
+    { id: 1, name: t("create.steps.basic.name"), description: t("create.steps.basic.description") },
+    { id: 2, name: t("create.steps.location.name"), description: t("create.steps.location.description") },
+    { id: 3, name: t("create.steps.admin.name"), description: t("create.steps.admin.description") },
+    { id: 4, name: t("create.steps.confirm.name"), description: t("create.steps.confirm.description") },
   ];
 
   useEffect(() => {
@@ -90,44 +94,43 @@ export default function CreateForm({
 
     if (stepToValidate === 1) {
       if (!formData.name?.trim()) {
-        errors.name = "La Razón Social es obligatoria.";
+        errors.name = t("validations.name_required");
         isValid = false;
       }
       if (!formData.taxId?.trim()) {
-        errors.taxId = "El ID Fiscal es obligatorio.";
+        errors.taxId = t("validations.tax_id_required");
         isValid = false;
       }
       if (!formData.status?.trim()) {
-        errors.status = "El estado de sucursal es obligatorio.";
+        errors.status = t("validations.status_required");
         isValid = false;
       }
     } else if (stepToValidate === 2) {
       if (!formData.address?.trim()) {
-        errors.address = "La Dirección Completa es obligatoria.";
+        errors.address = t("validations.address_required");
         isValid = false;
       }
       if (formData.latitude === 0 || formData.longitude === 0) {
-        errors.latitude = "Debe seleccionar la ubicación en el mapa.";
-        errors.longitude = "Debe seleccionar la ubicación en el mapa.";
+        errors.latitude = t("validations.location_required");
+        errors.longitude = t("validations.location_required");
         isValid = false;
       }
       if (!formData.countryId?.trim()) {
-        errors.countryId = "El País es obligatorio.";
+        errors.countryId = t("validations.country_required");
       }
       if (!formData.stateId?.trim()) {
-        errors.stateId = "El Estado es obligatorio.";
+        errors.stateId = t("validations.state_required");
       }
     } else if (stepToValidate === 3) {
       if (!formData.manager_id?.trim()) {
-        errors.manager_id = "Debe asignar un Gerente Responsable.";
+        errors.manager_id = t("validations.manager_required");
         isValid = false;
       }
       if (
         !formData.capacidadMiembros ||
         Number(formData.capacidadMiembros) <= 0
       ) {
-        errors.capacidadMiembros =
-          "La capacidad debe ser un número válido (> 0).";
+        errors.capacidadMiembros = t("validations.capacity_required");
         isValid = false;
       }
     }
@@ -250,16 +253,13 @@ export default function CreateForm({
       status: normalizedStatus,
     };
 
-    console.log("Payload enviado:", apiPayload);
     if (
       !apiPayload.name ||
       !apiPayload.tax_id ||
       !apiPayload.country ||
       !apiPayload.state
     ) {
-      alert(
-        "Por favor completa los campos obligatorios: Nombre, Tax ID, País y Estado.",
-      );
+      alert(t("notifications.error_required"));
       return;
     }
 
@@ -293,7 +293,7 @@ export default function CreateForm({
       <CardHeader className="sticky top-0 bg-white z-10 pt-6 pb-4 border-b">
         <div className="flex items-center justify-between w-full">
           <CardTitle className="text-2xl font-bold text-gray-800">
-            CREAR NUEVA SUCURSAL
+            {t("create.title")}
           </CardTitle>
           <div className="flex items-center gap-4">
             <Image
@@ -309,7 +309,7 @@ export default function CreateForm({
 
       <CardContent className="p-6 pt-4">
         <p className="text-sm text-gray-600 mb-6">
-          Complete los siguientes pasos para crear una nueva sucursal
+          {t("create.subtitle")}
         </p>
         <Wizard steps={steps} currentStep={currentStep} />
 
@@ -333,17 +333,17 @@ export default function CreateForm({
           className="flex items-center gap-2"
         >
           <ArrowLeftIcon className="w-4 h-4" />
-          Anterior
+          {t("create.form.buttons.back")}
         </Button>
         <Button
           onClick={currentStep === steps.length ? handleSubmit : handleNext}
           className="flex items-center gap-2"
         >
           {currentStep === steps.length ? (
-            "Crear Sucursal"
+            t("create.form.buttons.create")
           ) : (
             <>
-              Siguiente
+              {t("create.form.buttons.next")}
               <ArrowRightIcon className="w-4 h-4" />
             </>
           )}
