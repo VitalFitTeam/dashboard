@@ -32,6 +32,8 @@ interface EditBranchServiceModalProps {
   mode?: "view" | "edit";
 }
 
+import { useTranslations } from "next-intl";
+
 export default function EditBranchServiceModal({
   open,
   onClose,
@@ -39,6 +41,7 @@ export default function EditBranchServiceModal({
   onSave,
   mode = "edit",
 }: EditBranchServiceModalProps) {
+  const t = useTranslations("branches");
   const isViewMode = mode === "view";
 
   const [maxCapacity, setMaxCapacity] = useState(0);
@@ -67,11 +70,11 @@ export default function EditBranchServiceModal({
         price_for_non_member: priceNonMember,
         is_visible: isVisible,
       });
-      toast.success(`Servicio "${service.service_name}" actualizado`);
+      toast.success(t("details.services.success_update", { name: service.service_name ?? "" }));
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(`Error actualizando "${service.service_name}"`);
+      toast.error(t("details.services.error_update", { name: service.service_name ?? "" }));
     }
   };
 
@@ -81,19 +84,21 @@ export default function EditBranchServiceModal({
         <DialogHeader>
           <VisuallyHidden>
             <DialogTitle>
-              {isViewMode ? "Ver servicio" : "Editar servicio"}
+              {isViewMode
+                ? t("details.services.modal.view")
+                : t("details.services.modal.edit")}
             </DialogTitle>
           </VisuallyHidden>
         </DialogHeader>
 
         {!service ? (
-          <p className="text-sm text-gray-500">Cargando…</p>
+          <p className="text-sm text-gray-500">{t("details.services.modal.loading")}</p>
         ) : (
           <div className="space-y-4">
             <p className="text-lg font-semibold">{service.service_name}</p>
 
             <InputField
-              label="Aforo máximo"
+              label={t("details.services.modal.capacity")}
               type="number"
               disabled={isViewMode}
               value={maxCapacity}
@@ -101,7 +106,7 @@ export default function EditBranchServiceModal({
             />
 
             <InputField
-              label="Precio para miembros"
+              label={t("details.services.modal.member_price")}
               type="number"
               disabled={isViewMode}
               value={priceMember}
@@ -109,7 +114,7 @@ export default function EditBranchServiceModal({
             />
 
             <InputField
-              label="Precio para no miembros"
+              label={t("details.services.modal.non_member_price")}
               type="number"
               disabled={isViewMode}
               value={priceNonMember}
@@ -123,14 +128,14 @@ export default function EditBranchServiceModal({
                 checked={isVisible}
                 onChange={(e) => setIsVisible(e.target.checked)}
               />
-              <label>Visible</label>
+              <label>{t("details.services.modal.visible")}</label>
             </div>
           </div>
         )}
 
         {!isViewMode && (
           <DialogFooter>
-            <Button onClick={handleSave}>Guardar</Button>
+            <Button onClick={handleSave}>{t("details.services.modal.save")}</Button>
           </DialogFooter>
         )}
       </DialogContent>

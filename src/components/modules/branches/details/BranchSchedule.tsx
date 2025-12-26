@@ -13,22 +13,25 @@ interface BranchScheduleProps {
   onScheduleChange: (updatedSchedule: OperatingHour[]) => void;
   mode: "view" | "edit";
 }
-const dayNameMapping: Record<string, string> = {
-  Monday: "Lunes",
-  Tuesday: "Martes",
-  Wednesday: "Miércoles",
-  Thursday: "Jueves",
-  Friday: "Viernes",
-  Saturday: "Sábado",
-  Sunday: "Domingo",
-};
+import { useTranslations } from "next-intl";
 
 export default function BranchSchedule({
   schedule,
   onScheduleChange,
   mode,
 }: BranchScheduleProps) {
+  const t = useTranslations("branches");
   const isDisabled = mode === "view";
+
+  const dayNameMapping: Record<string, string> = {
+    Monday: t("create.form.admin.days.monday"),
+    Tuesday: t("create.form.admin.days.tuesday"),
+    Wednesday: t("create.form.admin.days.wednesday"),
+    Thursday: t("create.form.admin.days.thursday"),
+    Friday: t("create.form.admin.days.friday"),
+    Saturday: t("create.form.admin.days.saturday"),
+    Sunday: t("create.form.admin.days.sunday"),
+  };
 
   const handleTimeChange = (
     day_of_week: string,
@@ -54,12 +57,12 @@ export default function BranchSchedule({
 
   const columns: Column<OperatingHour>[] = [
     {
-      header: "Día",
+      header: t("create.form.admin.table.day"),
       accessor: "day_of_week", // <-- snake_case
       render: (value) => dayNameMapping[value as string],
     },
     {
-      header: "Apertura",
+      header: t("create.form.admin.table.opening"),
       accessor: "open_time",
       render: (value, row) => (
         <div className="relative w-36">
@@ -77,7 +80,7 @@ export default function BranchSchedule({
       ),
     },
     {
-      header: "Cierre",
+      header: t("create.form.admin.table.closing"),
       accessor: "close_time",
       render: (value, row) => (
         <div className="relative w-36">
@@ -95,7 +98,7 @@ export default function BranchSchedule({
       ),
     },
     {
-      header: "Cerrado",
+      header: t("create.form.admin.table.closed"),
       accessor: "is_closed",
       render: (value, row) => (
         <div className="flex justify-center">

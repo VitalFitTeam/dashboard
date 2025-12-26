@@ -20,10 +20,13 @@ interface BranchInstructorPanelProps {
   mode?: "view" | "edit";
 }
 
+import { useTranslations } from "next-intl";
+
 export default function BranchInstructorPanel({
   branchId,
   mode = "edit",
 }: BranchInstructorPanelProps) {
+  const t = useTranslations("branches");
   const { token } = useAuth();
   const isViewMode = mode === "view";
 
@@ -47,7 +50,7 @@ export default function BranchInstructorPanel({
   const fetchedRef = useRef(false);
 
   const fetchBranchInstructors = useCallback(async () => {
-    if (!token || !branchId) {return;}
+    if (!token || !branchId) { return; }
 
     try {
       setLoadingData(true);
@@ -67,15 +70,15 @@ export default function BranchInstructorPanel({
       setBranchInstructors(mapped);
     } catch (err) {
       console.error("Error cargando instructores:", err);
-      toast.error("No se pudieron cargar los instructores");
+      toast.error(t("details.instructors.error_loading"));
     } finally {
       setLoadingData(false);
     }
-  }, [token, branchId]);
+  }, [token, branchId, t]);
 
   const fetchAllInstructors = useCallback(
     async (page = 1) => {
-      if (!token || !hasMoreInstructors) {return;}
+      if (!token || !hasMoreInstructors) { return; }
 
       try {
         setLoadingData(true);
@@ -95,43 +98,43 @@ export default function BranchInstructorPanel({
         }
       } catch (err) {
         console.error("Error cargando instructores:", err);
-        toast.error("No se pudieron cargar los instructores");
+        toast.error(t("details.instructors.error_loading"));
       } finally {
         setLoadingData(false);
       }
     },
-    [token, hasMoreInstructors],
+    [token, hasMoreInstructors, t],
   );
 
   useEffect(() => {
-    if (fetchedRef.current) {return;}
+    if (fetchedRef.current) { return; }
     fetchedRef.current = true;
 
     fetchBranchInstructors();
 
-    if (!isViewMode) {fetchAllInstructors();}
+    if (!isViewMode) { fetchAllInstructors(); }
   }, [fetchBranchInstructors, fetchAllInstructors, isViewMode]);
 
   useEffect(() => {
     if (allInstructors.length > 50) {
-      toast.info("Hay muchos instructores, usa el scroll para ver más.");
+      toast.info(t("details.instructors.info_scroll"));
     }
-  }, [allInstructors]);
+  }, [allInstructors, t]);
 
   const handleAddInstructor = () => {
-    if (isViewMode || !selectedInstructorId) {return;}
+    if (isViewMode || !selectedInstructorId) { return; }
 
     if (
       branchInstructors.some((i) => i.instructorID === selectedInstructorId)
     ) {
-      toast.error("El instructor ya está asignado");
+      toast.error(t("details.instructors.already_assigned"));
       return;
     }
 
     const instructor = allInstructors.find(
       (i) => i.instructor_id === selectedInstructorId,
     );
-    if (!instructor) {return;}
+    if (!instructor) { return; }
 
     setBranchInstructors((prev) => [
       ...prev,
@@ -147,12 +150,12 @@ export default function BranchInstructorPanel({
     setDirty(true);
     setSelectedInstructorId(null);
 
-    toast.success("Instructor agregado (pendiente de guardar)");
+    toast.success(t("details.instructors.success_added_pending"));
   };
 
   const handleRemoveInstructor = async (instructorId: string) => {
-    if (isViewMode) {return;}
-    if (!token) {return;}
+    if (isViewMode) { return; }
+    if (!token) { return; }
 
     if (newInstructors.includes(instructorId)) {
       setBranchInstructors((prev) =>
@@ -160,7 +163,7 @@ export default function BranchInstructorPanel({
       );
       setNewInstructors((prev) => prev.filter((id) => id !== instructorId));
       setDirty(newInstructors.length > 1);
-      toast.success("Instructor eliminado localmente");
+      toast.success(t("details.instructors.success_removed_local"));
       return;
     }
 
@@ -176,10 +179,10 @@ export default function BranchInstructorPanel({
         prev.filter((i) => i.instructorID !== instructorId),
       );
 
-      toast.success("Instructor eliminado correctamente");
+      toast.success(t("details.instructors.success_removed"));
     } catch (err) {
       console.error("Error eliminando instructor:", err);
-      toast.error("No se pudo eliminar el instructor");
+      toast.error(t("details.instructors.error_removing"));
     } finally {
       setLoadingData(false);
     }
@@ -187,7 +190,7 @@ export default function BranchInstructorPanel({
 
   const handleSave = async () => {
     if (!token || !branchId || newInstructors.length === 0) {
-      toast.error("No hay cambios para guardar");
+      toast.error(t("details.instructors.no_changes"));
       return;
     }
 
@@ -198,10 +201,10 @@ export default function BranchInstructorPanel({
       await fetchBranchInstructors();
       setDirty(false);
 
-      toast.success("Cambios guardados correctamente");
+      toast.success(t("details.instructors.success_save"));
     } catch (err) {
       console.error("Error guardando cambios:", err);
-      toast.error("No se pudieron guardar los cambios");
+      toast.error(t("details.instructors.error_save"));
     } finally {
       setIsSaving(false);
     }
@@ -213,7 +216,7 @@ export default function BranchInstructorPanel({
         <div className="flex flex-col sm:flex-row gap-4 items-end">
           <div className="flex-grow">
             <label className="text-sm font-medium text-gray-700 mb-1 block">
-              Agregar instructor
+              {t("details.instructors.add_label")}
             </label>
 
             <Select
@@ -221,7 +224,7 @@ export default function BranchInstructorPanel({
               onValueChange={setSelectedInstructorId}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecciona un instructor" />
+                <SelectValue placeholder={t("details.instructors.select_placeholder")} />
               </SelectTrigger>
 
               <SelectContent
@@ -229,7 +232,7 @@ export default function BranchInstructorPanel({
                   const target = e.target as HTMLElement;
                   if (
                     target.scrollTop + target.clientHeight >=
-                      target.scrollHeight - 10 &&
+                    target.scrollHeight - 10 &&
                     hasMoreInstructors
                   ) {
                     const nextPage = currentPage + 1;
@@ -255,7 +258,7 @@ export default function BranchInstructorPanel({
             onClick={handleAddInstructor}
             disabled={!selectedInstructorId || loadingData || isSaving}
           >
-            Agregar
+            {t("details.instructors.add_button")}
           </Button>
 
           <Button
@@ -263,17 +266,17 @@ export default function BranchInstructorPanel({
             onClick={handleSave}
             disabled={!dirty || isSaving}
           >
-            {isSaving ? "Guardando..." : "Guardar cambios"}
+            {isSaving ? t("create.form.buttons.saving") : t("create.form.buttons.save")}
           </Button>
         </div>
       )}
 
       <div className="space-y-2">
         {loadingData ? (
-          <p className="text-sm text-gray-500">Cargando instructores...</p>
+          <p className="text-sm text-gray-500">{t("details.instructors.loading")}</p>
         ) : branchInstructors.length === 0 ? (
           <p className="text-sm text-gray-500">
-            No hay instructores asignados.
+            {t("details.instructors.empty")}
           </p>
         ) : (
           branchInstructors.map((instr) => (
@@ -294,7 +297,7 @@ export default function BranchInstructorPanel({
                     className="text-sm text-red-500 hover:underline"
                     onClick={() => handleRemoveInstructor(instr.instructorID)}
                   >
-                    Eliminar
+                    {t("details.instructors.remove")}
                   </button>
                 ) : undefined
               }

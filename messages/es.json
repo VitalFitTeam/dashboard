@@ -244,6 +244,7 @@
     "services": {
       "title": "SERVICIOS",
       "add_button": "Agregar Servicio",
+      "id_prefix": "Servicio ID",
       "stats": {
         "total": "Total",
         "actives": "Activos",
@@ -460,6 +461,101 @@
         "loading": "Cargando...",
         "not_found": "Método de pago no encontrado"
       }
+    },
+    "memberships": {
+      "title": "MEMBRESÍAS",
+      "add_button": "Agregar una membresía",
+      "loading": "Cargando Membresías...",
+      "table": {
+        "placeholder": "Buscar membresía por nombre",
+        "download": "Descargar",
+        "columns": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "duration": "Duración (días)",
+          "price": "Precio",
+          "status": "Status"
+        },
+        "status": {
+          "active": "Activa",
+          "inactive": "Inactiva"
+        },
+        "actions": {
+          "view": "Ver Detalles",
+          "edit": "Modificar",
+          "delete": "Eliminar"
+        },
+        "delete_dialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar esta membresía? Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "form": {
+        "labels": {
+          "name": "Nombre*",
+          "description": "Descripción*",
+          "duration_days": "Duración (Días)*",
+          "price": "Precio ($)*",
+          "status": "Status"
+        },
+        "placeholders": {
+          "name": "Ej: Membresía Premium",
+          "description": "Ej: Acceso ilimitado a todas las instalaciones",
+          "duration_days": "Ej: 30",
+          "price": "Ej: 99.99"
+        }
+      },
+      "create": {
+        "title": "CREAR MEMBRESÍA",
+        "subtitle": "Agrega la información de la membresía",
+        "button_create": "Crear",
+        "button_saving": "Guardando...",
+        "success": "Membresía creada exitosamente!",
+        "error_connection": "Error de conexión",
+        "error_connection_description": "No se pudo conectar con el servidor. Intenta más tarde.",
+        "error_create": "Error al crear membresía",
+        "error_auth": "Token de autenticación no encontrado."
+      },
+      "edit": {
+        "title": "MODIFICAR MEMBRESÍA",
+        "subtitle": "Modifica la información de la membresía {name}",
+        "button_cancel": "Cancelar",
+        "button_save": "Guardar Cambios",
+        "button_saving": "Guardando...",
+        "success": "Membresía actualizado exitosamente!",
+        "error_connection": "Error de conexión",
+        "error_connection_description": "No se pudo conectar con el servidor. Intenta más tarde.",
+        "error_update": "Error al actualizar membresia",
+        "error_load": "No se pudo cargar la información de la membresía.",
+        "error_auth": "Token de autenticación no encontrado."
+      },
+      "view": {
+        "title": "DETALLES DE MEMBRESÍA",
+        "button_edit": "Modificar",
+        "loading": "Cargando Membresías...",
+        "error_load": "No se pudo cargar la información de la membresía.",
+        "error_auth": "Sesión expirada o no autorizada. Intenta ingresar de nuevo.",
+        "not_found": "Membresía no encontrada o no disponible."
+      },
+      "notifications": {
+        "delete_success": "Membresía eliminada correctamente",
+        "delete_error": "Error al eliminar la membresía. Intenta nuevamente.",
+        "delete_auth_error": "No estás autenticado para realizar esta acción."
+      },
+      "validations": {
+        "name_required": "El nombre es requerido",
+        "name_max": "El nombre no puede tener más de 100 caracteres",
+        "description_required": "La descripción es requerida",
+        "description_max": "La descripción no puede tener más de 500 caracteres",
+        "duration_int": "La duración debe ser un número entero",
+        "duration_min": "La duración no puede ser cero (0) o negativa",
+        "duration_max": "La duración máxima es 3650 días (10 años)",
+        "price_min": "El precio no puede cero (0) o negativo",
+        "price_max": "El precio máximo es 999,999.99",
+        "validation_error": "Error de validación inesperado"
+      }
     }
   },
   "cancellationReason": {
@@ -498,101 +594,101 @@
         "error": "Could not delete the reason"
       }
     },
-  "Promotions": {
-    "title": "PROMOCIONES Y DESCUENTOS",
-    "add_button": "Agregar Promoción",
-    "error_loading": "Error al cargar promociones",
-    "stats": {
-      "total": "Total",
-      "active": "Activas",
-      "inactive": "Inactivas",
-      "unit": "Promos"
-    },
-    "table": {
-      "columns": {
-        "promotion": "Promoción",
-        "benefit": "Beneficio",
-        "validity": "Vigencia",
-        "status": "Estatus"
+    "Promotions": {
+      "title": "PROMOCIONES Y DESCUENTOS",
+      "add_button": "Agregar Promoción",
+      "error_loading": "Error al cargar promociones",
+      "stats": {
+        "total": "Total",
+        "active": "Activas",
+        "inactive": "Inactivas",
+        "unit": "Promos"
       },
-      "status": {
-        "active": "Activa",
-        "inactive": "Inactiva",
-        "expired": "Expirada"
+      "table": {
+        "columns": {
+          "promotion": "Promoción",
+          "benefit": "Beneficio",
+          "validity": "Vigencia",
+          "status": "Estatus"
+        },
+        "status": {
+          "active": "Activa",
+          "inactive": "Inactiva",
+          "expired": "Expirada"
+        },
+        "filters": {
+          "search_placeholder": "Buscar por nombre o código...",
+          "clear": "Limpiar"
+        },
+        "export": "Exportar",
+        "delete_dialog": {
+          "title": "¿Eliminar promoción?",
+          "description": "Esta acción no se puede deshacer. Se eliminará permanentemente la promoción \"{name}\".",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
       },
-      "filters": {
-        "search_placeholder": "Buscar por nombre o código...",
-        "clear": "Limpiar"
+      "actions": {
+        "view": "Ver detalles",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "delete_loading": "Eliminando promoción...",
+        "delete_success": "Promoción eliminada correctamente",
+        "delete_error": "Error al eliminar"
       },
-      "export": "Exportar",
-      "delete_dialog": {
-        "title": "¿Eliminar promoción?",
-        "description": "Esta acción no se puede deshacer. Se eliminará permanentemente la promoción \"{name}\".",
-        "confirm": "Eliminar",
-        "cancel": "Cancelar"
+      "form": {
+        "labels": {
+          "name": "Nombre de la Promoción",
+          "code": "Código (Cupón)",
+          "type": "Tipo de Descuento",
+          "value": "Valor del Descuento",
+          "start_date": "Fecha de Inicio",
+          "end_date": "Fecha de Finalización",
+          "is_active": "Promoción activa y visible"
+        },
+        "placeholders": {
+          "name": "Ej: Verano Fitness",
+          "code": "VERANO2025",
+          "type": "Seleccionar tipo",
+          "percentage": "Porcentaje (%)",
+          "fixed": "Monto Fijo ($)"
+        }
+      },
+      "create": {
+        "title": "NUEVA PROMOCIÓN",
+        "subtitle": "Configure los detalles del cupón para sus socios.",
+        "button_cancel": "Cancelar",
+        "button_submit": "Crear Promoción",
+        "button_loading": "Guardando...",
+        "success_title": "¡Promoción creada!",
+        "success_description": "El código {code} ha sido registrado exitosamente.",
+        "error_title": "Error al guardar",
+        "error_default": "Ocurrió un problema con los datos enviados."
+      },
+      "edit": {
+        "title": "EDITAR PROMOCIÓN",
+        "subtitle": "Modifica los parámetros de la promoción seleccionada para actualizar sus beneficios.",
+        "loading": "Cargando datos de la promoción...",
+        "error_fetch": "No se pudo cargar la promoción",
+        "not_found": "Promoción no encontrada",
+        "success_update": "Promoción actualizada correctamente",
+        "error_update": "Error al actualizar",
+        "button_cancel": "Cancelar",
+        "button_submit": "Actualizar Promoción",
+        "button_loading": "Guardando cambios...",
+        "error_update_description": "No se detectaron cambios para guardar."
+      },
+      "details": {
+        "title": "DETALLES DE LA PROMOCIÓN",
+        "subtitle": "Información detallada sobre el cupón, vigencia y beneficios configurados.",
+        "not_found": "Promoción no encontrada",
+        "loading": "Cargando detalles...",
+        "error_fetch": "No se pudo cargar la información de la promoción",
+        "button_back": "Volver",
+        "button_edit": "Modificar",
+        "button_list": "Volver al listado"
       }
-    },
-    "actions": {
-      "view": "Ver detalles",
-      "edit": "Editar",
-      "delete": "Eliminar",
-      "delete_loading": "Eliminando promoción...",
-      "delete_success": "Promoción eliminada correctamente",
-      "delete_error": "Error al eliminar"
-    },
-    "form": {
-      "labels": {
-        "name": "Nombre de la Promoción",
-        "code": "Código (Cupón)",
-        "type": "Tipo de Descuento",
-        "value": "Valor del Descuento",
-        "start_date": "Fecha de Inicio",
-        "end_date": "Fecha de Finalización",
-        "is_active": "Promoción activa y visible"
-      },
-      "placeholders": {
-        "name": "Ej: Verano Fitness",
-        "code": "VERANO2025",
-        "type": "Seleccionar tipo",
-        "percentage": "Porcentaje (%)",
-        "fixed": "Monto Fijo ($)"
-      }
-    },
-    "create": {
-      "title": "NUEVA PROMOCIÓN",
-      "subtitle": "Configure los detalles del cupón para sus socios.",
-      "button_cancel": "Cancelar",
-      "button_submit": "Crear Promoción",
-      "button_loading": "Guardando...",
-      "success_title": "¡Promoción creada!",
-      "success_description": "El código {code} ha sido registrado exitosamente.",
-      "error_title": "Error al guardar",
-      "error_default": "Ocurrió un problema con los datos enviados."
-    },
-    "edit": {
-      "title": "EDITAR PROMOCIÓN",
-      "subtitle": "Modifica los parámetros de la promoción seleccionada para actualizar sus beneficios.",
-      "loading": "Cargando datos de la promoción...",
-      "error_fetch": "No se pudo cargar la promoción",
-      "not_found": "Promoción no encontrada",
-      "success_update": "Promoción actualizada correctamente",
-      "error_update": "Error al actualizar",
-      "button_cancel": "Cancelar",
-      "button_submit": "Actualizar Promoción",
-      "button_loading": "Guardando cambios...",
-      "error_update_description": "No se detectaron cambios para guardar."
-    },
-    "details": {
-      "title": "DETALLES DE LA PROMOCIÓN",
-      "subtitle": "Información detallada sobre el cupón, vigencia y beneficios configurados.",
-      "not_found": "Promoción no encontrada",
-      "loading": "Cargando detalles...",
-      "error_fetch": "No se pudo cargar la información de la promoción",
-      "button_back": "Volver",
-      "button_edit": "Modificar",
-      "button_list": "Volver al listado"
     }
-  }
   },
   "common": {
     "Validations": {
@@ -844,6 +940,331 @@
       "error_subtitle": "No se pudo cargar la información del cliente",
       "not_found": "Cliente no encontrado",
       "back_button": "Volver a la lista"
+    }
+  },
+  "branches": {
+    "title": "SUCURSALES",
+    "add_button": "Crear Sucursal",
+    "stats": {
+      "total": "Total",
+      "active": "Activas",
+      "inactive": "Inactivas",
+      "maintenance": "Mantenimiento",
+      "unit": "SUCURSALES"
+    },
+    "table": {
+      "placeholder": "Buscar por nombre o RIF",
+      "filter_status": "Estatus",
+      "clear_filters": "Limpiar filtros",
+      "download": "Download CSV",
+      "columns": {
+        "name": "Nombre",
+        "tax_id": "taxId",
+        "manager": "Administrador",
+        "country": "País",
+        "status": "Estado"
+      },
+      "status": {
+        "active": "Activa",
+        "inactive": "Inactiva",
+        "maintenance": "En mantenimiento",
+        "unknown": "Desconocido"
+      },
+      "actions": {
+        "view": "Ver",
+        "edit": "Modificar",
+        "delete": "Eliminar"
+      },
+      "delete_dialog": {
+        "title": "Confirmar Eliminación",
+        "description": "¿Estás seguro de que deseas eliminar este servicio? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar",
+        "success": "Sucursal eliminada: {name}",
+        "error": "Error al eliminar la sucursal. Intenta nuevamente.",
+        "success_title": "Eliminación exitosa",
+        "error_title": "Error"
+      }
+    },
+    "create": {
+      "title": "CREAR NUEVA SUCURSAL",
+      "subtitle": "Complete los siguientes pasos para crear una nueva sucursal",
+      "steps": {
+        "basic": {
+          "name": "Información Básica",
+          "description": "Datos"
+        },
+        "location": {
+          "name": "Ubicación",
+          "description": "Dirección"
+        },
+        "admin": {
+          "name": "Administración",
+          "description": "Gestión"
+        },
+        "confirm": {
+          "name": "Confirmación",
+          "description": "Revisión"
+        }
+      },
+      "form": {
+        "basic_info": {
+          "title": "Información Básica de la Sucursal",
+          "subtitle": "Comience ingresando los datos fundamentales de la nueva sucursal.",
+          "name": "Razón Social *",
+          "name_placeholder": "Ej: FitnesPlaza",
+          "tax_id": "RIF *",
+          "tax_id_placeholder": "J-402456696-3",
+          "phone": "Teléfono",
+          "phone_placeholder": "Teléfono",
+          "status": "Estado de Sucursal *",
+          "status_placeholder": "Activa",
+          "next_steps": {
+            "title": "Próximos pasos",
+            "description": "En los siguientes pasos configuraremos la ubicación, contacto, horarios y empleados de la nueva sucursal."
+          }
+        },
+        "location": {
+          "title": "Ubicación y Contacto",
+          "subtitle": "Seleccione la ubicación exacta en el mapa o ingrese coordenadas",
+          "address": "Dirección Completa*",
+          "address_placeholder": "Ingrese la dirección manualmente o seleccione en el mapa",
+          "state": "Estado",
+          "country": "País",
+          "gps_coords": "Coordenadas GPS",
+          "latitude": "Latitud",
+          "longitude": "Longitud"
+        },
+        "admin": {
+          "title": "Administración",
+          "subtitle": "Asigne el gerente responsable, defina la capacidad y configure los horarios de operación para cada día de la semana",
+          "manager": "Gerente Responsable *",
+          "manager_placeholder": "Seleccione un Gerente",
+          "capacity": "Capacidad de Miembros *",
+          "capacity_placeholder": "Ejemplo: 400",
+          "table": {
+            "day": "Día",
+            "opening": "Apertura",
+            "closing": "Cierre",
+            "closed": "Cerrado"
+          },
+          "days": {
+            "monday": "Lunes",
+            "tuesday": "Martes",
+            "wednesday": "Miércoles",
+            "thursday": "Jueves",
+            "friday": "Viernes",
+            "saturday": "Sábado",
+            "sunday": "Domingo"
+          }
+        },
+        "confirm": {
+          "title": "Políticas Comerciales",
+          "subtitle": "Seleccionas las políticas comerciales correspondientes para la sucursal",
+          "checkbox_label": "Selecciona dándole al check las políticas",
+          "footer_hint": "Estas políticas serán visibles para los miembros de esta sucursal",
+          "next_steps": {
+            "title": "Listo para crear",
+            "description": "Revise la información antes de confirmar. Una vez creada la sucursal, podrá modificar estos datos desde la gestión de sucursales."
+          },
+          "policies": {
+            "p1": "Inscripción totalmente gratuita por tiempo limitado.",
+            "p2": "Membresía flexible con un periodo mínimo de cancelación de solo 1 mes.",
+            "p3": "Acceso a entrenador personal de planta sin costo adicional en cada horario.",
+            "p4": "Clases especializadas para adultos +50 años.",
+            "p5": "Beneficio 'Trae un amigo': 15 días de acceso gratuito para un acompañante.",
+            "p6": "Diversidad de clases grupales incluidas: Baile, Boxeo, Yoga y más.",
+            "p7": "Estacionamiento exclusivo/gratuito para miembros.",
+            "p8": "Compromiso con la seguridad: Instalaciones seguras y monitoreadas para una experiencia libre de preocupaciones."
+          }
+        },
+        "buttons": {
+          "back": "Anterior",
+          "next": "Siguiente",
+          "create": "Crear Sucursal",
+          "save": "Guardar cambios",
+          "saving": "Guardando..."
+        }
+      }
+    },
+    "details": {
+      "title": "Detalles de sucursal",
+      "edit_title": "Modificar Sucursal",
+      "info_of": "Información de {name}",
+      "loading": "Cargando sucursal...",
+      "not_found": "No se encontró la sucursal.",
+      "error_loading": "No se pudo cargar la información de la sucursal.",
+      "tabs": {
+        "basic": "General",
+        "payment": "Métodos de pago",
+        "services": "Servicios",
+        "instructors": "Instructores",
+        "equipment": "Equipamiento"
+      },
+      "basic": {
+        "title": "Información básica",
+        "subtitle": "Datos legales y generales de la sucursal",
+        "name": "Razón social",
+        "tax_id": "RIF",
+        "phone": "Teléfono",
+        "capacity": "Capacidad máxima",
+        "status": "Estado de la sucursal",
+        "status_placeholder": "Selecciona un estado",
+        "hint": "Estos datos deben corresponder con la documentación legal de la sucursal.",
+        "location_title": "Ubicación",
+        "location_subtitle": "Visualizando la ubicación de la sucursal",
+        "map_title": "Posición en el mapa",
+        "schedule_title": "Horarios de operación",
+        "success_update": "Sucursal actualizada correctamente",
+        "error_update": "Error actualizando sucursal"
+      },
+      "payment_methods": {
+        "title": "Métodos de pago aceptados",
+        "subtitle": "Selecciona los métodos de pago que estarán disponibles en esta sucursal.",
+        "placeholder": "Selecciona un método...",
+        "add": "Agregar",
+        "empty": "No hay métodos de pago seleccionados.",
+        "type": "Tipo: {type}",
+        "remove": "Eliminar",
+        "success_load": "Métodos de pago de la sucursal cargados correctamente",
+        "error_load": "No se pudieron cargar los métodos de pago",
+        "error_branch_load": "No se pudieron cargar los métodos de pago de la sucursal",
+        "success_add": "Método de pago \"{name}\" agregado",
+        "success_remove": "Método de pago eliminado correctamente",
+        "error_remove": "No se pudo eliminar el método de pago",
+        "saving": "Guardando métodos de pago...",
+        "success_save": "Métodos de pago guardados correctamente",
+        "error_save": "No se pudieron guardar los métodos de pago"
+      },
+      "equipment": {
+        "error_loading_catalog": "Error cargando catálogo de equipos",
+        "error_loading_inventory": "Error cargando inventario",
+        "select_before_adding": "Debes seleccionar un equipo antes de agregarlo",
+        "error_adding": "Error al agregar equipo: {errors}",
+        "success_added_pending": "Equipo \"{name}\" agregado al inventario pendiente",
+        "success_removed_pending": "Equipo \"{name}\" eliminado del inventario pendiente",
+        "success_removed": "Equipo \"{name}\" eliminado del inventario",
+        "error_invalid_token": "Token inválido",
+        "success_save": "Cambios guardados correctamente",
+        "error_save": "Error guardando cambios",
+        "error_invalid_update": "Equipo inválido para actualizar",
+        "error_update": "Error al actualizar equipo: {errors}",
+        "success_update": "Equipo \"{name}\" actualizado correctamente",
+        "error_updating": "Error actualizando equipamiento",
+        "table": {
+          "name": "Nombre",
+          "serial": "Serial",
+          "status": "Estado",
+          "acquisition": "Adquisición",
+          "last_maintenance": "Último mantenimiento"
+        },
+        "actions": {
+          "view": "Ver equipamiento",
+          "edit": "Editar equipamiento",
+          "delete": "Eliminar equipamiento"
+        },
+        "add": {
+          "title": "Agregar nuevo equipamiento",
+          "search_label": "Buscar equipo",
+          "search_placeholder": "Ej: Monster Power Rack",
+          "select_placeholder": "Seleccionar un equipo (Ej: Monster Power Rack)",
+          "serial_label": "Número de serie",
+          "serial_placeholder": "Ej: SN-ROG-123",
+          "notes_label": "Notas",
+          "notes_placeholder": "Ej: Equipo listo para usar",
+          "button": "Agregar"
+        },
+        "inventory_title": "Inventario de la sucursal",
+        "empty": "No hay equipamiento asignado a esta sucursal.",
+        "modal": {
+          "edit": "Editar equipamiento",
+          "view": "Ver equipamiento",
+          "loading": "Cargando...",
+          "last_maintenance": "Último mantenimiento",
+          "notes": "Notas",
+          "status": "Estado",
+          "status_placeholder": "Seleccionar estado",
+          "save": "Guardar"
+        }
+      },
+      "instructors": {
+        "error_loading": "No se pudieron cargar los instructores",
+        "already_assigned": "El instructor ya está asignado",
+        "success_added_pending": "Instructor agregado (pendiente de guardar)",
+        "success_removed_local": "Instructor eliminado localmente",
+        "success_removed": "Instructor eliminado correctamente",
+        "error_removing": "No se pudo eliminar el instructor",
+        "no_changes": "No hay cambios para guardar",
+        "success_save": "Cambios guardados correctamente",
+        "error_save": "No se pudieron guardar los cambios",
+        "add_label": "Agregar instructor",
+        "select_placeholder": "Selecciona un instructor",
+        "add_button": "Agregar",
+        "loading": "Cargando instructores...",
+        "empty": "No hay instructores asignados.",
+        "remove": "Eliminar",
+        "info_scroll": "Hay muchos instructores, usa el scroll para ver más."
+      },
+      "services": {
+        "success_load_catalog": "Servicios de la sucursal cargados correctamente",
+        "error_load_catalog": "No se pudieron cargar los servicios disponibles",
+        "error_load_branch": "No se pudieron cargar los servicios de la sucursal",
+        "success_added": "Servicio \"{name}\" agregado",
+        "success_removed": "Servicio \"{name}\" eliminado",
+        "error_removing": "No se pudo eliminar el servicio",
+        "no_new_services": "No hay servicios nuevos para guardar",
+        "success_save": "Servicios guardados correctamente",
+        "error_save": "Error al guardar los servicios",
+        "success_update": "Servicio \"{name}\" actualizado",
+        "error_update": "Error al actualizar el servicio",
+        "title": "Servicios de la sucursal",
+        "subtitle": "Administra los servicios disponibles y sus precios.",
+        "add": {
+          "title": "Agregar nuevo servicio",
+          "select_placeholder": "Selecciona un servicio",
+          "capacity": "Aforo",
+          "member_price": "Precio miembros",
+          "non_member_price": "Precio no miembros",
+          "visible": "Visible",
+          "button": "Agregar"
+        },
+        "assigned_title": "Servicios asignados",
+        "loading": "Cargando servicios...",
+        "empty": "No hay servicios asignados.",
+        "description": "Aforo: {capacity} | Miembros: ${memberPrice} | No miembros: ${nonMemberPrice} | Visible: {visible}",
+        "yes": "Sí",
+        "no": "No",
+        "modal": {
+          "view": "Ver servicio",
+          "edit": "Editar servicio",
+          "loading": "Cargando...",
+          "capacity": "Aforo máximo",
+          "member_price": "Precio para miembros",
+          "non_member_price": "Precio para no miembros",
+          "visible": "Visible",
+          "save": "Guardar"
+        }
+      }
+    },
+    "notifications": {
+      "success_title": "¡Sucursal Creada!",
+      "success_description": "La nueva sucursal ha sido registrada exitosamente en el sistema.",
+      "action_text": "Entendido",
+      "error_required": "Por favor completa los campos obligatorios: Nombre, Tax ID, País y Estado."
+    },
+    "validations": {
+      "name_required": "La Razón Social es obligatoria.",
+      "tax_id_required": "El ID Fiscal es obligatorio.",
+      "status_required": "El estado de sucursal es obligatorio.",
+      "address_required": "La Dirección Completa es obligatoria.",
+      "location_required": "Debe seleccionar la ubicación en el mapa.",
+      "country_required": "El País es obligatorio.",
+      "state_required": "El Estado es obligatorio.",
+      "manager_required": "Debe asignar un Gerente Responsable.",
+      "capacity_required": "La capacidad debe ser un número válido (> 0).",
+      "opening_required": "La hora de apertura es obligatoria",
+      "closing_required": "La hora de cierre es obligatoria",
+      "payment_method_required": "Debe seleccionar al menos un método de pago"
     }
   }
 }

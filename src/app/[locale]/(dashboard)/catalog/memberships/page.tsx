@@ -9,8 +9,10 @@ import MembershipTable from "./MembershipTable";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/sdk-config";
+import { useTranslations } from "next-intl";
 
 export default function Membership() {
+  const t = useTranslations("catalog.memberships");
   const router = useRouter();
   const { token } = useAuth();
 
@@ -42,9 +44,8 @@ export default function Membership() {
           search: filters.search || undefined,
         });
 
-        const activeMemberships = result.data?.filter((m) => m.is_active) || [];
-        setMembershipData(activeMemberships);
-        setTotalItems(activeMemberships.length);
+        setMembershipData(result.data || []);
+        setTotalItems(result.total || 0);
       } catch (error) {
         console.error("Error cargando membresías:", error);
         setMembershipData([]);
@@ -61,6 +62,7 @@ export default function Membership() {
 
   const handleFilterChange = (newFilters: { search?: string }) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
+    setPage(1);
   };
 
   const handleReload = () => {
@@ -69,18 +71,18 @@ export default function Membership() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <PageHeader title="MEMBRESÍAS">
+      <PageHeader title={t("title")}>
         <Button
           className="bg-transparent text-black border border-gray-100"
-          onClick={() => router.push("/memberships/new")}
+          onClick={() => router.push("/catalog/memberships/new")}
         >
           <PlusIcon className="h-5 w-5" />
-          Agregar una membresía
+          {t("add_button")}
         </Button>
       </PageHeader>
 
       {isLoading ? (
-        <div className="text-center p-10">Cargando Membresías...</div>
+        <div className="text-center p-10">{t("loading")}</div>
       ) : (
         <MembershipTable
           data={membershipData}

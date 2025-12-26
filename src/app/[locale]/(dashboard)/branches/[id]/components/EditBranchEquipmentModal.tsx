@@ -32,6 +32,8 @@ interface EditBranchEquipmentModalProps {
   mode?: "view" | "edit";
 }
 
+import { useTranslations } from "next-intl";
+
 export default function EditBranchEquipmentModal({
   open,
   onClose,
@@ -39,6 +41,7 @@ export default function EditBranchEquipmentModal({
   onSave,
   mode = "edit",
 }: EditBranchEquipmentModalProps) {
+  const t = useTranslations("branches");
   const isViewMode = mode === "view";
 
   const [lastMaintenanceDate, setLastMaintenanceDate] = useState("");
@@ -68,18 +71,22 @@ export default function EditBranchEquipmentModal({
       <DialogContent>
         <DialogHeader>
           <VisuallyHidden>
-            <DialogTitle>Editar equipamiento</DialogTitle>
+            <DialogTitle>
+              {isViewMode
+                ? t("details.equipment.modal.view")
+                : t("details.equipment.modal.edit")}
+            </DialogTitle>
           </VisuallyHidden>
         </DialogHeader>
 
         {!equipment ? (
-          <p className="text-sm text-gray-500">Cargando…</p>
+          <p className="text-sm text-gray-500">{t("details.equipment.modal.loading")}</p>
         ) : (
           <div className="space-y-4">
             <p className="text-lg font-semibold">{equipment.serial_number}</p>
 
             <InputField
-              label="Último mantenimiento"
+              label={t("details.equipment.modal.last_maintenance")}
               type="date"
               disabled={isViewMode}
               value={lastMaintenanceDate}
@@ -87,7 +94,7 @@ export default function EditBranchEquipmentModal({
             />
 
             <InputField
-              label="Notas"
+              label={t("details.equipment.modal.notes")}
               type="text"
               disabled={isViewMode}
               value={notes}
@@ -96,7 +103,7 @@ export default function EditBranchEquipmentModal({
 
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-1">
-                Estado
+                {t("details.equipment.modal.status")}
               </label>
               <Select
                 value={status}
@@ -104,7 +111,7 @@ export default function EditBranchEquipmentModal({
                 disabled={isViewMode}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar estado" />
+                  <SelectValue placeholder={t("details.equipment.modal.status_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Available">Available</SelectItem>
@@ -118,7 +125,7 @@ export default function EditBranchEquipmentModal({
 
         {!isViewMode && (
           <DialogFooter>
-            <Button onClick={handleSave}>Guardar</Button>
+            <Button onClick={handleSave}>{t("details.equipment.modal.save")}</Button>
           </DialogFooter>
         )}
       </DialogContent>

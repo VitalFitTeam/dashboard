@@ -18,10 +18,13 @@ interface BranchFormContainerProps {
   branch: BranchDetails;
 }
 
+import { useTranslations } from "next-intl";
+
 export default function BranchFormContainer({
   mode = "edit",
   branch,
 }: BranchFormContainerProps) {
+  const t = useTranslations("branches");
   const router = useRouter();
   const [formData, setFormData] = useState<BranchDetails>({ ...branch });
   const [allServicesFromApi, setAllServicesFromApi] = useState<
@@ -31,7 +34,7 @@ export default function BranchFormContainer({
   const tabs = [
     {
       value: "basic",
-      label: "General",
+      label: t("details.tabs.basic"),
       content: (
         <BranchBasicDataPanel
           mode={mode}
@@ -42,26 +45,26 @@ export default function BranchFormContainer({
     },
     {
       value: "payment",
-      label: "Métodos de pago",
+      label: t("details.tabs.payment"),
       content: (
         <BranchPaymentMethodPanel mode={mode} branchId={branch.branch_id} />
       ),
     },
     {
       value: "services",
-      label: "Servicios",
+      label: t("details.tabs.services"),
       content: <BranchServicePanel branchId={branch.branch_id} mode={mode} />,
     },
     {
       value: "instructors",
-      label: "Instructores",
+      label: t("details.tabs.instructors"),
       content: (
         <BranchInstructorPanel mode={mode} branchId={branch.branch_id} />
       ),
     },
     {
       value: "equipment",
-      label: "Equipamiento",
+      label: t("details.tabs.equipment"),
       content: <BranchEquipmentPanel mode={mode} branchId={branch.branch_id} />,
     },
   ];
@@ -71,9 +74,11 @@ export default function BranchFormContainer({
       <div className="flex justify-between items-center mb-4">
         <div>
           <h1 className="text-2xl font-bold">
-            {mode === "edit" ? "Modificar Sucursal" : "Detalles de sucursal"}
+            {mode === "edit" ? t("details.edit_title") : t("details.title")}
           </h1>
-          <p className="text-gray-500">Información de {formData.name}</p>
+          <p className="text-gray-500">
+            {t("details.info_of", { name: formData.name })}
+          </p>
         </div>
 
         <div className="flex gap-2">
@@ -81,7 +86,7 @@ export default function BranchFormContainer({
             <Button
               onClick={() => router.push(`/branches/${branch.branch_id}/edit`)}
             >
-              Modificar
+              {t("table.actions.edit")}
             </Button>
           )}
         </div>

@@ -20,10 +20,13 @@ interface BranchPaymentMethodPanelProps {
   mode?: "edit" | "view";
 }
 
+import { useTranslations } from "next-intl";
+
 export default function BranchPaymentMethodPanel({
   branchId,
   mode = "edit",
 }: BranchPaymentMethodPanelProps) {
+  const t = useTranslations("branches");
   const { token } = useAuth();
 
   const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethod[]>(
@@ -48,7 +51,7 @@ export default function BranchPaymentMethodPanel({
         setAllPaymentMethods(res.data || []);
       } catch (err) {
         console.error(err);
-        toast.error("No se pudieron cargar los métodos de pago disponibles");
+        toast.error(t("details.payment_methods.error_load"));
       } finally {
         setLoading(false);
       }
@@ -71,10 +74,10 @@ export default function BranchPaymentMethodPanel({
         );
         setSelectedMethods(res.data || []);
         setDirty(false);
-        toast.success("Métodos de pago de la sucursal cargados correctamente");
+        toast.success(t("details.payment_methods.success_load"));
       } catch (err) {
         console.error(err);
-        toast.error("No se pudieron cargar los métodos de pago de la sucursal");
+        toast.error(t("details.payment_methods.error_branch_load"));
       } finally {
         setLoading(false);
       }
@@ -104,7 +107,7 @@ export default function BranchPaymentMethodPanel({
     setSelectedMethods((prev) => [...prev, newMethod]);
     setSelectedId("");
     setDirty(true);
-    toast.success(`Método de pago "${method.name}" agregado`);
+    toast.success(t("details.payment_methods.success_add", { name: method.name }));
   };
 
   const handleRemove = async (id: string) => {
@@ -116,10 +119,10 @@ export default function BranchPaymentMethodPanel({
       await api.paymentMethod.removeBranchPaymentMethod(branchId, id, token);
       setSelectedMethods((prev) => prev.filter((m) => m.method_id !== id));
       setDirty(true);
-      toast.success("Método de pago eliminado correctamente");
+      toast.success(t("details.payment_methods.success_remove"));
     } catch (err) {
       console.error("Error eliminando método de pago:", err);
-      toast.error("No se pudo eliminar el método de pago");
+      toast.error(t("details.payment_methods.error_remove"));
     } finally {
       setLoading(false);
     }
@@ -137,9 +140,9 @@ export default function BranchPaymentMethodPanel({
       await toast.promise(
         api.paymentMethod.addBranchPaymentMethod(branchId, payload, token),
         {
-          loading: "Guardando métodos de pago...",
-          success: "Métodos de pago guardados correctamente",
-          error: "No se pudieron guardar los métodos de pago",
+          loading: t("details.payment_methods.saving"),
+          success: t("details.payment_methods.success_save"),
+          error: t("details.payment_methods.error_save"),
         },
       );
 
@@ -155,11 +158,10 @@ export default function BranchPaymentMethodPanel({
     <div className="space-y-6">
       <section>
         <h2 className="text-xl font-semibold text-gray-900">
-          Métodos de pago aceptados
+          {t("details.payment_methods.title")}
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          Selecciona los métodos de pago que estarán disponibles en esta
-          sucursal.
+          {t("details.payment_methods.subtitle")}
         </p>
       </section>
 
@@ -167,7 +169,7 @@ export default function BranchPaymentMethodPanel({
         <div className="flex gap-2 items-end">
           <Select value={selectedId} onValueChange={setSelectedId}>
             <SelectTrigger className="w-64">
-              <SelectValue placeholder="Selecciona un método..." />
+              <SelectValue placeholder={t("details.payment_methods.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {allPaymentMethods
@@ -183,7 +185,7 @@ export default function BranchPaymentMethodPanel({
             </SelectContent>
           </Select>
           <Button onClick={handleAddMethod} disabled={!selectedId}>
-            Agregar
+            {t("details.payment_methods.add")}
           </Button>
         </div>
       )}
@@ -191,7 +193,7 @@ export default function BranchPaymentMethodPanel({
       <div className="space-y-2">
         {selectedMethods.length === 0 ? (
           <p className="text-sm text-gray-500">
-            No hay métodos de pago seleccionados.
+            {t("details.payment_methods.empty")}
           </p>
         ) : (
           selectedMethods.map((method) => (
@@ -202,14 +204,14 @@ export default function BranchPaymentMethodPanel({
                 .map((n) => n[0])
                 .join("")}
               title={method.name}
-              description={`Tipo: ${method.type}`}
+              description={t("details.payment_methods.type", { type: method.type })}
               action={
                 mode === "edit" ? (
                   <button
                     className="text-sm text-red-500 hover:underline"
                     onClick={() => handleRemove(method.method_id)}
                   >
-                    Eliminar
+                    {t("details.payment_methods.remove")}
                   </button>
                 ) : null
               }
@@ -220,7 +222,7 @@ export default function BranchPaymentMethodPanel({
 
       {mode === "edit" && (
         <Button onClick={handleSave} disabled={!dirty || loading}>
-          {loading ? "Guardando..." : "Guardar cambios"}
+          {loading ? t("create.form.buttons.saving") : t("create.form.buttons.save")}
         </Button>
       )}
     </div>
