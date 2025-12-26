@@ -353,107 +353,122 @@
       }
     },
     "payment_methods": {
-      "title": "PAYMENT METHODS",
-      "add_button": "Add a payment method",
+      "title": "Payment Methods",
+      "add_button": "New Method",
       "stats": {
-        "total": "TOTAL",
-        "cash": "CASH",
-        "gateway": "GATEWAY",
-        "digital": "DIGITAL",
-        "unit": "METHODS"
+        "total": "Total Methods",
+        "cash": "Cash",
+        "gateway": "Gateways",
+        "digital": "Transfers/Zelle",
+        "unit": "methods"
       },
       "table": {
-        "filter_placeholder": "Filter by name",
-        "category": "Category",
-        "all_types": "All types",
-        "all_statuses": "All statuses",
-        "update_button": "Update",
-        "updating": "Updating...",
         "columns": {
           "name": "Name",
           "type": "Type",
-          "description": "Description",
-          "status": "Status"
+          "status": "Status",
+          "actions": "Actions"
         },
         "types": {
           "cash": "Cash",
           "card": "Card",
-          "transfer": "Transfer",
-          "other": "Other"
+          "transfer": "Transfer / Mobile Payment",
+          "other": "Zelle / Others"
         },
         "status": {
           "active": "Active",
           "inactive": "Inactive"
         },
         "actions": {
-          "view": "View",
-          "edit": "Modify",
+          "view": "View Details",
+          "edit": "Edit",
           "delete": "Delete"
         },
+        "filter_placeholder": "Search by name...",
+        "all_types": "All types",
+        "update_button": "Update",
         "delete_dialog": {
-          "title": "Confirm deletion",
-          "description": "Are you sure you want to delete this payment method? This action cannot be undone.",
-          "action_delete": "Delete",
-          "action_cancel": "Cancel"
+          "title": "Are you absolutely sure?",
+          "description": "This action cannot be undone. It will permanently delete the payment method:",
+          "action_delete": "Yes, delete"
         }
       },
-      "notifications": {
-        "load_error": "Error loading payment methods",
-        "delete_success": "Payment method deleted successfully",
-        "delete_error": "Error deleting payment method",
-        "success_title": "Success",
-        "error_title": "Error",
-        "validation_error_title": "Validation Error",
-        "validation_error_description": "Please correct the errors in the form",
-        "update_success": "Payment method updated successfully",
-        "update_error": "Error updating payment method",
-        "create_success": "Payment method created successfully",
-        "create_error": "Error creating payment method"
+      "new": {
+        "title": "Create Payment Method",
+        "create_button": "Create Method",
+        "creating": "Saving..."
       },
-      "validations": {
-        "name_required": "Name is required",
-        "name_max": "Name cannot exceed 100 characters",
-        "name_format": "Name can only contain letters, numbers and spaces",
-        "type_required": "Please select a type",
-        "processing_type_required": "Please select a processing type",
-        "description_max": "Description cannot exceed 500 characters"
+      "edit": {
+        "title": "Edit Payment Method",
+        "save_button": "Save Changes",
+        "saving": "Updating...",
+        "cancel_button": "Cancel"
+      },
+      "view": {
+        "title": "Method Details",
+        "loading": "Loading information..."
       },
       "form": {
         "labels": {
-          "name": "Name",
-          "type": "Type",
-          "processing_type": "Processing Type",
-          "description": "Description",
-          "status": "Global Status"
+          "name": "Internal Name",
+          "display_name": "Public Name (Client)",
+          "type": "Method Type",
+          "processing": "Processing",
+          "visibility": "Visibility",
+          "surcharge_fixed": "Fixed Surcharge (Amount)",
+          "surcharge_percentage": "Percentage Surcharge (%)",
+          "description": "Client Instructions"
         },
         "placeholders": {
-          "name": "Ex: Cash, Stripe, PayPal",
-          "description": "Short description of the payment method"
+          "name_example": "Ex: Bank Transfer Chase",
+          "display_name": "Name visible to the customer",
+          "type": "Select type",
+          "description": "Ex: Please send proof via WhatsApp after finishing the transaction..."
         },
-        "processing_types": {
-          "gateway": "Gateway",
-          "offline": "Offline"
+        "sections": {
+          "config_details": "Configuration Details"
+        },
+        "config": {
+          "phone": "Phone Number",
+          "bank_id": "Bank ID (Code)",
+          "tax_id": "Tax ID / SSN",
+          "bank_name": "Bank Name",
+          "account_number": "Account Number",
+          "email": "Email Address (Zelle)"
+        },
+        "messages": {
+          "no_config_required": "No additional data required for this method.",
+          "back": "Back"
+        },
+        "actions": {
+          "back": "Back",
+          "cancel": "Cancel",
+          "edit": "Modify"
         }
       },
-      "edit": {
-        "title": "EDIT PAYMENT METHOD",
-        "subtitle": "Modify the payment method information",
-        "save_button": "Save Changes",
-        "saving": "Saving...",
-        "cancel_button": "Cancel"
+      "notifications": {
+        "create_success_title": "Method created!",
+        "create_success_description": "The method '{name}' has been successfully registered.",
+        "update_success_title": "Changes saved",
+        "update_success_description": "The method '{name}' has been updated.",
+        "delete_success": "Payment method deleted successfully.",
+        "delete_error": "Could not delete the payment method.",
+        "error_title": "Error",
+        "load_error": "Could not load information.",
+        "validation_error_title": "Validation Error",
+        "conflict_error_title": "Duplicate Name",
+        "conflict_error_description": "A method with that name already exists."
       },
-      "new": {
-        "title": "CREATE PAYMENT METHOD",
-        "subtitle": "Complete the information to create a new payment method",
-        "create_button": "Create Payment Method",
-        "creating": "Creating..."
-      },
-      "view": {
-        "title": "PAYMENT METHOD DETAILS",
-        "subtitle": "Detailed information about the payment method",
-        "edit_button": "Modify",
-        "loading": "Loading...",
-        "not_found": "Payment method not found"
+      "errors": {
+        "invalid_name_format": "The name must include 'Pago Movil', 'Zelle' or 'Bank Transfer'"
+      }, 
+      "validations": {
+        "name_required": "Name is required",
+        "name_max": "Name cannot exceed 100 caracteres",
+        "name_format": "Name can only contain letters, numbers, and hyphens",
+        "type_required": "Method type is required",
+        "processing_type_required": "Processing type is required",
+        "description_max": "Description cannot exceed 500 characters"
       }
     }
   },

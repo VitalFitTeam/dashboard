@@ -5,12 +5,13 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
+import { Pencil, ChevronLeft } from "lucide-react";
 
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton"; 
+import { Skeleton } from "@/components/ui/skeleton";
 import PaymentForm from "../PaymentForm";
 
 export default function PaymentMethodDetailPage() {
@@ -26,13 +27,18 @@ export default function PaymentMethodDetailPage() {
     if (!token || !id) {
       return;
     }
-    
+
     try {
       setLoading(true);
-      const response = await api.paymentMethod.getPaymentMethodByID(id as string, token);
-           
+      const response = await api.paymentMethod.getPaymentMethodByID(
+        id as string,
+        token
+      );
+
       if (response.data) {
-        setFormData(response.data);
+        setFormData({
+          ...response.data,
+        });
       } else {
         throw new Error("No data found");
       }
@@ -57,11 +63,11 @@ export default function PaymentMethodDetailPage() {
           <Skeleton className="h-4 w-[400px]" />
         </div>
         <div className="mt-8 bg-white rounded-xl border p-6 shadow-sm space-y-8">
-           <div className="grid grid-cols-2 gap-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-           </div>
-           <Skeleton className="h-32 w-full" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+          <Skeleton className="h-32 w-full" />
         </div>
       </div>
     );
@@ -74,28 +80,46 @@ export default function PaymentMethodDetailPage() {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
       <PageHeader title={t("view.title")}>
-        <Button 
-          variant="outline" 
-          onClick={() => router.push("/catalog/payment-methods")}
-        >
-          {t("form.actions.back")}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => router.push("/catalog/payment-methods")}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {t("form.actions.back")}
+          </Button>
+
+          <Button
+            onClick={() => router.push(`/catalog/payment-methods/${id}/edit`)}
+            className="flex items-center gap-2"
+          >
+            <Pencil className="h-4 w-4" />
+            {t("form.actions.edit")}
+          </Button>
+        </div>
       </PageHeader>
 
       <div className="bg-white rounded-xl border p-6 shadow-sm">
-        <div className="mb-6 border-b pb-4">
-            <h3 className="text-lg font-medium">
-                {formData.name}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-                ID: {formData.method_id}
-            </p>
+        {/* Cabecera visual del detalle */}
+        <div className="mb-6 border-b pb-4 flex justify-between items-start">
+            <div>
+                <h3 className="text-xl font-bold text-foreground">
+                    {formData.name}
+                </h3>
+                <p className="text-xs text-muted-foreground font-mono mt-1">
+                    ID: {formData.method_id}
+                </p>
+            </div>
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase border bg-secondary/50">
+                {t(`table.types.${formData.type.toLowerCase()}`)}
+            </span>
         </div>
 
-        <PaymentForm
-          formData={formData}
+        <PaymentForm 
+          formData={formData} 
           onChange={() => {}} 
-          mode="view"
+          mode="view" 
         />
       </div>
     </div>

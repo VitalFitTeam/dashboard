@@ -6,22 +6,34 @@ import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Download, Eye, Pencil, Trash2 } from "lucide-react";
+import { RefreshCcw, Eye, Pencil, Trash2 } from "lucide-react";
 
 import { PaymentMethod } from "@vitalfit/sdk";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+
 
 interface PaymentTableProps {
   data: PaymentMethod[];
   loading: boolean;
-  pagination: { page: number; totalPages: number; setPage: (p: number) => void };
-  filters: { type: string; status: string; search: string };
+  pagination: {
+    page: number;
+    totalPages: number;
+    setPage: (p: number) => void;
+  };
+  filters: { type: string; search: string };
   setFilters: (f: any) => void;
   searchQuery: string;
   setSearchQuery: (s: string) => void;
@@ -29,60 +41,91 @@ interface PaymentTableProps {
 }
 
 export default function PaymentTable({
-  data, loading, pagination, filters, setFilters, searchQuery, setSearchQuery, onRefresh
+  data,
+  loading,
+  pagination,
+  filters,
+  setFilters,
+  searchQuery,
+  setSearchQuery,
+  onRefresh,
 }: PaymentTableProps) {
   const t = useTranslations("catalog.payment_methods");
   const router = useRouter();
   const { token } = useAuth();
 
-  // El diálogo se controla aquí porque es una acción efímera de UI
   const [deleteRow, setDeleteRow] = useState<PaymentMethod | null>(null);
 
   const handleDelete = async () => {
-    if (!token || !deleteRow) {
-      return;
+    if (!token || !deleteRow){
+       return;
     }
+
     try {
       await api.paymentMethod.deletePaymentMethod(deleteRow.method_id, token);
       toast.success(t("notifications.delete_success"));
       setDeleteRow(null);
-      onRefresh(); 
-    } catch {
+      onRefresh();
+    } catch (error) {
       toast.error(t("notifications.delete_error"));
     }
   };
 
   const columns: Column<PaymentMethod>[] = [
-    { header: t("table.columns.name"), accessor: "name" },
+    {
+      header: t("table.columns.name"),
+      accessor: "name",
+      render: (_, row) => (
+        <div className="flex flex-col min-w-[150px]">
+          <span className="font-medium text-sm truncate">{String(row.name)}</span>
+          <span className="text-[10px] text-muted-foreground font-mono hidden md:block">
+            {row.method_id.split("-")[0]}...
+          </span>
+        </div>
+      ),
+    },
     {
       header: t("table.columns.type"),
       accessor: "type",
-      render: (type) => (
-        <span className="px-2 py-0.5 rounded-full text-xs font-medium border bg-gray-50 capitalize">
-          {t(`table.types.${String(type).toLowerCase()}`)}
-        </span>
-      )
+      render: (type) => {
+        const typeKey = String(type).toLowerCase();
+        const variantMap: Record<string, "info" | "secondary" | "warning" | "outline"> = {
+          transfer: "info",
+          cash: "warning",
+          card: "secondary",
+          other: "outline",
+        };
+
+        return (
+          <Badge variant={variantMap[typeKey] || "secondary"} className="uppercase text-[10px] whitespace-nowrap">
+            {t(`table.types.${typeKey}`)}
+          </Badge>
+        );
+      },
     },
     {
       header: t("table.columns.status"),
-      accessor: "global_status",
-      render: (status) => (
-        <span className={`px-2 py-0.5 rounded-full text-xs border ${status ? "text-green-700 border-green-200" : "text-red-700 border-red-200"}`}>
-          {status ? t("table.status.active") : t("table.status.inactive")}
-        </span>
-      )
-    }
+      accessor: "global_status" as any,
+      render: (status) => {
+        const isActive = status !== false;
+        return (
+          <Badge variant={isActive ? "success" : "error"} className="whitespace-nowrap">
+            {isActive ? t("table.status.active") : t("table.status.inactive")}
+          </Badge>
+        );
+      },
+    },
   ];
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex flex-1 gap-4 min-w-[300px]">
-          <div className="relative w-[250px]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row flex-1 gap-4 items-center">
+          <div className="relative w-full sm:max-w-[300px]">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={t("table.filter_placeholder")}
-              className="pl-9"
+              className="pl-9 h-10 w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -90,9 +133,13 @@ export default function PaymentTable({
 
           <Select
             value={filters.type || "all"}
-            onValueChange={(v) => setFilters({ ...filters, type: v === "all" ? "" : v })}
+            onValueChange={(v) =>
+              setFilters({ ...filters, type: v === "all" ? "" : v })
+            }
           >
-            <SelectTrigger className="w-[180px]"><SelectValue placeholder={t("table.all_types")} /></SelectTrigger>
+            <SelectTrigger className="w-full sm:w-[200px] h-10">
+              <SelectValue placeholder={t("table.all_types")} />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("table.all_types")}</SelectItem>
               <SelectItem value="Cash">{t("table.types.cash")}</SelectItem>
@@ -103,40 +150,61 @@ export default function PaymentTable({
           </Select>
         </div>
 
-        <Button variant="outline" onClick={onRefresh} disabled={loading}>
-          <Download className="mr-2 h-4 w-4" />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRefresh}
+          disabled={loading}
+          className="h-10 w-full lg:w-auto"
+        >
+          <RefreshCcw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           {t("table.update_button")}
         </Button>
       </div>
 
-      <DataTable<PaymentMethod>
-        columns={columns}
-        data={data}
-        page={pagination.page}
-        totalPages={pagination.totalPages}
-        onPageChange={pagination.setPage}
-        isLoading={loading}
-        rowIdKey="method_id"
-        actions={(row) => (
-          <RowActions
-            actions={[
-              { label: t("table.actions.view"), icon: Eye, onClick: () => router.push(`/catalog/payment-methods/${row.method_id}`) },
-              { label: t("table.actions.edit"), icon: Pencil, onClick: () => router.push(`/catalog/payment-methods/${row.method_id}/edit`) },
-              { label: t("table.actions.delete"), icon: Trash2, onClick: () => setDeleteRow(row), variant: "danger", separatorBefore: true },
-            ]}
+      <div className="rounded-md border bg-white overflow-hidden">
+        <div className="overflow-x-auto">
+          <DataTable<PaymentMethod>
+            columns={columns}
+            data={data}
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={pagination.setPage}
+            isLoading={loading}
+            rowIdKey="method_id"
+            actions={(row) => (
+              <RowActions
+                actions={[
+                  {
+                    label: t("table.actions.view"),
+                    icon: Eye,
+                    onClick: () =>
+                      router.push(`/catalog/payment-methods/${row.method_id}`),
+                  },
+                  {
+                    label: t("table.actions.edit"),
+                    icon: Pencil,
+                    onClick: () =>
+                      router.push(`/catalog/payment-methods/${row.method_id}/edit`),
+                  },
+                  {
+                    label: t("table.actions.delete"),
+                    icon: Trash2,
+                    onClick: () => setDeleteRow(row),
+                    variant: "danger",
+                    separatorBefore: true,
+                  },
+                ]}
+              />
+            )}
           />
-        )}
-      />
+        </div>
+      </div>
 
       <GeneralAlertDialog
-        open={Boolean(deleteRow)} 
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteRow(null);
-          }
-        }}
+        open={Boolean(deleteRow)}
+        onOpenChange={(open) => !open && setDeleteRow(null)}
         title={t("table.delete_dialog.title")}
-        // Usamos un condicional opcional para evitar el crash
         description={`${t("table.delete_dialog.description")} ${deleteRow?.name ?? ""}`}
         actionText={t("table.delete_dialog.action_delete")}
         onAction={handleDelete}

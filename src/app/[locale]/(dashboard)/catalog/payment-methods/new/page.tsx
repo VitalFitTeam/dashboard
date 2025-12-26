@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { CreatePaymentMethod, BranchPaymentVisibility, PaymentMethod } from "@vitalfit/sdk";
+import { CreatePaymentMethod, BranchPaymentVisibility } from "@vitalfit/sdk";
 
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -22,7 +22,7 @@ export default function NewPaymentMethodPage() {
     method_id: "", 
     name: "",
     display_name: "",
-    type: "Cash",
+    type: "Transfer", 
     processing_type: "Offline",
     description: "",
     surcharge_fixed: 0,
@@ -31,59 +31,94 @@ export default function NewPaymentMethodPage() {
     visibility: "All" as BranchPaymentVisibility,
   });
 
-  const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (): boolean => {
+    setErrors({});
+    const nameLower = formData.name.toLowerCase();
+    const isManualType = formData.type === "Cash" || formData.type === "Card";
+
+    if (!isManualType) {
+      const isValidName = 
+        nameLower.includes("pago movil") || 
+        nameLower.includes("zelle") || 
+        nameLower.includes("bank transfer");
+
+      if (!isValidName) {
+        // Implementación de i18n para mensaje de error de validación
+        const errorMsg = t("errors.invalid_name_format");
+        setErrors({ name: errorMsg });
+        toast.error(t("notifications.validation_error_title"), { 
+          description: errorMsg 
+        });
+        return false;
+      }
+    }
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token){
+    if (!token || !validateForm()){
        return;
     }
 
     try {
       setIsSubmitting(true);
-
+      const config = formData.configuration as any;
       let finalConfig = {};
-      const c = formData.configuration as any;
+      let finalType = formData.type;
 
-      if (formData.type === "Transfer") {
-        finalConfig = {
-          bank_name: c.bank_name || "",
-          account_number: c.account_number || "",
-          tax_id: c.tax_id || "",
-        };
-      } else if (formData.type === "Other") {
-        if (c.phone) {
-          finalConfig = {
-            phone: c.phone,
-            bank_id: c.bank_id,
-            tax_id: c.tax_id,
+      if (formData.type === "Transfer" || formData.type === "Other" || formData.name.toLowerCase().includes("zelle")) {
+        finalType = "Transfer" as any;
+        if (config?.phone) {
+          finalConfig = { 
+            phone: String(config.phone).trim(), 
+            bank_id: String(config.bank_id).trim(), 
+            tax_id: String(config.tax_id).trim() 
           };
-        } else if (c.email) {
-          finalConfig = {
-            email: c.email,
+        } else if (config?.email || formData.name.toLowerCase().includes("zelle")) {
+          finalConfig = { email: String(config?.email || "").trim() };
+        } else {
+          finalConfig = { 
+            bank_name: String(config?.bank_name || "").trim(), 
+            account_number: String(config?.account_number || "").trim(), 
+            tax_id: String(config?.tax_id || "").trim() 
           };
         }
+      } else {
+        finalConfig = {};
       }
 
       const payload: CreatePaymentMethod = {
         ...formData,
         method_id: crypto.randomUUID(),
-        display_name: formData.display_name || formData.name,
-        configuration: finalConfig, 
-        surcharge_fixed: Number(formData.surcharge_fixed),
-        surcharge_percentage: Number(formData.surcharge_percentage),
+        name: formData.name.trim(),
+        display_name: (formData as any).display_name?.trim() || formData.name.trim(),
+        type: finalType as any,
+        configuration: finalConfig,
+        surcharge_fixed: Number(formData.surcharge_fixed) || 0,
+        surcharge_percentage: Number(formData.surcharge_percentage) || 0,
       };
 
       await api.paymentMethod.createPaymentMethod(payload, token);
 
-      toast.success(t("notifications.create_success"));
-      router.push("/catalog/payment-methods");
-      router.refresh();
+      // Mensaje de éxito mejorado con i18n dinámico
+      toast.success(t("notifications.create_success_title"), {
+        description: t("notifications.create_success_description", { name: payload.name }),
+      });
+      
+      setTimeout(() => {
+        router.push("/catalog/payment-methods");
+        router.refresh();
+      }, 1500);
+
     } catch (error: any) {
-      console.error("Error creating payment method:", error);
-      toast.error(error.response?.data?.error || t("notifications.create_error"));
+      // Manejo de errores de API con i18n
+      const errorMsg = error.response?.data?.error || t("notifications.error_title");
+      toast.error(t("notifications.error_title"), {
+        description: errorMsg
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -94,9 +129,9 @@ export default function NewPaymentMethodPage() {
       <form onSubmit={handleSubmit}>
         <PageHeader title={t("new.title")}>
           <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
+            <Button 
+              type="button" 
+              variant="outline" 
               onClick={() => router.back()}
               disabled={isSubmitting}
             >
@@ -107,12 +142,12 @@ export default function NewPaymentMethodPage() {
             </Button>
           </div>
         </PageHeader>
-
         <div className="mt-4 bg-white rounded-xl border p-6 shadow-sm">
-          <PaymentForm
-            formData={formData}
-            onChange={handleChange}
-            mode="create"
+          <PaymentForm 
+            formData={formData} 
+            errors={errors} 
+            onChange={(f, v) => setFormData(prev => ({ ...prev, [f]: v }))} 
+            mode="create" 
           />
         </div>
       </form>

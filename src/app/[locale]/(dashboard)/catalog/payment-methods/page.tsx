@@ -39,11 +39,24 @@ export default function PaymentMethodsPage() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
+      {/* Sección de Estadísticas con el formato solicitado */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title={t("stats.total")} value={<StatValue v={stats.total} c="text-primary" t={t} />} />
-        <StatCard title={t("stats.cash")} value={<StatValue v={stats.cash} c="text-green-500" t={t} />} />
-        <StatCard title={t("stats.gateway")} value={<StatValue v={stats.gateway} c="text-blue-500" t={t} />} />
-        <StatCard title={t("stats.digital")} value={<StatValue v={stats.digital} c="text-primary" t={t} />} />
+        <StatCard
+          title={t("stats.total")}
+          value={<h3 className="ml-1.5 font-bold text-primary">{stats.total ?? 0}</h3>}
+        />
+        <StatCard
+          title={t("stats.cash")}
+          value={<h3 className="ml-1.5 font-bold text-green-500">{stats.cash ?? 0}</h3>}
+        />
+        <StatCard
+          title={t("stats.gateway")}
+          value={<h3 className="ml-1.5 font-bold text-blue-500">{stats.gateway ?? 0}</h3>}
+        />
+        <StatCard
+          title={t("stats.digital")}
+          value={<h3 className="ml-1.5 font-bold text-primary">{stats.digital ?? 0}</h3>}
+        />
       </div>
 
       <PageHeader title={t("title")}>
@@ -65,8 +78,4 @@ export default function PaymentMethodsPage() {
       />
     </div>
   );
-}
-
-function StatValue({ v, c, t }: { v: number; c: string; t: any }) {
-  return <h3 className={`ml-1.5 font-heading ${c}`}>{v} {t("stats.unit")}</h3>;
 }
