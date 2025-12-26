@@ -4,6 +4,7 @@ import React from "react";
 import { DataTable, Column } from "@/components/ui/table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, CreditCard, Receipt } from "lucide-react";
+import { PaymentMethodCell } from "./PaymentMethodCell";
 
 interface Payment {
   payment_id: string;
@@ -37,11 +38,8 @@ export function PaymentHistoryTable({ payments, isLoading }: PaymentHistoryTable
     {
       header: "Método",
       accessor: "payment_method_id",
-      render: (v) => (
-        <Badge variant="secondary" className="font-normal capitalize px-2 py-0">
-          {String(v || "N/A")}
-        </Badge>
-      ),
+      // Implementación de la celda inteligente para resolver el ID
+      render: (v) => <PaymentMethodCell methodId={String(v)} />,
     },
     {
       header: "Referencia",
@@ -66,7 +64,8 @@ export function PaymentHistoryTable({ payments, isLoading }: PaymentHistoryTable
       accessor: "status",
       render: (v) => (
         <Badge 
-          variant={v === "Paid" || v === "confirmed" ? "success" : "outline"}
+          // Actualizamos la lógica para incluir "Completed" basado en la data de tu API
+          variant={v === "Paid" || v === "confirmed" || v === "Completed" ? "success" : "outline"}
           className="text-[10px] uppercase font-bold"
         >
           {String(v || "Pending")}
@@ -83,12 +82,12 @@ export function PaymentHistoryTable({ payments, isLoading }: PaymentHistoryTable
         isLoading={isLoading}
         enableRowSelection={false}
         rowIdKey="payment_id"
-        actions={(row) => row.receipt_url ? (
+        actions={(row) => row.receipt_url && row.receipt_url !== "Pago reportado en sitio" ? (
           <a 
             href={row.receipt_url} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-primary hover:underline text-xs flex items-center gap-1 justify-center"
+            className="text-primary hover:underline text-xs flex items-center gap-1 justify-center px-2"
           >
             <Receipt className="h-3 w-3" />
             Recibo

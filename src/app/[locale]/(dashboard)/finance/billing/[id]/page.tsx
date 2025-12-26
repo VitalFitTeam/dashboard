@@ -8,6 +8,7 @@ import {
   Download,
   AlertCircle,
   Loader2,
+  MapPin,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import { useGetUser } from "@/hooks/users/useGetUser";
 import { api } from "@/lib/sdk-config";
 
 import { InvoiceDetailForm } from "@/components/modules/billing/InvoiceDetailForm";
+import useGetBranch from "@/hooks/branches/useGetBranch";
 
 export default function InvoiceDetailPage() {
   const { id } = useParams();
@@ -30,14 +32,14 @@ export default function InvoiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Función para obtener/refrescar los detalles de la factura
   const fetchInvoiceDetails = useCallback(async () => {
-    if (!id || !token) return;
+    if (!id || !token) {
+      return;
+    }
 
     try {
       setLoading(true);
       setError(null);
-
       const response = await api.billing.getInvoiceByID(id as string, token);
 
       if (response?.data) {
@@ -55,37 +57,57 @@ export default function InvoiceDetailPage() {
   useEffect(() => {
     fetchInvoiceDetails();
   }, [fetchInvoiceDetails]);
-  
-  // 2. Carga de datos del usuario una vez obtenida la factura
-  const { user, loading: userLoading } = useGetUser(
-    invoice?.user_id,
+
+  const { user, loading: userLoading } = useGetUser(invoice?.user_id, token);
+  const { branchDetail, loading: branchLoading } = useGetBranch(
+    invoice?.branch_id,
     token
   );
 
-  // 3. Cálculo de montos para el Registro de Pago Manual
   const financialSummary = useMemo(() => {
-    if (!invoice) return { totalPaid: 0, pendingAmount: 0 };
-    
+    if (!invoice) {
+      return { totalPaid: 0, pendingAmount: 0 };
+    }
+
     const totalAmount = Number(invoice.total_amount || 0);
     const totalPaid = (invoice.payments || []).reduce(
-      (acc: number, p: any) => acc + Number(p.amount_paid || 0), 
+      (acc: number, p: any) => acc + Number(p.amount_paid || 0),
       0
     );
-    
+
     return {
       totalPaid,
-      pendingAmount: Math.max(0, totalAmount - totalPaid)
+      pendingAmount: Math.max(0, totalAmount - totalPaid),
     };
   }, [invoice]);
 
   return (
     <div className="max-w-7xl mx-auto p-6 animate-in fade-in duration-500">
       <PageHeader
-        title={invoice ? `Factura ${invoice.invoice_number}` : "Detalle de Factura"}
+        title={
+          invoice ? `Factura ${invoice.invoice_number}` : "Detalle de Factura"
+        }
         subtitle={
-          invoice
-            ? `Emitida el ${new Date(invoice.issue_date).toLocaleDateString()} • ID: ${invoice.invoice_id}`
-            : "Consulta el desglose de conceptos y transacciones."
+          invoice ? (
+
+            <span className="flex flex-col gap-1">
+              <span>
+                Emitida el {new Date(invoice.issue_date).toLocaleDateString()}
+              </span>
+              <span className="flex items-center gap-1.5 text-primary font-medium">
+                <MapPin className="h-3.5 w-3.5" />
+                {branchLoading ? (
+                  <span className="animate-pulse bg-muted h-3 w-24 rounded inline-block" />
+                ) : (
+                  <span>
+                    {branchDetail?.name || "Sucursal no identificada"}
+                  </span>
+                )}
+              </span>
+            </span>
+          ) : (
+            "Consulta el desglose de conceptos."
+          )
         }
         actionButton={
           <div className="flex items-center gap-2">
@@ -95,12 +117,10 @@ export default function InvoiceDetailPage() {
               onClick={() => window.print()}
               disabled={loading || !!error}
             >
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
+              <Printer className="h-4 w-4 mr-2" /> Imprimir
             </Button>
             <Button size="sm" disabled={loading || !!error}>
-              <Download className="h-4 w-4 mr-2" />
-              Exportar PDF
+              <Download className="h-4 w-4 mr-2" /> Exportar PDF
             </Button>
           </div>
         }
@@ -137,7 +157,7 @@ export default function InvoiceDetailPage() {
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm font-medium text-muted-foreground animate-pulse">
-            Sincronizando con el servidor...
+            Sincronizando...
           </p>
         </div>
       ) : (
@@ -145,8 +165,9 @@ export default function InvoiceDetailPage() {
           invoice={invoice}
           user={user}
           userLoading={userLoading}
-          onRefresh={fetchInvoiceDetails} 
-          pendingAmount={financialSummary.pendingAmount} // Pasamos el saldo pendiente calculado
+          onRefresh={fetchInvoiceDetails}
+          pendingAmount={financialSummary.pendingAmount}
+          branchName={branchDetail?.name}
         />
       )}
     </div>

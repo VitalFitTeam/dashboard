@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Search, Plus, Building2 } from "lucide-react";
 
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -19,6 +18,7 @@ import { useInvoices } from "@/hooks/billing/use-invoices";
 import { useAuth } from "@/context/AuthContext";
 import { InvoiceTable } from "@/components/modules/billing/InvoiceTable";
 import { useBranches } from "@/hooks/branches/useBranches";
+import { useRouter } from "@/i18n/navigation";
 
 export default function BillingPage() {
   const router = useRouter();
@@ -67,7 +67,7 @@ export default function BillingPage() {
               : "Administra tus facturas y métodos de pago aquí."
           }
         />
-        <Button onClick={() => router.push("/billing/new")}>
+        <Button onClick={() => router.push("/finance/billing/new")}>
           <Plus className="h-4 w-4 mr-2" /> Nueva Factura
         </Button>
       </div>
