@@ -54,7 +54,7 @@ export default function BillingPage() {
     return null;
   }
 
-  const canSwitchBranch = hasRole(["admin", "super_admin","account"] as any);
+  const canSwitchBranch = hasRole(["branch_admin", "super_admin","account"] as any);
 
   return (
     <div className="flex flex-col gap-6 p-6">

@@ -11,41 +11,90 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { api } from "@/lib/sdk-config";
-import { CreateInvoiceForm, type InvoiceItem } from "@/components/modules/billing/CreateInvoiceForm";
+import {
+  CreateInvoiceForm,
+  type InvoiceItem,
+} from "@/components/modules/billing/CreateInvoiceForm";
 import { useRouter } from "@/i18n/navigation";
-
+import { useBranchPaymentMethods } from "@/hooks/branches/useBranchPaymentMethods";
+import { usePaymentMethods } from "@/hooks/payment-methods/usePaymentMethods";
 
 export default function StaffNewInvoicePage() {
   const router = useRouter();
   const { token, user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { getUserByEmail, userData, loading: searchingUser } = useUserByEmail(token ?? "");
-  const { branches } = useBranches({ token: token ?? "", limit: 100 });
-  const { memberships, loading: loadingMems } = useMembershipTypes({ token: token ?? "", initialLimit: 50 });
-  const { packages, loading: loadingPkgs } = usePackages({ token: token ?? "" });
+  const branchId = user?.activeBranch?.id;
+  
+  const branchData = useBranchPaymentMethods(branchId ?? "", token ?? "");
+  const globalData = usePaymentMethods(branchId ? "" : (token ?? ""));
 
-  const handleCreateInvoice = async (branchId: string, items: InvoiceItem[]) => {
+  const paymentMethods = branchId ? branchData.methods : globalData.methods;
+  const loadingMethods = branchId ? branchData.loading : globalData.loading;
+
+  const {
+    getUserByEmail,
+    userData,
+    loading: searchingUser,
+  } = useUserByEmail(token ?? "");
+  
+  const { branches } = useBranches({ token: token ?? "", limit: 100 });
+  const { memberships, loading: loadingMems } = useMembershipTypes({
+    token: token ?? "",
+    initialLimit: 50,
+  });
+  const { packages, loading: loadingPkgs } = usePackages({
+    token: token ?? "",
+  });
+
+  const handleCreateInvoice = async (
+    targetBranchId: string,
+    items: InvoiceItem[],
+    paymentMethodId: string,
+    totalAmount: number
+  ) => {
     if (!token || !userData) {
-         return toast.error("Completa todos los conceptos");
-    }
-    if (items.some(i => !i.item_id)){
-         return toast.error("Completa todos los conceptos");
+      return toast.error("Debe seleccionar un usuario primero");
     }
 
     setIsSubmitting(true);
+    let createdInvoiceId = null;
+
     try {
-      const payload = {
-        branch_id: branchId,
+      const invoicePayload = {
+        branch_id: targetBranchId,
         user_id: userData.user_id,
-        items: items.map(item => ({ ...item, quantity: Number(item.quantity) })),
+        items: items.map((item) => ({
+          item_id: item.item_id,
+          item_type: item.item_type,
+          quantity: Number(item.quantity),
+        })),
       };
-      console.log("Payload de la factura:", payload);
-      await api.billing.createInvoice(payload, token);
-      toast.success("Factura generada exitosamente");
+
+      const invoiceRes = await api.billing.createInvoice(invoicePayload, token);
+      createdInvoiceId = invoiceRes.invoice_id;
+
+      const paymentPayload = {
+        invoice_id: createdInvoiceId,
+        amount_paid: totalAmount,
+        currency_paid: "USD", 
+        payment_method_id: paymentMethodId,
+        transaction_id: `STAFF-${user?.user_id || "UID"}-${Date.now()}`,
+        receipt_url: "",
+      };
+
+      await api.billing.AddPaymentToInvoice(paymentPayload, token);
+
+      toast.success("Venta completada y pagada exitosamente");
       router.push("/finance/billing");
     } catch (error: any) {
-      toast.error("Error al procesar la venta");
+      console.error("Error en el flujo de venta:", error);
+      if (createdInvoiceId) {
+        toast.error("Factura creada, pero el pago falló. Redirigiendo...");
+        router.push(`/finance/billing/${createdInvoiceId}/pay`);
+      } else {
+        toast.error("Error al generar la factura");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -54,10 +103,11 @@ export default function StaffNewInvoicePage() {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.back()} className="rounded-full h-9 w-9">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <PageHeader title="Nueva Venta" subtitle="Genera cargos directos a la cuenta del usuario." />
+
+        <PageHeader
+          title="Nueva Venta"
+          subtitle="Genera cargos y procesa el pago en un solo paso."
+        />
       </div>
 
       <CreateInvoiceForm
@@ -65,6 +115,8 @@ export default function StaffNewInvoicePage() {
         memberships={memberships}
         packages={packages}
         userData={userData}
+        paymentMethods={paymentMethods} 
+        loadingMethods={loadingMethods} 
         loadingMems={loadingMems}
         loadingPkgs={loadingPkgs}
         isSubmitting={isSubmitting}
@@ -72,8 +124,8 @@ export default function StaffNewInvoicePage() {
         onSearchUser={getUserByEmail}
         onSubmit={handleCreateInvoice}
         onCancel={() => router.back()}
-        canSelectBranch={!user?.activeBranch?.id}
-        initialBranchId={user?.activeBranch?.id}
+        canSelectBranch={!branchId} 
+        initialBranchId={branchId}
       />
     </div>
   );

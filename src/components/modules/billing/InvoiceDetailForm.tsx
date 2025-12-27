@@ -96,7 +96,7 @@ export function InvoiceDetailForm({
           <Card className="border-border shadow-sm overflow-hidden bg-card/50">
             <CardContent className="p-0">
               {/* La resolución del método de pago ocurre internamente en esta tabla */}
-              <PaymentHistoryTable payments={invoice.payments || []} />
+              <PaymentHistoryTable payments={invoice.payments || []}  onRefresh={onRefresh}/>
             </CardContent>
           </Card>
         </section>

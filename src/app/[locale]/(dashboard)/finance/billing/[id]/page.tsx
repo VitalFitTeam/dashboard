@@ -113,7 +113,6 @@ export default function InvoiceDetailPage() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="sm"
               onClick={() => window.print()}
               disabled={loading || !!error}
             >

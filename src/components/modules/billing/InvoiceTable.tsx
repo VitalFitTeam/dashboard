@@ -45,26 +45,7 @@ export function InvoiceTable({
     router.push(`/finance/billing/${id}`);
   };
 
-  const handlePay = (id: string) => {
-    console.log("Iniciando pago para:", id);
-  };
 
-  const handleVoidConfirm = async () => {
-    if (!invoiceToVoid) {
-      return;
-    }
-    try {
-      console.log(
-        "Ejecutando anulación en API para:",
-        invoiceToVoid.invoice_id
-      );
-      onActionSuccess(); 
-    } catch (error) {
-      console.error("Error al anular");
-    } finally {
-      setInvoiceToVoid(null);
-    }
-  };
 
 
  const columns: Column<InvoiceList>[] = [
@@ -132,60 +113,11 @@ export function InvoiceTable({
               <Eye className="h-4 w-4" />
             </Button>
 
-            {row.status === "Unpaid" && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-600 border-green-200 hover:bg-green-50"
-                onClick={() => handlePay(row.invoice_id)}
-                title="Registrar pago"
-              >
-                <DollarSign className="h-4 w-4" />
-              </Button>
-            )}
 
-            {row.status !== "Void" && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-red-500 hover:bg-red-50"
-                onClick={() => setInvoiceToVoid(row)}
-                title="Anular factura"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
           </div>
         )}
       />
 
-      <AlertDialog
-        open={!!invoiceToVoid}
-        onOpenChange={() => setInvoiceToVoid(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <div className="flex items-center gap-2 text-red-600 mb-2">
-              <AlertTriangle className="h-5 w-5" />
-              <AlertDialogTitle>¿Confirmar anulación?</AlertDialogTitle>
-            </div>
-            <AlertDialogDescription>
-              Estás a punto de anular la factura{" "}
-              <strong>{invoiceToVoid?.invoice_number}</strong>. Esta acción no
-              se puede deshacer y afectará el balance del cliente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleVoidConfirm}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Anular Factura
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

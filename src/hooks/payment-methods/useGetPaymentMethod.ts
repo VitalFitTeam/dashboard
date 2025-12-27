@@ -8,7 +8,8 @@ export function useGetPaymentMethod(paymentMethodId: string | undefined, token: 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMethod = useCallback(async () => {    if (!paymentMethodId || !token) {
+  const fetchMethod = useCallback(async () => {
+    if (!paymentMethodId || !token) {
       setMethod(null);
       return;
     }
@@ -17,15 +18,23 @@ export function useGetPaymentMethod(paymentMethodId: string | undefined, token: 
       setLoading(true);
       setError(null);
       
-      // Llamada usando el nombre exacto de tu SDK
       const response = await api.paymentMethod.getPaymentMethodByID(paymentMethodId, token);
       
       if (response?.data) {
         setMethod(response.data);
       }
     } catch (err: any) {
-      console.error("Error en useGetPaymentMethod:", err);
-      setError(err.message || "Error al cargar el método de pago");
+      // Diagnóstico del error
+      const status = err.status || err.response?.status;
+      
+      if (status === 403) {
+        console.warn(`Acceso denegado al método de pago: ${paymentMethodId}`);
+        setError("forbidden"); // Identificador para manejar en la UI
+      } else {
+        console.error("Error en useGetPaymentMethod:", err);
+        setError(err.message || "Error al cargar el método de pago");
+      }
+      setMethod(null);
     } finally {
       setLoading(false);
     }
