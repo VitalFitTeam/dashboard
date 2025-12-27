@@ -455,6 +455,97 @@
         "loading": "Loading...",
         "not_found": "Payment method not found"
       }
+    },
+    "equipment": {
+      "title": "EQUIPMENT",
+      "addButton": "Add Equipment",
+      "loading": "Loading equipment...",
+      "categories": {
+        "Cardio": "Cardio",
+        "Strength": "Strength",
+        "FreeWeight": "Free Weight",
+        "Functional": "Functional",
+        "Accessory": "Accessory"
+      },
+      "table": {
+        "filter_placeholder": "Filter by name",
+        "category_placeholder": "Category",
+        "all_categories": "All Categories",
+        "download": "Download",
+        "columns": {
+          "name": "Equipment",
+          "category": "Category",
+          "model": "Model",
+          "brand": "Brand"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Modify",
+          "delete": "Delete"
+        },
+        "delete_dialog": {
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete \"{name}\"?",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "form": {
+        "labels": {
+          "name": "Name",
+          "category": "Category",
+          "description": "Description",
+          "model": "Model",
+          "brand": "Brand"
+        },
+        "placeholders": {
+          "name": "Add a name",
+          "category": "Select a category",
+          "description": "Add a description",
+          "model": "Add a model",
+          "brand": "Add a brand"
+        },
+        "errors": {
+          "name_required": "Name is required.",
+          "description_required": "Description is required.",
+          "brand_required": "Brand is required.",
+          "model_required": "Model is required.",
+          "category_required": "Category is required."
+        }
+      },
+      "create": {
+        "title": "CREATE EQUIPMENT",
+        "subtitle": "Enter the information for new equipment",
+        "button": "Create",
+        "loading": "Saving...",
+        "success": "Equipment created successfully!",
+        "connection_error_title": "Connection error",
+        "connection_error_desc": "Could not connect to the server. Try again.",
+        "server_error_title": "Error creating equipment"
+      },
+      "edit": {
+        "title": "EDIT EQUIPMENT",
+        "subtitle": "Modify the equipment information",
+        "button": "Save Changes",
+        "loading": "Saving...",
+        "success": "Equipment updated successfully!",
+        "cancel": "Cancel",
+        "loading_data": "Loading equipment data...",
+        "not_found": "Equipment not found",
+        "error_loading": "Error loading equipment"
+      },
+      "details": {
+        "title": "EQUIPMENT DETAILS",
+        "subtitle": "Equipment information: {name}",
+        "back": "Back",
+        "edit": "Modify",
+        "not_found": "Equipment not found.",
+        "loading": "Loading details..."
+      },
+      "notifications": {
+        "delete_success": "Equipment deleted successfully",
+        "delete_error": "Error deleting equipment."
+      }
     }
   },
   "cancellationReason": {
@@ -696,6 +787,8 @@
     },
     "table": {
       "filter_placeholder": "Filter name or email",
+      "filter_role": "Filter by Role",
+      "all_roles": "All Roles",
       "all_categories": "All categories",
       "category": "Category",
       "categories": {
@@ -839,6 +932,19 @@
       "error_subtitle": "Could not load client information",
       "not_found": "Client not found",
       "back_button": "Back to list"
+    },
+    "create": {
+      "title": "CREATE CLIENT",
+      "subtitle": "Enter the new client information",
+      "create_button": "Create",
+      "creating": "Creating...",
+      "success": "Client created successfully",
+      "error": "Error creating client",
+      "cancel_button": "Cancel",
+      "save_error": "Error saving client",
+      "invalid_data": "Invalid data",
+      "email_in_use": "Email address is already in use",
+      "validation_error": "Please correct the following errors: {errors}"
     }
   }
 }

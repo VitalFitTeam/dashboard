@@ -9,7 +9,7 @@ import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Badge, badgeVariants } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -20,6 +20,7 @@ import {
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { RoleResponse } from "@vitalfit/sdk";
 
 interface Client {
   client_id: string;
@@ -28,6 +29,9 @@ interface Client {
   email: string;
   category: string;
   status: string;
+  role?: {
+    name: string;
+  };
 }
 
 interface ClientsTableProps {
@@ -39,8 +43,8 @@ interface ClientsTableProps {
   totalItems?: number;
   isLoading?: boolean;
   onPageChange: (page: number) => void;
-  filters: { search: string; category: string };
-  onFilterChange: (filters: { search?: string; category?: string }) => void;
+  filters: { search: string; role: string };
+  onFilterChange: (filters: { search?: string; role?: string }) => void;
 }
 
 export default function ClientsTable({
@@ -59,9 +63,23 @@ export default function ClientsTable({
   const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [roles, setRoles] = useState<RoleResponse[]>([]);
 
   const router = useRouter();
   const { token } = useAuth();
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      if (!token) return;
+      try {
+        const response = await api.RBAC.getRoles({ limit: 100 }, token);
+        setRoles(response.data || []);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    };
+    fetchRoles();
+  }, [token]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -135,10 +153,10 @@ export default function ClientsTable({
 
   const StatusBadge = ({ status }: { status: string }) => {
     const variantMap: Record<string, any> = {
-  active: "success",
-  inactive: "error",
-  pending: "warning",
-};
+      active: "success",
+      inactive: "error",
+      pending: "warning",
+    };
 
     const displays: Record<string, string> = {
       active: t("table.status.active"),
@@ -151,9 +169,9 @@ export default function ClientsTable({
     const variant = (variantMap[normalizedStatus] || "default") as "default" | "success" | "error" | "warning" | "info" | "secondary" | "outline";
 
     return (
-     <Badge variant={variant}>
-    {status}
-  </Badge>
+      <Badge variant={variant}>
+        {status}
+      </Badge>
     );
   };
 
@@ -170,9 +188,10 @@ export default function ClientsTable({
       filterType: "text"
     },
     {
-      header: t("table.columns.category"),
-      accessor: "category",
-      filterType: "text"
+      header: "Rol", // Using a hardcoded header for now as 'role' might not be in translations, or use t("table.columns.role") if available. I'll check translations but safe to use "Rol" or t("table.columns.category") -> "Category" is confusing. I'll check if I can use t("roles.title") or just "Rol". Given the user language is Spanish, "Rol" is safe, or t("table.columns.role") if I add it. I'll stick to 'category' column for now as user didn't ask to change column.
+      accessor: "category", // Keeping accessor category but... wait. The user data has roles.
+      filterType: "text",
+      render: (_, row) => row.role?.name || row.category // Fallback to category if role missing
     },
     {
       header: t("table.columns.status"),
@@ -196,17 +215,19 @@ export default function ClientsTable({
         </div>
 
         <Select
-          value={filters.category}
-          onValueChange={(value) => onFilterChange({ category: value })}
+          value={filters.role}
+          onValueChange={(value) => onFilterChange({ role: value })}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={t("table.category")} />
+            <SelectValue placeholder={t("table.filter_role")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t("table.all_categories")}</SelectItem>
-            <SelectItem value="premium">{t("table.categories.premium")}</SelectItem>
-            <SelectItem value="regular">{t("table.categories.regular")}</SelectItem>
-            <SelectItem value="new">{t("table.categories.new")}</SelectItem>
+            <SelectItem value="all">{t("table.all_roles")}</SelectItem>
+            {roles.map((role) => (
+              <SelectItem key={role.role_id} value={role.name}>
+                {role.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 

@@ -455,6 +455,97 @@
         "loading": "Cargando...",
         "not_found": "Método de pago no encontrado"
       }
+    },
+    "equipment": {
+      "title": "EQUIPAMIENTO",
+      "addButton": "Agregar Equipamiento",
+      "loading": "Cargando equipamiento...",
+      "categories": {
+        "Cardio": "Cardio",
+        "Strength": "Fuerza",
+        "FreeWeight": "Peso Libre",
+        "Functional": "Funcional",
+        "Accessory": "Accesorio"
+      },
+      "table": {
+        "filter_placeholder": "Filtrar por nombre",
+        "category_placeholder": "Categoría",
+        "all_categories": "Todas las Categorías",
+        "download": "Descarga",
+        "columns": {
+          "name": "Equipamiento",
+          "category": "Categoría",
+          "model": "Modelo",
+          "brand": "Marca"
+        },
+        "actions": {
+          "view": "Ver",
+          "edit": "Modificar",
+          "delete": "Eliminar"
+        },
+        "delete_dialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar \"{name}\"?",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "form": {
+        "labels": {
+          "name": "Nombre",
+          "category": "Categoría",
+          "description": "Descripción",
+          "model": "Modelo",
+          "brand": "Marca"
+        },
+        "placeholders": {
+          "name": "Agrega un nombre",
+          "category": "Seleccione una categoría",
+          "description": "Agrega una descripción",
+          "model": "Agrega un modelo",
+          "brand": "Agrega una marca"
+        },
+        "errors": {
+          "name_required": "El nombre es obligatorio.",
+          "description_required": "La descripción es obligatoria.",
+          "brand_required": "La marca es obligatoria.",
+          "model_required": "El modelo es obligatorio.",
+          "category_required": "La categoría es obligatoria."
+        }
+      },
+      "create": {
+        "title": "CREAR EQUIPAMIENTO",
+        "subtitle": "Ingrese la información de un nuevo equipo",
+        "button": "Crear",
+        "loading": "Guardando...",
+        "success": "¡Equipamiento creado exitosamente!",
+        "connection_error_title": "Error de conexión",
+        "connection_error_desc": "No se pudo conectar con el servidor. Intenta más tarde.",
+        "server_error_title": "Error al crear equipo"
+      },
+      "edit": {
+        "title": "EDITAR EQUIPAMIENTO",
+        "subtitle": "Modifique la información del equipamiento",
+        "button": "Guardar Cambios",
+        "loading": "Guardando...",
+        "success": "¡Equipamiento actualizado exitosamente!",
+        "cancel": "Cancelar",
+        "loading_data": "Cargando datos del equipo...",
+        "not_found": "Equipo no encontrado",
+        "error_loading": "Error al cargar equipo"
+      },
+      "details": {
+        "title": "DETALLES DE EQUIPAMIENTO",
+        "subtitle": "Información del equipamiento: {name}",
+        "back": "Volver",
+        "edit": "Modificar",
+        "not_found": "Equipo no encontrado.",
+        "loading": "Cargando detalles..."
+      },
+      "notifications": {
+        "delete_success": "Equipamiento eliminado exitosamente",
+        "delete_error": "Error al eliminar el equipamiento."
+      }
     }
   },
   "cancellationReason": {
@@ -493,101 +584,101 @@
         "error": "Could not delete the reason"
       }
     },
-  "Promotions": {
-    "title": "PROMOCIONES Y DESCUENTOS",
-    "add_button": "Agregar Promoción",
-    "error_loading": "Error al cargar promociones",
-    "stats": {
-      "total": "Total",
-      "active": "Activas",
-      "inactive": "Inactivas",
-      "unit": "Promos"
-    },
-    "table": {
-      "columns": {
-        "promotion": "Promoción",
-        "benefit": "Beneficio",
-        "validity": "Vigencia",
-        "status": "Estatus"
+    "Promotions": {
+      "title": "PROMOCIONES Y DESCUENTOS",
+      "add_button": "Agregar Promoción",
+      "error_loading": "Error al cargar promociones",
+      "stats": {
+        "total": "Total",
+        "active": "Activas",
+        "inactive": "Inactivas",
+        "unit": "Promos"
       },
-      "status": {
-        "active": "Activa",
-        "inactive": "Inactiva",
-        "expired": "Expirada"
+      "table": {
+        "columns": {
+          "promotion": "Promoción",
+          "benefit": "Beneficio",
+          "validity": "Vigencia",
+          "status": "Estatus"
+        },
+        "status": {
+          "active": "Activa",
+          "inactive": "Inactiva",
+          "expired": "Expirada"
+        },
+        "filters": {
+          "search_placeholder": "Buscar por nombre o código...",
+          "clear": "Limpiar"
+        },
+        "export": "Exportar",
+        "delete_dialog": {
+          "title": "¿Eliminar promoción?",
+          "description": "Esta acción no se puede deshacer. Se eliminará permanentemente la promoción \"{name}\".",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
       },
-      "filters": {
-        "search_placeholder": "Buscar por nombre o código...",
-        "clear": "Limpiar"
+      "actions": {
+        "view": "Ver detalles",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "delete_loading": "Eliminando promoción...",
+        "delete_success": "Promoción eliminada correctamente",
+        "delete_error": "Error al eliminar"
       },
-      "export": "Exportar",
-      "delete_dialog": {
-        "title": "¿Eliminar promoción?",
-        "description": "Esta acción no se puede deshacer. Se eliminará permanentemente la promoción \"{name}\".",
-        "confirm": "Eliminar",
-        "cancel": "Cancelar"
+      "form": {
+        "labels": {
+          "name": "Nombre de la Promoción",
+          "code": "Código (Cupón)",
+          "type": "Tipo de Descuento",
+          "value": "Valor del Descuento",
+          "start_date": "Fecha de Inicio",
+          "end_date": "Fecha de Finalización",
+          "is_active": "Promoción activa y visible"
+        },
+        "placeholders": {
+          "name": "Ej: Verano Fitness",
+          "code": "VERANO2025",
+          "type": "Seleccionar tipo",
+          "percentage": "Porcentaje (%)",
+          "fixed": "Monto Fijo ($)"
+        }
+      },
+      "create": {
+        "title": "NUEVA PROMOCIÓN",
+        "subtitle": "Configure los detalles del cupón para sus socios.",
+        "button_cancel": "Cancelar",
+        "button_submit": "Crear Promoción",
+        "button_loading": "Guardando...",
+        "success_title": "¡Promoción creada!",
+        "success_description": "El código {code} ha sido registrado exitosamente.",
+        "error_title": "Error al guardar",
+        "error_default": "Ocurrió un problema con los datos enviados."
+      },
+      "edit": {
+        "title": "EDITAR PROMOCIÓN",
+        "subtitle": "Modifica los parámetros de la promoción seleccionada para actualizar sus beneficios.",
+        "loading": "Cargando datos de la promoción...",
+        "error_fetch": "No se pudo cargar la promoción",
+        "not_found": "Promoción no encontrada",
+        "success_update": "Promoción actualizada correctamente",
+        "error_update": "Error al actualizar",
+        "button_cancel": "Cancelar",
+        "button_submit": "Actualizar Promoción",
+        "button_loading": "Guardando cambios...",
+        "error_update_description": "No se detectaron cambios para guardar."
+      },
+      "details": {
+        "title": "DETALLES DE LA PROMOCIÓN",
+        "subtitle": "Información detallada sobre el cupón, vigencia y beneficios configurados.",
+        "not_found": "Promoción no encontrada",
+        "loading": "Cargando detalles...",
+        "error_fetch": "No se pudo cargar la información de la promoción",
+        "button_back": "Volver",
+        "button_edit": "Modificar",
+        "button_list": "Volver al listado"
       }
-    },
-    "actions": {
-      "view": "Ver detalles",
-      "edit": "Editar",
-      "delete": "Eliminar",
-      "delete_loading": "Eliminando promoción...",
-      "delete_success": "Promoción eliminada correctamente",
-      "delete_error": "Error al eliminar"
-    },
-    "form": {
-      "labels": {
-        "name": "Nombre de la Promoción",
-        "code": "Código (Cupón)",
-        "type": "Tipo de Descuento",
-        "value": "Valor del Descuento",
-        "start_date": "Fecha de Inicio",
-        "end_date": "Fecha de Finalización",
-        "is_active": "Promoción activa y visible"
-      },
-      "placeholders": {
-        "name": "Ej: Verano Fitness",
-        "code": "VERANO2025",
-        "type": "Seleccionar tipo",
-        "percentage": "Porcentaje (%)",
-        "fixed": "Monto Fijo ($)"
-      }
-    },
-    "create": {
-      "title": "NUEVA PROMOCIÓN",
-      "subtitle": "Configure los detalles del cupón para sus socios.",
-      "button_cancel": "Cancelar",
-      "button_submit": "Crear Promoción",
-      "button_loading": "Guardando...",
-      "success_title": "¡Promoción creada!",
-      "success_description": "El código {code} ha sido registrado exitosamente.",
-      "error_title": "Error al guardar",
-      "error_default": "Ocurrió un problema con los datos enviados."
-    },
-    "edit": {
-      "title": "EDITAR PROMOCIÓN",
-      "subtitle": "Modifica los parámetros de la promoción seleccionada para actualizar sus beneficios.",
-      "loading": "Cargando datos de la promoción...",
-      "error_fetch": "No se pudo cargar la promoción",
-      "not_found": "Promoción no encontrada",
-      "success_update": "Promoción actualizada correctamente",
-      "error_update": "Error al actualizar",
-      "button_cancel": "Cancelar",
-      "button_submit": "Actualizar Promoción",
-      "button_loading": "Guardando cambios...",
-      "error_update_description": "No se detectaron cambios para guardar."
-    },
-    "details": {
-      "title": "DETALLES DE LA PROMOCIÓN",
-      "subtitle": "Información detallada sobre el cupón, vigencia y beneficios configurados.",
-      "not_found": "Promoción no encontrada",
-      "loading": "Cargando detalles...",
-      "error_fetch": "No se pudo cargar la información de la promoción",
-      "button_back": "Volver",
-      "button_edit": "Modificar",
-      "button_list": "Volver al listado"
     }
-  }
   },
   "common": {
     "Validations": {
@@ -696,6 +787,8 @@
     },
     "table": {
       "filter_placeholder": "Filtrar nombre o email",
+      "filter_role": "Filtrar por Rol",
+      "all_roles": "Todos los Roles",
       "all_categories": "Todas las categorías",
       "category": "Categoría",
       "categories": {
@@ -839,6 +932,19 @@
       "error_subtitle": "No se pudo cargar la información del cliente",
       "not_found": "Cliente no encontrado",
       "back_button": "Volver a la lista"
+    },
+    "create": {
+      "title": "CREAR CLIENTE",
+      "subtitle": "Ingresa la información del nuevo cliente",
+      "create_button": "Crear",
+      "creating": "Creando...",
+      "success": "Cliente creado exitosamente",
+      "error": "Error al crear el cliente",
+      "cancel_button": "Cancelar",
+      "save_error": "Error al guardar el cliente",
+      "invalid_data": "Datos inválidos",
+      "email_in_use": "El correo electrónico ya está en uso",
+      "validation_error": "Por favor corrige los siguientes errores: {errors}"
     }
   }
 }
