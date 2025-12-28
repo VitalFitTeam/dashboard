@@ -462,6 +462,43 @@
         "not_found": "Método de pago no encontrado"
       }
     },
+    "equipment": {
+      "title": "EQUIPAMIENTO",
+      "addButton": "Agregar Equipamiento",
+      "loading": "Cargando equipamiento...",
+      "categories": {
+        "Cardio": "Cardio",
+        "Strength": "Fuerza",
+        "FreeWeight": "Peso Libre",
+        "Functional": "Funcional",
+        "Accessory": "Accesorio"
+      },
+      "table": {
+        "filter_placeholder": "Filtrar por nombre",
+        "category_placeholder": "Categoría",
+        "all_categories": "Todas las Categorías",
+        "download": "Descarga",
+        "columns": {
+          "name": "Equipamiento",
+          "category": "Categoría",
+          "model": "Modelo",
+          "brand": "Marca"
+        },
+        "actions": {
+          "delete": "Eliminar"
+        },
+        "delete_dialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar este equipo? Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "notifications": {
+        "delete_success": "Equipo eliminado exitosamente",
+        "delete_error": "Error al eliminar el equipo."
+      }
+    },
     "memberships": {
       "title": "MEMBRESÍAS",
       "add_button": "Agregar una membresía",
@@ -474,7 +511,7 @@
           "description": "Descripción",
           "duration": "Duración (días)",
           "price": "Precio",
-          "status": "Status"
+          "status": "Estado"
         },
         "status": {
           "active": "Activa",
@@ -487,7 +524,7 @@
         },
         "delete_dialog": {
           "title": "Confirmar eliminación",
-          "description": "¿Estás seguro de que deseas eliminar esta membresía? Esta acción no se puede deshacer.",
+          "description": "¿Estás seguro de que deseas eliminar la membresía \"{name}\"? Esta acción no se puede deshacer.",
           "confirm": "Eliminar",
           "cancel": "Cancelar"
         }
@@ -498,7 +535,7 @@
           "description": "Descripción*",
           "duration_days": "Duración (Días)*",
           "price": "Precio ($)*",
-          "status": "Status"
+          "status": "Estado"
         },
         "placeholders": {
           "name": "Ej: Membresía Premium",
@@ -512,7 +549,7 @@
         "subtitle": "Agrega la información de la membresía",
         "button_create": "Crear",
         "button_saving": "Guardando...",
-        "success": "Membresía creada exitosamente!",
+        "success": "¡Membresía creada exitosamente!",
         "error_connection": "Error de conexión",
         "error_connection_description": "No se pudo conectar con el servidor. Intenta más tarde.",
         "error_create": "Error al crear membresía",
@@ -524,17 +561,17 @@
         "button_cancel": "Cancelar",
         "button_save": "Guardar Cambios",
         "button_saving": "Guardando...",
-        "success": "Membresía actualizado exitosamente!",
+        "success": "¡Membresía actualizada exitosamente!",
         "error_connection": "Error de conexión",
         "error_connection_description": "No se pudo conectar con el servidor. Intenta más tarde.",
-        "error_update": "Error al actualizar membresia",
+        "error_update": "Error al actualizar membresía",
         "error_load": "No se pudo cargar la información de la membresía.",
         "error_auth": "Token de autenticación no encontrado."
       },
       "view": {
         "title": "DETALLES DE MEMBRESÍA",
         "button_edit": "Modificar",
-        "loading": "Cargando Membresías...",
+        "loading": "Cargando Membresía...",
         "error_load": "No se pudo cargar la información de la membresía.",
         "error_auth": "Sesión expirada o no autorizada. Intenta ingresar de nuevo.",
         "not_found": "Membresía no encontrada o no disponible."
@@ -552,9 +589,89 @@
         "duration_int": "La duración debe ser un número entero",
         "duration_min": "La duración no puede ser cero (0) o negativa",
         "duration_max": "La duración máxima es 3650 días (10 años)",
-        "price_min": "El precio no puede cero (0) o negativo",
+        "price_min": "El precio no puede ser cero (0) o negativo",
         "price_max": "El precio máximo es 999,999.99",
         "validation_error": "Error de validación inesperado"
+      }
+    },
+    "packages": {
+      "title": "PAQUETES DE SERVICIOS",
+      "add_button": "Agregar un paquete",
+      "loading": "Cargando paquetes...",
+      "error_loading": "Error al cargar los paquetes",
+      "table": {
+        "placeholder": "Buscar paquete por nombre",
+        "download": "Descargar",
+        "downloading": "Descargando...",
+        "columns": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "duration": "Duración (días)",
+          "price": "Precio",
+          "status": "Estado"
+        },
+        "status": {
+          "active": "Activa",
+          "inactive": "Inactiva"
+        },
+        "actions": {
+          "view": "Ver Detalles",
+          "edit": "Modificar",
+          "delete": "Eliminar"
+        },
+        "delete_dialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar el paquete \"{name}\"? Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "form": {
+        "labels": {
+          "name": "Nombre",
+          "price": "Precio ($)",
+          "description": "Descripción",
+          "start_at": "Fecha inicio",
+          "end_at": "Fecha fin",
+          "status": "Estado",
+          "add_service": "Agregar servicio",
+          "service_placeholder": "Selecciona un servicio",
+          "sessions": "{count} sesiones",
+          "remove": "Quitar"
+        }
+      },
+      "create": {
+        "title": "CREAR PAQUETE",
+        "subtitle": "Complete la información del nuevo paquete",
+        "button_create": "Crear paquete",
+        "button_creating": "Creando...",
+        "success": "¡Paquete creado exitosamente!",
+        "error_create": "No se pudo crear el paquete. Intenta nuevamente."
+      },
+      "edit": {
+        "title": "EDITAR PAQUETE",
+        "subtitle": "Modifica los datos del paquete: {name}",
+        "button_save": "Guardar cambios",
+        "button_cancel": "Cancelar",
+        "button_saving": "Guardando...",
+        "success": "¡Paquete actualizado exitosamente!",
+        "error_update": "Error al actualizar el paquete",
+        "error_load": "No se pudo cargar el paquete."
+      },
+      "view": {
+        "title": "DETALLES DEL PAQUETE",
+        "button_edit": "Modificar",
+        "loading": "Cargando Paquetes...",
+        "error_load": "No se pudo cargar la información del paquete."
+      },
+      "notifications": {
+        "delete_success": "Paquete eliminado correctamente",
+        "delete_error": "Error al eliminar el paquete. Intenta nuevamente.",
+        "auth_error": "No estás autenticado para realizar esta acción.",
+        "invalid_id": "ID de paquete no válido",
+        "services_load_error": "No se pudieron cargar los servicios.",
+        "success_title": "Éxito",
+        "error_title": "Error"
       }
     }
   },
@@ -795,8 +912,29 @@
       "inactive": "INACTIVOS/BLOQUEADOS",
       "unit": "CLIENTES"
     },
+    "payments": {
+      "title": "Historial de Facturas y Pagos",
+      "subtitle": "Consulta el registro histórico de pagos y membresías del cliente",
+      "table": {
+        "reference": "Referencia",
+        "date": "Fecha de Emisión",
+        "amount": "Monto Total",
+        "status": "Estado",
+        "search_placeholder": "Buscar por referencia..."
+      },
+      "status": {
+        "paid": "Pagado",
+        "pagado": "Pagado",
+        "unpaid": "Pendiente",
+        "pendiente": "Pendiente",
+        "overdue": "Vencido",
+        "void": "Anulado"
+      }
+    },
     "table": {
       "filter_placeholder": "Filtrar nombre o email",
+      "filter_role": "Filtrar por Rol",
+      "all_roles": "Todos los Roles",
       "all_categories": "Todas las categorías",
       "category": "Categoría",
       "categories": {
@@ -809,8 +947,9 @@
       "columns": {
         "name": "Nombre",
         "email": "Email",
+        "role": "Rol",
         "category": "Categoría",
-        "status": "Status"
+        "status": "Estado"
       },
       "status": {
         "active": "Activo",
@@ -940,6 +1079,19 @@
       "error_subtitle": "No se pudo cargar la información del cliente",
       "not_found": "Cliente no encontrado",
       "back_button": "Volver a la lista"
+    },
+    "create": {
+      "title": "CREAR CLIENTE",
+      "subtitle": "Ingresa la información del nuevo cliente",
+      "create_button": "Crear",
+      "creating": "Creando...",
+      "success": "Cliente creado exitosamente",
+      "error": "Error al crear el cliente",
+      "cancel_button": "Cancelar",
+      "save_error": "Error al guardar el cliente",
+      "invalid_data": "Datos inválidos",
+      "email_in_use": "El correo electrónico ya está en uso",
+      "validation_error": "Por favor corrige los siguientes errores: {errors}"
     }
   },
   "branches": {
