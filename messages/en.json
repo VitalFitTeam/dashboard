@@ -135,7 +135,13 @@
     "CheckinCheckout": "Check-in/Check-out",
     "ReporteVentas": "Sales Report",
     "CombosPaquetes": "Combos/Packages",
-    "GestionMarketing": "Maketing Management"
+    "GestionMarketing": "Maketing Management",
+    "branches_label": "{name}'s Branches",
+    "select_branch": "Select Branch",
+    "available_branches": "Available branches",
+    "no_branches": "No branches assigned",
+    "system_footer": "Vitalfit System"
+    
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -239,6 +245,7 @@
     "services": {
       "title": "SERVICES",
       "add_button": "Add Service",
+      "id_prefix": "Service ID",
       "stats": {
         "total": "Total",
         "actives": "Actives",
@@ -545,6 +552,67 @@
       "notifications": {
         "delete_success": "Equipment deleted successfully",
         "delete_error": "Error deleting equipment."
+          "name": "Name*",
+          "description": "Description*",
+          "duration_days": "Duration (Days)*",
+          "price": "Price ($)*",
+          "status": "Status"
+        },
+        "placeholders": {
+          "name": "E.g.: Premium Membership",
+          "description": "E.g.: Unlimited access to all facilities",
+          "duration_days": "E.g.: 30",
+          "price": "E.g.: 99.99"
+        }
+      },
+      "create": {
+        "title": "CREATE MEMBERSHIP",
+        "subtitle": "Add the membership information",
+        "button_create": "Create",
+        "button_saving": "Saving...",
+        "success": "Membership created successfully!",
+        "error_connection": "Connection Error",
+        "error_connection_description": "Could not connect to the server. Try again later.",
+        "error_create": "Error creating membership",
+        "error_auth": "Authentication token not found."
+      },
+      "edit": {
+        "title": "MODIFY MEMBERSHIP",
+        "subtitle": "Modify the membership information {name}",
+        "button_cancel": "Cancel",
+        "button_save": "Save Changes",
+        "button_saving": "Saving...",
+        "success": "Membership updated successfully!",
+        "error_connection": "Connection Error",
+        "error_connection_description": "Could not connect to the server. Try again later.",
+        "error_update": "Error updating membership",
+        "error_load": "Could not load membership information.",
+        "error_auth": "Authentication token not found."
+      },
+      "view": {
+        "title": "MEMBERSHIP DETAILS",
+        "button_edit": "Modify",
+        "loading": "Loading Memberships...",
+        "error_load": "Could not load membership information.",
+        "error_auth": "Session expired or unauthorized. Please log in again.",
+        "not_found": "Membership not found or unavailable."
+      },
+      "notifications": {
+        "delete_success": "Membership deleted successfully",
+        "delete_error": "Error deleting membership. Try again.",
+        "delete_auth_error": "You are not authenticated to perform this action."
+      },
+      "validations": {
+        "name_required": "Name is required",
+        "name_max": "Name cannot exceed 100 characters",
+        "description_required": "Description is required",
+        "description_max": "Description cannot exceed 500 characters",
+        "duration_int": "Duration must be an integer",
+        "duration_min": "Duration cannot be zero (0) or negative",
+        "duration_max": "Maximum duration is 3650 days (10 years)",
+        "price_min": "Price cannot be zero (0) or negative",
+        "price_max": "Maximum price is 999,999.99",
+        "validation_error": "Unexpected validation error"
       }
     }
   },
@@ -964,6 +1032,331 @@
       "invalid_data": "Invalid data",
       "email_in_use": "Email address is already in use",
       "validation_error": "Please correct the following errors: {errors}"
+    }
+  },
+  "branches": {
+    "title": "BRANCHES",
+    "add_button": "Create Branch",
+    "stats": {
+      "total": "Total",
+      "active": "Active",
+      "inactive": "Inactive",
+      "maintenance": "Maintenance",
+      "unit": "BRANCHES"
+    },
+    "table": {
+      "placeholder": "Search by name or RIF",
+      "filter_status": "Status",
+      "clear_filters": "Clear filters",
+      "download": "Download CSV",
+      "columns": {
+        "name": "Name",
+        "tax_id": "taxId",
+        "manager": "Manager",
+        "country": "Country",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "maintenance": "Under maintenance",
+        "unknown": "Unknown"
+      },
+      "actions": {
+        "view": "View",
+        "edit": "Modify",
+        "delete": "Delete"
+      },
+      "delete_dialog": {
+        "title": "Confirm Deletion",
+        "description": "Are you sure you want to delete this branch? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel",
+        "success": "Branch deleted: {name}",
+        "error": "Error deleting the branch. Please try again.",
+        "success_title": "Successfully deleted",
+        "error_title": "Error"
+      }
+    },
+    "create": {
+      "title": "CREATE NEW BRANCH",
+      "subtitle": "Complete the following steps to create a new branch",
+      "steps": {
+        "basic": {
+          "name": "Basic Information",
+          "description": "Data"
+        },
+        "location": {
+          "name": "Location",
+          "description": "Address"
+        },
+        "admin": {
+          "name": "Administration",
+          "description": "Management"
+        },
+        "confirm": {
+          "name": "Confirmation",
+          "description": "Review"
+        }
+      },
+      "form": {
+        "basic_info": {
+          "title": "Basic Branch Information",
+          "subtitle": "Start by entering the fundamental data of the new branch.",
+          "name": "Legal Name *",
+          "name_placeholder": "E.g.: FitnessPlaza",
+          "tax_id": "Tax ID *",
+          "tax_id_placeholder": "J-402456696-3",
+          "phone": "Phone",
+          "phone_placeholder": "Phone",
+          "status": "Branch Status *",
+          "status_placeholder": "Active",
+          "next_steps": {
+            "title": "Next steps",
+            "description": "In the following steps we will configure the location, contact, schedules and employees of the new branch."
+          }
+        },
+        "location": {
+          "title": "Location and Contact",
+          "subtitle": "Select the exact location on the map or enter coordinates",
+          "address": "Full Address*",
+          "address_placeholder": "Enter address manually or select on map",
+          "state": "State",
+          "country": "Country",
+          "gps_coords": "GPS Coordinates",
+          "latitude": "Latitude",
+          "longitude": "Longitude"
+        },
+        "admin": {
+          "title": "Management",
+          "subtitle": "Assign the responsible manager, define the capacity and configure the operating hours for each day of the week",
+          "manager": "Responsible Manager *",
+          "manager_placeholder": "Select a Manager",
+          "capacity": "Member Capacity *",
+          "capacity_placeholder": "Example: 400",
+          "table": {
+            "day": "Day",
+            "opening": "Opening",
+            "closing": "Closing",
+            "closed": "Closed"
+          },
+          "days": {
+            "monday": "Monday",
+            "tuesday": "Tuesday",
+            "wednesday": "Wednesday",
+            "thursday": "Thursday",
+            "friday": "Friday",
+            "saturday": "Saturday",
+            "sunday": "Sunday"
+          }
+        },
+        "confirm": {
+          "title": "Commercial Policies",
+          "subtitle": "Select the corresponding commercial policies for the branch",
+          "checkbox_label": "Select by checking the policies",
+          "footer_hint": "These policies will be visible to the members of this branch",
+          "next_steps": {
+            "title": "Ready to create",
+            "description": "Review the information before confirming. Once the branch is created, you can modify these data from the branch management."
+          },
+          "policies": {
+            "p1": "Totally free registration for a limited time.",
+            "p2": "Flexible membership with a minimum cancellation period of only 1 month.",
+            "p3": "Access to on-site personal trainer at no additional cost at each schedule.",
+            "p4": "Specialized classes for adults +50 years old.",
+            "p5": "'Bring a friend' benefit: 15 days of free access for a companion.",
+            "p6": "Diversity of group classes included: Dance, Boxing, Yoga and more.",
+            "p7": "Exclusive/free parking for members.",
+            "p8": "Commitment to safety: Secure and monitored facilities for a worry-free experience."
+          }
+        },
+        "buttons": {
+          "back": "Back",
+          "next": "Next",
+          "create": "Create Branch",
+          "save": "Save changes",
+          "saving": "Saving..."
+        }
+      }
+    },
+    "details": {
+      "title": "Branch Details",
+      "edit_title": "Modify Branch",
+      "info_of": "Information of {name}",
+      "loading": "Loading branch...",
+      "not_found": "Branch not found.",
+      "error_loading": "Could not load branch information.",
+      "tabs": {
+        "basic": "General",
+        "payment": "Payment methods",
+        "services": "Services",
+        "instructors": "Instructors",
+        "equipment": "Equipment"
+      },
+      "basic": {
+        "title": "Basic information",
+        "subtitle": "Legal and general data of the branch",
+        "name": "Legal name",
+        "tax_id": "Tax ID",
+        "phone": "Phone",
+        "capacity": "Maximum capacity",
+        "status": "Branch status",
+        "status_placeholder": "Select a status",
+        "hint": "This data must correspond with the legal documentation of the branch.",
+        "location_title": "Location",
+        "location_subtitle": "Visualizing the location of the branch",
+        "map_title": "Map position",
+        "schedule_title": "Operating hours",
+        "success_update": "Branch updated successfully",
+        "error_update": "Error updating branch"
+      },
+      "payment_methods": {
+        "title": "Accepted payment methods",
+        "subtitle": "Select the payment methods that will be available in this branch.",
+        "placeholder": "Select a method...",
+        "add": "Add",
+        "empty": "No payment methods selected.",
+        "type": "Type: {type}",
+        "remove": "Remove",
+        "success_load": "Branch payment methods loaded successfully",
+        "error_load": "Could not load payment methods",
+        "error_branch_load": "Could not load branch payment methods",
+        "success_add": "Payment method \"{name}\" added",
+        "success_remove": "Payment method removed successfully",
+        "error_remove": "Could not remove payment method",
+        "saving": "Saving payment methods...",
+        "success_save": "Payment methods saved successfully",
+        "error_save": "Could not save payment methods"
+      },
+      "equipment": {
+        "error_loading_catalog": "Error loading equipment catalog",
+        "error_loading_inventory": "Error loading inventory",
+        "select_before_adding": "You must select an equipment before adding it",
+        "error_adding": "Error adding equipment: {errors}",
+        "success_added_pending": "Equipment \"{name}\" added to pending inventory",
+        "success_removed_pending": "Equipment \"{name}\" removed from pending inventory",
+        "success_removed": "Equipment \"{name}\" removed from inventory",
+        "error_invalid_token": "Invalid token",
+        "success_save": "Changes saved successfully",
+        "error_save": "Error saving changes",
+        "error_invalid_update": "Invalid equipment for update",
+        "error_update": "Error updating equipment: {errors}",
+        "success_update": "Equipment \"{name}\" updated successfully",
+        "error_updating": "Error updating equipment",
+        "table": {
+          "name": "Name",
+          "serial": "Serial",
+          "status": "Status",
+          "acquisition": "Acquisition",
+          "last_maintenance": "Last Maintenance"
+        },
+        "actions": {
+          "view": "View equipment",
+          "edit": "Edit equipment",
+          "delete": "Delete equipment"
+        },
+        "add": {
+          "title": "Add new equipment",
+          "search_label": "Search equipment",
+          "search_placeholder": "E.g.: Monster Power Rack",
+          "select_placeholder": "Select an equipment (E.g.: Monster Power Rack)",
+          "serial_label": "Serial number",
+          "serial_placeholder": "E.g.: SN-ROG-123",
+          "notes_label": "Notes",
+          "notes_placeholder": "E.g.: Equipment ready to use",
+          "button": "Add"
+        },
+        "inventory_title": "Branch inventory",
+        "empty": "No equipment assigned to this branch.",
+        "modal": {
+          "edit": "Edit equipment",
+          "view": "View equipment",
+          "loading": "Loading...",
+          "last_maintenance": "Last maintenance",
+          "notes": "Notes",
+          "status": "Status",
+          "status_placeholder": "Select status",
+          "save": "Save"
+        }
+      },
+      "instructors": {
+        "error_loading": "Could not load instructors",
+        "already_assigned": "Instructor is already assigned",
+        "success_added_pending": "Instructor added (pending save)",
+        "success_removed_local": "Instructor removed locally",
+        "success_removed": "Instructor removed successfully",
+        "error_removing": "Could not remove instructor",
+        "no_changes": "No changes to save",
+        "success_save": "Changes saved successfully",
+        "error_save": "Could not save changes",
+        "add_label": "Add instructor",
+        "select_placeholder": "Select an instructor",
+        "add_button": "Add",
+        "loading": "Loading instructors...",
+        "empty": "No instructors assigned.",
+        "remove": "Remove",
+        "info_scroll": "There are many instructors, use the scroll to see more."
+      },
+      "services": {
+        "success_load_catalog": "Branch services loaded successfully",
+        "error_load_catalog": "Could not load available services",
+        "error_load_branch": "Could not load branch services",
+        "success_added": "Service \"{name}\" added",
+        "success_removed": "Service \"{name}\" removed",
+        "error_removing": "Could not remove service",
+        "no_new_services": "No new services to save",
+        "success_save": "Services saved successfully",
+        "error_save": "Error saving services",
+        "success_update": "Service \"{name}\" updated",
+        "error_update": "Error updating service",
+        "title": "Branch services",
+        "subtitle": "Manage available services and their prices.",
+        "add": {
+          "title": "Add new service",
+          "select_placeholder": "Select a service",
+          "capacity": "Capacity",
+          "member_price": "Member price",
+          "non_member_price": "Non-member price",
+          "visible": "Visible",
+          "button": "Add"
+        },
+        "assigned_title": "Assigned services",
+        "loading": "Loading services...",
+        "empty": "No services assigned.",
+        "description": "Capacity: {capacity} | Members: ${memberPrice} | Non-members: ${nonMemberPrice} | Visible: {visible}",
+        "yes": "Yes",
+        "no": "No",
+        "modal": {
+          "view": "View service",
+          "edit": "Edit service",
+          "loading": "Loading...",
+          "capacity": "Maximum capacity",
+          "member_price": "Member price",
+          "non_member_price": "Non-member price",
+          "visible": "Visible",
+          "save": "Save"
+        }
+      }
+    },
+    "notifications": {
+      "success_title": "Branch Created!",
+      "success_description": "The new branch has been successfully registered in the system.",
+      "action_text": "Understood",
+      "error_required": "Please complete the required fields: Name, Tax ID, Country and State."
+    },
+    "validations": {
+      "name_required": "Legal Name is required.",
+      "tax_id_required": "Tax ID is required.",
+      "status_required": "Branch status is required.",
+      "address_required": "Full Address is required.",
+      "location_required": "You must select the location on the map.",
+      "country_required": "Country is required.",
+      "state_required": "State is required.",
+      "manager_required": "You must assign a Responsible Manager.",
+      "capacity_required": "Capacity must be a valid number (> 0).",
+      "opening_required": "Opening time is required",
+      "closing_required": "Closing time is required",
+      "payment_method_required": "You must select at least one payment method"
     }
   }
 }

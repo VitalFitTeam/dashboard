@@ -9,47 +9,35 @@ type StepProps = {
   formErrors?: Record<string, string>;
 };
 
-const defaultPolicies = [
-  { id: "p1", text: "Inscripción totalmente gratuita por tiempo limitado." },
-  {
-    id: "p2",
-    text: "Membresía flexible con un periodo mínimo de cancelación de solo 1 mes.",
-  },
-  {
-    id: "p3",
-    text: "Acceso a entrenador personal de planta sin costo adicional en cada horario.",
-  },
-  { id: "p4", text: "Clases especializadas para adultos +50 años." },
-  {
-    id: "p5",
-    text: "Beneficio 'Trae un amigo': 15 días de acceso gratuito para un acompañante.",
-  },
-  {
-    id: "p6",
-    text: "Diversidad de clases grupales incluidas: Baile, Boxeo, Yoga y más.",
-  },
-  { id: "p7", text: "Estacionamiento exclusivo/gratuito para miembros." },
-  {
-    id: "p8",
-    text: "Compromiso con la seguridad: Instalaciones seguras y monitoreadas para una experiencia libre de preocupaciones.",
-  },
-];
+import { useTranslations } from "next-intl";
 
 export default function Step4({ formData }: StepProps) {
+  const t = useTranslations("branches");
+
+  const defaultPolicies = [
+    { id: "p1", text: t("create.form.confirm.policies.p1") },
+    { id: "p2", text: t("create.form.confirm.policies.p2") },
+    { id: "p3", text: t("create.form.confirm.policies.p3") },
+    { id: "p4", text: t("create.form.confirm.policies.p4") },
+    { id: "p5", text: t("create.form.confirm.policies.p5") },
+    { id: "p6", text: t("create.form.confirm.policies.p6") },
+    { id: "p7", text: t("create.form.confirm.policies.p7") },
+    { id: "p8", text: t("create.form.confirm.policies.p8") },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-1">
-          Políticas Comerciales
+          {t("create.form.confirm.title")}
         </h3>
         <p className="text-sm text-gray-600 mb-4">
-          Seleccionas las políticas comerciales correspondientes para la
-          sucursal
+          {t("create.form.confirm.subtitle")}
         </p>
 
         <div className="space-y-4">
           <p className="text-sm font-semibold text-gray-700">
-            Selecciona dándole al check las políticas
+            {t("create.form.confirm.checkbox_label")}
           </p>
           {defaultPolicies.map((policy) => (
             <div key={policy.id} className="flex items-start space-x-3">
@@ -68,13 +56,13 @@ export default function Step4({ formData }: StepProps) {
         </div>
 
         <p className="text-xs text-gray-500 mt-4">
-          Estas políticas serán visibles para los miembros de esta sucursal
+          {t("create.form.confirm.footer_hint")}
         </p>
       </div>
 
       <StepNotification
-        title="Listo para crear"
-        description="Revise la información antes de confirmar. Una vez creada la sucursal, podrá modificar estos datos desde la gestión de sucursales."
+        title={t("create.form.confirm.next_steps.title")}
+        description={t("create.form.confirm.next_steps.description")}
       />
     </div>
   );

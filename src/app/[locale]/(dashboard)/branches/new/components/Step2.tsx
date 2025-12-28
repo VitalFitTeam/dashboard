@@ -21,12 +21,15 @@ type StepProps = {
   formErrors?: Record<string, string>;
 };
 
+import { useTranslations } from "next-intl";
+
 export default function Step2({
   formData,
   handleChange,
   handleCustomChange,
   formErrors = {},
 }: StepProps) {
+  const t = useTranslations("branches");
   const handleMapSelect = (data: {
     latitud: string;
     longitud: string;
@@ -42,8 +45,8 @@ export default function Step2({
     // Conversión a número
     const latNum = parseFloat(data.latitud);
     const lngNum = parseFloat(data.longitud);
-    if (!isNaN(latNum)) {handleCustomChange("latitude", latNum);}
-    if (!isNaN(lngNum)) {handleCustomChange("longitude", lngNum);}
+    if (!isNaN(latNum)) { handleCustomChange("latitude", latNum); }
+    if (!isNaN(lngNum)) { handleCustomChange("longitude", lngNum); }
 
     // IDs geográficos
     handleCustomChange("cityId", data.city);
@@ -60,10 +63,10 @@ export default function Step2({
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-1">
-          Ubicación y Contacto
+          {t("create.form.location.title")}
         </h3>
         <p className="text-sm text-gray-600">
-          Seleccione la ubicación exacta en el mapa o ingrese coordenadas
+          {t("create.form.location.subtitle")}
         </p>
       </div>
 
@@ -71,29 +74,30 @@ export default function Step2({
         {/* Dirección manual (ahora también se llena automáticamente) */}
         <div className="col-span-6">
           <InputField
-            label="Dirección Completa*"
+            label={t("create.form.location.address")}
             id="address"
             name="address"
             value={formData.address || ""}
             error={formErrors["address"]}
             onChange={handleChange}
-            placeholder="Ingrese la dirección manualmente o seleccione en el mapa"
+            placeholder={t("create.form.location.address_placeholder")}
             className="focus:ring-orange-500 focus:border-transparent"
           />
         </div>
 
-        {/* Ciudad / Estado / País */}
-        <InputField
-          label="Estado"
-          id="stateId"
-          name="stateId"
-          value={formData.stateId || ""}
-          readOnly
-          className="bg-gray-50 text-gray-700"
-        />
+        <div className="col-span-6 md:col-span-4">
+          <InputField
+            label={t("create.form.location.state")}
+            id="stateId"
+            name="stateId"
+            value={formData.stateId || ""}
+            readOnly
+            className="bg-gray-50 text-gray-700"
+          />
+        </div>
         <div className="col-span-6 md:col-span-2">
           <InputField
-            label="País"
+            label={t("create.form.location.country")}
             id="countryId"
             name="countryId"
             value={formData.countryId || ""}
@@ -105,13 +109,13 @@ export default function Step2({
         <div className="col-span-6 flex items-center gap-2 mt-4">
           <MapPin className="w-4 h-4 text-gray-700" />
           <span className="text-sm font-medium text-gray-700">
-            Coordenadas GPS
+            {t("create.form.location.gps_coords")}
           </span>
         </div>
 
         <div className="col-span-6 md:col-span-3">
           <InputField
-            label="Latitud"
+            label={t("create.form.location.latitude")}
             id="latitud"
             name="latitud"
             value={formData.latitud || ""}
@@ -122,7 +126,7 @@ export default function Step2({
 
         <div className="col-span-6 md:col-span-3">
           <InputField
-            label="Longitud"
+            label={t("create.form.location.longitude")}
             id="longitud"
             name="longitud"
             value={formData.longitud || ""}

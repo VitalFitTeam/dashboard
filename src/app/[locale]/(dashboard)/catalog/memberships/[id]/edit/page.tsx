@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import MembershipForm from "../../MembershipForm";
 import { api } from "@/lib/sdk-config";
-import { Notification } from "@/components/ui/Notification";
 import { useAuth } from "@/context/AuthContext";
 import { MembershipType } from "@vitalfit/sdk";
 import { useRouter, useParams } from "next/navigation";
-import { membershipSchema } from "@/lib/validation/membershipSchema";
+import { useTranslations } from "next-intl";
+import { createMembershipSchema } from "@/lib/validation/membershipSchema";
+import { toast } from "sonner";
 
 export default function EditMembership() {
+  const t = useTranslations("catalog.memberships");
   const params = useParams();
   const router = useRouter();
   const { token } = useAuth();
@@ -25,12 +27,6 @@ export default function EditMembership() {
     Partial<Record<keyof MembershipType, string>>
   >({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
-  const [showConnectionError, setShowConnectionError] = useState(false);
 
   const [formData, setFormData] = useState<MembershipType>({
     membership_type_id: "",
@@ -43,7 +39,7 @@ export default function EditMembership() {
 
   useEffect(() => {
     if (!id) {
-      router.replace("/memberships");
+      router.replace("/catalog/memberships");
       return;
     }
     if (!token) {
@@ -70,10 +66,10 @@ export default function EditMembership() {
         }
         const status = err?.response?.status ?? err?.status ?? null;
         if (status === 404) {
-          router.replace("/memberships");
+          router.replace("/catalog/memberships");
         } else {
           console.error("Error cargando membresia:", err);
-          setError("No se pudo cargar la información de la membresía.");
+          setError(t("edit.error_load"));
         }
       } finally {
         if (mounted) {
@@ -109,7 +105,8 @@ export default function EditMembership() {
     formData: MembershipType,
     setErrors: (errors: Partial<Record<keyof MembershipType, string>>) => void,
   ): boolean => {
-    const result = membershipSchema.safeParse(formData);
+    const schema = createMembershipSchema((key) => t(`validations.${key.split('.').pop()}`));
+    const result = schema.safeParse(formData);
 
     if (!result.success) {
       const zodErrors = result.error.flatten().fieldErrors;
@@ -134,8 +131,6 @@ export default function EditMembership() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowServerError({ visible: false, message: "" });
-    setShowConnectionError(false);
 
     const isValid = validate(formData, setErrors);
     if (!isValid) {
@@ -144,10 +139,7 @@ export default function EditMembership() {
 
     const token = localStorage.getItem("access_token");
     if (!token || typeof token !== "string" || token.length < 10) {
-      setShowServerError({
-        visible: true,
-        message: "Token de autenticación no encontrado.",
-      });
+      toast.error(t("edit.error_auth"));
       return;
     }
 
@@ -166,14 +158,14 @@ export default function EditMembership() {
         payload,
         token,
       );
-      setShowSuccess(true);
-      setTimeout(() => router.push("/memberships"), 1500);
+      toast.success(t("edit.success"));
+      setTimeout(() => router.replace("/catalog/memberships"), 1500);
     } catch (err: any) {
       console.error("Error al actualizar membresia:", err);
       if (err?.response?.data?.error) {
-        setShowServerError({ visible: true, message: err.response.data.error });
+        toast.error(err.response.data.error);
       } else {
-        setShowConnectionError(true);
+        toast.error(t("edit.error_connection_description"));
       }
     } finally {
       setIsLoading(false);
@@ -183,19 +175,20 @@ export default function EditMembership() {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <form onSubmit={handleSubmit} className="space-y-2">
-        <PageHeader title="MODIFICAR MEMBRESÍA">
+        <PageHeader title={t("edit.title")}>
           <Button
+            type="button"
             variant="secondary"
-            onClick={() => router.push("/memberships")}
+            onClick={() => router.replace("/catalog/memberships")}
           >
-            Cancelar
+            {t("edit.button_cancel")}
           </Button>
           <Button type="submit" variant="default" disabled={isLoading}>
-            {isLoading ? "Guardando..." : "Guardar Cambios"}
+            {isLoading ? t("edit.button_saving") : t("edit.button_save")}
           </Button>
         </PageHeader>
         <p className="text-sm text-muted-foreground">
-          Modifica la información de la membresía {membership?.name}
+          {t("edit.subtitle", { name: membership?.name || "" })}
         </p>
 
         {!loading && (
@@ -207,30 +200,6 @@ export default function EditMembership() {
           />
         )}
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="Membresía actualizado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-      {showConnectionError && (
-        <Notification
-          variant="destructive"
-          title="Error de conexión"
-          description="No se pudo conectar con el servidor. Intenta más tarde."
-          onClose={() => setShowConnectionError(false)}
-        />
-      )}
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al actualizar membresia"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

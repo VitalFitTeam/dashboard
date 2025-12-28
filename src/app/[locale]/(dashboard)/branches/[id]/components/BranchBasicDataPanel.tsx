@@ -94,14 +94,23 @@ const transformDataForAPI = (data: BranchDetails): UpdateBranchRequest => {
   };
 };
 
+import { useTranslations } from "next-intl";
+
 export default function BranchBasicDataPanel({
   mode = "edit",
   formData,
   setFormData,
 }: BasicDataPanelProps) {
+  const t = useTranslations("branches");
   const [loading, setLoading] = useState(false);
   const isViewMode = mode === "view";
   const { token } = useAuth();
+
+  const statusOptions: { label: string; value: BranchDetails["status"] }[] = [
+    { label: t("table.status.active"), value: "Active" },
+    { label: t("table.status.inactive"), value: "Inactive" },
+    { label: t("table.status.maintenance"), value: "Maintenance" },
+  ];
 
   const handleMapSelect = (data: MapSelectData) => {
     setFormData((prev) => ({
@@ -137,10 +146,10 @@ export default function BranchBasicDataPanel({
     try {
       const payload = transformDataForAPI(formData);
       await api.branch.updateBranch(formData.branch_id, payload, token || "");
-      toast.success("Sucursal actualizada correctamente");
+      toast.success(t("details.basic.success_update"));
     } catch (err) {
       console.error(err);
-      toast.error("Error actualizando sucursal");
+      toast.error(t("details.basic.error_update"));
     } finally {
       setLoading(false);
     }
@@ -150,16 +159,16 @@ export default function BranchBasicDataPanel({
     <div className="space-y-10">
       <section>
         <h2 className="text-xl font-semibold text-gray-900">
-          Información básica
+          {t("details.basic.title")}
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          Datos legales y generales de la sucursal
+          {t("details.basic.subtitle")}
         </p>
 
         <form className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <InputField
             id="name"
-            label="Razón social"
+            label={t("details.basic.name")}
             value={formData.name ?? ""}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, name: e.target.value }))
@@ -169,7 +178,7 @@ export default function BranchBasicDataPanel({
 
           <InputField
             id="taxId"
-            label="RIF"
+            label={t("details.basic.tax_id")}
             value={formData.tax_id ?? ""}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, tax_id: e.target.value }))
@@ -179,7 +188,7 @@ export default function BranchBasicDataPanel({
 
           <InputField
             id="phone"
-            label="Teléfono"
+            label={t("details.basic.phone")}
             value={formData.phone ?? ""}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, phone: e.target.value }))
@@ -189,7 +198,7 @@ export default function BranchBasicDataPanel({
 
           <InputField
             id="maxCapacity"
-            label="Capacidad máxima"
+            label={t("details.basic.capacity")}
             type="number"
             value={formData.max_capacity ?? ""}
             onChange={(e) =>
@@ -206,7 +215,7 @@ export default function BranchBasicDataPanel({
               htmlFor="status"
               className="block text-sm font-medium text-gray-700"
             >
-              Estado de la sucursal
+              {t("details.basic.status")}
             </label>
             <Select
               value={formData.status ?? ""}
@@ -219,7 +228,7 @@ export default function BranchBasicDataPanel({
               disabled={isViewMode}
             >
               <SelectTrigger id="status">
-                <SelectValue placeholder="Selecciona un estado" />
+                <SelectValue placeholder={t("details.basic.status_placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 {statusOptions.map((option) => (
@@ -234,25 +243,24 @@ export default function BranchBasicDataPanel({
         <Alert variant="default" className="mt-6">
           <InformationCircleIcon className="h-4 w-4" />
           <AlertDescription>
-            Estos datos deben corresponder con la documentación legal de la
-            sucursal.
+            {t("details.basic.hint")}
           </AlertDescription>
         </Alert>
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">Ubicación</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">{t("details.basic.location_title")}</h2>
         <p className="text-sm text-gray-600 mb-4">
-          Visualizando la ubicación de la sucursal
+          {t("details.basic.location_subtitle")}
         </p>
 
         <div className="grid grid-cols-6 gap-4">
           <div className="col-span-6">
             <InputField
-              label="Dirección Completa*"
+              label={t("create.form.location.address")}
               id="address"
               name="address"
-              placeholder="Av. Principal, Edificio Centro..."
+              placeholder={t("create.form.location.address_placeholder")}
               value={formData.address ?? ""}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, address: e.target.value }))
@@ -262,11 +270,11 @@ export default function BranchBasicDataPanel({
           </div>
           <div className="col-span-6 md:col-span-3">
             <InputField
-              label="Estado"
+              label={t("create.form.location.state")}
               id="state"
               name="state"
               value={formData.state ?? ""}
-              placeholder="Se rellena con el mapa"
+              placeholder={t("create.form.location.state")}
               readOnly={isViewMode || !formData.state}
               className={isViewMode ? "bg-gray-100" : ""}
               onChange={(e) =>
@@ -277,11 +285,11 @@ export default function BranchBasicDataPanel({
 
           <div className="col-span-6 md:col-span-3">
             <InputField
-              label="País"
+              label={t("create.form.location.country")}
               id="country"
               name="country"
               value={formData.country ?? ""}
-              placeholder="Se rellena con el mapa"
+              placeholder={t("create.form.location.country")}
               readOnly={isViewMode || !formData.country}
               className={isViewMode ? "bg-gray-100" : ""}
               onChange={(e) =>
@@ -293,13 +301,13 @@ export default function BranchBasicDataPanel({
           <div className="col-span-6 flex items-center gap-2 mt-4">
             <MapPin className="w-4 h-4 text-gray-700" />
             <span className="text-sm font-medium text-gray-700">
-              Coordenadas GPS
+              {t("create.form.location.gps_coords")}
             </span>
           </div>
 
           <div className="col-span-6 md:col-span-3">
             <InputField
-              label="Latitud"
+              label={t("create.form.location.latitude")}
               id="latitude"
               name="latitude"
               readOnly
@@ -310,7 +318,7 @@ export default function BranchBasicDataPanel({
 
           <div className="col-span-6 md:col-span-3">
             <InputField
-              label="Longitud"
+              label={t("create.form.location.longitude")}
               id="longitude"
               name="longitude"
               readOnly
@@ -322,7 +330,7 @@ export default function BranchBasicDataPanel({
 
         <div className="mt-6">
           <h3 className="text-sm font-medium text-gray-700 mb-1 block">
-            Posición en el mapa
+            {t("details.basic.map_title")}
           </h3>
           <MapboxPicker
             lat={formData.latitude ? String(formData.latitude) : "0"}
@@ -335,7 +343,7 @@ export default function BranchBasicDataPanel({
       {/* Horarios */}
       <section>
         <h2 className="text-lg font-semibold text-gray-900 mb-1">
-          Horarios de operación
+          {t("details.basic.schedule_title")}
         </h2>
         <BranchSchedule
           schedule={formData.operating_hours || []}
@@ -346,7 +354,7 @@ export default function BranchBasicDataPanel({
 
       {!isViewMode && (
         <Button onClick={handleSaveChanges} disabled={loading}>
-          {loading ? "Guardando..." : "Guardar cambios"}
+          {loading ? t("create.form.buttons.saving") : t("create.form.buttons.save")}
         </Button>
       )}
     </div>

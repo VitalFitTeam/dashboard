@@ -30,8 +30,11 @@ interface BranchServicePanelProps {
   mode: "view" | "edit";
 }
 
+import { useTranslations } from "next-intl";
+
 const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   const { branchId, mode = "edit" } = props;
+  const t = useTranslations("branches");
   const { token } = useAuth();
   const isDisabled = mode === "view";
 
@@ -65,15 +68,15 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     const fetchServices = async () => {
       try {
         const response = await api.products.getServices(token, { page: 1 });
-        toast.success("Servicios de la sucursal cargados correctamente");
+        toast.success(t("details.services.success_load_catalog"));
         setAllServices(response.data || []);
       } catch (err) {
         console.error("Error cargando servicios:", err);
-        toast.error("No se pudieron cargar los servicios disponibles");
+        toast.error(t("details.services.error_load_catalog"));
       }
     };
     fetchServices();
-  }, [token]);
+  }, [token, t]);
 
   useEffect(() => {
     if (!token || !branchId) {
@@ -86,19 +89,19 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
         setServices(response.data || []);
       } catch (err) {
         console.error("Error cargando servicios de la sucursal:", err);
-        toast.error("No se pudieron cargar los servicios de la sucursal");
+        toast.error(t("details.services.error_load_branch"));
       } finally {
         setIsLoading(false);
       }
     };
     fetchBranchServices();
-  }, [token, branchId]);
+  }, [token, branchId, t]);
 
   const handleAddService = () => {
-    if (!selectedServiceId) {return;}
+    if (!selectedServiceId) { return; }
 
     const service = allServices.find((s) => s.service_id === selectedServiceId);
-    if (!service) {return;}
+    if (!service) { return; }
 
     const newService: CreateBranchServicePriceItem = {
       service_id: service.service_id,
@@ -131,7 +134,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     setPriceNonMember(0);
     setIsVisible(true);
 
-    toast.success(`Servicio "${service.name}" agregado`);
+    toast.success(t("details.services.success_added", { name: service.name }));
   };
 
   const handleRemoveService = async (serviceId: string) => {
@@ -152,11 +155,11 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       setServices((prev) => prev.filter((s) => s.service_id !== serviceId));
       setDirty(true);
       toast.success(
-        `Servicio "${removedService?.service_name ?? ""}" eliminado`,
+        t("details.services.success_removed", { name: removedService?.service_name ?? "" }),
       );
     } catch (err) {
       console.error("Error eliminando servicio:", err);
-      toast.error("No se pudo eliminar el servicio");
+      toast.error(t("details.services.error_removing"));
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +170,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       return;
     }
     if (newServices.length === 0) {
-      toast.error("No hay servicios nuevos para guardar");
+      toast.error(t("details.services.no_new_services"));
       return;
     }
 
@@ -179,10 +182,10 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       setNewServices([]);
       setDirty(false);
 
-      toast.success("Servicios guardados correctamente");
+      toast.success(t("details.services.save_success"));
     } catch (err) {
       console.error("Error guardando servicios:", err);
-      toast.error("Error al guardar los servicios");
+      toast.error(t("details.services.save_error"));
     } finally {
       setLoading(false);
     }
@@ -216,10 +219,10 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
       setEditModalOpen(false);
       setServiceToEdit(null);
 
-      toast.success(`Servicio "${serviceToEdit.service_name}" actualizado`);
+      toast.success(t("details.services.success_update", { name: serviceToEdit.service_name ?? "" }));
     } catch (err) {
       console.error("Error actualizando servicio:", err);
-      toast.error("Error al actualizar el servicio");
+      toast.error(t("details.services.error_update"));
     }
   };
 
@@ -239,10 +242,10 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     <div className="space-y-10">
       <section>
         <h2 className="text-xl font-semibold text-gray-900">
-          Servicios de la sucursal
+          {t("details.services.title")}
         </h2>
         <p className="mt-1 text-sm text-gray-600">
-          Administra los servicios disponibles y sus precios.
+          {t("details.services.subtitle")}
         </p>
       </section>
 
@@ -251,14 +254,14 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
           <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-end">
             <div className="flex-grow min-w-[200px] space-y-1.5">
               <p className="text-sm font-medium text-gray-700">
-                Agregar nuevo servicio
+                {t("details.services.add.title")}
               </p>
               <Select
                 value={selectedServiceId ?? ""}
                 onValueChange={setSelectedServiceId}
               >
                 <SelectTrigger id="service-select">
-                  <SelectValue placeholder="Selecciona un servicio" />
+                  <SelectValue placeholder={t("details.services.add.select_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {allServices
@@ -281,21 +284,21 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
             </div>
 
             <InputField
-              label="Aforo"
+              label={t("details.services.add.capacity")}
               type="number"
               min={0}
               value={aforo}
               onChange={(e) => setAforo(Number(e.target.value))}
             />
             <InputField
-              label="Precio miembros"
+              label={t("details.services.add.member_price")}
               type="number"
               min={0}
               value={priceMember}
               onChange={(e) => setPriceMember(Number(e.target.value))}
             />
             <InputField
-              label="Precio no miembros"
+              label={t("details.services.add.non_member_price")}
               type="number"
               min={0}
               value={priceNonMember}
@@ -309,7 +312,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
                 onChange={(e) => setIsVisible(e.target.checked)}
                 className="h-4 w-4"
               />
-              <label className="text-sm">Visible</label>
+              <label className="text-sm">{t("details.services.add.visible")}</label>
             </div>
 
             <Button
@@ -318,7 +321,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
               disabled={!selectedServiceId || aforo <= 0}
               onClick={handleAddService}
             >
-              <Plus size={16} className="mr-2" /> Agregar
+              <Plus size={16} className="mr-2" /> {t("details.services.add.button")}
             </Button>
           </div>
         </div>
@@ -326,21 +329,26 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
 
       <div>
         <h3 className="text-sm font-medium text-gray-800 mb-4">
-          Servicios asignados
+          {t("details.services.assigned_title")}
         </h3>
         {isLoading ? (
-          <p className="text-sm text-gray-500">Cargando servicios...</p>
+          <p className="text-sm text-gray-500">{t("details.services.loading")}</p>
         ) : services.length === 0 ? (
-          <p className="text-sm text-gray-500">No hay servicios asignados.</p>
+          <p className="text-sm text-gray-500">{t("details.services.empty")}</p>
         ) : (
           services.map((service) => (
             <EntityItem
               key={service.service_id}
               initials={getInitials(service.service_name ?? "??")}
               title={
-                service.service_name ?? `Servicio ID: ${service.service_id}`
+                service.service_name ?? `${t("catalog.services.id_prefix")}: ${service.service_id}`
               }
-              description={`Aforo: ${service.max_capacity} | Miembros: $${service.price_for_member} | No miembros: $${service.price_for_non_member} | Visible: ${service.is_visible ? "Sí" : "No"}`}
+              description={t("details.services.description", {
+                capacity: service.max_capacity,
+                memberPrice: service.price_for_member,
+                nonMemberPrice: service.price_for_non_member,
+                visible: service.is_visible ? t("details.services.yes") : t("details.services.no"),
+              })}
               action={
                 !isDisabled ? (
                   <div className="flex gap-2">
@@ -375,7 +383,7 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
 
       {!isDisabled && (
         <Button onClick={handleSave} disabled={!dirty || loading}>
-          {loading ? "Guardando..." : "Guardar cambios"}
+          {loading ? t("create.form.buttons.saving") : t("create.form.buttons.save")}
         </Button>
       )}
 
