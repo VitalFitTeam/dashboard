@@ -141,7 +141,6 @@
     "available_branches": "Available branches",
     "no_branches": "No branches assigned",
     "system_footer": "Vitalfit System"
-    
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -552,6 +551,40 @@
       "notifications": {
         "delete_success": "Equipment deleted successfully",
         "delete_error": "Error deleting equipment."
+      }
+    },
+    "memberships": {
+      "title": "MEMBERSHIPS",
+      "add_button": "Add a membership",
+      "loading": "Loading Memberships...",
+      "table": {
+        "placeholder": "Search membership by name",
+        "download": "Download",
+        "columns": {
+          "name": "Name",
+          "description": "Description",
+          "duration": "Duration (days)",
+          "price": "Price",
+          "status": "Status"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "actions": {
+          "view": "View Details",
+          "edit": "Modify",
+          "delete": "Delete"
+        },
+        "delete_dialog": {
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete the membership \"{name}\"? This action cannot be undone.",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "form": {
+        "labels": {
           "name": "Name*",
           "description": "Description*",
           "duration_days": "Duration (Days)*",
@@ -592,7 +625,7 @@
       "view": {
         "title": "MEMBERSHIP DETAILS",
         "button_edit": "Modify",
-        "loading": "Loading Memberships...",
+        "loading": "Loading Membership...",
         "error_load": "Could not load membership information.",
         "error_auth": "Session expired or unauthorized. Please log in again.",
         "not_found": "Membership not found or unavailable."
@@ -888,6 +921,7 @@
       "columns": {
         "name": "Name",
         "email": "Email",
+        "role": "Role",
         "category": "Category",
         "status": "Status"
       },

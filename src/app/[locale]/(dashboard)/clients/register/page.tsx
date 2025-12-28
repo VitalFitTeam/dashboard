@@ -47,7 +47,7 @@ export default function Clients() {
       </div>
 
       <PageHeader title={t("title")} >
-        <Button onClick={() => router.replace("/clients/register/new")} variant="outline">
+        <Button onClick={() => router.push("/clients/register/new")} variant="outline">
           <PlusIcon className="mr-2 h-4 w-4" />
           {t("add_button")}
         </Button>

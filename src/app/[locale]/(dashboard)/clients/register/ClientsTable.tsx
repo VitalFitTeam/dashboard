@@ -170,7 +170,7 @@ export default function ClientsTable({
 
     return (
       <Badge variant={variant}>
-        {status}
+        {displays[normalizedStatus] || status}
       </Badge>
     );
   };
@@ -188,8 +188,8 @@ export default function ClientsTable({
       filterType: "text"
     },
     {
-      header: "Rol", // Using a hardcoded header for now as 'role' might not be in translations, or use t("table.columns.role") if available. I'll check translations but safe to use "Rol" or t("table.columns.category") -> "Category" is confusing. I'll check if I can use t("roles.title") or just "Rol". Given the user language is Spanish, "Rol" is safe, or t("table.columns.role") if I add it. I'll stick to 'category' column for now as user didn't ask to change column.
-      accessor: "category", // Keeping accessor category but... wait. The user data has roles.
+      header: t("table.columns.role"),
+      accessor: "role",
       filterType: "text",
       render: (_, row) => row.role?.name || row.category // Fallback to category if role missing
     },

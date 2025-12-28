@@ -485,7 +485,20 @@
           "brand": "Marca"
         },
         "actions": {
-          "view": "Ver",
+          "delete": "Eliminar"
+        },
+        "delete_dialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar este equipo? Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "notifications": {
+        "delete_success": "Equipo eliminado exitosamente",
+        "delete_error": "Error al eliminar el equipo."
+      }
+    },
     "memberships": {
       "title": "MEMBRESÍAS",
       "add_button": "Agregar una membresía",
@@ -498,7 +511,7 @@
           "description": "Descripción",
           "duration": "Duración (días)",
           "price": "Precio",
-          "status": "Status"
+          "status": "Estado"
         },
         "status": {
           "active": "Activa",
@@ -511,71 +524,18 @@
         },
         "delete_dialog": {
           "title": "Confirmar eliminación",
-          "description": "¿Estás seguro de que deseas eliminar \"{name}\"?",
+          "description": "¿Estás seguro de que deseas eliminar la membresía \"{name}\"? Esta acción no se puede deshacer.",
           "confirm": "Eliminar",
           "cancel": "Cancelar"
         }
       },
       "form": {
         "labels": {
-          "name": "Nombre",
-          "category": "Categoría",
-          "description": "Descripción",
-          "model": "Modelo",
-          "brand": "Marca"
-        },
-        "placeholders": {
-          "name": "Agrega un nombre",
-          "category": "Seleccione una categoría",
-          "description": "Agrega una descripción",
-          "model": "Agrega un modelo",
-          "brand": "Agrega una marca"
-        },
-        "errors": {
-          "name_required": "El nombre es obligatorio.",
-          "description_required": "La descripción es obligatoria.",
-          "brand_required": "La marca es obligatoria.",
-          "model_required": "El modelo es obligatorio.",
-          "category_required": "La categoría es obligatoria."
-        }
-      },
-      "create": {
-        "title": "CREAR EQUIPAMIENTO",
-        "subtitle": "Ingrese la información de un nuevo equipo",
-        "button": "Crear",
-        "loading": "Guardando...",
-        "success": "¡Equipamiento creado exitosamente!",
-        "connection_error_title": "Error de conexión",
-        "connection_error_desc": "No se pudo conectar con el servidor. Intenta más tarde.",
-        "server_error_title": "Error al crear equipo"
-      },
-      "edit": {
-        "title": "EDITAR EQUIPAMIENTO",
-        "subtitle": "Modifique la información del equipamiento",
-        "button": "Guardar Cambios",
-        "loading": "Guardando...",
-        "success": "¡Equipamiento actualizado exitosamente!",
-        "cancel": "Cancelar",
-        "loading_data": "Cargando datos del equipo...",
-        "not_found": "Equipo no encontrado",
-        "error_loading": "Error al cargar equipo"
-      },
-      "details": {
-        "title": "DETALLES DE EQUIPAMIENTO",
-        "subtitle": "Información del equipamiento: {name}",
-        "back": "Volver",
-        "edit": "Modificar",
-        "not_found": "Equipo no encontrado.",
-        "loading": "Cargando detalles..."
-      },
-      "notifications": {
-        "delete_success": "Equipamiento eliminado exitosamente",
-        "delete_error": "Error al eliminar el equipamiento."
           "name": "Nombre*",
           "description": "Descripción*",
           "duration_days": "Duración (Días)*",
           "price": "Precio ($)*",
-          "status": "Status"
+          "status": "Estado"
         },
         "placeholders": {
           "name": "Ej: Membresía Premium",
@@ -589,7 +549,7 @@
         "subtitle": "Agrega la información de la membresía",
         "button_create": "Crear",
         "button_saving": "Guardando...",
-        "success": "Membresía creada exitosamente!",
+        "success": "¡Membresía creada exitosamente!",
         "error_connection": "Error de conexión",
         "error_connection_description": "No se pudo conectar con el servidor. Intenta más tarde.",
         "error_create": "Error al crear membresía",
@@ -601,17 +561,17 @@
         "button_cancel": "Cancelar",
         "button_save": "Guardar Cambios",
         "button_saving": "Guardando...",
-        "success": "Membresía actualizado exitosamente!",
+        "success": "¡Membresía actualizada exitosamente!",
         "error_connection": "Error de conexión",
         "error_connection_description": "No se pudo conectar con el servidor. Intenta más tarde.",
-        "error_update": "Error al actualizar membresia",
+        "error_update": "Error al actualizar membresía",
         "error_load": "No se pudo cargar la información de la membresía.",
         "error_auth": "Token de autenticación no encontrado."
       },
       "view": {
         "title": "DETALLES DE MEMBRESÍA",
         "button_edit": "Modificar",
-        "loading": "Cargando Membresías...",
+        "loading": "Cargando Membresía...",
         "error_load": "No se pudo cargar la información de la membresía.",
         "error_auth": "Sesión expirada o no autorizada. Intenta ingresar de nuevo.",
         "not_found": "Membresía no encontrada o no disponible."
@@ -629,7 +589,7 @@
         "duration_int": "La duración debe ser un número entero",
         "duration_min": "La duración no puede ser cero (0) o negativa",
         "duration_max": "La duración máxima es 3650 días (10 años)",
-        "price_min": "El precio no puede cero (0) o negativo",
+        "price_min": "El precio no puede ser cero (0) o negativo",
         "price_max": "El precio máximo es 999,999.99",
         "validation_error": "Error de validación inesperado"
       }
@@ -907,8 +867,9 @@
       "columns": {
         "name": "Nombre",
         "email": "Email",
+        "role": "Rol",
         "category": "Categoría",
-        "status": "Status"
+        "status": "Estado"
       },
       "status": {
         "active": "Activo",
