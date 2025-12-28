@@ -785,6 +785,25 @@
       "inactive": "INACTIVE/BLOCKED",
       "unit": "CLIENTS"
     },
+    "payments": {
+      "title": "Invoice and Payment History",
+      "subtitle": "View the historical record of payments and memberships for the client",
+      "table": {
+        "reference": "Reference",
+        "date": "Issue Date",
+        "amount": "Total Amount",
+        "status": "Status",
+        "search_placeholder": "Search by reference..."
+      },
+      "status": {
+        "paid": "Paid",
+        "pagado": "Paid",
+        "unpaid": "Unpaid",
+        "pendiente": "Unpaid",
+        "overdue": "Overdue",
+        "void": "Void"
+      }
+    },
     "table": {
       "filter_placeholder": "Filter name or email",
       "filter_role": "Filter by Role",

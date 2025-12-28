@@ -785,6 +785,25 @@
       "inactive": "INACTIVOS/BLOQUEADOS",
       "unit": "CLIENTES"
     },
+    "payments": {
+      "title": "Historial de Facturas y Pagos",
+      "subtitle": "Consulta el registro histórico de pagos y membresías del cliente",
+      "table": {
+        "reference": "Referencia",
+        "date": "Fecha de Emisión",
+        "amount": "Monto Total",
+        "status": "Estado",
+        "search_placeholder": "Buscar por referencia..."
+      },
+      "status": {
+        "paid": "Pagado",
+        "pagado": "Pagado",
+        "unpaid": "Pendiente",
+        "pendiente": "Pendiente",
+        "overdue": "Vencido",
+        "void": "Anulado"
+      }
+    },
     "table": {
       "filter_placeholder": "Filtrar nombre o email",
       "filter_role": "Filtrar por Rol",
