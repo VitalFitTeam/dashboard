@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {  useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import ClassForm from "../ClassesForm";
@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Notification } from "@/components/ui/Notification";
 import { ClassFormData, ClassFormSchema } from "@/lib/validation/class";
+import { useRouter } from "@/i18n/navigation";
 
 interface Branch {
   branch_id: string;

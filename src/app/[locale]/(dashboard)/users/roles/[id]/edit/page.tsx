@@ -1,10 +1,10 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+
+import { useParams } from "next/navigation";
+import { useEffect, useState, useMemo } from "react";
 import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import RolesForm from "../../RolesForm";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -14,7 +14,9 @@ import {
   validateRoleField,
   RoleFormData,
 } from "@/lib/validation/roleSchema";
-import { RoleResponse, CreateRole, DataResponse } from "@vitalfit/sdk";
+import { RoleResponse,  DataResponse } from "@vitalfit/sdk";
+import RolesForm from "@/components/modules/roles/RolesForm";
+import { useRouter } from "@/i18n/navigation";
 
 export default function EditRolePage() {
   const t = useTranslations("roles.edit");
@@ -29,11 +31,14 @@ export default function EditRolePage() {
     description: "",
     Permission: [],
   });
-
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof RoleFormData, string>>
-  >({});
+  const [initialData, setInitialData] = useState<{
+    name: string;
+    description: string;
+    permissions: string[];
+  } | null>(null);
+
+  const [errors, setErrors] = useState<Partial<Record<keyof RoleFormData, string>>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -42,38 +47,43 @@ export default function EditRolePage() {
       if (!id || !token) {
         return;
       }
-
       setIsLoading(true);
       try {
-        const response: DataResponse<RoleResponse> = await api.RBAC.getRoleByID(
-          id,
-          token,
-        );
-        if (response && response.data) {
-          const roleData = response.data;
-          setFormData({
-            id: roleData.role_id,
-            name: roleData.name,
-            description: roleData.description,
-            Permission: roleData.permissions,
-          });
+        const response: DataResponse<RoleResponse> = await api.RBAC.getRoleByID(id, token);
+        if (response?.data) {
+          const { role_id, name, description, permissions } = response.data;
+          const permissionIds = permissions?.map((p) => p.permission_id) || [];
 
-          const permissionIds =
-            roleData.permissions?.map((p: any) => p.permission_id) || [];
+          setFormData({ id: role_id, name, description, Permission: permissions });
           setSelectedPermissions(permissionIds);
-        } else {
-          toast.error(t("load_error"));
+          setInitialData({
+            name,
+            description,
+            permissions: [...permissionIds].sort(),
+          });
         }
       } catch (err) {
-        console.error("Error cargando rol:", err);
         toast.error(t("load_error"));
       } finally {
         setIsLoading(false);
       }
     };
-
     loadRole();
-  }, [id, token]);
+  }, [id, token, t]);
+
+  const isDirty = useMemo(() => {
+    if (!initialData) {
+      return false;
+    }
+    const hasNameChanged = formData.name.trim() !== initialData.name;
+    const hasDescriptionChanged = formData.description.trim() !== initialData.description;
+    const currentPermsSorted = [...selectedPermissions].sort();
+    const hasPermissionsChanged = 
+      currentPermsSorted.length !== initialData.permissions.length ||
+      currentPermsSorted.some((val, index) => val !== initialData.permissions[index]);
+
+    return hasNameChanged || hasDescriptionChanged || hasPermissionsChanged;
+  }, [formData.name, formData.description, selectedPermissions, initialData]);
 
   const handleChange = (field: keyof Roles, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -82,13 +92,9 @@ export default function EditRolePage() {
     }
   };
 
-  const handleFieldBlur = (field: keyof Roles, value: string) => {
-    const result = validateRoleField(field, value, tForm);
-    if (!result.success && result.error) {
-      setErrors((prev) => ({ ...prev, [field]: result.error }));
-    } else {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
+  const handleFieldBlur = (field: keyof Roles, value: any) => {
+    const result = validateRoleField(field as keyof RoleFormData, value, tForm);
+    setErrors((prev) => ({ ...prev, [field]: result.success ? undefined : result.error }));
   };
 
   const handlePermissionChange = (permissionId: string, isChecked: boolean) => {
@@ -97,73 +103,44 @@ export default function EditRolePage() {
       : selectedPermissions.filter((id) => id !== permissionId);
 
     setSelectedPermissions(newPermissions);
-
     const result = validateRoleField("permissionsID", newPermissions, tForm);
-    if (!result.success && result.error) {
-      setErrors((prev) => ({ ...prev, permissionsID: result.error }));
-    } else {
-      setErrors((prev) => ({ ...prev, permissionsID: undefined }));
-    }
+    setErrors((prev) => ({ ...prev, permissionsID: result.success ? undefined : result.error }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.id || !token) {
+    if (!formData.id || !token || !isDirty) {
       return;
     }
 
-    const formDataToValidate = {
-      name: formData.name,
-      description: formData.description,
+    const dataToValidate: RoleFormData = {
+      name: formData.name.trim(),
+      description: formData.description.trim(),
       permissionsID: selectedPermissions,
     };
 
-    const validationResult = validateRole(formDataToValidate, tForm);
-    if (!validationResult.success) {
+    const validation = validateRole(dataToValidate, tForm);
+    if (!validation.success) {
       const newErrors: Partial<Record<keyof RoleFormData, string>> = {};
-      validationResult.error.issues.forEach((issue) => {
-        if (issue.path.length > 0 && typeof issue.path[0] === "string") {
-          const field = issue.path[0] as keyof RoleFormData;
-          newErrors[field] = issue.message;
-        }
+      validation.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof RoleFormData;
+        newErrors[field] = issue.message;
       });
       setErrors(newErrors);
       return;
     }
 
     setErrors({});
-
     setIsSaving(true);
+
     try {
-      const payload: CreateRole = {
-        name: formData.name,
-        description: formData.description,
-        permissions: [],
-      };
-
-      await api.RBAC.updateRole(formData.id, payload, token);
-
-      if (selectedPermissions.length > 0) {
-        await api.RBAC.addPermission(formData.id, selectedPermissions, token);
-      }
-
+      await api.RBAC.updateRole(formData.id, { ...dataToValidate, permissions: [] }, token);
+      await api.RBAC.addPermission(formData.id, selectedPermissions, token);
       toast.success(t("success"));
-      setTimeout(() => {
-        router.push("/users/roles");
-      }, 1500);
-    } catch (err: unknown) {
-      console.error("Error al actualizar rol:", err);
-
-      if (err && typeof err === "object" && "messages" in err) {
-        const error = err as { messages: string[]; error?: string };
-        if (error.messages[0] === "conflict") {
-          toast.error(t("conflict_error"));
-        } else {
-          toast.error(error.error || t("error"));
-        }
-      } else {
-        toast.error(t("error"));
-      }
+      router.push("/users/roles");
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err?.error || t("error"));
     } finally {
       setIsSaving(false);
     }
@@ -171,43 +148,56 @@ export default function EditRolePage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <div>{t("loading")}</div>
+      <div className="flex h-[50vh] items-center justify-center">
+        <span className="animate-pulse text-muted-foreground">{t("loading")}</span>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <PageHeader
-          title={t("title")}
-          subtitle={t("subtitle", { name: formData.name })}
-          actionButton={
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => router.push("/users/roles")}
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" variant="default" disabled={isSaving}>
-                {isSaving ? t("loading") : t("button")}
-              </Button>
-            </div>
-          }
-        />
+    <div className="flex-1 p-4 md:p-8 pt-6">
+      <div className="mx-auto max-w-5xl bg-white rounded-xl shadow-sm border p-4 md:p-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <PageHeader
+            title={t("title")}
+            subtitle={t("subtitle", { name: formData.name })}
+            actionButton={
+              <div className="flex flex-col-reverse sm:flex-row gap-3 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="w-full sm:w-auto"
+                  onClick={() => router.push("/users/roles")}
+                  disabled={isSaving}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="default" 
+                  className="w-full sm:w-auto"
+                  disabled={isSaving || !isDirty}
+                >
+                  {isSaving ? t("loading") : t("button")}
+                </Button>
+              </div>
+            }
+          />
 
-        <RolesForm
-          formData={formData}
-          onChange={handleChange}
-          selectedPermissions={selectedPermissions}
-          onPermissionChange={handlePermissionChange}
-          onFieldBlur={handleFieldBlur}
-          errors={errors}
-        />
-      </form>
+          <hr className="border-slate-100" />
+
+          <div className="overflow-x-hidden">
+            <RolesForm
+              formData={formData}
+              onChange={handleChange}
+              selectedPermissions={selectedPermissions}
+              onPermissionChange={handlePermissionChange}
+              onFieldBlur={handleFieldBlur}
+              errors={errors}
+            />
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

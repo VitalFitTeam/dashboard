@@ -7,15 +7,18 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import EquipmentForm from "../EquipmentForm";
 import { api } from "@/lib/sdk-config";
 import type { CreateEquipment } from "@vitalfit/sdk";
-import { Notification } from "@/components/ui/Notification";
 import { type EquipmentSchema } from "@/lib/validation/equipmentSchema";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface CreateEquipmentProps {
   onBack: () => void;
 }
 
 export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
+  const t = useTranslations("catalog.equipment.create");
+  const tFormErrors = useTranslations("catalog.equipment.form.errors");
   const [formData, setFormData] = useState<EquipmentSchema>({
     name: "",
     description: "",
@@ -30,12 +33,6 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
     Partial<Record<keyof Equipment, string>>
   >({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
-  const [showConnectionError, setShowConnectionError] = useState(false);
 
   const handleChange = (field: keyof Equipment, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -46,19 +43,19 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
     const newErrors: Partial<Record<keyof Equipment, string>> = {};
 
     if (!(formData.name ?? "").trim()) {
-      newErrors.name = "El nombre es obligatorio.";
+      newErrors.name = tFormErrors("name_required");
     }
     if (!(formData.description ?? "").trim()) {
-      newErrors.description = "La descripción es obligatoria.";
+      newErrors.description = tFormErrors("description_required");
     }
     if (!(formData.brand ?? "").trim()) {
-      newErrors.brand = "La marca es obligatoria.";
+      newErrors.brand = tFormErrors("brand_required");
     }
     if (!(formData.model ?? "").trim()) {
-      newErrors.model = "El modelo es obligatorio.";
+      newErrors.model = tFormErrors("model_required");
     }
     if (!(formData.category ?? "").trim()) {
-      newErrors.category = "La categoría es obligatoria.";
+      newErrors.category = tFormErrors("category_required");
     }
 
     setErrors(newErrors);
@@ -67,8 +64,6 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowServerError({ visible: false, message: "" });
-    setShowConnectionError(false);
 
     if (!validate()) {
       return;
@@ -76,10 +71,7 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
 
     const token = localStorage.getItem("access_token");
     if (!token || typeof token !== "string" || token.length < 10) {
-      setShowServerError({
-        visible: true,
-        message: "Token de autenticación no encontrado.",
-      });
+      toast.error(t("server_error_title"), { description: "Token not found" });
       return;
     }
 
@@ -94,16 +86,16 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
     setIsLoading(true);
     try {
       await api.equipment.createEquipment(payload, token);
-      setShowSuccess(true);
+      toast.success(t("success"));
       setTimeout(() => {
-        router.push("/equipment");
+        router.replace("/catalog/equipment");
       }, 1500);
     } catch (err: any) {
       console.error("Error al crear equipo:", err);
       if (err?.response?.data?.error) {
-        setShowServerError({ visible: true, message: err.response.data.error });
+        toast.error(t("server_error_title"), { description: err.response.data.error });
       } else {
-        setShowConnectionError(true);
+        toast.error(t("connection_error_title"), { description: t("connection_error_desc") });
       }
     } finally {
       setIsLoading(false);
@@ -113,9 +105,9 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <form onSubmit={handleSubmit} className="space-y-2">
-        <PageHeader title="CREAR EQUIPAMIENTO"></PageHeader>
+        <PageHeader title={t("title")}></PageHeader>
         <p className="text-sm text-muted-foreground">
-          Ingrese la información de un nuevo equipo
+          {t("subtitle")}
         </p>
 
         <EquipmentForm
@@ -130,33 +122,9 @@ export default function CreateEquipment({ onBack }: CreateEquipmentProps) {
           variant="default"
           disabled={isLoading}
         >
-          {isLoading ? "Guardando..." : "Crear"}
+          {isLoading ? t("loading") : t("button")}
         </Button>
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="¡Equipamiento creado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-      {showConnectionError && (
-        <Notification
-          variant="destructive"
-          title="Error de conexión"
-          description="No se pudo conectar con el servidor. Intenta más tarde."
-          onClose={() => setShowConnectionError(false)}
-        />
-      )}
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al crear equipo"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

@@ -1,19 +1,22 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner";
 import { PackageDetail, ServiceFullDetail } from "@vitalfit/sdk";
 import { useAuth } from "@/context/AuthContext";
 import PackageForm from "../../PackageForm";
+import { useTranslations } from "next-intl";
 
 export default function EditPackagePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { token } = useAuth();
+  const t = useTranslations("catalog.packages");
 
   const [packageD, setPackageD] = useState<PackageDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,11 +29,6 @@ export default function EditPackagePage() {
   const [servicesError, setServicesError] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
 
   useEffect(() => {
     if (!id || !token) {
@@ -44,14 +42,14 @@ export default function EditPackagePage() {
         setPackageD(response.data);
       } catch (err: any) {
         console.error("Error cargando paquete:", err);
-        setError("No se pudo cargar el paquete.");
+        setError(t("edit.error_load"));
       } finally {
         setLoading(false);
       }
     };
 
     loadPackage();
-  }, [id, token]);
+  }, [id, token, t]);
 
   useEffect(() => {
     if (!token) {
@@ -72,14 +70,14 @@ export default function EditPackagePage() {
         setAvailableServices(allServices);
       } catch (err) {
         console.error("Error cargando servicios:", err);
-        setServicesError("No se pudieron cargar los servicios.");
+        setServicesError(t("notifications.services_load_error"));
       } finally {
         setLoadingServices(false);
       }
     };
 
     loadServices();
-  }, [token]);
+  }, [token, t]);
 
   const handleChange = (data: Partial<PackageDetail>) => {
     setPackageD((prev) => (prev ? { ...prev, ...data } : prev));
@@ -91,28 +89,24 @@ export default function EditPackagePage() {
       return;
     }
 
-    setShowServerError({ visible: false, message: "" });
     setIsLoading(true);
 
     try {
       await api.packages.updatePackage(packageD.packageId, packageD, token);
-      setShowSuccess(true);
-      setTimeout(() => router.push("/packages"), 1500);
+      toast.success(t("edit.success"));
+      setTimeout(() => router.push("/catalog/packages"), 1500);
     } catch (err: any) {
       console.error("Error al guardar paquete:", err);
-      setShowServerError({
-        visible: true,
-        message:
-          err?.response?.data?.error ||
-          "Error desconocido al actualizar el paquete",
-      });
+      toast.error(
+        err?.response?.data?.error || t("edit.error_update"),
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   if (loading) {
-    return <div className="p-6">Cargando paquete...</div>;
+    return <div className="p-6">{t("edit.button_saving")}</div>; // Reusing "Saving" as loading state or adding a load key
   }
   if (error) {
     return <div className="p-6 text-red-500">{error}</div>;
@@ -125,19 +119,19 @@ export default function EditPackagePage() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <form onSubmit={handleSubmit} className="space-y-4">
         <PageHeader
-          title="Editar Paquete"
-          subtitle={`Modifica los datos del paquete: ${packageD.name}`}
+          title={t("edit.title")}
+          subtitle={t("edit.subtitle", { name: packageD.name })}
           actionButton={
             <div className="flex gap-2">
               <Button
                 variant="secondary"
                 type="button"
-                onClick={() => router.push("/packages")}
+                onClick={() => router.push("/catalog/packages")}
               >
-                Cancelar
+                {t("edit.button_cancel")}
               </Button>
               <Button type="submit" variant="default" disabled={isLoading}>
-                {isLoading ? "Guardando..." : "Guardar cambios"}
+                {isLoading ? t("edit.button_saving") : t("edit.button_save")}
               </Button>
             </div>
           }
@@ -154,23 +148,6 @@ export default function EditPackagePage() {
           services={availableServices}
         />
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="¡Paquete actualizado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al actualizar paquete"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

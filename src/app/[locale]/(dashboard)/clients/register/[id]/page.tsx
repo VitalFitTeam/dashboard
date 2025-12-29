@@ -248,9 +248,16 @@ export default function ClientDetails() {
                         >
                             <Pencil className="mr-2 h-4 w-4" /> {t("actions.edit")}
                         </Button>
-                        <Button variant="outline" className="w-full justify-start text-sm">
+
+                        {/* BOTÓN ACTUALIZADO PARA REDIRIGIR AL HISTORIAL DE PAGOS */}
+                        <Button 
+                            variant="outline" 
+                            className="w-full justify-start text-sm"
+                            onClick={() => router.push(`/clients/register/${client.user_id}/payments`)}
+                        >
                             <CreditCard className="mr-2 h-4 w-4" /> {t("actions.membership_history")}
                         </Button>
+
                         <Button variant="outline" className="w-full justify-start text-sm">
                             <Eye className="mr-2 h-4 w-4" /> {t("actions.attendance_history")}
                         </Button>

@@ -1,70 +1,89 @@
-import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/sdk-config";
-import { toast } from "sonner";
 import { PackageListItem } from "@vitalfit/sdk";
+import { useCallback, useState, useEffect, useMemo, useRef } from "react";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
-interface UsePackagesProps {
-  token: string;
+interface Filters {
+    search: string;
 }
 
-export function usePackages({ token }: UsePackagesProps) {
-  const [packages, setPackages] = useState<PackageListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 50,
-    total: 0,
-    count: 0,
-  });
+interface PaginatedPackages {
+    data: PackageListItem[];
+    total: number;
+    count: number;
+    next?: string;
+    previous?: string;
+}
 
-  const fetchPackages = useCallback(async () => {
-    if (!token) {
-      return;
-    }
+export function usePackages(token: string | null, page: number, pageSize: number, filters: Filters) {
+    const t = useTranslations("catalog.packages");
 
-    setLoading(true);
-    try {
-      // Casteo a any para acceder a la respuesta anidada del backend
-      const response: any = await api.packages.getPackages(token, {
-        page: pagination.page,
-        limit: pagination.limit,
-        sort: "desc",
-        search: search.trim() || undefined,
-      });
+    const [packageData, setPackageData] = useState<PackageListItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [totalItems, setTotalItems] = useState(0);
 
-      const backendData = response.data;
+    const filtersKey = JSON.stringify(filters);
+    const lastFiltersRef = useRef(filtersKey);
 
-      setPackages(backendData.data || []);
-      setPagination(prev => ({
-        ...prev,
-        total: backendData.total || 0,
-        count: backendData.count || 0,
-      }));
-    } catch (error) {
-      console.error("Error fetchPackages:", error);
-      toast.error("Error al cargar la lista de paquetes");
-    } finally {
-      setLoading(false);
-    }
-  }, [token, pagination.page, pagination.limit, search]);
+    const loadData = useCallback(async (isManual = false) => {
+        if (!token) {
+            return;
+        }
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      fetchPackages();
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [fetchPackages]);
+        let toastId: string | number | undefined;
+        if (isManual) {
+            toastId = toast.loading(t("table.downloading") || t("loading"));
+        }
 
-  return {
-    packages,
-    loading,
-    search,
-    updateSearch: (val: string) => {
-      setSearch(val);
-      setPagination(p => ({ ...p, page: 1 }));
-    },
-    refresh: fetchPackages,
-  };
+        setIsLoading(true);
+
+        try {
+            const result = await api.packages.getPackages(token, {
+                page,
+                limit: pageSize,
+                sort: "desc",
+                search: filters.search?.trim() || undefined,
+            });
+
+            const paquetesResult = result as unknown as { data: PaginatedPackages };
+
+            const newData = paquetesResult.data.data || [];
+            const serverTotal = paquetesResult.data.total ?? 0;
+
+            setPackageData(newData);
+            setTotalItems(serverTotal);
+
+            if (isManual && toastId) {
+                toast.success(t("notifications.success_title") || "Éxito", { id: toastId });
+            }
+        } catch (error) {
+            console.error("Error en usePackages:", error);
+            setPackageData([]);
+            setTotalItems(0);
+            if (isManual) {
+                toast.error(t("notifications.error_title") || "Error", { id: toastId });
+            } else {
+                toast.error(t("error_loading") || "Error loading packages");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    }, [token, page, pageSize, filtersKey, t]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const totalPages = useMemo(() => {
+        return Math.max(1, Math.ceil(totalItems / pageSize));
+    }, [totalItems, pageSize]);
+
+    return {
+        packageData,
+        isLoading,
+        totalItems,
+        totalPages,
+        refresh: () => loadData(true),
+    };
 }

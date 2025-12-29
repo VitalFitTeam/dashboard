@@ -3,31 +3,19 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Notification } from "@/components/ui/Notification";
-import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { CreatePackagePayload } from "@vitalfit/sdk";
-import PackageForm from "../PackageForm";
+import PackageForm, { PackageFormState, PackageItemUI } from "../PackageForm";
 import { api } from "@/lib/sdk-config";
+import { useTranslations } from "next-intl";
 
-interface PackageItemUI {
-  serviceId: string;
-  sessionsIncluded: number;
-  name: string;
-}
-
-export interface PackageFormState {
-  name: string;
-  description: string;
-  price: number;
-  startAt: string;
-  endAt: string;
-  packageItems: PackageItemUI[];
-}
 
 export default function CreatePackagePage() {
   const router = useRouter();
   const { token } = useAuth();
+  const t = useTranslations("catalog.packages");
 
   const [formData, setFormData] = useState<PackageFormState>({
     name: "",
@@ -45,11 +33,6 @@ export default function CreatePackagePage() {
   const [servicesError, setServicesError] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
 
   useEffect(() => {
     if (!token) {
@@ -69,50 +52,17 @@ export default function CreatePackagePage() {
         );
       } catch (err) {
         console.error("Error cargando servicios:", err);
-        setServicesError("No se pudieron cargar los servicios.");
+        setServicesError(t("notifications.services_load_error"));
       } finally {
         setLoadingServices(false);
       }
     };
 
     loadServices();
-  }, [token]);
+  }, [token, t]);
 
   const handleChange = (data: Partial<PackageFormState>) => {
     setFormData((prev) => ({ ...prev, ...data }));
-  };
-
-  const handleAddService = (service: { id: string; name: string }) => {
-    if (formData.packageItems.some((s) => s.serviceId === service.id)) {
-      return;
-    }
-    const newItem: PackageItemUI = {
-      serviceId: service.id,
-      name: service.name,
-      sessionsIncluded: 1,
-    };
-    setFormData((prev) => ({
-      ...prev,
-      packageItems: [...prev.packageItems, newItem],
-    }));
-  };
-
-  const handleRemoveService = (serviceId: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      packageItems: prev.packageItems.filter((s) => s.serviceId !== serviceId),
-    }));
-  };
-
-  const handleUpdateSessions = (serviceId: string, sessions: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      packageItems: prev.packageItems.map((item) =>
-        item.serviceId === serviceId
-          ? { ...item, sessionsIncluded: sessions }
-          : item,
-      ),
-    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,7 +71,6 @@ export default function CreatePackagePage() {
       return;
     }
 
-    setShowServerError({ visible: false, message: "" });
     setIsLoading(true);
 
     try {
@@ -141,21 +90,18 @@ export default function CreatePackagePage() {
 
       await api.packages.createPackage(payload, token);
 
-      setShowSuccess(true);
-      setTimeout(() => router.push("/packages"), 1500);
+      toast.success(t("create.success"));
+      setTimeout(() => router.push("/catalog/packages"), 1500);
     } catch (err: unknown) {
       console.error("Error creando paquete:", err);
-      setShowServerError({
-        visible: true,
-        message: "No se pudo crear el paquete. Intenta nuevamente.",
-      });
+      toast.error(t("create.error_create"));
     } finally {
       setIsLoading(false);
     }
   };
 
   if (loadingServices) {
-    return <div className="p-6">Cargando servicios...</div>;
+    return <div className="p-6">{t("form.labels.add_service")}...</div>; // Reusing "Add service" for loading
   }
 
   if (servicesError) {
@@ -166,8 +112,8 @@ export default function CreatePackagePage() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <form onSubmit={handleSubmit} className="space-y-6">
         <PageHeader
-          title="Crear Paquete"
-          subtitle="Complete la información del nuevo paquete"
+          title={t("create.title")}
+          subtitle={t("create.subtitle")}
         />
 
         <PackageForm
@@ -183,26 +129,9 @@ export default function CreatePackagePage() {
           disabled={isLoading}
           className="w-full"
         >
-          {isLoading ? "Creando..." : "Crear paquete"}
+          {isLoading ? t("create.button_creating") : t("create.button_create")}
         </Button>
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="¡Paquete creado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

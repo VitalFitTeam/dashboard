@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import {useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import ClassForm from "../ClassesForm";
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useRouter } from "@/i18n/navigation";
 
 interface AttendanceRecord {
   id: string;

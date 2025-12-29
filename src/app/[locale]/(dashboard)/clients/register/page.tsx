@@ -1,138 +1,30 @@
 "use client";
 import { PageHeader } from "@/components/ui/PageHeader";
 import ClientsTable from "./ClientsTable";
-import { useEffect, useState } from "react";
 import { StatCard } from "@/components/ui/StatCard";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { User, PaginatedTotal } from "@vitalfit/sdk";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { useClients } from "@/hooks/useClients";
+import { useRouter } from "@/i18n/navigation";
 
 export default function Clients() {
   const t = useTranslations("clients");
-  const [data, setData] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
-  const [reloadTrigger, setReloadTrigger] = useState(0);
-
-  const [filters, setFilters] = useState({
-    search: "",
-    category: "all",
-  });
-
-  const totalPages = Math.max(1, Math.ceil(totalItems / limit));
-
-  const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    blocked: 0
-  });
-
+  const router = useRouter();
   const { token } = useAuth();
 
-  const loadStats = async () => {
-    if (!token) {
-      return;
-    }
+  const {
+    data,
+    isLoading,
+    pagination,
+    filters,
+    onFilterChange,
+    stats,
+    reload
+  } = useClients({ token });
 
-    try {
-      const statsResponse = await api.user.getClientUsers(token, {
-        role: "client",
-        limit: 1000
-      });
-
-      const response = statsResponse as PaginatedTotal<User[]>;
-      const allUsers = response.data || [];
-
-      const activeCount = allUsers.filter(user =>
-        user.is_validated === true
-      ).length;
-
-      const blockedCount = allUsers.filter(user =>
-        user.is_validated === false || user.is_validated === undefined
-      ).length;
-
-      setStats({
-        total: response.total || allUsers.length,
-        active: activeCount,
-        blocked: blockedCount
-      });
-    } catch (error) {
-      console.error("Error loading stats:", error);
-      toast.error(t("notifications.stats_error"));
-    }
-  };
-
-  const loadClients = async () => {
-    if (!token) { return; }
-
-    setIsLoading(true);
-    try {
-      const options = {
-        search: filters.search || undefined,
-        page: page,
-        limit: limit,
-        sort: "desc" as "asc" | "desc",
-        role: "client"
-      };
-
-      const response = await api.user.getClientUsers(token, options);
-
-      const paginatedResponse = response as PaginatedTotal<User[]>;
-
-      const users = paginatedResponse.data || [];
-      const total = paginatedResponse.total || 0;
-
-      setData(users);
-      setTotalItems(total);
-
-      await loadStats();
-
-    } catch (error) {
-      console.error("Error loading clients:", error);
-      toast.error(t("notifications.load_error"));
-      setData([]);
-      setTotalItems(0);
-      setStats({
-        total: 0,
-        active: 0,
-        blocked: 0
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadClients();
-  }, [page, filters.search, reloadTrigger, token, limit]);
-
-  useEffect(() => {
-    if (filters.search) {
-      setPage(1);
-    }
-  }, [filters.search]);
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleFilterChange = (newFilters: {
-    search?: string;
-    category?: string;
-  }) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-    setPage(1);
-  };
-
-  const handleReload = () => {
-    setReloadTrigger((prev) => prev + 1);
-  };
+  const { page, limit, totalPages, totalItems, onPageChange } = pagination;
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
@@ -155,7 +47,7 @@ export default function Clients() {
       </div>
 
       <PageHeader title={t("title")} >
-        <Button variant="outline">
+        <Button onClick={() => router.push("/clients/register/new")} variant="outline">
           <PlusIcon className="mr-2 h-4 w-4" />
           {t("add_button")}
         </Button>
@@ -170,16 +62,17 @@ export default function Clients() {
             first_name: user.first_name,
             last_name: user.last_name,
             email: user.email,
-            category: "N/A",
-            status: user.is_validated ? "active" : "blocked"
+            category: (user as any).ClientProfile?.category || "Regular",
+            status: user.is_validated ? "active" : "blocked",
+            role: (user as any).role
           }))}
-          onReload={handleReload}
+          onReload={reload}
           page={page}
           pageSize={limit}
-          onPageChange={handlePageChange}
+          onPageChange={onPageChange}
           totalPages={totalPages}
           filters={filters}
-          onFilterChange={handleFilterChange}
+          onFilterChange={onFilterChange}
           totalItems={totalItems}
           isLoading={isLoading}
         />
