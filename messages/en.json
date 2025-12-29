@@ -647,6 +647,86 @@
         "price_max": "Maximum price is 999,999.99",
         "validation_error": "Unexpected validation error"
       }
+    },
+    "packages": {
+      "title": "SERVICE PACKAGES",
+      "add_button": "Add a package",
+      "loading": "Loading packages...",
+      "error_loading": "Error loading packages",
+      "table": {
+        "placeholder": "Search package by name",
+        "download": "Download",
+        "downloading": "Downloading...",
+        "columns": {
+          "name": "Name",
+          "description": "Description",
+          "duration": "Duration (days)",
+          "price": "Price",
+          "status": "Status"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "actions": {
+          "view": "View Details",
+          "edit": "Modify",
+          "delete": "Delete"
+        },
+        "delete_dialog": {
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete the package \"{name}\"? This action cannot be undone.",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "form": {
+        "labels": {
+          "name": "Name",
+          "price": "Price ($)",
+          "description": "Description",
+          "start_at": "Start Date",
+          "end_at": "End Date",
+          "status": "Status",
+          "add_service": "Add service",
+          "service_placeholder": "Select a service",
+          "sessions": "{count} sessions",
+          "remove": "Remove"
+        }
+      },
+      "create": {
+        "title": "CREATE PACKAGE",
+        "subtitle": "Complete the information for the new package",
+        "button_create": "Create package",
+        "button_creating": "Creating...",
+        "success": "Package created successfully!",
+        "error_create": "Could not create the package. Try again."
+      },
+      "edit": {
+        "title": "EDIT PACKAGE",
+        "subtitle": "Modify the package data: {name}",
+        "button_save": "Save changes",
+        "button_cancel": "Cancel",
+        "button_saving": "Saving...",
+        "success": "Package updated successfully!",
+        "error_update": "Error updating the package",
+        "error_load": "Could not load the package."
+      },
+      "view": {
+        "title": "PACKAGE DETAILS",
+        "button_edit": "Modify",
+        "loading": "Loading Packages...",
+        "error_load": "Could not load package information."
+      },
+      "notifications": {
+        "delete_success": "Package deleted successfully",
+        "delete_error": "Error deleting the package. Try again.",
+        "auth_error": "You are not authenticated to perform this action.",
+        "invalid_id": "Invalid package ID",
+        "services_load_error": "Could not load services.",
+        "success_title": "Success",
+        "error_title": "Error"
+      }
     }
   },
   "cancellationReason": {

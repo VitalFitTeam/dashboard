@@ -593,6 +593,86 @@
         "price_max": "El precio máximo es 999,999.99",
         "validation_error": "Error de validación inesperado"
       }
+    },
+    "packages": {
+      "title": "PAQUETES DE SERVICIOS",
+      "add_button": "Agregar un paquete",
+      "loading": "Cargando paquetes...",
+      "error_loading": "Error al cargar los paquetes",
+      "table": {
+        "placeholder": "Buscar paquete por nombre",
+        "download": "Descargar",
+        "downloading": "Descargando...",
+        "columns": {
+          "name": "Nombre",
+          "description": "Descripción",
+          "duration": "Duración (días)",
+          "price": "Precio",
+          "status": "Estado"
+        },
+        "status": {
+          "active": "Activa",
+          "inactive": "Inactiva"
+        },
+        "actions": {
+          "view": "Ver Detalles",
+          "edit": "Modificar",
+          "delete": "Eliminar"
+        },
+        "delete_dialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar el paquete \"{name}\"? Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "form": {
+        "labels": {
+          "name": "Nombre",
+          "price": "Precio ($)",
+          "description": "Descripción",
+          "start_at": "Fecha inicio",
+          "end_at": "Fecha fin",
+          "status": "Estado",
+          "add_service": "Agregar servicio",
+          "service_placeholder": "Selecciona un servicio",
+          "sessions": "{count} sesiones",
+          "remove": "Quitar"
+        }
+      },
+      "create": {
+        "title": "CREAR PAQUETE",
+        "subtitle": "Complete la información del nuevo paquete",
+        "button_create": "Crear paquete",
+        "button_creating": "Creando...",
+        "success": "¡Paquete creado exitosamente!",
+        "error_create": "No se pudo crear el paquete. Intenta nuevamente."
+      },
+      "edit": {
+        "title": "EDITAR PAQUETE",
+        "subtitle": "Modifica los datos del paquete: {name}",
+        "button_save": "Guardar cambios",
+        "button_cancel": "Cancelar",
+        "button_saving": "Guardando...",
+        "success": "¡Paquete actualizado exitosamente!",
+        "error_update": "Error al actualizar el paquete",
+        "error_load": "No se pudo cargar el paquete."
+      },
+      "view": {
+        "title": "DETALLES DEL PAQUETE",
+        "button_edit": "Modificar",
+        "loading": "Cargando Paquetes...",
+        "error_load": "No se pudo cargar la información del paquete."
+      },
+      "notifications": {
+        "delete_success": "Paquete eliminado correctamente",
+        "delete_error": "Error al eliminar el paquete. Intenta nuevamente.",
+        "auth_error": "No estás autenticado para realizar esta acción.",
+        "invalid_id": "ID de paquete no válido",
+        "services_load_error": "No se pudieron cargar los servicios.",
+        "success_title": "Éxito",
+        "error_title": "Error"
+      }
     }
   },
   "cancellationReason": {
