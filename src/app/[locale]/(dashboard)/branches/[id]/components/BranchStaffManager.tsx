@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Plus, UserPlus, AlertCircle, Save, X, Users, CheckCircle2 } from "lucide-react";
+import { Plus, UserPlus } from "lucide-react";
 import { GetUserResponse, User, Staff } from "@vitalfit/sdk";
 import { toast } from "sonner";
 
@@ -14,7 +14,6 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import InputField from "@/components/ui/InputField";
 import useBranchStaff from "@/hooks/branches/useStaffBranch";
 import { useStaffUsers } from "@/hooks/staff/useStaffUsers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
