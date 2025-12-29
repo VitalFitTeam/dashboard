@@ -1,100 +1,68 @@
 "use client";
+
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/ui/PageHeader";
-import ManagementTable from "./ManagementTable";
-import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { mockMembershipPayments, MembershipPayment } from "./data";
+import { useAuth } from "@/context/AuthContext";
+import { useClientMembership } from "@/hooks/membership/useClientMembership";
+import MembershipManagementTable from "@/components/modules/membership/MembershipManagementTable";
 
 export default function MembershipManagement() {
-  const router = useRouter();
+  // Usamos el namespace anidado según tu JSON
+  const t = useTranslations("finance.MembershipManagement");
+  const { token } = useAuth();
 
-  const [paymentsData, setPaymentsData] = useState<MembershipPayment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
-
   const [filters, setFilters] = useState({
     search: "",
     status: "all",
-    startDate: "",
-    endDate: ""
   });
 
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-
-  const loadPaymentsData = useCallback(async () => {
-    setIsLoading(true);
-    
-    // Simular carga de datos
-    setTimeout(() => {
-      let filteredData = [...mockMembershipPayments];
-      
-      // Aplicar filtro de búsqueda
-      if (filters.search) {
-        filteredData = filteredData.filter(payment => 
-          payment.invoice.toLowerCase().includes(filters.search.toLowerCase()) ||
-          payment.client.toLowerCase().includes(filters.search.toLowerCase())
-        );
-      }
-      
-      // Aplicar filtro de status
-      if (filters.status !== "all") {
-        filteredData = filteredData.filter(payment => 
-          payment.status === filters.status
-        );
-      }
-      
-      if (filters.startDate && filters.endDate) {
-        filteredData = filteredData.filter(payment => {
-          const paymentDate = new Date(payment.payment_date);
-          const startDate = new Date(filters.startDate);
-          const endDate = new Date(filters.endDate);
-          return paymentDate >= startDate && paymentDate <= endDate;
-        });
-      }
-      
-      setPaymentsData(filteredData);
-      setTotalItems(filteredData.length);
-      setIsLoading(false);
-    }, 500);
-  }, [page, pageSize, filters]);
+  const { memberships, total, loading, fetchMembership } = useClientMembership(token || "");
 
   useEffect(() => {
-    loadPaymentsData();
-  }, [loadPaymentsData]);
+
+    const effectiveSearch = filters.search.trim() !== "" 
+      ? filters.search 
+      : (filters.status !== "all" ? filters.status : "");
+
+    fetchMembership({
+      page: page,
+      search: effectiveSearch
+    });
+  }, [fetchMembership, page, filters.search, filters.status]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
 
-  const handleFilterChange = (newFilters: {
-    search?: string;
-    status?: string;
-    startDate?: string;
-    endDate?: string;
-  }) => {
+  const handleFilterChange = (newFilters: Partial<{ search: string; status: string }>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
-    setPage(1);
+    setPage(1); 
   };
+
+  const totalPages = Math.ceil(total / 10) || 1;
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <PageHeader title="GESTIÓN DE MEMBRESÍAS"/>
+      <PageHeader title={t("title")} />
 
-      {isLoading ? (
-        <div className="text-center p-10">Cargando pagos de membresías...</div>
-      ) : (
-        <ManagementTable
-          data={paymentsData}
-          onReload={loadPaymentsData}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={handlePageChange}
-          totalPages={totalPages}
-          filters={filters}
-          onFilterChange={handleFilterChange}
-        />
+      <MembershipManagementTable
+        data={memberships}
+        isLoading={loading}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+      />
+      
+      {!loading && memberships.length === 0 && (
+        <div className="flex flex-col items-center justify-center p-10 border-2 border-dashed rounded-lg">
+          <p className="text-muted-foreground">
+            {t("noResults")}
+          </p>
+        </div>
       )}
     </div>
   );
