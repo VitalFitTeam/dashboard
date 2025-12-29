@@ -1266,5 +1266,102 @@
       "closing_required": "La hora de cierre es obligatoria",
       "payment_method_required": "Debe seleccionar al menos un método de pago"
     }
+  },
+  "finance": {
+    "MembershipManagement": {
+      "title": "GESTIÓN DE MEMBRESÍAS",
+      "noResults": "No se encontraron resultados para los filtros aplicados.",
+      "searchPlaceholder": "Buscar cliente o membresía...",
+      "statusPlaceholder": "Estado",
+      "clearFilters": "Limpiar filtros",
+      "exportCsv": "Exportar CSV",
+      "viewDetails": "Ver detalles",
+      "table": {
+        "client": "Cliente",
+        "plan": "Plan",
+        "price": "Precio",
+        "start": "Inicio",
+        "expiry": "Vencimiento",
+        "status": "Estado"
+      },
+      "statuses": {
+        "all": "Todos los estados",
+        "active": "Activas",
+        "expired": "Expiradas",
+        "cancelled": "Canceladas"
+      },
+      "detail": {
+        "title": "DETALLE DE MEMBRESÍA",
+        "loading": "Obteniendo detalles...",
+        "notFound": "No se encontró información.",
+        "actions": {
+          "cancel": "Cancelar Membresía",
+          "activate": "Activar Membresía",
+          "refresh": "Actualizar"
+        },
+        "error": {
+          "title": "Error de conexión",
+          "retry": "Reintentar"
+        }
+      },
+      "form": {
+        "header": {
+          "instruction": "Verifica y gestiona los parámetros del registro"
+        },
+        "statusLabels": {
+          "active": "Activa",
+          "expired": "Vencida",
+          "cancelled": "Cancelada"
+        },
+        "clientInfo": {
+          "sectionTitle": "Información del Cliente",
+          "fullName": "Nombre Completo",
+          "email": "Email",
+          "systemId": "System User ID"
+        },
+        "subscription": {
+          "sectionTitle": "Detalles de Suscripción",
+          "membershipType": "Membresía Adquirida",
+          "price": "Monto de Pago",
+          "duration": "Duración (Días)",
+          "invoiceId": "ID de Factura",
+          "description": "Descripción del Plan",
+          "defaultDescription": "Este plan permite el acceso según los términos vigentes."
+        },
+        "timeline": {
+          "sectionTitle": "Línea de Tiempo",
+          "startDate": "Fecha Inicio",
+          "endDate": "Fecha Fin"
+        },
+        "audit": {
+          "sectionTitle": "Auditoría de Baja",
+          "reason": "Motivo de Cancelación",
+          "notes": "Notas del Administrador",
+          "defaultReason": "Baja Administrativa",
+          "noNotes": "Sin observaciones adicionales."
+        }
+      },
+      "cancelDialog": {
+        "title": "Cancelar Membresía",
+        "description": "Indica el motivo de la baja. Esta acción cambiará el estado a \"Cancelled\".",
+        "reasonLabel": "Motivo de cancelación",
+        "reasonPlaceholder": "Selecciona un motivo",
+        "noReasons": "No hay motivos disponibles",
+        "notesLabel": "Notas adicionales",
+        "notesPlaceholder": "Detalles opcionales...",
+        "cancelButton": "Cancelar",
+        "confirmButton": "Confirmar Baja",
+        "processing": "Procesando..."
+      },
+      "messages": {
+        "errorFetching": "Error al obtener la lista de membresías.",
+        "errorDetail": "Error al cargar el detalle de la membresía.",
+        "notFound": "No se encontraron datos para esta membresía.",
+        "successUpdate": "Membresía actualizada correctamente.",
+        "errorUpdate": "No se pudo actualizar la membresía.",
+        "missingParams": "Falta el token de autenticación o el ID de registro.",
+        "requestInProgress": "Ya hay una actualización en curso. Por favor, espera."
+      }
+    }
   }
 }

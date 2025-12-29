@@ -1267,5 +1267,102 @@
       "closing_required": "Closing time is required",
       "payment_method_required": "You must select at least one payment method"
     }
+  },
+  "finance": {
+    "MembershipManagement": {
+      "title": "MEMBERSHIP MANAGEMENT",
+      "noResults": "No results found for the applied filters.",
+      "searchPlaceholder": "Search client or membership...",
+      "statusPlaceholder": "Status",
+      "clearFilters": "Clear filters",
+      "exportCsv": "Export CSV",
+      "viewDetails": "View details",
+      "table": {
+        "client": "Client",
+        "plan": "Plan",
+        "price": "Price",
+        "start": "Start Date",
+        "expiry": "Expiry Date",
+        "status": "Status"
+      },
+      "statuses": {
+        "all": "All statuses",
+        "active": "Active",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      },
+      "detail": {
+        "title": "MEMBERSHIP DETAILS",
+        "loading": "Fetching details...",
+        "notFound": "Information not found.",
+        "actions": {
+          "cancel": "Cancel Membership",
+          "activate": "Activate Membership",
+          "refresh": "Update"
+        },
+        "error": {
+          "title": "Connection error",
+          "retry": "Retry"
+        }
+      },
+      "form": {
+        "header": {
+          "instruction": "Verify and manage record parameters"
+        },
+        "statusLabels": {
+          "active": "Active",
+          "expired": "Expired",
+          "cancelled": "Cancelled"
+        },
+        "clientInfo": {
+          "sectionTitle": "Client Information",
+          "fullName": "Full Name",
+          "email": "Email",
+          "systemId": "System User ID"
+        },
+        "subscription": {
+          "sectionTitle": "Subscription Details",
+          "membershipType": "Acquired Membership",
+          "price": "Payment Amount",
+          "duration": "Duration (Days)",
+          "invoiceId": "Invoice ID",
+          "description": "Plan Description",
+          "defaultDescription": "This plan allows access according to current terms."
+        },
+        "timeline": {
+          "sectionTitle": "Timeline",
+          "startDate": "Start Date",
+          "endDate": "End Date"
+        },
+        "audit": {
+          "sectionTitle": "Cancellation Audit",
+          "reason": "Cancellation Reason",
+          "notes": "Admin Notes",
+          "defaultReason": "Administrative Withdrawal",
+          "noNotes": "No additional observations."
+        }
+      },
+      "cancelDialog": {
+        "title": "Cancel Membership",
+        "description": "State the reason for cancellation. This will change the status to \"Cancelled\".",
+        "reasonLabel": "Cancellation Reason",
+        "reasonPlaceholder": "Select a reason",
+        "noReasons": "No reasons available",
+        "notesLabel": "Additional Notes",
+        "notesPlaceholder": "Optional details...",
+        "cancelButton": "Cancel",
+        "confirmButton": "Confirm Cancellation",
+        "processing": "Processing..."
+      },
+      "messages": {
+        "errorFetching": "Error fetching membership list.",
+        "errorDetail": "Error loading membership details.",
+        "notFound": "No data found for this membership.",
+        "successUpdate": "Membership successfully updated.",
+        "errorUpdate": "Could not update the membership.",
+        "missingParams": "Missing authentication token or record ID.",
+        "requestInProgress": "An update is already in progress. Please wait."
+      }
+    }
   }
 }
