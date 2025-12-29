@@ -19,41 +19,44 @@ type StepProps = {
   formErrors?: Record<string, string>;
 };
 
+import { useTranslations } from "next-intl";
+
 export default function Step1({
   formData,
   handleChange,
   handleCustomChange,
   formErrors = {},
 }: StepProps) {
+  const t = useTranslations("branches");
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-        Información Básica de la Sucursal
+        {t("create.form.basic_info.title")}
       </h3>
       <p className="text-sm text-gray-600 -mt-4">
-        Comience ingresando los datos fundamentales de la nueva sucursal.
+        {t("create.form.basic_info.subtitle")}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <InputField
           id="name"
           name="name"
-          label="Razón Social *"
+          label={t("create.form.basic_info.name")}
           type="text"
           value={formData.name || ""}
           onChange={handleChange}
-          placeholder="Ej: FitnesPlaza"
+          placeholder={t("create.form.basic_info.name_placeholder")}
           error={formErrors["name"]}
         />
 
         <InputField
           id="taxId"
           name="taxId"
-          label="RIF *"
+          label={t("create.form.basic_info.tax_id")}
           type="text"
           value={formData.taxId || ""}
           onChange={handleChange}
-          placeholder="J-402456696-3"
+          placeholder={t("create.form.basic_info.tax_id_placeholder")}
           error={formErrors["taxId"]}
         />
       </div>
@@ -62,27 +65,27 @@ export default function Step1({
         <InputField
           id="phone"
           name="phone"
-          label="Teléfono"
+          label={t("create.form.basic_info.phone")}
           type="tel"
           value={formData.phone || ""}
           onChange={handleChange}
-          placeholder="Placeholder"
+          placeholder={t("create.form.basic_info.phone_placeholder")}
           error={formErrors["phone"]}
         />
 
         <div>
-          <label htmlFor="status">Estado de Sucursal *</label>
+          <label htmlFor="status">{t("create.form.basic_info.status")}</label>
           <Select
             value={formData.status || "active"}
             onValueChange={(value) => handleCustomChange("status", value)}
           >
             <SelectTrigger id="status" className="mt-1 w-full">
-              <SelectValue placeholder="Activa" />
+              <SelectValue placeholder={t("create.form.basic_info.status_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Activa</SelectItem>
-              <SelectItem value="inactive">Inactiva</SelectItem>
-              <SelectItem value="maintenance">Mantenimiento</SelectItem>
+              <SelectItem value="active">{t("table.status.active")}</SelectItem>
+              <SelectItem value="inactive">{t("table.status.inactive")}</SelectItem>
+              <SelectItem value="maintenance">{t("table.status.maintenance")}</SelectItem>
             </SelectContent>
           </Select>
           {formErrors["status"] && (
@@ -91,8 +94,8 @@ export default function Step1({
         </div>
       </div>
       <StepNotification
-        title="Próximos pasos"
-        description="En los siguientes pasos configuraremos la ubicación, contacto, horarios y empleados de la nueva sucursal."
+        title={t("create.form.basic_info.next_steps.title")}
+        description={t("create.form.basic_info.next_steps.description")}
       />
     </div>
   );

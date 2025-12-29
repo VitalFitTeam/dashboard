@@ -8,8 +8,10 @@ import EquipmentForm from "../EquipmentForm";
 import { EquipmentInfo } from "@vitalfit/sdk";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function EquipmentDetailPage() {
+  const t = useTranslations("catalog.equipment.details");
   const params = useParams();
   const router = useRouter();
   const { token } = useAuth();
@@ -38,21 +40,20 @@ export default function EquipmentDetailPage() {
   }, [id, token]);
 
   if (loading) {
-    return <div className="p-6">Cargando detalles...</div>;
+    return <div className="p-6">{t("loading")}</div>;
   }
 
   if (!equipment) {
-    return <div className="p-6 text-red-500">Equipo no encontrado.</div>;
+    return <div className="p-6 text-red-500">{t("not_found")}</div>;
   }
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <PageHeader
-        title="DETALLES DE EQUIPAMIENTO"
+        title={t("title")}
         subtitle={
           <p className="text-sm text-muted-foreground">
-            Información del equipamiento:{" "}
-            <span className="font-medium">{equipment.name}</span>
+            {t("subtitle", { name: equipment.name })}
           </p>
         }
         actionButton={
@@ -60,16 +61,16 @@ export default function EquipmentDetailPage() {
             <Button
               variant="secondary"
               type="button"
-              onClick={() => router.push("/equipment")}
+              onClick={() => router.replace("/catalog/equipment")}
             >
-              Volver
+              {t("back")}
             </Button>
             <Button
               variant="default"
               type="button"
-              onClick={() => router.push(`/equipment/edit/${id}`)}
+              onClick={() => router.replace(`/catalog/equipment/${id}/edit`)}
             >
-              Modificar
+              {t("edit")}
             </Button>
           </div>
         }

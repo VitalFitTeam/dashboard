@@ -1,139 +1,58 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
-import { StatCard } from "@/components/ui/StatCard";
-import { AlertTriangle } from "lucide-react";
+import React from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useTopBranches, useTotalActiveBranches, useTotalClients } from "@/hooks/useReports";
-import { BuildingOffice2Icon } from "@heroicons/react/24/solid";
-import { FranchisePerformanceItem } from "@/components/modules/analytics/FranchisePerformanceItem";
+import { UserRole } from "@/lib/roles";
+import { SidebarMenuSkeleton } from "@/components/ui/sidebar";
+import SuperAdminDashboard from "@/components/modules/dashboard/SuperAdminDashboard";
+import BranchAdminDashboard from "@/components/modules/dashboard/BranchDashboard";
+import InstructorDashboard from "@/components/modules/dashboard/InstructorDashboard";
 
-export default function SuperAdminDashboard() {
-    const { token } = useAuth();
-    const t = useTranslations("dashboards.super_admin");
+export default function DashboardPage() {
+  const { user, loading } = useAuth();
 
-    const { data: totalActiveBranch, isLoading: isLoadingBranches } = useTotalActiveBranches(token);
-    const { data: topActiveBranch, isLoading: isLoadingTopBranches } = useTopBranches(token);
-    const { data: totalClients, isLoading: isLoadingClients } = useTotalClients(token);
+  if (loading) {
+    return <SidebarMenuSkeleton />;
+  }
 
-    const normalizeTrend = (value?: string) =>
-        value?.toLowerCase() === "up" || value?.toLowerCase() === "down"
-            ? (value.toLowerCase() as "up" | "down")
-            : undefined;
 
-    const systemAlerts = [
-        {
-            color: "text-yellow-600",
-            title: t("alerts.items.low_occupancy"),
-            desc: "Querétaro - Clases < 30%",
-            time: "2h",
-        },
-        {
-            color: "text-red-600",
-            title: t("alerts.items.pending_finance"),
-            desc: "Cancún - Cierre Mes",
-            time: "5h",
-        },
-        {
-            color: "text-blue-600",
-            title: t("alerts.items.new_franchisee"),
-            desc: "Onboarding initiated",
-            time: "1d",
-        },
-        {
-            color: "text-blue-600",
-            title: t("alerts.items.sync_error"),
-            desc: "API de pagos",
-            time: "1d",
-        },
-    ];
+  if (!user) {
+    return null; 
+  }
+  const dashboards: Record<UserRole, React.ReactNode> = {
+    [UserRole.SUPER_ADMIN]: (
+      <SuperAdminDashboard  />
+    ),
+    [UserRole.BRANCH_ADMIN]: (
+      <BranchAdminDashboard 
+        user={user} 
+        activeBranch={user.activeBranch} 
+      />
+    ),
+    [UserRole.INSTRUCTOR]: (
+      <InstructorDashboard 
+        user={user} 
+        activeBranch={user.activeBranch} 
+      />
+    ),
+    [UserRole.ACCOUNTANT]: (
+      <div className="p-8 font-medium">Panel Contador - Próximamente</div>
+    ),
+    [UserRole.DATA_ANALYST]: (
+      <div className="p-8 font-medium">Panel Analista - Próximamente</div>
+    ),
+    [UserRole.RECEPTIONIST]: (
+      <div className="p-8 font-medium">Panel Recepción - Próximamente</div>
+    ),
+  };
 
-    return (
-        <div className="min-h-screen">
-            <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard
-                        title={t("stats.global_sales")}
-                        value={<h3 className="ml-1.5 font-normal">$ 1,250,000</h3>}
-                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
-                        description={<span className="text-green-600">{t("stats.vs_last_month", { value: "+20.1%" })}</span>}
-                    />
-
-                    <StatCard
-                        title={t("stats.active_branches")}
-                        value={isLoadingBranches ? "-" : totalActiveBranch}
-                        icon={<BuildingOffice2Icon className="h-5 w-5 text-gray-500" />}
-                    />
-
-                    <StatCard
-                        title={t("stats.total_clients")}
-                        value={isLoadingClients ? "-" : totalClients}
-                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
-                    />
-
-                    <StatCard
-                        title={t("stats.global_nps")}
-                        value={<h3 className="ml-1.5 font-normal">8.63</h3>}
-                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
-                        description={<span className="text-red-600">{t("stats.vs_last_month", { value: "-1.2%" })}</span>}
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg font-semibold">
-                                {t("performance.title")}
-                            </CardTitle>
-                            <p className="text-sm text-gray-500">
-                                {t("performance.subtitle", { count: isLoadingTopBranches ? "-" : topActiveBranch?.length ?? 0 })}
-                            </p>
-                        </CardHeader>
-
-                        <CardContent>
-                            <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
-                                {topActiveBranch?.map((branch, index) => (
-                                    <FranchisePerformanceItem
-                                        key={branch.label}
-                                        name={branch.label}
-                                        status={branch.status}
-                                        revenue={branch.value}
-                                        growth={branch.percent_change}
-                                        trend={normalizeTrend(branch.trend)}
-                                        withBorder={index !== topActiveBranch.length - 1}
-                                    />
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg font-semibold">
-                                {t("alerts.title")}
-                            </CardTitle>
-                            <p className="text-sm text-gray-500">{t("alerts.subtitle")}</p>
-                        </CardHeader>
-
-                        <CardContent>
-                            <div className="space-y-4">
-                                {systemAlerts.map((alert, i) => (
-                                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg border">
-                                        <AlertTriangle className={`h-5 w-5 ${alert.color} mt-0.5`} />
-                                        <div className="flex-1">
-                                            <p className="font-medium text-sm">{alert.title}</p>
-                                            <p className="text-xs text-gray-600">{alert.desc}</p>
-                                        </div>
-                                        <span className="text-xs text-gray-500">{alert.time}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+  return (
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      {dashboards[user.role] || (
+        <div className="p-8 text-center text-muted-foreground">
+          No tienes un dashboard asignado para tu rol.
         </div>
-    );
+      )}
+    </div>
+  );
 }

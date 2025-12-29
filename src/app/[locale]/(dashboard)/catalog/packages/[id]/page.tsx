@@ -1,18 +1,21 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
 import { DataResponse, PackageDetail } from "@vitalfit/sdk";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import PackageForm from "../PackageForm";
+import { useTranslations } from "next-intl";
 
 export default function PackageDetailPage() {
   const params = useParams();
   const { token } = useAuth();
   const router = useRouter();
+  const t = useTranslations("catalog.packages");
   const id = params?.id as string | undefined;
   const [loading, setLoading] = useState(true);
   const [packageD, setPackageD] = useState<PackageDetail | null>(null);
@@ -20,7 +23,7 @@ export default function PackageDetailPage() {
 
   useEffect(() => {
     if (!id) {
-      router.replace("/packages");
+      router.replace("/catalog/packages");
       return;
     }
     if (!token) {
@@ -47,10 +50,10 @@ export default function PackageDetailPage() {
 
         const status = err?.response?.status ?? err?.status ?? null;
         if (status === 404) {
-          router.replace("/instructors");
+          router.replace("/catalog/packages");
         } else {
-          console.error("Error cargando instructor:", err);
-          setError("No se pudo cargar la información del instructor.");
+          console.error("Error cargando paquete:", err);
+          setError(t("view.error_load"));
         }
       } finally {
         if (mounted) {
@@ -62,10 +65,10 @@ export default function PackageDetailPage() {
     return () => {
       mounted = false;
     };
-  }, [id, token, router]);
+  }, [id, token, router, t]);
 
   if (loading) {
-    return <div className="p-6">Cargando Instructores...</div>;
+    return <div className="p-6">{t("view.loading")}</div>;
   }
 
   if (error) {
@@ -77,14 +80,14 @@ export default function PackageDetailPage() {
   }
   return (
     <>
-      <PageHeader title="DETALLES DEL PAQUETE">
+      <PageHeader title={t("view.title")}>
         <Button
           variant="default"
           onClick={() => {
-            router.push(`/packages/${id}/edit`);
+            router.push(`/catalog/packages/${id}/edit`);
           }}
         >
-          Modificar
+          {t("view.button_edit")}
         </Button>
       </PageHeader>
       <PackageForm

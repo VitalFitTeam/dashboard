@@ -29,10 +29,13 @@ interface BranchEquipmentPanelProps {
   mode?: "view" | "edit";
 }
 
+import { useTranslations } from "next-intl";
+
 const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
   branchId,
   mode = "edit",
 }) => {
+  const t = useTranslations("branches");
   const { token } = useAuth();
   const isDisabled = mode === "view";
 
@@ -70,13 +73,13 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         setAllEquipment(res.data);
       } catch (err) {
         console.error(err);
-        toast.error("Error cargando equipos");
+        toast.error(t("details.equipment.error_loading_catalog"));
       } finally {
         setLoading(false);
       }
     };
     fetchAllEquipment();
-  }, [token]);
+  }, [token, t]);
 
   const fetchInventory = async () => {
     if (!token) {
@@ -88,7 +91,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       setCurrentInventory(res.data);
     } catch (err) {
       console.error(err);
-      toast.error("Error cargando inventario");
+      toast.error(t("details.equipment.error_loading_inventory"));
     } finally {
       setLoading(false);
     }
@@ -100,7 +103,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
 
   const handleAddEquipment = () => {
     if (!selectedEquipmentId) {
-      toast.error("Debes seleccionar un equipo antes de agregarlo");
+      toast.error(t("details.equipment.select_before_adding"));
       return;
     }
 
@@ -124,7 +127,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       const errorMessages = validation.error.issues
         .map((e) => e.message)
         .join(", ");
-      toast.error(`Error al agregar equipo: ${errorMessages}`);
+      toast.error(t("details.equipment.error_adding", { errors: errorMessages }));
       return;
     }
 
@@ -133,7 +136,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
     setSerialNumber("");
     setNotes("");
     toast.success(
-      `Equipo "${newPending.name}" agregado al inventario pendiente`,
+      t("details.equipment.success_added_pending", { name: newPending.name }),
     );
   };
 
@@ -146,7 +149,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         prev.filter((e) => e.inventory_id !== inventoryId),
       );
       toast.success(
-        `Equipo "${isPending.name}" eliminado del inventario pendiente`,
+        t("details.equipment.success_removed_pending", { name: isPending.name }),
       );
       return;
     }
@@ -163,12 +166,12 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       prev.filter((e) => e.inventory_id !== inventoryId),
     );
 
-    toast.success(`Equipo "${removed.name}" eliminado del inventario`);
+    toast.success(t("details.equipment.success_removed", { name: removed.name }));
   };
 
   const handleSaveChanges = async () => {
     if (!token) {
-      toast.error("Token inválido");
+      toast.error(t("details.equipment.error_invalid_token"));
       return;
     }
 
@@ -191,13 +194,13 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         await api.equipment.removeBranchEquipment(branchId, invId, token);
       }
 
-      toast.success("Cambios guardados correctamente");
+      toast.success(t("details.equipment.success_save"));
       setPendingInventory([]);
       setRemovedInventoryIds([]);
       await fetchInventory();
     } catch (err) {
       console.error(err);
-      toast.error("Error guardando cambios");
+      toast.error(t("details.equipment.error_save"));
     } finally {
       setLoading(false);
     }
@@ -209,7 +212,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
     status: EquipmentStatus;
   }) => {
     if (!token || !equipmentToEdit) {
-      toast.error("Equipo inválido para actualizar");
+      toast.error(t("details.equipment.error_invalid_update"));
       return;
     }
 
@@ -223,7 +226,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       const errorMessages = validation.error.issues
         .map((e) => e.message)
         .join(", ");
-      toast.error(`Error al actualizar equipo: ${errorMessages}`);
+      toast.error(t("details.equipment.error_update", { errors: errorMessages }));
       return;
     }
 
@@ -245,24 +248,24 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       );
 
       toast.success(
-        `Equipo "${equipmentToEdit.name}" actualizado correctamente`,
+        t("details.equipment.success_update", { name: equipmentToEdit.name }),
       );
       setEditModalOpen(false);
       setEquipmentToEdit(null);
     } catch (err) {
       console.error(err);
-      toast.error("Error actualizando equipamiento");
+      toast.error(t("details.equipment.error_updating"));
     } finally {
       setLoading(false);
     }
   };
 
   const inventoryColumns: Column<BranchEquipmentInventory>[] = [
-    { header: "Nombre", accessor: "name" },
-    { header: "Serial", accessor: "serial_number" },
-    { header: "Estado", accessor: "status" },
-    { header: "Adquisición", accessor: "acquisition_date" },
-    { header: "Último mantenimiento", accessor: "last_maintenance_date" },
+    { header: t("details.equipment.table.name"), accessor: "name" },
+    { header: t("details.equipment.table.serial"), accessor: "serial_number" },
+    { header: t("details.equipment.table.status"), accessor: "status" },
+    { header: t("details.equipment.table.acquisition"), accessor: "acquisition_date" },
+    { header: t("details.equipment.table.last_maintenance"), accessor: "last_maintenance_date" },
   ];
 
   const handleEdit = (equipment: BranchEquipmentInventory) => {
@@ -281,7 +284,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         size="icon"
         variant="outline"
         onClick={() => handleView(row)}
-        title="Ver equipamiento"
+        title={t("details.equipment.actions.view")}
       >
         <Eye size={16} />
       </Button>
@@ -291,7 +294,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
           size="icon"
           variant="outline"
           onClick={() => handleEdit(row)}
-          title="Editar equipamiento"
+          title={t("details.equipment.actions.edit")}
         >
           <Pencil size={16} />
         </Button>
@@ -302,7 +305,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
           size="icon"
           variant="outline"
           onClick={() => handleRemoveEquipment(row.inventory_id)}
-          title="Eliminar equipamiento"
+          title={t("details.equipment.actions.delete")}
         >
           <Trash2 size={16} />
         </Button>
@@ -322,15 +325,15 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       {!isDisabled && (
         <div className="p-6 border rounded-xl bg-gray-50 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            Agregar nuevo equipamiento
+            {t("details.equipment.add.title")}
           </h3>
 
           <div className="space-y-3">
             <label className="text-sm font-medium text-gray-700">
-              Buscar equipo
+              {t("details.equipment.add.search_label")}
             </label>
             <InputField
-              placeholder="Ej: Monster Power Rack"
+              placeholder={t("details.equipment.add.search_placeholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -339,7 +342,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
               onValueChange={setSelectedEquipmentId}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar un equipo (Ej: Monster Power Rack)" />
+                <SelectValue placeholder={t("details.equipment.add.select_placeholder")} />
               </SelectTrigger>
               <SelectContent className="max-h-48 overflow-y-auto w-full">
                 {filteredEquipment.map((equipment) => (
@@ -356,17 +359,17 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
 
           <div className="flex flex-col sm:flex-row gap-4 mt-3">
             <InputField
-              label="Número de serie"
+              label={t("details.equipment.add.serial_label")}
               type="text"
-              placeholder="Ej: SN-ROG-123"
+              placeholder={t("details.equipment.add.serial_placeholder")}
               value={serialNumber}
               onChange={(e) => setSerialNumber(e.target.value)}
               className="flex-1"
             />
             <InputField
-              label="Notas"
+              label={t("details.equipment.add.notes_label")}
               type="text"
-              placeholder="Ej: Equipo listo para usar"
+              placeholder={t("details.equipment.add.notes_placeholder")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="flex-1"
@@ -380,7 +383,7 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
               onClick={handleAddEquipment}
               className="flex items-center"
             >
-              <Plus size={16} className="mr-2" /> Agregar
+              <Plus size={16} className="mr-2" /> {t("details.equipment.add.button")}
             </Button>
             <Button
               type="button"
@@ -390,16 +393,16 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
                 removedInventoryIds.length === 0
               }
             >
-              {loading ? "Guardando..." : "Guardar cambios"}
+              {loading ? t("create.form.buttons.saving") : t("create.form.buttons.save")}
             </Button>
           </div>
         </div>
       )}
 
-      <h3 className="text-lg font-semibold">Inventario de la sucursal</h3>
+      <h3 className="text-lg font-semibold">{t("details.equipment.inventory_title")}</h3>
       {displayedInventory.length === 0 ? (
         <p className="text-sm text-gray-500">
-          No hay equipamiento asignado a esta sucursal.
+          {t("details.equipment.empty")}
         </p>
       ) : (
         <DataTable

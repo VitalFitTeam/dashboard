@@ -5,12 +5,14 @@ import MembershipForm from "../MembershipForm";
 import { MembershipType } from "@vitalfit/sdk";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface ViewMembershipProps {
   membership: MembershipType;
 }
 
 export default function ViewMembership({ membership }: ViewMembershipProps) {
+  const t = useTranslations("catalog.memberships");
   const router = useRouter();
   const id = membership.membership_type_id;
 
@@ -25,20 +27,20 @@ export default function ViewMembership({ membership }: ViewMembershipProps) {
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
-      <PageHeader title="DETALLES DE MEMBRESÍA">
+      <PageHeader title={t("view.title")}>
         <Button
           variant="default"
           onClick={() => {
             router.push(`/memberships/${id}/edit`);
           }}
         >
-          Modificar
+          {t("view.button_edit")}
         </Button>
       </PageHeader>
 
       <MembershipForm
         formData={formData}
-        onChange={() => {}}
+        onChange={() => { }}
         mode="view"
         disabled
       />
