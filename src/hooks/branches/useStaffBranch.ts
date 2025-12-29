@@ -27,7 +27,6 @@ export default function useBranchStaff(token: string | null, branchID: string) {
         sort: "desc",
       });
 
-      // El SDK retorna PaginatedTotal, usualmente la data viene en .data
       setBranchStaff(response.data || []);
       setError(null);
     } catch (err) {
