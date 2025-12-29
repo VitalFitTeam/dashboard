@@ -3,8 +3,9 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+
 import { ClassCalendar } from "@/components/calendar/ClassCalendar";
+import { useRouter } from "@/i18n/navigation";
 
 export default function ClassesMethodsPage() {
   const { token } = useAuth();
