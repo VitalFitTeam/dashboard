@@ -14,13 +14,13 @@ export default function useBranchStaff(token: string | null, branchID: string) {
   const [error, setError] = useState<Error | null>(null);
 
   const loadData = useCallback(async () => {
-
-    if (!token || !branchID){
-       return;
+    if (!token || !branchID) {
+      return;
     }
 
     try {
       setIsLoading(true);
+
       const response = await api.staff.getBranchstaff(branchID, token, {
         page: 1,
         limit: 50, 
@@ -62,6 +62,7 @@ export default function useBranchStaff(token: string | null, branchID: string) {
     }
     try {
       await api.staff.RemoveBranchStaff(branchID, staffId, token);
+
       setBranchStaff((prev) => prev.filter((s) => s.user_id !== staffId));
     } catch (err) {
       console.error("Error al eliminar staff:", err);
