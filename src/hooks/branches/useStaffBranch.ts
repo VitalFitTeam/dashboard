@@ -14,12 +14,22 @@ export default function useBranchStaff(token: string | null, branchID: string) {
   const [error, setError] = useState<Error | null>(null);
 
   const loadData = useCallback(async () => {
-    if (!token || !branchID) return;
+    if (!token || !branchID) {
+      return;
+    }
+
     try {
       setIsLoading(true);
-      // Obtenemos la lista completa del backend
-      const response = await api.staff.getBranchstaff(branchID, token);
+
+      const response = await api.staff.getBranchstaff(branchID, token, {
+        page: 1,
+        limit: 50, 
+        sort: "desc",
+      });
+
+      // El SDK retorna PaginatedTotal, usualmente la data viene en .data
       setBranchStaff(response.data || []);
+      setError(null);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -32,11 +42,13 @@ export default function useBranchStaff(token: string | null, branchID: string) {
   }, [loadData]);
 
   const assignStaff = async (payload: AssignStaffPayload) => {
-    if (!token || !branchID) return;
+    if (!token || !branchID) {
+      return;
+    }
     try {
       setIsLoading(true);
-      await api.staff.AssignBranchStaff(branchID, payload.staff_ids as any, token);
-      await loadData(); 
+      await api.staff.AssignBranchStaff(branchID, payload.staff_ids, token);
+      await loadData();
     } catch (err: any) {
       console.error("Error al asignar staff:", err);
       throw err;
@@ -46,9 +58,12 @@ export default function useBranchStaff(token: string | null, branchID: string) {
   };
 
   const removeStaff = async (staffId: string) => {
-    if (!token || !branchID) return;
+    if (!token || !branchID) {
+      return;
+    }
     try {
       await api.staff.RemoveBranchStaff(branchID, staffId, token);
+
       setBranchStaff((prev) => prev.filter((s) => s.user_id !== staffId));
     } catch (err) {
       console.error("Error al eliminar staff:", err);

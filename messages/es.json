@@ -359,107 +359,122 @@
       }
     },
     "payment_methods": {
-      "title": "MÉTODOS DE PAGO",
-      "add_button": "Agregar un método de pago",
+      "title": "Métodos de Pago",
+      "add_button": "Nuevo Método",
       "stats": {
-        "total": "TOTAL",
-        "cash": "EFECTIVO",
-        "gateway": "GATEWAY",
-        "digital": "DIGITAL",
-        "unit": "MÉTODOS"
+        "total": "Total Métodos",
+        "cash": "Efectivo",
+        "gateway": "Pasarelas",
+        "digital": "Transferencias/Zelle",
+        "unit": "métodos"
       },
       "table": {
-        "filter_placeholder": "Filtrar por nombre",
-        "category": "Categoría",
-        "all_types": "Todos los tipos",
-        "all_statuses": "Todos los estados",
-        "update_button": "Actualizar",
-        "updating": "Actualizando...",
         "columns": {
           "name": "Nombre",
           "type": "Tipo",
-          "description": "Descripción",
-          "status": "Estado"
+          "status": "Estado",
+          "actions": "Acciones"
         },
         "types": {
           "cash": "Efectivo",
           "card": "Tarjeta",
-          "transfer": "Transferencia",
-          "other": "Otro"
+          "transfer": "Transferencia / Pago Móvil",
+          "other": "Zelle / Otros"
         },
         "status": {
           "active": "Activo",
           "inactive": "Inactivo"
         },
         "actions": {
-          "view": "Ver",
-          "edit": "Modificar",
+          "view": "Ver detalle",
+          "edit": "Editar",
           "delete": "Eliminar"
         },
+        "filter_placeholder": "Buscar por nombre...",
+        "all_types": "Todos los tipos",
+        "update_button": "Actualizar",
         "delete_dialog": {
-          "title": "Confirmar eliminación",
-          "description": "¿Estás seguro de que deseas eliminar este método de pago? Esta acción no se puede deshacer.",
-          "action_delete": "Eliminar",
-          "action_cancel": "Cancelar"
+          "title": "¿Estás completamente seguro?",
+          "description": "Esta acción no se puede deshacer. Se eliminará permanentemente el método de pago:",
+          "action_delete": "Sí, eliminar"
         }
       },
-      "notifications": {
-        "load_error": "Error al cargar los métodos de pago",
-        "delete_success": "Método de pago eliminado exitosamente",
-        "delete_error": "Error al eliminar el método de pago",
-        "success_title": "Éxito",
-        "error_title": "Error",
-        "validation_error_title": "Error de validación",
-        "validation_error_description": "Por favor corrige los errores en el formulario",
-        "update_success": "Método de pago actualizado exitosamente",
-        "update_error": "Error al actualizar el método de pago",
-        "create_success": "Método de pago creado exitosamente",
-        "create_error": "Error al crear el método de pago"
+      "new": {
+        "title": "Crear Método de Pago",
+        "create_button": "Crear Método",
+        "creating": "Guardando..."
       },
-      "validations": {
-        "name_required": "El nombre es obligatorio",
-        "name_max": "El nombre no puede tener más de 100 caracteres",
-        "name_format": "El nombre solo puede contener letras, números y espacios",
-        "type_required": "Selecciona un tipo",
-        "processing_type_required": "Selecciona un tipo de procesamiento",
-        "description_max": "La descripción no puede tener más de 500 caracteres"
+      "edit": {
+        "title": "Editar Método de Pago",
+        "save_button": "Guardar Cambios",
+        "saving": "Actualizando...",
+        "cancel_button": "Cancelar"
+      },
+      "view": {
+        "title": "Detalle del Método",
+        "loading": "Cargando información..."
       },
       "form": {
         "labels": {
-          "name": "Nombre",
-          "type": "Tipo",
-          "processing_type": "Tipo de Procesamiento",
-          "description": "Descripción",
-          "status": "Estado Global"
+          "name": "Nombre Interno",
+          "display_name": "Nombre Público (Cliente)",
+          "type": "Tipo de Método",
+          "processing": "Procesamiento",
+          "visibility": "Visibilidad",
+          "surcharge_fixed": "Recargo Fijo (Monto)",
+          "surcharge_percentage": "Recargo Porcentual (%)",
+          "description": "Instrucciones para el Cliente"
         },
         "placeholders": {
-          "name": "Ej: Efectivo, Stripe, PayPal",
-          "description": "Breve descripción del método de pago"
+          "name_example": "Ej: Pago Movil Banco de Albani",
+          "display_name": "Nombre visible para el cliente",
+          "type": "Seleccione el tipo",
+          "description": "Ej: Favor enviar comprobante por WhatsApp al terminar la transacción..."
         },
-        "processing_types": {
-          "gateway": "Gateway",
-          "offline": "Offline"
+        "sections": {
+          "config_details": "Detalles de Configuración"
+        },
+        "config": {
+          "phone": "Teléfono",
+          "bank_id": "ID Banco (Código)",
+          "tax_id": "Cédula / RIF",
+          "bank_name": "Nombre del Banco",
+          "account_number": "Número de Cuenta",
+          "email": "Correo Electrónico (Zelle)"
+        },
+        "messages": {
+          "no_config_required": "No se requieren datos adicionales para este método.",
+          "back": "Volver"
+        },
+        "actions": {
+          "back": "Volver",
+          "cancel": "Cancelar",
+          "edit": "Modificar"
         }
       },
-      "edit": {
-        "title": "EDITAR MÉTODO DE PAGO",
-        "subtitle": "Modifique la información del método de pago",
-        "save_button": "Guardar Cambios",
-        "saving": "Guardando...",
-        "cancel_button": "Cancelar"
+      "notifications": {
+        "create_success_title": "¡Método creado!",
+        "create_success_description": "El método '{name}' se ha registrado exitosamente.",
+        "update_success_title": "Cambios guardados",
+        "update_success_description": "El método '{name}' ha sido actualizado.",
+        "delete_success": "Método de pago eliminado correctamente.",
+        "delete_error": "No se pudo eliminar el método de pago.",
+        "error_title": "Error",
+        "load_error": "No se pudo cargar la información.",
+        "validation_error_title": "Error de validación",
+        "conflict_error_title": "Nombre duplicado",
+        "conflict_error_description": "Ya existe un método con ese nombre."
       },
-      "new": {
-        "title": "CREAR MÉTODO DE PAGO",
-        "subtitle": "Complete la información para crear un nuevo método de pago",
-        "create_button": "Crear Método de Pago",
-        "creating": "Creando..."
+      "errors": {
+        "invalid_name_format": "El nombre debe incluir 'Pago Movil', 'Zelle' o 'Bank Transfer'"
       },
-      "view": {
-        "title": "DETALLES DE MÉTODO DE PAGO",
-        "subtitle": "Información detallada del método de pago",
-        "edit_button": "Modificar",
-        "loading": "Cargando...",
-        "not_found": "Método de pago no encontrado"
+      "validations": {
+        "name_required": "El nombre es obligatorio",
+        "name_max": "El nombre no puede exceder los 100 caracteres",
+        "name_format": "El nombre solo puede contener letras, números y guiones",
+        "type_required": "El tipo de método es obligatorio",
+        "processing_type_required": "El tipo de procesamiento es obligatorio",
+        "description_max": "La descripción no puede exceder los 500 caracteres"
       }
     },
     "equipment": {
