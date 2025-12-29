@@ -13,7 +13,9 @@ export function usePaymentMethods(token: string | null) {
   const pageSize = 10;
 
   const fetchMethods = useCallback(async () => {
-    if (!token) return;
+    if (!token){
+       return;
+    }
     setLoading(true);
     try {
       const response = await api.paymentMethod.getPaymentMethods(token);
@@ -45,9 +47,15 @@ export function usePaymentMethods(token: string | null) {
   const stats = useMemo(() => {
     return filteredData.reduce((acc, pm) => {
       acc.total++;
-      if (pm.type === "Cash") acc.cash++;
-      if (pm.processing_type === "Gateway") acc.gateway++;
-      if (["Card", "Transfer", "Other"].includes(pm.type)) acc.digital++;
+      if (pm.type === "Cash"){
+         acc.cash++;
+      }
+      if (pm.processing_type === "Gateway") {
+        acc.gateway++;
+      }
+      if (["Card", "Transfer", "Other"].includes(pm.type)){
+         acc.digital++;
+      }
       return acc;
     }, { total: 0, cash: 0, gateway: 0, digital: 0 });
   }, [filteredData]);

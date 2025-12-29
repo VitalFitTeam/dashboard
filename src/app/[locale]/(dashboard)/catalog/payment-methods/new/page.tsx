@@ -7,10 +7,9 @@ import { toast } from "sonner";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { CreatePaymentMethod, BranchPaymentVisibility } from "@vitalfit/sdk";
-
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import PaymentForm from "../PaymentForm";
+import PaymentForm from "@/components/modules/payment-methods/PaymentForm";
 
 export default function NewPaymentMethodPage() {
   const t = useTranslations("catalog.payment_methods");
@@ -45,7 +44,6 @@ export default function NewPaymentMethodPage() {
         nameLower.includes("bank transfer");
 
       if (!isValidName) {
-        // Implementación de i18n para mensaje de error de validación
         const errorMsg = t("errors.invalid_name_format");
         setErrors({ name: errorMsg });
         toast.error(t("notifications.validation_error_title"), { 
@@ -102,8 +100,6 @@ export default function NewPaymentMethodPage() {
       };
 
       await api.paymentMethod.createPaymentMethod(payload, token);
-
-      // Mensaje de éxito mejorado con i18n dinámico
       toast.success(t("notifications.create_success_title"), {
         description: t("notifications.create_success_description", { name: payload.name }),
       });
@@ -114,7 +110,7 @@ export default function NewPaymentMethodPage() {
       }, 1500);
 
     } catch (error: any) {
-      // Manejo de errores de API con i18n
+
       const errorMsg = error.response?.data?.error || t("notifications.error_title");
       toast.error(t("notifications.error_title"), {
         description: errorMsg

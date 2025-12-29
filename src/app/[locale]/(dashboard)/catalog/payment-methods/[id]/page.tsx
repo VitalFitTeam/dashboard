@@ -6,13 +6,12 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { Pencil, ChevronLeft } from "lucide-react";
-
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import PaymentForm from "../PaymentForm";
+import PaymentForm from "@/components/modules/payment-methods/PaymentForm";
 
 export default function PaymentMethodDetailPage() {
   const t = useTranslations("catalog.payment_methods");
@@ -101,7 +100,6 @@ export default function PaymentMethodDetailPage() {
       </PageHeader>
 
       <div className="bg-white rounded-xl border p-6 shadow-sm">
-        {/* Cabecera visual del detalle */}
         <div className="mb-6 border-b pb-4 flex justify-between items-start">
             <div>
                 <h3 className="text-xl font-bold text-foreground">

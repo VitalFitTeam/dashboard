@@ -8,11 +8,11 @@ import {
   CreatePaymentMethod,
   BranchPaymentVisibility,
 } from "@vitalfit/sdk";
-import PaymentForm from "../../PaymentForm";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import PaymentForm from "@/components/modules/payment-methods/PaymentForm";
 
 export default function EditPaymentMethodPage() {
   const t = useTranslations("catalog.payment_methods");

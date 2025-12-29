@@ -9,9 +9,8 @@ import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/StatCard";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/i18n/navigation";
-
-import PaymentTable from "./PaymentTable";
 import { usePaymentMethods } from "@/hooks/payment-methods/usePaymentMethods";
+import PaymentTable from "@/components/modules/payment-methods/PaymentTable";
 
 export default function PaymentMethodsPage() {
   const t = useTranslations("catalog.payment_methods");
@@ -39,7 +38,6 @@ export default function PaymentMethodsPage() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      {/* Sección de Estadísticas con el formato solicitado */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard
           title={t("stats.total")}
@@ -66,7 +64,7 @@ export default function PaymentMethodsPage() {
         </Button>
       </PageHeader>
 
-      <PaymentTable 
+      <PaymentTable
         data={paginatedData}
         loading={loading}
         pagination={pagination}
