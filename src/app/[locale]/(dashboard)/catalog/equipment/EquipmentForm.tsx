@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Equipment, EquipmentInfo } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
 
 type EquipmentWithBrand = Partial<EquipmentInfo> & {
   brand?: string;
@@ -28,9 +29,11 @@ interface EquipmentFormProps {
 export default function EquipmentForm({
   equipment,
   errors = {},
-  onChange = () => {},
+  onChange = () => { },
   mode = "view",
 }: EquipmentFormProps) {
+  const t = useTranslations("catalog.equipment.form");
+  const tCategories = useTranslations("catalog.equipment.categories");
   const disabled = mode === "view";
 
   const categories: EquipmentCategory[] = [
@@ -44,30 +47,30 @@ export default function EquipmentForm({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
       <div className="flex flex-col">
-        <label className="text-sm font-medium mb-1">Nombre</label>
+        <label className="text-sm font-medium mb-1">{t("labels.name")}</label>
         <Input
           value={equipment.name ?? ""}
           onChange={(e) => onChange("name", e.target.value)}
-          placeholder="Agrega un nombre"
+          placeholder={t("placeholders.name")}
           disabled={disabled}
         />
         {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
       </div>
 
       <div className="flex flex-col">
-        <label className="text-sm font-medium mb-1">Categoría</label>
+        <label className="text-sm font-medium mb-1">{t("labels.category")}</label>
         <Select
           value={equipment.category ?? ""}
           onValueChange={(value) => onChange("category", value)}
           disabled={disabled}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Seleccione una categoría" />
+            <SelectValue placeholder={t("placeholders.category")} />
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
               <SelectItem key={cat} value={cat}>
-                {cat}
+                {tCategories(cat)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -78,11 +81,11 @@ export default function EquipmentForm({
       </div>
 
       <div className="flex flex-col col-span-1 md:col-span-2">
-        <label className="text-sm font-medium mb-1">Descripción</label>
+        <label className="text-sm font-medium mb-1">{t("labels.description")}</label>
         <Textarea
           value={equipment.description ?? ""}
           onChange={(e) => onChange("description", e.target.value)}
-          placeholder="Agrega una descripción"
+          placeholder={t("placeholders.description")}
           disabled={disabled}
           className="min-h-[100px]"
         />
@@ -92,22 +95,22 @@ export default function EquipmentForm({
       </div>
 
       <div className="flex flex-col">
-        <label className="text-sm font-medium mb-1">Modelo</label>
+        <label className="text-sm font-medium mb-1">{t("labels.model")}</label>
         <Input
           value={equipment.model ?? ""}
           onChange={(e) => onChange("model", e.target.value)}
-          placeholder="Agrega un modelo"
+          placeholder={t("placeholders.model")}
           disabled={disabled}
         />
         {errors.model && <p className="text-sm text-red-500">{errors.model}</p>}
       </div>
 
       <div className="flex flex-col">
-        <label className="text-sm font-medium mb-1">Marca</label>
+        <label className="text-sm font-medium mb-1">{t("labels.brand")}</label>
         <Input
           value={equipment.brand ?? ""}
           onChange={(e) => onChange("brand", e.target.value)}
-          placeholder="Agrega una marca"
+          placeholder={t("placeholders.brand")}
           disabled={disabled}
         />
         {errors.brand && <p className="text-sm text-red-500">{errors.brand}</p>}

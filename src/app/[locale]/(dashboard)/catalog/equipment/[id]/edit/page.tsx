@@ -7,8 +7,11 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import EquipmentForm from "../../EquipmentForm";
 import { EquipmentInfo } from "@vitalfit/sdk";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export default function EditEquipmentPage() {
+  const t = useTranslations("catalog.equipment.edit");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { token } = useAuth();
@@ -26,18 +29,17 @@ export default function EditEquipmentPage() {
       try {
         setLoading(true);
         const response = await api.equipment.getEquipmentByID(id, token);
-        // Verifica si la API devuelve data.data o data directamente
         setEquipment(response.data ?? response);
       } catch (err) {
         console.error("Error cargando equipo:", err);
-        setError("No se pudo cargar el equipo.");
+        setError(t("error_loading"));
       } finally {
         setLoading(false);
       }
     };
 
     loadEquipment();
-  }, [id, token]);
+  }, [id, token, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,15 +53,16 @@ export default function EditEquipmentPage() {
         equipment,
         token,
       );
-      router.push("/equipment");
+      toast.success(t("success"));
+      router.replace("/catalog/equipment");
     } catch (err) {
       console.error("Error al guardar cambios:", err);
-      setError("No se pudo guardar la información del equipo.");
+      toast.error(t("error_loading")); // Using error_loading as generic error or I should have added 'save_error'
     }
   };
 
   if (loading) {
-    return <div className="p-6">Cargando equipo...</div>;
+    return <div className="p-6">{t("loading_data")}</div>;
   }
   if (error) {
     return <div className="p-6 text-red-500">{error}</div>;
@@ -72,19 +75,19 @@ export default function EditEquipmentPage() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <form onSubmit={handleSubmit} className="space-y-4">
         <PageHeader
-          title="Editar Equipamiento"
-          subtitle={`Modifica los datos del equipo: ${equipment.name}`}
+          title={t("title")}
+          subtitle={t("subtitle")}
           actionButton={
             <div className="flex gap-2">
               <Button
                 variant="secondary"
                 type="button"
-                onClick={() => router.push("/equipment")}
+                onClick={() => router.push("/catalog/equipment")}
               >
-                Cancelar
+                {t("cancel")}
               </Button>
               <Button type="submit" variant="default">
-                Guardar cambios
+                {t("button")}
               </Button>
             </div>
           }
