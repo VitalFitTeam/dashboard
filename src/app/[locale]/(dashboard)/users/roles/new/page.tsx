@@ -1,11 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import RolesForm from "../RolesForm";
 import { api } from "@/lib/sdk-config";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import { Roles } from "@/models/roles";
@@ -14,9 +13,11 @@ import {
   validateRoleField,
   RoleFormData,
 } from "@/lib/validation/roleSchema";
-import type { CreateRole } from "@vitalfit/sdk";
+import type { CreateRole as CreateRolePayload } from "@vitalfit/sdk";
+import RolesForm from "@/components/modules/roles/RolesForm";
+import { useRouter } from "@/i18n/navigation";
 
-export default function CreateRole() {
+export default function CreateRolePage() {
   const t = useTranslations("roles.create");
   const tForm = useTranslations("roles.form");
   const router = useRouter();
@@ -30,9 +31,7 @@ export default function CreateRole() {
   });
 
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof RoleFormData, string>>
-  >({});
+  const [errors, setErrors] = useState<Partial<Record<keyof RoleFormData, string>>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (field: keyof Roles, value: string) => {
@@ -43,12 +42,11 @@ export default function CreateRole() {
   };
 
   const handleFieldBlur = (field: keyof Roles, value: string) => {
-    const result = validateRoleField(field, value, tForm);
-    if (!result.success && result.error) {
-      setErrors((prev) => ({ ...prev, [field]: result.error }));
-    } else {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
+    const result = validateRoleField(field as keyof RoleFormData, value, tForm);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: result.success ? undefined : result.error,
+    }));
   };
 
   const handlePermissionChange = (permissionId: string, isChecked: boolean) => {
@@ -59,11 +57,10 @@ export default function CreateRole() {
     setSelectedPermissions(newPermissions);
 
     const result = validateRoleField("permissionsID", newPermissions, tForm);
-    if (!result.success && result.error) {
-      setErrors((prev) => ({ ...prev, permissionsID: result.error }));
-    } else {
-      setErrors((prev) => ({ ...prev, permissionsID: undefined }));
-    }
+    setErrors((prev) => ({
+      ...prev,
+      permissionsID: result.success ? undefined : result.error,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,90 +71,93 @@ export default function CreateRole() {
       return;
     }
 
-    const formDataToValidate = {
-      name: formData.name,
-      description: formData.description,
+    const dataToValidate: RoleFormData = {
+      name: formData.name.trim(),
+      description: formData.description.trim(),
       permissionsID: selectedPermissions,
     };
 
-    const validationResult = validateRole(formDataToValidate, tForm);
-    if (!validationResult.success) {
+    const validation = validateRole(dataToValidate, tForm);
+    if (!validation.success) {
       const newErrors: Partial<Record<keyof RoleFormData, string>> = {};
-      validationResult.error.issues.forEach((issue) => {
-        if (issue.path.length > 0 && typeof issue.path[0] === "string") {
-          const field = issue.path[0] as keyof RoleFormData;
-          newErrors[field] = issue.message;
-        }
+      validation.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof RoleFormData;
+        newErrors[field] = issue.message;
       });
       setErrors(newErrors);
       return;
     }
 
     setErrors({});
-
-    const payload: CreateRole = {
-      name: formData.name,
-      description: formData.description,
-      permissions: selectedPermissions,
-    };
-
     setIsLoading(true);
+
     try {
+      const payload: CreateRolePayload = {
+        name: dataToValidate.name,
+        description: dataToValidate.description,
+        permissions: dataToValidate.permissionsID,
+      };
+
       await api.RBAC.createRole(payload, token);
 
       toast.success(t("success"));
-      setTimeout(() => {
-        router.push("/users/roles");
-      }, 1500);
-    } catch (err: unknown) {
+      router.push("/users/roles");
+      router.refresh();
+    } catch (err: any) {
       console.error("Error al crear rol:", err);
-
-      if (err && typeof err === "object" && "messages" in err) {
-        const error = err as { messages: string[]; error?: string };
-        if (error.messages[0] === "conflict") {
-          toast.error(t("conflict_error"));
-        } else {
-          toast.error(error.error || t("error"));
-        }
-      } else {
-        toast.error(t("error"));
-      }
+      const errorMessage = err?.messages?.[0] === "conflict" 
+        ? t("conflict_error") 
+        : (err?.error || t("error"));
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <PageHeader
-          title={t("title")}
-          subtitle={t("subtitle")}
-          actionButton={
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => router.push("/users/roles")}
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" variant="default" disabled={isLoading}>
-                {isLoading ? t("loading") : t("button")}
-              </Button>
-            </div>
-          }
-        />
+    <div className="flex-1 p-4 md:p-8 pt-6">
+      <div className="mx-auto max-w-5xl bg-white rounded-xl shadow-sm border p-4 md:p-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <PageHeader
+            title={t("title")}
+            subtitle={t("subtitle")}
+            actionButton={
+              <div className="flex flex-col-reverse sm:flex-row gap-3 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="w-full sm:w-auto"
+                  onClick={() => router.push("/users/roles")}
+                  disabled={isLoading}
+                >
+                  {t("cancel")}
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="default" 
+                  className="w-full sm:w-auto"
+                  disabled={isLoading}
+                >
+                  {isLoading ? t("loading") : t("button")}
+                </Button>
+              </div>
+            }
+          />
 
-        <RolesForm
-          formData={formData}
-          onChange={handleChange}
-          selectedPermissions={selectedPermissions}
-          onPermissionChange={handlePermissionChange}
-          onFieldBlur={handleFieldBlur}
-          errors={errors}
-        />
-      </form>
+          <hr className="border-slate-100" />
+
+          <div className="overflow-x-hidden">
+            <RolesForm
+              formData={formData}
+              onChange={handleChange}
+              selectedPermissions={selectedPermissions}
+              onPermissionChange={handlePermissionChange}
+              onFieldBlur={handleFieldBlur}
+              errors={errors}
+            />
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
