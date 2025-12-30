@@ -30,6 +30,7 @@ export default function BillingPage() {
     user?.activeBranch?.id
   );
 
+
   const { branches, isLoading: loadingBranches } = useBranches({
     token: token ?? "",
     limit: 100,
