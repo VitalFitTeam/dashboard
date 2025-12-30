@@ -59,6 +59,9 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
     useState<BranchEquipmentInventory | null>(null);
   const [modalMode, setModalMode] = useState<"view" | "edit">("edit");
 
+  const [equipmentPage, setEquipmentPage] = useState(1);
+  const [equipmentPageSize, setEquipmentPageSize] = useState(10);
+
   useEffect(() => {
     if (!token) {
       return;
@@ -320,6 +323,18 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
     .filter((e) => !removedInventoryIds.includes(e.inventory_id))
     .concat(pendingInventory);
 
+  const totalPages = Math.ceil(displayedInventory.length / equipmentPageSize);
+  const currentDisplayedInventory = displayedInventory.slice(
+    (equipmentPage - 1) * equipmentPageSize,
+    equipmentPage * equipmentPageSize,
+  );
+
+  useEffect(() => {
+    if (equipmentPage > 1 && currentDisplayedInventory.length === 0 && totalPages > 0) {
+      setEquipmentPage(totalPages);
+    }
+  }, [displayedInventory.length, equipmentPageSize, equipmentPage, currentDisplayedInventory.length, totalPages]);
+
   return (
     <div className="space-y-6">
       {!isDisabled && (
@@ -399,7 +414,38 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
         </div>
       )}
 
-      <h3 className="text-lg font-semibold">{t("details.equipment.inventory_title")}</h3>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h3 className="text-lg font-semibold">{t("details.equipment.inventory_title")}</h3>
+        {displayedInventory.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">
+              {t("pagination.show")}
+            </span>
+            <Select
+              value={equipmentPageSize.toString()}
+              onValueChange={(val) => {
+                setEquipmentPageSize(Number(val));
+                setEquipmentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[10, 20, 50].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-gray-600">
+              {t("pagination.per_page")}
+            </span>
+          </div>
+        )}
+      </div>
+
       {displayedInventory.length === 0 ? (
         <p className="text-sm text-gray-500">
           {t("details.equipment.empty")}
@@ -407,11 +453,13 @@ const BranchEquipmentPanel: React.FC<BranchEquipmentPanelProps> = ({
       ) : (
         <DataTable
           columns={inventoryColumns}
-          data={displayedInventory}
+          data={currentDisplayedInventory}
           enableRowSelection
           actions={actionRenderer}
-          page={1}
-          pageSize={10}
+          page={equipmentPage}
+          pageSize={equipmentPageSize}
+          totalPages={totalPages}
+          onPageChange={setEquipmentPage}
           rowIdKey="inventory_id"
         />
       )}

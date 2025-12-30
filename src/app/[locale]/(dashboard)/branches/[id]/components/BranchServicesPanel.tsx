@@ -24,6 +24,7 @@ import EditBranchServiceModal from "./EditBranchServiceModal";
 import { toast } from "sonner";
 import { branchServiceSchema } from "@/lib/validation/branchServiceSchema";
 import EntityItem from "@/components/layout/EntityItem";
+import { PaginationControls } from "@/components/ui/table/PaginationControls";
 
 interface BranchServicePanelProps {
   branchId: string;
@@ -60,6 +61,9 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     null,
   );
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     if (!token) {
@@ -238,6 +242,18 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     setEditModalOpen(true);
   };
 
+  const totalPages = Math.ceil(services.length / pageSize);
+  const currentServices = services.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  useEffect(() => {
+    if (currentPage > 1 && currentServices.length === 0 && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [services.length, pageSize, currentPage, currentServices.length, totalPages]);
+
   return (
     <div className="space-y-10">
       <section>
@@ -336,48 +352,87 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
         ) : services.length === 0 ? (
           <p className="text-sm text-gray-500">{t("details.services.empty")}</p>
         ) : (
-          services.map((service) => (
-            <EntityItem
-              key={service.service_id}
-              initials={getInitials(service.service_name ?? "??")}
-              title={
-                service.service_name ?? `${t("catalog.services.id_prefix")}: ${service.service_id}`
-              }
-              description={t("details.services.description", {
-                capacity: service.max_capacity,
-                memberPrice: service.price_for_member,
-                nonMemberPrice: service.price_for_non_member,
-                visible: service.is_visible ? t("details.services.yes") : t("details.services.no"),
-              })}
-              action={
-                !isDisabled ? (
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      onClick={() => handleViewService(service)}
-                      variant="outline"
-                    >
-                      <Eye size={20} />
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => handleEditService(service)}
-                      variant="outline"
-                    >
-                      <Pencil size={20} />
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => handleRemoveService(service.service_id)}
-                      variant="outline"
-                    >
-                      <Trash2 size={20} />
-                    </Button>
-                  </div>
-                ) : undefined
-              }
-            />
-          ))
+          <>
+            <div className="space-y-2">
+              {currentServices.map((service) => (
+                <EntityItem
+                  key={service.service_id}
+                  initials={getInitials(service.service_name ?? "??")}
+                  title={
+                    service.service_name ?? `${t("catalog.services.id_prefix")}: ${service.service_id}`
+                  }
+                  description={t("details.services.description", {
+                    capacity: service.max_capacity,
+                    memberPrice: service.price_for_member,
+                    nonMemberPrice: service.price_for_non_member,
+                    visible: service.is_visible ? t("details.services.yes") : t("details.services.no"),
+                  })}
+                  action={
+                    !isDisabled ? (
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          onClick={() => handleViewService(service)}
+                          variant="outline"
+                        >
+                          <Eye size={20} />
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => handleEditService(service)}
+                          variant="outline"
+                        >
+                          <Pencil size={20} />
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => handleRemoveService(service.service_id)}
+                          variant="outline"
+                        >
+                          <Trash2 size={20} />
+                        </Button>
+                      </div>
+                    ) : undefined
+                  }
+                />
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t pt-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {t("pagination.show")}
+                </span>
+                <Select
+                  value={pageSize.toString()}
+                  onValueChange={(val) => {
+                    setPageSize(Number(val));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[2, 5, 10, 20, 50].map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-gray-600">
+                  {t("pagination.per_page")}
+                </span>
+              </div>
+
+              <PaginationControls
+                page={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          </>
         )}
       </div>
 

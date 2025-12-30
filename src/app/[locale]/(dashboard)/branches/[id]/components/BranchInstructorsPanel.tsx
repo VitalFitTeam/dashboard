@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import EntityItem from "@/components/layout/EntityItem";
+import { PaginationControls } from "@/components/ui/table/PaginationControls";
 
 interface BranchInstructorPanelProps {
   branchId: string;
@@ -46,6 +47,9 @@ export default function BranchInstructorPanel({
   const [dirty, setDirty] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreInstructors, setHasMoreInstructors] = useState(true);
+
+  const [branchPage, setBranchPage] = useState(1);
+  const [branchPageSize, setBranchPageSize] = useState(10);
 
   const fetchedRef = useRef(false);
 
@@ -210,6 +214,18 @@ export default function BranchInstructorPanel({
     }
   };
 
+  const totalPages = Math.ceil(branchInstructors.length / branchPageSize);
+  const currentBranchInstructors = branchInstructors.slice(
+    (branchPage - 1) * branchPageSize,
+    branchPage * branchPageSize,
+  );
+
+  useEffect(() => {
+    if (branchPage > 1 && currentBranchInstructors.length === 0 && totalPages > 0) {
+      setBranchPage(totalPages);
+    }
+  }, [branchInstructors.length, branchPageSize, branchPage, currentBranchInstructors.length, totalPages]);
+
   return (
     <div className="space-y-4">
       {!isViewMode && (
@@ -279,30 +295,69 @@ export default function BranchInstructorPanel({
             {t("details.instructors.empty")}
           </p>
         ) : (
-          branchInstructors.map((instr) => (
-            <EntityItem
-              key={instr.instructorID}
-              initials={
-                instr.instructorName
-                  ?.split(" ")
-                  .slice(0, 2)
-                  .map((n) => n[0])
-                  .join("") ?? "?"
-              }
-              title={instr.instructorName ?? "Sin nombre"}
-              description={instr.email}
-              action={
-                !isViewMode ? (
-                  <button
-                    className="text-sm text-red-500 hover:underline"
-                    onClick={() => handleRemoveInstructor(instr.instructorID)}
-                  >
-                    {t("details.instructors.remove")}
-                  </button>
-                ) : undefined
-              }
-            />
-          ))
+          <>
+            <div className="space-y-2">
+              {currentBranchInstructors.map((instr) => (
+                <EntityItem
+                  key={instr.instructorID}
+                  initials={
+                    instr.instructorName
+                      ?.split(" ")
+                      .slice(0, 2)
+                      .map((n) => n[0])
+                      .join("") ?? "?"
+                  }
+                  title={instr.instructorName ?? "Sin nombre"}
+                  description={instr.email}
+                  action={
+                    !isViewMode ? (
+                      <button
+                        className="text-sm text-red-500 hover:underline"
+                        onClick={() => handleRemoveInstructor(instr.instructorID)}
+                      >
+                        {t("details.instructors.remove")}
+                      </button>
+                    ) : undefined
+                  }
+                />
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t pt-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {t("pagination.show")}
+                </span>
+                <Select
+                  value={branchPageSize.toString()}
+                  onValueChange={(val) => {
+                    setBranchPageSize(Number(val));
+                    setBranchPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[2, 5, 10, 20, 50].map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-gray-600">
+                  {t("pagination.per_page")}
+                </span>
+              </div>
+
+              <PaginationControls
+                page={branchPage}
+                totalPages={totalPages}
+                onPageChange={setBranchPage}
+              />
+            </div>
+          </>
         )}
       </div>
     </div>

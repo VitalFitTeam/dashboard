@@ -8,4 +8,5 @@ export const branchDetailsSchema = z.object({
   state: z.string().min(1, "Estado es requerido"),
   country: z.string().min(1, "País es requerido"),
   max_capacity: z.number().min(1, "Capacidad máxima debe ser mayor a 0"),
+  manager: z.any().optional(),
 });

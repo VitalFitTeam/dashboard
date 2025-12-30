@@ -141,7 +141,6 @@
     "available_branches": "Available branches",
     "no_branches": "No branches assigned",
     "system_footer": "Vitalfit System"
-    
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -463,9 +462,100 @@
         "not_found": "Payment method not found"
       }
     },
+    "equipment": {
+      "title": "EQUIPMENT",
+      "addButton": "Add Equipment",
+      "loading": "Loading equipment...",
+      "categories": {
+        "Cardio": "Cardio",
+        "Strength": "Strength",
+        "FreeWeight": "Free Weight",
+        "Functional": "Functional",
+        "Accessory": "Accessory"
+      },
+      "table": {
+        "filter_placeholder": "Filter by name",
+        "category_placeholder": "Category",
+        "all_categories": "All Categories",
+        "download": "Download",
+        "columns": {
+          "name": "Equipment",
+          "category": "Category",
+          "model": "Model",
+          "brand": "Brand"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Modify",
+          "delete": "Delete"
+        },
+        "delete_dialog": {
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete \"{name}\"?",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "form": {
+        "labels": {
+          "name": "Name",
+          "category": "Category",
+          "description": "Description",
+          "model": "Model",
+          "brand": "Brand"
+        },
+        "placeholders": {
+          "name": "Add a name",
+          "category": "Select a category",
+          "description": "Add a description",
+          "model": "Add a model",
+          "brand": "Add a brand"
+        },
+        "errors": {
+          "name_required": "Name is required.",
+          "description_required": "Description is required.",
+          "brand_required": "Brand is required.",
+          "model_required": "Model is required.",
+          "category_required": "Category is required."
+        }
+      },
+      "create": {
+        "title": "CREATE EQUIPMENT",
+        "subtitle": "Enter the information for new equipment",
+        "button": "Create",
+        "loading": "Saving...",
+        "success": "Equipment created successfully!",
+        "connection_error_title": "Connection error",
+        "connection_error_desc": "Could not connect to the server. Try again.",
+        "server_error_title": "Error creating equipment"
+      },
+      "edit": {
+        "title": "EDIT EQUIPMENT",
+        "subtitle": "Modify the equipment information",
+        "button": "Save Changes",
+        "loading": "Saving...",
+        "success": "Equipment updated successfully!",
+        "cancel": "Cancel",
+        "loading_data": "Loading equipment data...",
+        "not_found": "Equipment not found",
+        "error_loading": "Error loading equipment"
+      },
+      "details": {
+        "title": "EQUIPMENT DETAILS",
+        "subtitle": "Equipment information: {name}",
+        "back": "Back",
+        "edit": "Modify",
+        "not_found": "Equipment not found.",
+        "loading": "Loading details..."
+      },
+      "notifications": {
+        "delete_success": "Equipment deleted successfully",
+        "delete_error": "Error deleting equipment."
+      }
+    },
     "memberships": {
       "title": "MEMBERSHIPS",
-      "add_button": "Add Membership",
+      "add_button": "Add a membership",
       "loading": "Loading Memberships...",
       "table": {
         "placeholder": "Search membership by name",
@@ -487,8 +577,8 @@
           "delete": "Delete"
         },
         "delete_dialog": {
-          "title": "Confirm Deletion",
-          "description": "Are you sure you want to delete this membership? This action cannot be undone.",
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete the membership \"{name}\"? This action cannot be undone.",
           "confirm": "Delete",
           "cancel": "Cancel"
         }
@@ -535,7 +625,7 @@
       "view": {
         "title": "MEMBERSHIP DETAILS",
         "button_edit": "Modify",
-        "loading": "Loading Memberships...",
+        "loading": "Loading Membership...",
         "error_load": "Could not load membership information.",
         "error_auth": "Session expired or unauthorized. Please log in again.",
         "not_found": "Membership not found or unavailable."
@@ -556,6 +646,86 @@
         "price_min": "Price cannot be zero (0) or negative",
         "price_max": "Maximum price is 999,999.99",
         "validation_error": "Unexpected validation error"
+      }
+    },
+    "packages": {
+      "title": "SERVICE PACKAGES",
+      "add_button": "Add a package",
+      "loading": "Loading packages...",
+      "error_loading": "Error loading packages",
+      "table": {
+        "placeholder": "Search package by name",
+        "download": "Download",
+        "downloading": "Downloading...",
+        "columns": {
+          "name": "Name",
+          "description": "Description",
+          "duration": "Duration (days)",
+          "price": "Price",
+          "status": "Status"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "actions": {
+          "view": "View Details",
+          "edit": "Modify",
+          "delete": "Delete"
+        },
+        "delete_dialog": {
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete the package \"{name}\"? This action cannot be undone.",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "form": {
+        "labels": {
+          "name": "Name",
+          "price": "Price ($)",
+          "description": "Description",
+          "start_at": "Start Date",
+          "end_at": "End Date",
+          "status": "Status",
+          "add_service": "Add service",
+          "service_placeholder": "Select a service",
+          "sessions": "{count} sessions",
+          "remove": "Remove"
+        }
+      },
+      "create": {
+        "title": "CREATE PACKAGE",
+        "subtitle": "Complete the information for the new package",
+        "button_create": "Create package",
+        "button_creating": "Creating...",
+        "success": "Package created successfully!",
+        "error_create": "Could not create the package. Try again."
+      },
+      "edit": {
+        "title": "EDIT PACKAGE",
+        "subtitle": "Modify the package data: {name}",
+        "button_save": "Save changes",
+        "button_cancel": "Cancel",
+        "button_saving": "Saving...",
+        "success": "Package updated successfully!",
+        "error_update": "Error updating the package",
+        "error_load": "Could not load the package."
+      },
+      "view": {
+        "title": "PACKAGE DETAILS",
+        "button_edit": "Modify",
+        "loading": "Loading Packages...",
+        "error_load": "Could not load package information."
+      },
+      "notifications": {
+        "delete_success": "Package deleted successfully",
+        "delete_error": "Error deleting the package. Try again.",
+        "auth_error": "You are not authenticated to perform this action.",
+        "invalid_id": "Invalid package ID",
+        "services_load_error": "Could not load services.",
+        "success_title": "Success",
+        "error_title": "Error"
       }
     }
   },
@@ -796,8 +966,29 @@
       "inactive": "INACTIVE/BLOCKED",
       "unit": "CLIENTS"
     },
+    "payments": {
+      "title": "Invoice and Payment History",
+      "subtitle": "View the historical record of payments and memberships for the client",
+      "table": {
+        "reference": "Reference",
+        "date": "Issue Date",
+        "amount": "Total Amount",
+        "status": "Status",
+        "search_placeholder": "Search by reference..."
+      },
+      "status": {
+        "paid": "Paid",
+        "pagado": "Paid",
+        "unpaid": "Unpaid",
+        "pendiente": "Unpaid",
+        "overdue": "Overdue",
+        "void": "Void"
+      }
+    },
     "table": {
       "filter_placeholder": "Filter name or email",
+      "filter_role": "Filter by Role",
+      "all_roles": "All Roles",
       "all_categories": "All categories",
       "category": "Category",
       "categories": {
@@ -810,6 +1001,7 @@
       "columns": {
         "name": "Name",
         "email": "Email",
+        "role": "Role",
         "category": "Category",
         "status": "Status"
       },
@@ -941,6 +1133,19 @@
       "error_subtitle": "Could not load client information",
       "not_found": "Client not found",
       "back_button": "Back to list"
+    },
+    "create": {
+      "title": "CREATE CLIENT",
+      "subtitle": "Enter the new client information",
+      "create_button": "Create",
+      "creating": "Creating...",
+      "success": "Client created successfully",
+      "error": "Error creating client",
+      "cancel_button": "Cancel",
+      "save_error": "Error saving client",
+      "invalid_data": "Invalid data",
+      "email_in_use": "Email address is already in use",
+      "validation_error": "Please correct the following errors: {errors}"
     }
   },
   "branches": {
@@ -1246,6 +1451,10 @@
           "save": "Save"
         }
       }
+    },
+    "pagination": {
+      "show": "Show",
+      "per_page": "per page"
     },
     "notifications": {
       "success_title": "Branch Created!",
