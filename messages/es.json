@@ -238,6 +238,36 @@
           "sync_error": "Error de sincronización"
         }
       }
+    },
+    "InstructorDashboard": {
+      "header": {
+        "morning": "¡Buenos días!",
+        "afternoon": "¡Buenas tardes!",
+        "night": "¡Buenas noches!",
+        "active_branch": "Sede actual:",
+        "no_branch": "Sin sede asignada"
+      },
+      "stats": {
+        "next_class": "Próxima Clase",
+        "students_today": "Alumnos Hoy",
+        "monthly_classes": "Clases este mes",
+        "meta": "Meta"
+      },
+      "classes_list": {
+        "title": "Mis clases de hoy",
+        "description": "Gestión de clases en",
+        "empty": "No hay sesiones programadas para hoy.",
+        "starts": "Horario de inicio",
+        "ends": "Fin",
+        "capacity": "Capacidad",
+        "start_button": "Iniciar clase",
+        "loading": "Cargando..."
+      },
+      "messages": {
+        "updating": "Actualizando dashboard...",
+        "updated": "Datos actualizados",
+        "error_loading": "Error al cargar los reportes"
+      }
     }
   },
   "catalog": {
