@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -30,7 +30,6 @@ export default function BillingPage() {
     user?.activeBranch?.id
   );
 
-
   const { branches, isLoading: loadingBranches } = useBranches({
     token: token ?? "",
     limit: 100,
@@ -47,15 +46,14 @@ export default function BillingPage() {
   } = useInvoices(token ?? "", selectedBranch);
 
   useEffect(() => {
-    if (user?.activeBranch?.id) {
+    if (user?.activeBranch?.id && user.activeBranch.id !== selectedBranch) {
       setSelectedBranch(user.activeBranch.id);
     }
-  }, [user?.activeBranch?.id]);
+  }, [user?.activeBranch?.id]); 
 
   if (!token) {
     return null;
   }
-
   const canSwitchBranch = hasRole([
     "branch_admin",
     "super_admin",
@@ -63,6 +61,13 @@ export default function BillingPage() {
   ] as any);
 
   const canCreateInvoice = hasRole(["branch_admin", "super_admin"] as any);
+
+  const handleSearchChange = (val: string) => {
+    const timer = setTimeout(() => {
+      updateFilters({ search: val, page: 1 });
+    }, 500);
+    return () => clearTimeout(timer);
+  };
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -75,7 +80,6 @@ export default function BillingPage() {
               : t("subtitle")
           }
         />
-
         {canCreateInvoice && (
           <Button onClick={() => router.push("/finance/billing/new")}>
             <Plus className="h-4 w-4 mr-2" /> {t("newInvoiceTitle")}
@@ -89,7 +93,7 @@ export default function BillingPage() {
           <Input
             placeholder={t("searchPlaceholder")}
             className="pl-10 focus-visible:ring-primary"
-            onChange={(e) => updateFilters({ search: e.target.value })}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
 
@@ -122,7 +126,10 @@ export default function BillingPage() {
 
           <Select
             onValueChange={(v) =>
-              updateFilters({ status: v === "all" ? undefined : (v as any) })
+              updateFilters({ 
+                status: v === "all" ? undefined : (v as any),
+                page: 1 
+              })
             }
           >
             <SelectTrigger className="w-full md:w-[180px]">
