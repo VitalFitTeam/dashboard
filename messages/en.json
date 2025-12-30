@@ -141,10 +141,6 @@
     "available_branches": "Available branches",
     "no_branches": "No branches assigned",
     "system_footer": "Vitalfit System"
-<<<<<<< HEAD
-    
-=======
->>>>>>> development
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -471,7 +467,7 @@
       },
       "errors": {
         "invalid_name_format": "The name must include 'Pago Movil', 'Zelle' or 'Bank Transfer'"
-      }, 
+      },
       "validations": {
         "name_required": "Name is required",
         "name_max": "Name cannot exceed 100 caracteres",
@@ -1681,6 +1677,178 @@
         "errorUpdate": "Could not update the membership.",
         "missingParams": "Missing authentication token or record ID.",
         "requestInProgress": "An update is already in progress. Please wait."
+      }
+    },
+    "Billing": {
+      "title": "Invoices & Payments",
+      "subtitle": "Manage your invoices and payment methods here.",
+      "managing": "Managing: {branchName}",
+      "newInvoiceTitle": "New Invoice",
+      "searchPlaceholder": "Search by client or invoice number...",
+      "branchPlaceholder": "Branch",
+      "allBranches": "All branches",
+      "statusPlaceholder": "Status",
+      "status": {
+        "all": "All statuses",
+        "paid": "Paid",
+        "unpaid": "Unpaid",
+        "overdue": "Overdue",
+        "void": "Void",
+        "partial": "Partial"
+      },
+      "table": {
+        "invoiceNumber": "Invoice No.",
+        "client": "Client",
+        "date": "Date",
+        "total": "Total ({currency})",
+        "status": "Status",
+        "actions": {
+          "view": "View details"
+        }
+      },
+      "newInvoice": {
+        "title": "New Sale",
+        "subtitle": "Simplified payment management for staff.",
+        "messages": {
+          "selectUserError": "A valid user must be selected first",
+          "success": "Sale completed in {currency}",
+          "partialError": "Invoice created, but payment failed",
+          "error": "Error generating invoice"
+        }
+      },
+      "form": {
+        "branch": "Branch",
+        "selectBranch": "Select branch",
+        "client": "Client",
+        "emailPlaceholder": "Client email...",
+        "waitingClient": "Waiting for client",
+        "concepts": "Line Items",
+        "addItem": "ADD ITEM",
+        "membership": "Membership",
+        "package": "Package",
+        "selectProduct": "Select product...",
+        "currency": "Currency",
+        "paymentMethod": "Payment Method",
+        "choose": "Choose...",
+        "exchangeRate": "Exchange Rate: 1 USD = {rate} {currency}",
+        "subtotal": "Subtotal",
+        "taxes": "Taxes",
+        "totalCharge": "Total Charge (USD)",
+        "equivalentTo": "Equivalent to",
+        "cancel": "Cancel",
+        "finishSale": "Finish Sale"
+      },
+      "addPayment": {
+        "trigger": "Register Payment",
+        "title": "Close Invoice",
+        "invoiceId": "Invoice ID: {id}",
+        "currencyLabel": "Payment Currency",
+        "totalUSD": "Total USD",
+        "exchangeRate": "Rate: {rate}",
+        "toReceive": "Amount in {currency}",
+        "methodLabel": "Method",
+        "choose": "Choose...",
+        "bankReference": "Bank Reference",
+        "referencePlaceholder": "Confirmation No.",
+        "cancel": "Cancel",
+        "confirm": "Confirm Payment",
+        "messages": {
+          "selectMethodError": "Please select a payment method",
+          "success": "Payment successfully recorded",
+          "error": "Error processing payment"
+        }
+      },
+      "detail": {
+        "conceptsTitle": "Item Details",
+        "conceptsSubtitle": "Breakdown of purchased products and services",
+        "itemsCount": "{count, plural, =1 {# item} other {# items}}",
+        "paymentsTitle": "Payment History",
+        "paymentsSubtitle": "Complete record of payments and transactions",
+        "statusLabel": "Billing Status",
+        "status": {
+          "paid": "RECONCILED",
+          "pending": "PENDING"
+        },
+        "summary": {
+          "subtotal": "Subtotal",
+          "taxes": "Taxes",
+          "currentDebt": "Current Debt",
+          "fullyPaid": "INVOICE FULLY PAID"
+        },
+        "accountInfo": {
+          "title": "Account Information",
+          "loading": "Loading...",
+          "idLabel": "ID",
+          "branchLabel": "Issuing Branch",
+          "principal": "Main",
+          "uuidLabel": "Invoice UUID",
+          "uuidInfo": "INFO",
+          "uuidTooltip": "Unique system identifier"
+        }
+      },
+      "detailPage": {
+        "title": "Invoice {number}",
+        "defaultTitle": "Invoice Detail",
+        "issuedAt": "Issued on {date}",
+        "unknownBranch": "Unidentified branch",
+        "loadingDocument": "Loading document information...",
+        "actions": {
+          "print": "Print",
+          "export": "Export PDF"
+        },
+        "errors": {
+          "title": "System Error",
+          "notFound": "No data found for this invoice.",
+          "serverError": "Error connecting to server.",
+          "retry": "Retry Loading"
+        },
+        "loading": {
+          "title": "Syncing invoice",
+          "subtitle": "Retrieving financial data..."
+        }
+      },
+      "itemsTable": {
+        "description": "Description",
+        "quantity": "Qty",
+        "unitPrice": "Unit Price",
+        "tax": "Tax",
+        "total": "Total",
+        "types": {
+          "membership": "Membership",
+          "package": "Package",
+          "unknown": "Unknown Item"
+        },
+        "defaultNames": {
+          "membership": "Membership",
+          "package": "Class Package"
+        }
+      },
+      "paymentsTable": {
+        "date": "Date",
+        "method": "Method",
+        "amount": "Amount",
+        "status": "Status",
+        "baseAmount": "Base: ${amount} USD",
+        "exchangeRateTooltip": "Rate: 1 USD = {rate} {currency}",
+        "approveAction": "Approve payment",
+        "viewReceipt": "View receipt",
+        "actionsLabel": "Payment Actions",
+        "actions": {
+          "approve": "Approve Payment",
+          "reject": "Mark as Failed",
+          "refund": "Refund Payment",
+          "resetToPending": "Reset to Pending"
+        },
+        "statuses": {
+          "Completed": "Completed",
+          "Pending": "Pending",
+          "Failed": "Failed",
+          "Refunded": "Refunded"
+        }
+      },
+      "methodCell": {
+        "loading": "Loading...",
+        "notAvailable": "N/A"
       }
     }
   },

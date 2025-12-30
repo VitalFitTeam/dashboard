@@ -7,18 +7,22 @@ export function useUserByEmail(token: string) {
   const [userData, setUserData] = useState<any | null>(null);
 
   const getUserByEmail = async (email: string) => {
-    if (!email || !email.includes("@")){
-         return;
+    if (!email || !email.includes("@")) {
+      toast.error("Por favor, ingrese un email válido");
+      return;
     }
 
     setLoading(true);
     try {
       const response = await api.user.getUserByEmail(email, token);
-      setUserData(response.data);
+
+      setUserData(response); 
       return response.data;
     } catch (error: any) {
       setUserData(null);
-      if (error.status !== 404) {
+      if (error.status === 404) {
+        toast.error("Usuario no encontrado");
+      } else {
         toast.error("Error al buscar el usuario");
       }
     } finally {

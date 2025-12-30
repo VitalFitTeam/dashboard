@@ -4,11 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { api } from "@/lib/sdk-config";
 import { toast } from "sonner";
 
-// Definimos la interfaz exacta según tu respuesta del backend
 interface BranchPaymentMethod {
   branch_id: string;
   is_active: boolean;
-  method_id: string; // Esta es la propiedad clave
+  method_id: string; 
   name: string;
   type: string;
 }
@@ -16,7 +15,7 @@ interface BranchPaymentMethod {
 export function useBranchPaymentMethods(branchId: string | undefined, token: string | null) {
   const [methods, setMethods] = useState<BranchPaymentMethod[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<"forbidden" | "error" | "not_found" | null>(null);
 
   const fetchMethods = useCallback(async () => {
     if (!branchId || !token) {
@@ -28,24 +27,32 @@ export function useBranchPaymentMethods(branchId: string | undefined, token: str
       setLoading(true);
       setError(null);
 
+      if (!api?.paymentMethod?.getBranchPaymentMethods) {
+        console.error("SDK Error: api.paymentMethod.getBranchPaymentMethods no está definido.");
+        setMethods([]);
+        return;
+      }
+
       const response = await api.paymentMethod.getBranchPaymentMethods(branchId, token);
-      
-      // Filtramos solo los métodos activos para mejorar la UX
-      if (response && response.data) {
-        const activeMethods = Array.isArray(response.data) 
-          ? response.data.filter((m: BranchPaymentMethod) => m.is_active)
-          : [];
+
+      if (response?.data && Array.isArray(response.data)) {
+        const activeMethods = response.data.filter((m: BranchPaymentMethod) => m.is_active);
         setMethods(activeMethods);
       } else {
         setMethods([]);
       }
     } catch (err: any) {
-      console.error("Error en useBranchPaymentMethods:", err);
-      if (err.status === 403 || err.message?.includes("forbidden")) {
+      const status = err?.status || err?.response?.status;
+      
+      if (status === 403 || status === 401) {
         setError("forbidden");
+      } else if (status === 404) {
+        setError("not_found");
+        setMethods([]); 
       } else {
+        console.error("Error técnico al cargar métodos:", err);
         setError("error");
-        toast.error("Error al cargar los métodos de pago de la sede");
+        toast.error("Error al sincronizar métodos de la sede");
       }
       setMethods([]);
     } finally {
@@ -57,5 +64,11 @@ export function useBranchPaymentMethods(branchId: string | undefined, token: str
     fetchMethods();
   }, [fetchMethods]);
 
-  return { methods, loading, error, refresh: fetchMethods };
+  return { 
+    methods: methods || [], 
+    loading, 
+    error, 
+    isEmpty: !loading && (methods?.length === 0 || !methods),
+    refresh: fetchMethods 
+  };
 }

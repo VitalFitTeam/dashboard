@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Plus, Building2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -19,11 +19,12 @@ import { useAuth } from "@/context/AuthContext";
 import { InvoiceTable } from "@/components/modules/billing/InvoiceTable";
 import { useBranches } from "@/hooks/branches/useBranches";
 import { useRouter } from "@/i18n/navigation";
+import { Building2, Plus, Search } from "lucide-react";
 
 export default function BillingPage() {
+  const t = useTranslations("finance.Billing");
   const router = useRouter();
   const { token, user, hasRole } = useAuth();
-
 
   const [selectedBranch, setSelectedBranch] = useState<string | undefined>(
     user?.activeBranch?.id
@@ -54,21 +55,25 @@ export default function BillingPage() {
     return null;
   }
 
-  const canSwitchBranch = hasRole(["branch_admin", "super_admin","account"] as any);
+  const canSwitchBranch = hasRole([
+    "branch_admin",
+    "super_admin",
+    "accountant",
+  ] as any);
 
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex justify-between items-start">
         <PageHeader
-          title="Facturas y Pagos."
+          title={t("title")}
           subtitle={
             user?.activeBranch
-              ? `Gestionando: ${user.activeBranch.name}`
-              : "Administra tus facturas y métodos de pago aquí."
+              ? t("managing", { branchName: user.activeBranch.name })
+              : t("subtitle")
           }
         />
         <Button onClick={() => router.push("/finance/billing/new")}>
-          <Plus className="h-4 w-4 mr-2" /> Nueva Factura
+          <Plus className="h-4 w-4 mr-2" /> {t("newInvoiceTitle")}
         </Button>
       </div>
 
@@ -76,31 +81,30 @@ export default function BillingPage() {
         <div className="relative w-full lg:flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Buscar por cliente o número..."
+            placeholder={t("searchPlaceholder")}
             className="pl-10 focus-visible:ring-primary"
             onChange={(e) => updateFilters({ search: e.target.value })}
           />
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto">
-
           <Select
             value={selectedBranch || "all"}
             onValueChange={(v) =>
               setSelectedBranch(v === "all" ? undefined : v)
             }
-
             disabled={loadingBranches || !canSwitchBranch}
           >
             <SelectTrigger className="w-full md:w-[220px]">
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-gray-400" />
-                <SelectValue placeholder="Sucursal" />
+                <SelectValue placeholder={t("branchPlaceholder")} />
               </div>
             </SelectTrigger>
-            <SelectContent className="max-h-[300px] overflow-y-auto">
+
+            <SelectContent className="max-h-[300px]">
               {canSwitchBranch && (
-                <SelectItem value="all">Todas las sucursales</SelectItem>
+                <SelectItem value="all">{t("allBranches")}</SelectItem>
               )}
               {branches.map((branch) => (
                 <SelectItem key={branch.branch_id} value={branch.branch_id}>
@@ -109,20 +113,21 @@ export default function BillingPage() {
               ))}
             </SelectContent>
           </Select>
+
           <Select
             onValueChange={(v) =>
               updateFilters({ status: v === "all" ? undefined : (v as any) })
             }
           >
             <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="Estado" />
+              <SelectValue placeholder={t("statusPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="Paid">Pagado</SelectItem>
-              <SelectItem value="Unpaid">Pendiente</SelectItem>
-              <SelectItem value="Overdue">Vencido</SelectItem>
-              <SelectItem value="Void">Anulado</SelectItem>
+              <SelectItem value="all">{t("status.all")}</SelectItem>
+              <SelectItem value="Paid">{t("status.paid")}</SelectItem>
+              <SelectItem value="Unpaid">{t("status.unpaid")}</SelectItem>
+              <SelectItem value="Overdue">{t("status.overdue")}</SelectItem>
+              <SelectItem value="Void">{t("status.void")}</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, Wallet, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useGetPaymentMethod } from "@/hooks/payment-methods/useGetPaymentMethod";
+import { useTranslations } from "next-intl";
 
 export function PaymentMethodCell({ methodId }: { methodId: string }) {
+  const t = useTranslations("finance.Billing.methodCell");
   const { token } = useAuth();
   const { method, loading } = useGetPaymentMethod(methodId, token);
 
@@ -14,7 +16,7 @@ export function PaymentMethodCell({ methodId }: { methodId: string }) {
     return (
       <div className="flex items-center gap-1 text-[10px] text-muted-foreground animate-pulse">
         <Loader2 className="h-3 w-3 animate-spin" />
-        Cargando...
+        {t("loading")}
       </div>
     );
   }
@@ -22,7 +24,7 @@ export function PaymentMethodCell({ methodId }: { methodId: string }) {
   if (!method) {
     return (
       <Badge variant="secondary" className="font-normal capitalize px-2 py-0">
-        N/A
+        {t("notAvailable")}
       </Badge>
     );
   }

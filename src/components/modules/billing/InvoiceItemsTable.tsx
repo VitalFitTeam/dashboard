@@ -4,6 +4,7 @@ import React from "react";
 import { DataTable, Column } from "@/components/ui/table/DataTable";
 import { InvoiceItemDetail } from "@vitalfit/sdk";
 import { ItemNameCell } from "./ItemNameCell";
+import { useTranslations } from "next-intl"; 
 
 interface InvoiceItemsTableProps {
   items: InvoiceItemDetail[];
@@ -11,19 +12,18 @@ interface InvoiceItemsTableProps {
 }
 
 export function InvoiceItemsTable({ items, isLoading }: InvoiceItemsTableProps) {
-  
+  const t = useTranslations("finance.Billing.itemsTable");
+
   const columns: Column<InvoiceItemDetail>[] = [
     {
-      header: "Descripción",
+      header: t("description"),
       accessor: "invoice_item_id", 
-      // Cambiamos el argumento para recibir (value, row) en lugar de intentar desestructurar
       render: (_, row) => {
-        // 'row' es el objeto completo de tipo InvoiceItemDetail
         return <ItemNameCell item={row} />;
       },
     },
     { 
-      header: "Cantidad", 
+      header: t("quantity"), 
       accessor: "quantity", 
       render: (v) => (
         <span className="text-sm text-muted-foreground font-medium">
@@ -32,7 +32,7 @@ export function InvoiceItemsTable({ items, isLoading }: InvoiceItemsTableProps) 
       ) 
     },
     { 
-      header: "Precio Unit.", 
+      header: t("unitPrice"), 
       accessor: "unit_price", 
       render: (v) => (
         <span className="text-sm font-mono">
@@ -41,10 +41,9 @@ export function InvoiceItemsTable({ items, isLoading }: InvoiceItemsTableProps) 
       )
     },
     { 
-      header: "Impuesto", 
+      header: t("tax"), 
       accessor: "tax_amount", 
       render: (v, row) => {
-        // Calculamos el porcentaje basándonos en el tax_rate de la fila
         const ratePercentage = (parseFloat(row.tax_rate || "0") * 100).toFixed(0);
         return (
           <div className="flex flex-col text-[11px]">
@@ -59,7 +58,7 @@ export function InvoiceItemsTable({ items, isLoading }: InvoiceItemsTableProps) 
       } 
     },
     { 
-      header: "Total", 
+      header: t("total"), 
       accessor: "total_line", 
       render: (v) => (
         <span className="text-sm font-bold text-foreground font-mono">

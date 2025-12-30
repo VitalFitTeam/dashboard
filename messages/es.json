@@ -1624,6 +1624,178 @@
         "missingParams": "Falta el token de autenticación o el ID de registro.",
         "requestInProgress": "Ya hay una actualización en curso. Por favor, espera."
       }
+    },
+    "Billing": {
+      "title": "Facturas y Pagos",
+      "subtitle": "Administra tus facturas y métodos de pago aquí.",
+      "managing": "Gestionando: {branchName}",
+      "newInvoiceTitle": "Nueva Factura",
+      "searchPlaceholder": "Buscar por cliente o número...",
+      "branchPlaceholder": "Sucursal",
+      "allBranches": "Todas las sucursales",
+      "statusPlaceholder": "Estado",
+      "status": {
+        "all": "Todos los estados",
+        "paid": "Pagado",
+        "unpaid": "Pendiente",
+        "overdue": "Vencido",
+        "void": "Anulado",
+        "partial": "Parcial"
+      },
+      "table": {
+        "invoiceNumber": "Nro. Factura",
+        "client": "Cliente",
+        "date": "Fecha",
+        "total": "Total ({currency})",
+        "status": "Estado",
+        "actions": {
+          "view": "Ver detalle"
+        }
+      },
+      "newInvoice": {
+        "title": "Nueva Venta",
+        "subtitle": "Gestión simplificada de cobros para staff.",
+        "messages": {
+          "selectUserError": "Debe seleccionar un usuario válido primero",
+          "success": "Venta completada en {currency}",
+          "partialError": "Factura creada, pero el pago falló",
+          "error": "Error al generar la factura"
+        }
+      },
+      "form": {
+        "branch": "Sucursal",
+        "selectBranch": "Seleccionar sucursal",
+        "client": "Cliente",
+        "emailPlaceholder": "Email del cliente...",
+        "waitingClient": "Esperando cliente",
+        "concepts": "Conceptos",
+        "addItem": "AÑADIR ITEM",
+        "membership": "Membresía",
+        "package": "Paquete",
+        "selectProduct": "Seleccionar producto...",
+        "currency": "Moneda",
+        "paymentMethod": "Método Pago",
+        "choose": "Elegir...",
+        "exchangeRate": "Tasa Actual: 1 USD = {rate} {currency}",
+        "subtotal": "Subtotal",
+        "taxes": "Impuestos",
+        "totalCharge": "Total Cobro (USD)",
+        "equivalentTo": "Equivale a",
+        "cancel": "Cancelar",
+        "finishSale": "Finalizar Venta"
+      },
+      "addPayment": {
+        "trigger": "Registrar Pago",
+        "title": "Cerrar Factura",
+        "invoiceId": "ID Factura: {id}",
+        "currencyLabel": "Moneda de Pago",
+        "totalUSD": "Total USD",
+        "exchangeRate": "Tasa: {rate}",
+        "toReceive": "A recibir en {currency}",
+        "methodLabel": "Método",
+        "choose": "Elegir...",
+        "bankReference": "Referencia Banco",
+        "referencePlaceholder": "Nro Confirmación",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar Pago",
+        "messages": {
+          "selectMethodError": "Selecciona un método de pago",
+          "success": "Pago registrado con éxito",
+          "error": "Error al procesar el pago"
+        }
+      },
+      "detail": {
+        "conceptsTitle": "Detalle de Conceptos",
+        "conceptsSubtitle": "Desglose de productos y servicios adquiridos",
+        "itemsCount": "{count, plural, =1 {# ítem} other {# ítems}}",
+        "paymentsTitle": "Registro de Pagos",
+        "paymentsSubtitle": "Historial completo de abonos y transacciones",
+        "statusLabel": "Estado de Cobro",
+        "status": {
+          "paid": "CONCILIADO",
+          "pending": "PENDIENTE"
+        },
+        "summary": {
+          "subtotal": "Subtotal",
+          "taxes": "Impuestos",
+          "currentDebt": "Deuda Actual",
+          "fullyPaid": "FACTURA TOTALMENTE PAGADA"
+        },
+        "accountInfo": {
+          "title": "Información de Cuenta",
+          "loading": "Cargando...",
+          "idLabel": "ID",
+          "branchLabel": "Sede Emisión",
+          "principal": "Principal",
+          "uuidLabel": "UUID de Factura",
+          "uuidInfo": "INFO",
+          "uuidTooltip": "Identificador único de sistema"
+        }
+      },
+      "detailPage": {
+        "title": "Factura {number}",
+        "defaultTitle": "Detalle de Factura",
+        "issuedAt": "Emitida el {date}",
+        "unknownBranch": "Sucursal no identificada",
+        "loadingDocument": "Cargando información del documento...",
+        "actions": {
+          "print": "Imprimir",
+          "export": "Exportar PDF"
+        },
+        "errors": {
+          "title": "Error de Sistema",
+          "notFound": "No se encontraron datos para esta factura.",
+          "serverError": "Error al conectar con el servidor.",
+          "retry": "Reintentar Carga"
+        },
+        "loading": {
+          "title": "Sincronizando factura",
+          "subtitle": "Obteniendo datos financieros..."
+        }
+      },
+      "itemsTable": {
+        "description": "Descripción",
+        "quantity": "Cantidad",
+        "unitPrice": "Precio Unit.",
+        "tax": "Impuesto",
+        "total": "Total",
+        "types": {
+          "membership": "Membresía",
+          "package": "Paquete",
+          "unknown": "Ítem Desconocido"
+        },
+        "defaultNames": {
+          "membership": "Membresía",
+          "package": "Paquete de Clases"
+        }
+      },
+      "paymentsTable": {
+        "date": "Fecha",
+        "method": "Método",
+        "amount": "Monto",
+        "status": "Estado",
+        "baseAmount": "Base: ${amount} USD",
+        "exchangeRateTooltip": "Tasa: 1 USD = {rate} {currency}",
+        "approveAction": "Aprobar pago",
+        "viewReceipt": "Ver comprobante",
+        "actionsLabel": "Acciones de pago",
+        "actions": {
+          "approve": "Aprobar pago",
+          "reject": "Rechazar / Fallido",
+          "refund": "Reembolsar pago",
+          "resetToPending": "Volver a Pendiente"
+        },
+        "statuses": {
+          "Completed": "Completado",
+          "Pending": "Pendiente",
+          "Failed": "Fallido",
+          "Refunded": "Reembolsado"
+        }
+      },
+      "methodCell": {
+        "loading": "Cargando...",
+        "notAvailable": "N/A"
+      }
     }
   },
   "branches": {

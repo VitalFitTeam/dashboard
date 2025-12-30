@@ -9,7 +9,9 @@ import {
   AlertCircle,
   Loader2,
   MapPin,
+  CalendarDays,
 } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -24,35 +26,56 @@ import { InvoiceDetailForm } from "@/components/modules/billing/InvoiceDetailFor
 import useGetBranch from "@/hooks/branches/useGetBranch";
 
 export default function InvoiceDetailPage() {
+  const t = useTranslations("finance.Billing.detailPage");
+  const locale = useLocale();
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuth();
-
   const [invoice, setInvoice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const formatDateSafe = (dateString: string) => {
+    if (!dateString) {
+      return "—";
+    }
+    try {
+      const datePart = dateString.split("T")[0];
+      const [year, month, day] = datePart.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      if (isNaN(date.getTime())) {
+        return "—";
+      }
+
+      return new Intl.DateTimeFormat(locale === "es" ? "es-ES" : "en-US", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }).format(date);
+    } catch (e) {
+      return "—";
+    }
+  };
 
   const fetchInvoiceDetails = useCallback(async () => {
     if (!id || !token) {
       return;
     }
-
     try {
       setLoading(true);
       setError(null);
       const response = await api.billing.getInvoiceByID(id as string, token);
-
       if (response?.data) {
         setInvoice(response.data);
       } else {
-        setError("No se encontraron datos para esta factura.");
+        setError(t("errors.notFound"));
       }
     } catch (err: any) {
-      setError(err.message || "Error al conectar con el servidor.");
+      setError(err.message || t("errors.serverError"));
     } finally {
       setLoading(false);
     }
-  }, [id, token]);
+  }, [id, token, t]);
 
   useEffect(() => {
     fetchInvoiceDetails();
@@ -68,67 +91,72 @@ export default function InvoiceDetailPage() {
     if (!invoice) {
       return { totalPaid: 0, pendingAmount: 0 };
     }
-
     const totalAmount = Number(invoice.total_amount || 0);
-    const totalPaid = (invoice.payments || []).reduce(
-      (acc: number, p: any) => acc + Number(p.amount_paid || 0),
+    const totalPaidUSD = (invoice.payments || []).reduce(
+      (acc: number, p: any) => acc + Number(p.amount_base || 0),
       0
     );
-
+    const roundedTotalPaid = Math.round(totalPaidUSD * 100) / 100;
+    const pending = Math.max(0, totalAmount - roundedTotalPaid);
     return {
-      totalPaid,
-      pendingAmount: Math.max(0, totalAmount - totalPaid),
+      totalPaid: roundedTotalPaid,
+      pendingAmount: pending <= 0.05 ? 0 : pending,
     };
   }, [invoice]);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 animate-in fade-in duration-500">
+    <div className="max-w-7xl mx-auto p-4 md:p-6 animate-in fade-in duration-500">
       <PageHeader
         title={
-          invoice ? `Factura ${invoice.invoice_number}` : "Detalle de Factura"
+          invoice
+            ? t("title", { number: invoice.invoice_number })
+            : t("defaultTitle")
         }
         subtitle={
           invoice ? (
-
-            <span className="flex flex-col gap-1">
-              <span>
-                Emitida el {new Date(invoice.issue_date).toLocaleDateString()}
+            <span className="flex flex-col gap-1.5 mt-1">
+              <span className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
+                <CalendarDays className="h-4 w-4 text-primary/70" />
+                <span>
+                  {t("issuedAt", { date: formatDateSafe(invoice.issue_date) })}
+                </span>
               </span>
-              <span className="flex items-center gap-1.5 text-primary font-medium">
-                <MapPin className="h-3.5 w-3.5" />
+
+              <span className="flex items-center gap-2 text-sm font-medium text-primary">
+                <MapPin className="h-4 w-4" />
                 {branchLoading ? (
-                  <span className="animate-pulse bg-muted h-3 w-24 rounded inline-block" />
+                  <span className="animate-pulse bg-primary/10 h-4 w-32 rounded inline-block" />
                 ) : (
-                  <span>
-                    {branchDetail?.name || "Sucursal no identificada"}
-                  </span>
+                  <span>{branchDetail?.name || t("unknownBranch")}</span>
                 )}
               </span>
             </span>
           ) : (
-            "Consulta el desglose de conceptos."
+            t("loadingDocument")
           )
         }
         actionButton={
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => window.print()}
               disabled={loading || !!error}
+              className="hidden sm:flex"
             >
-              <Printer className="h-4 w-4 mr-2" /> Imprimir
+              <Printer className="h-4 w-4 mr-2" /> {t("actions.print")}
             </Button>
-            <Button size="sm" disabled={loading || !!error}>
-              <Download className="h-4 w-4 mr-2" /> Exportar PDF
+            <Button size="sm" variant="default" disabled={loading || !!error}>
+              <Download className="h-4 w-4 mr-2" /> {t("actions.export")}
             </Button>
           </div>
         }
       >
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="h-9 w-9 rounded-full"
+          className="h-9 w-9 rounded-full border bg-background shadow-sm hover:bg-muted"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -137,27 +165,37 @@ export default function InvoiceDetailPage() {
       <Separator className="my-6" />
 
       {error ? (
-        <Alert variant="destructive">
+        <Alert
+          variant="destructive"
+          className="bg-destructive/5 border-destructive/20 text-destructive"
+        >
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error de Sistema</AlertTitle>
-          <AlertDescription className="flex flex-col gap-3 text-sm">
+          <AlertTitle className="font-bold uppercase tracking-tight">
+            {t("errors.title")}
+          </AlertTitle>
+          <AlertDescription className="flex flex-col gap-3 text-sm mt-1">
             {error}
             <Button
               variant="outline"
               size="sm"
-              className="w-fit"
+              className="w-fit border-destructive/30 hover:bg-destructive/10"
               onClick={fetchInvoiceDetails}
             >
-              Reintentar Carga
+              {t("errors.retry")}
             </Button>
           </AlertDescription>
         </Alert>
       ) : loading ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm font-medium text-muted-foreground animate-pulse">
-            Sincronizando...
-          </p>
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary opacity-50" />
+          <div className="space-y-1 text-center">
+            <p className="text-sm font-bold text-foreground">
+              {t("loading.title")}
+            </p>
+            <p className="text-xs text-muted-foreground animate-pulse">
+              {t("loading.subtitle")}
+            </p>
+          </div>
         </div>
       ) : (
         <InvoiceDetailForm

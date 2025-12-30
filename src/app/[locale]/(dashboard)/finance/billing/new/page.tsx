@@ -1,60 +1,53 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBranches } from "@/hooks/branches/useBranches";
 import { useUserByEmail } from "@/hooks/users/useUserByEmail";
 import { usePackages } from "@/hooks/packages/usePackages";
 import { useMembershipTypes } from "@/hooks/membership/useMembershipTypes";
+import { useTaxRate } from "@/hooks/billing/useTaxRate";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { api } from "@/lib/sdk-config";
-import {
-  CreateInvoiceForm,
-  type InvoiceItem,
-} from "@/components/modules/billing/CreateInvoiceForm";
+import { CreateInvoiceForm } from "@/components/modules/billing/CreateInvoiceForm";
 import { useRouter } from "@/i18n/navigation";
 import { useBranchPaymentMethods } from "@/hooks/branches/useBranchPaymentMethods";
 import { usePaymentMethods } from "@/hooks/payment-methods/usePaymentMethods";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl"; 
 
 export default function StaffNewInvoicePage() {
+  const t = useTranslations("finance.Billing"); 
   const router = useRouter();
-  const { token, user } = useAuth();
+  const { token, user: authUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedBranchId, setSelectedBranchId] = useState<string | undefined>(
+    authUser?.activeBranch?.id
+  );
 
-  const branchId = user?.activeBranch?.id;
-  
-  const branchData = useBranchPaymentMethods(branchId ?? "", token ?? "");
-  const globalData = usePaymentMethods(branchId ? "" : (token ?? ""));
+  const branchData = useBranchPaymentMethods(selectedBranchId ?? "", token ?? "");
+  const globalData = usePaymentMethods(selectedBranchId ? null : (token ?? ""));
+  const { taxRate, isLoading: loadingTax } = useTaxRate(selectedBranchId, token ?? "");
 
-  const paymentMethods = branchId ? branchData.methods : globalData.methods;
-  const loadingMethods = branchId ? branchData.loading : globalData.loading;
+  const paymentMethods = selectedBranchId ? branchData.methods : globalData.methods;
+  const loadingMethods = selectedBranchId ? branchData.loading : globalData.loading;
 
-  const {
-    getUserByEmail,
-    userData,
-    loading: searchingUser,
-  } = useUserByEmail(token ?? "");
-  
+  const { getUserByEmail, userData, loading: searchingUser } = useUserByEmail(token ?? "");
   const { branches } = useBranches({ token: token ?? "", limit: 100 });
-  const { memberships, loading: loadingMems } = useMembershipTypes({
-    token: token ?? "",
-    initialLimit: 50,
-  });
-  const { packages, loading: loadingPkgs } = usePackages({
-    token: token ?? "",
-  });
+  const { memberships, loading: loadingMems } = useMembershipTypes({ token: token ?? "", initialLimit: 50 });
+  const { packageData: packages, isLoading: loadingPkgs } = usePackages(token ?? "", 1, 100, { search: "" });
 
   const handleCreateInvoice = async (
     targetBranchId: string,
-    items: InvoiceItem[],
+    items: any[],
     paymentMethodId: string,
-    totalAmount: number
+    totalUSD: number,     
+    amountPaid: number,     
+    currencyPaid: string   
   ) => {
-    if (!token || !userData) {
-      return toast.error("Debe seleccionar un usuario primero");
+    if (!token || !userData?.data) {
+      return toast.error(t("newInvoice.messages.selectUserError"));
     }
 
     setIsSubmitting(true);
@@ -63,7 +56,7 @@ export default function StaffNewInvoicePage() {
     try {
       const invoicePayload = {
         branch_id: targetBranchId,
-        user_id: userData.user_id,
+        user_id: userData.data.user_id,
         items: items.map((item) => ({
           item_id: item.item_id,
           item_type: item.item_type,
@@ -76,56 +69,59 @@ export default function StaffNewInvoicePage() {
 
       const paymentPayload = {
         invoice_id: createdInvoiceId,
-        amount_paid: totalAmount,
-        currency_paid: "USD", 
+        amount_paid: amountPaid,   
+        currency_paid: currencyPaid,
         payment_method_id: paymentMethodId,
-        transaction_id: `STAFF-${user?.user_id || "UID"}-${Date.now()}`,
+        transaction_id: `STAFF-${authUser?.user_id || "UID"}-${Date.now()}`,
         receipt_url: "",
       };
-
       await api.billing.AddPaymentToInvoice(paymentPayload, token);
 
-      toast.success("Venta completada y pagada exitosamente");
+      toast.success(t("newInvoice.messages.success", { currency: currencyPaid }));
       router.push("/finance/billing");
     } catch (error: any) {
-      console.error("Error en el flujo de venta:", error);
+      console.error("Error:", error);
       if (createdInvoiceId) {
-        toast.error("Factura creada, pero el pago falló. Redirigiendo...");
+        toast.error(t("newInvoice.messages.partialError"));
         router.push(`/finance/billing/${createdInvoiceId}/pay`);
       } else {
-        toast.error("Error al generar la factura");
+        toast.error(t("newInvoice.messages.error"));
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (!token) {
+    return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  }
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-4">
-
-        <PageHeader
-          title="Nueva Venta"
-          subtitle="Genera cargos y procesa el pago en un solo paso."
-        />
-      </div>
-
+    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-500">
+      <PageHeader 
+        title={t("newInvoice.title")} 
+        subtitle={t("newInvoice.subtitle")} 
+      />
       <CreateInvoiceForm
+        token={token}
         branches={branches}
         memberships={memberships}
-        packages={packages}
+        packages={packages || []}
         userData={userData}
-        paymentMethods={paymentMethods} 
-        loadingMethods={loadingMethods} 
+        paymentMethods={paymentMethods || []}
+        loadingMethods={loadingMethods}
         loadingMems={loadingMems}
         loadingPkgs={loadingPkgs}
+        loadingTax={loadingTax}
+        taxRate={taxRate}
         isSubmitting={isSubmitting}
         isSearchingUser={searchingUser}
         onSearchUser={getUserByEmail}
         onSubmit={handleCreateInvoice}
         onCancel={() => router.back()}
-        canSelectBranch={!branchId} 
-        initialBranchId={branchId}
+        canSelectBranch={!authUser?.activeBranch?.id}
+        initialBranchId={selectedBranchId}
+        onBranchChange={(id: string) => setSelectedBranchId(id)}
       />
     </div>
   );
