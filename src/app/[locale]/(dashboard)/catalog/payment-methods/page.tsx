@@ -20,14 +20,14 @@ export default function PaymentMethodsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { 
-    paginatedData, 
-    stats, 
-    loading, 
-    filters, 
-    setFilters, 
-    pagination, 
-    refresh 
-  } = usePaymentMethods(token);
+  methods,
+  stats, 
+  loading, 
+  filters, 
+  setFilters, 
+  pagination, 
+  refresh 
+} = usePaymentMethods(token);
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -65,7 +65,7 @@ export default function PaymentMethodsPage() {
       </PageHeader>
 
       <PaymentTable
-        data={paginatedData}
+        data={methods}
         loading={loading}
         pagination={pagination}
         filters={filters}

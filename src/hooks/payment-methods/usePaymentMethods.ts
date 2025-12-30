@@ -4,36 +4,53 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/sdk-config";
 
+interface PaymentFilters {
+  search: string;
+  type: string;
+  status: string;
+}
+
 export function usePaymentMethods(token: string | null) {
   const t = useTranslations("catalog.payment_methods");
+  
   const [data, setData] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ search: "", type: "", status: "" });
+  const [filters, setFilters] = useState<PaymentFilters>({ search: "", type: "", status: "" });
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
   const fetchMethods = useCallback(async () => {
-    if (!token){
-       return;
+    if (!token) {
+      return;
     }
+    
     setLoading(true);
     try {
       const response = await api.paymentMethod.getPaymentMethods(token);
-      setData(response.data || []);
+
+      const methods = Array.isArray(response) ? response : (response as any).data || [];
+      setData(methods);
     } catch (error) {
-      toast.error(t("notifications.error_title"), { description: t("notifications.load_error") });
+      console.error("Error loading payment methods:", error);
+      toast.error(t("notifications.error_title") || "Error", { 
+        description: t("notifications.load_error") 
+      });
     } finally {
       setLoading(false);
     }
   }, [token, t]);
 
-  useEffect(() => { fetchMethods(); }, [fetchMethods]);
+  useEffect(() => {
+    fetchMethods();
+  }, [fetchMethods]);
+
 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
+      const searchLower = filters.search.toLowerCase();
       const matchesSearch = !filters.search || 
-        item.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        item.description?.toLowerCase().includes(filters.search.toLowerCase());
+        item.name.toLowerCase().includes(searchLower) ||
+        item.description?.toLowerCase().includes(searchLower);
       
       const matchesType = !filters.type || item.type === filters.type;
       
@@ -53,27 +70,36 @@ export function usePaymentMethods(token: string | null) {
       if (pm.processing_type === "Gateway") {
         acc.gateway++;
       }
-      if (["Card", "Transfer", "Other"].includes(pm.type)){
-         acc.digital++;
+      if (["Card", "Transfer", "Other"].includes(pm.type)) {
+        acc.digital++;
       }
       return acc;
     }, { total: 0, cash: 0, gateway: 0, digital: 0 });
   }, [filteredData]);
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+
   const paginatedData = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredData.slice(start, start + pageSize);
   }, [filteredData, page]);
 
   return {
-    paginatedData,
+    methods: paginatedData, 
+    allMethods: data,       
+    allFiltered: filteredData,
     stats,
     loading,
     filters,
-    setFilters: (f: any) => { setFilters(f); setPage(1); },
-    pagination: { page, totalPages, setPage },
+    setFilters: (f: Partial<PaymentFilters>) => { 
+      setFilters(prev => ({ ...prev, ...f })); 
+      setPage(1); 
+    },
+    pagination: { 
+      page, 
+      totalPages, 
+      setPage 
+    },
     refresh: fetchMethods,
-    allFiltered: filteredData
   };
 }
