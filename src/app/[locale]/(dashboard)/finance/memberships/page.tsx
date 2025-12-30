@@ -8,7 +8,6 @@ import { useClientMembership } from "@/hooks/membership/useClientMembership";
 import MembershipManagementTable from "@/components/modules/membership/MembershipManagementTable";
 
 export default function MembershipManagement() {
-  // Usamos el namespace anidado según tu JSON
   const t = useTranslations("finance.MembershipManagement");
   const { token } = useAuth();
 

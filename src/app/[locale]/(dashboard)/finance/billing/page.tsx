@@ -61,6 +61,8 @@ export default function BillingPage() {
     "accountant",
   ] as any);
 
+  const canCreateInvoice = hasRole(["branch_admin", "super_admin"] as any);
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex justify-between items-start">
@@ -72,9 +74,12 @@ export default function BillingPage() {
               : t("subtitle")
           }
         />
-        <Button onClick={() => router.push("/finance/billing/new")}>
-          <Plus className="h-4 w-4 mr-2" /> {t("newInvoiceTitle")}
-        </Button>
+
+        {canCreateInvoice && (
+          <Button onClick={() => router.push("/finance/billing/new")}>
+            <Plus className="h-4 w-4 mr-2" /> {t("newInvoiceTitle")}
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 items-center bg-white p-4 rounded-xl border shadow-sm">
