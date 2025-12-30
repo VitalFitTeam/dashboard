@@ -238,6 +238,36 @@
           "sync_error": "Sync error"
         }
       }
+    },
+    "InstructorDashboard": {
+      "header": {
+        "morning": "Good morning!",
+        "afternoon": "Good afternoon!",
+        "night": "Good evening!",
+        "active_branch": "Current branch:",
+        "no_branch": "No branch assigned"
+      },
+      "stats": {
+        "next_class": "Next Class",
+        "students_today": "Students Today",
+        "monthly_classes": "Classes this month",
+        "meta": "Goal"
+      },
+      "classes_list": {
+        "title": "My classes today",
+        "description": "Class management at",
+        "empty": "No sessions scheduled for today.",
+        "starts": "Start time",
+        "loading": "Loading...",
+        "ends": "End",
+        "capacity": "Capacity",
+        "start_button": "Start class"
+      },
+      "messages": {
+        "updating": "Updating dashboard...",
+        "updated": "Data updated",
+        "error_loading": "Error loading reports"
+      }
     }
   },
   "catalog": {
