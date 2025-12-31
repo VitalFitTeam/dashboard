@@ -130,6 +130,21 @@ export default function BranchBasicDataPanel({
     }
   };
 
+  const handleManagerChange = (id: string) => {
+    if (!isSuperAdmin) {
+      return;
+    }
+
+    const selectedAdmin = allBranchAdmins.find((a) => a.user_id === id);
+
+    setFormData((prev: any) => ({
+      ...prev,
+      manager: id,
+      manager_first_name: selectedAdmin?.first_name || prev.manager_first_name,
+      manager_last_name: selectedAdmin?.last_name || prev.manager_last_name,
+    }));
+  };
+
   return (
     <div className="space-y-10">
       <section>
@@ -216,7 +231,7 @@ export default function BranchBasicDataPanel({
             </label>
             <Select
               value={currentManagerId}
-              onValueChange={(v) => setFormData((p) => ({ ...p, manager: v }))}
+              onValueChange={handleManagerChange} 
               disabled={isViewMode || !isSuperAdmin}
             >
               <SelectTrigger
