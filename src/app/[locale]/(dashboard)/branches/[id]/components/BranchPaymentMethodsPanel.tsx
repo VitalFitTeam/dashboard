@@ -1,11 +1,23 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { 
+  CreditCard, 
+  Plus, 
+  RotateCcw, 
+  Trash2, 
+  Save, 
+  WalletCards 
+} from "lucide-react";
+import { BranchPaymentMethodInfo, PaymentMethod } from "@vitalfit/sdk";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { BranchPaymentMethodInfo, PaymentMethod } from "@vitalfit/sdk";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectTrigger,
@@ -14,217 +26,244 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import EntityItem from "@/components/layout/EntityItem";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
+import { SectionHeader } from "@/components/modules/branches/SectionHeader";
 
-interface BranchPaymentMethodPanelProps {
+interface Props {
   branchId: string;
   mode?: "edit" | "view";
 }
 
-import { useTranslations } from "next-intl";
-
-export default function BranchPaymentMethodPanel({
-  branchId,
-  mode = "edit",
-}: BranchPaymentMethodPanelProps) {
+export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Props) {
   const t = useTranslations("branches");
   const { token } = useAuth();
-
-  const [allPaymentMethods, setAllPaymentMethods] = useState<PaymentMethod[]>(
-    [],
-  );
-  const [selectedMethods, setSelectedMethods] = useState<
-    BranchPaymentMethodInfo[]
-  >([]);
+  const isViewMode = mode === "view";
+  const [allMethods, setAllMethods] = useState<PaymentMethod[]>([]);
+  const [branchMethods, setBranchMethods] = useState<BranchPaymentMethodInfo[]>([]);
+  const [pendingIds, setPendingIds] = useState<string[]>([]);
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [dirty, setDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [methodToRemove, setMethodToRemove] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!token) {
+  const fetchData = useCallback(async () => {
+    if (!token || !branchId){
+       return;
+    }
+    setLoading(true);
+    try {
+      const [catalogRes, branchRes] = await Promise.all([
+        api.paymentMethod.getPaymentMethods(token),
+        api.paymentMethod.getBranchPaymentMethods(branchId, token)
+      ]);
+      setAllMethods(catalogRes.data || []);
+      setBranchMethods(branchRes.data || []);
+      setPendingIds([]);
+      setRemovedIds([]);
+    } catch (err) {
+      toast.error(t("details.payment_methods.error_load"));
+    } finally {
+      setLoading(false);
+    }
+  }, [branchId, token, t]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleAddToQueue = useCallback(() => {
+    if (!selectedId) {
       return;
     }
-
-    const fetchAllMethods = async () => {
-      try {
-        setLoading(true);
-        const res = await api.paymentMethod.getPaymentMethods(token);
-        setAllPaymentMethods(res.data || []);
-      } catch (err) {
-        console.error(err);
-        toast.error(t("details.payment_methods.error_load"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllMethods();
-  }, [token]);
-
-  useEffect(() => {
-    if (!token || !branchId) {
-      return;
-    }
-
-    const fetchBranchMethods = async () => {
-      try {
-        setLoading(true);
-        const res = await api.paymentMethod.getBranchPaymentMethods(
-          branchId,
-          token,
-        );
-        setSelectedMethods(res.data || []);
-        setDirty(false);
-        toast.success(t("details.payment_methods.success_load"));
-      } catch (err) {
-        console.error(err);
-        toast.error(t("details.payment_methods.error_branch_load"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBranchMethods();
-  }, [branchId, token]);
-
-  const handleAddMethod = () => {
-    if (!branchId || !selectedId) {
-      return;
-    }
-
-    const method = allPaymentMethods.find((m) => m.method_id === selectedId);
+    const method = allMethods.find(x => x.method_id === selectedId);
     if (!method) {
       return;
     }
+    if (removedIds.includes(selectedId)) {
+      setRemovedIds(prev => prev.filter(id => id !== selectedId));
+    } else {
+      setPendingIds(prev => [...prev, method.method_id]);
+    }
 
-    const newMethod: BranchPaymentMethodInfo = {
-      method_id: method.method_id,
-      branch_id: branchId,
-      is_active: true,
-      name: method.name,
-      type: method.type,
-    };
-
-    setSelectedMethods((prev) => [...prev, newMethod]);
+    setBranchMethods(prev => [...prev, { ...method, branch_id: branchId, is_active: true }]);
     setSelectedId("");
-    setDirty(true);
-    toast.success(t("details.payment_methods.success_add", { name: method.name }));
-  };
+    toast.info("Método añadido a la cola local");
+  }, [selectedId, allMethods, branchId, removedIds]);
 
-  const handleRemove = async (id: string) => {
+  const handleSyncChanges = async () => {
     if (!token || !branchId) {
       return;
     }
-    setLoading(true);
+    setIsSaving(true);
     try {
-      await api.paymentMethod.removeBranchPaymentMethod(branchId, id, token);
-      setSelectedMethods((prev) => prev.filter((m) => m.method_id !== id));
-      setDirty(true);
-      toast.success(t("details.payment_methods.success_remove"));
-    } catch (err) {
-      console.error("Error eliminando método de pago:", err);
-      toast.error(t("details.payment_methods.error_remove"));
+      if (pendingIds.length > 0) {
+        await api.paymentMethod.addBranchPaymentMethod(branchId, pendingIds, token);
+      }
+      if (removedIds.length > 0) {
+        for (const id of removedIds) {
+          await api.paymentMethod.removeBranchPaymentMethod(branchId, id, token);
+        }
+      }
+      toast.success("Sincronización exitosa");
+      await fetchData();
+    } catch (error) {
+      toast.error("Error al guardar los cambios");
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!token || !branchId) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const payload = selectedMethods.map((m) => m.method_id);
-
-      await toast.promise(
-        api.paymentMethod.addBranchPaymentMethod(branchId, payload, token),
-        {
-          loading: t("details.payment_methods.saving"),
-          success: t("details.payment_methods.success_save"),
-          error: t("details.payment_methods.error_save"),
-        },
-      );
-
-      setDirty(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const handleDiscard = () => {
+    fetchData();
+    toast.info("Cambios locales descartados");
   };
+
+  const displayMethods = useMemo(() => {
+    return branchMethods.filter(m => !removedIds.includes(m.method_id));
+  }, [branchMethods, removedIds]);
+
+  const hasChanges = pendingIds.length > 0 || removedIds.length > 0;
 
   return (
-    <div className="space-y-6">
-      <section>
-        <h2 className="text-xl font-semibold text-gray-900">
-          {t("details.payment_methods.title")}
-        </h2>
-        <p className="mt-1 text-sm text-gray-600">
-          {t("details.payment_methods.subtitle")}
-        </p>
-      </section>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <SectionHeader 
+        title="Métodos de Pago"
+        subtitle="Configura los medios de pago aceptados en esta sucursal."
+        icon={CreditCard}
+        isViewMode={isViewMode}
+      />
 
-      {mode === "edit" && (
-        <div className="flex gap-2 items-end">
-          <Select value={selectedId} onValueChange={setSelectedId}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder={t("details.payment_methods.placeholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              {allPaymentMethods
-                .filter(
-                  (m) =>
-                    !selectedMethods.some((s) => s.method_id === m.method_id),
-                )
-                .map((method) => (
-                  <SelectItem key={method.method_id} value={method.method_id}>
-                    {method.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={handleAddMethod} disabled={!selectedId}>
-            {t("details.payment_methods.add")}
-          </Button>
-        </div>
+
+      {!isViewMode && (
+        <Card className="border shadow-none bg-slate-50/40">
+          <CardHeader className="pb-4 text-left">
+            <CardTitle className="text-[11px] font-black uppercase tracking-wider text-muted-foreground">
+              Vincular Nuevo Método
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Select value={selectedId} onValueChange={setSelectedId}>
+                <SelectTrigger className="w-full sm:w-[350px] bg-white">
+                  <SelectValue placeholder="Selecciona un método de pago..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {allMethods
+                    .filter(m => !branchMethods.some(bm => bm.method_id === m.method_id) && !pendingIds.includes(m.method_id))
+                    .map((method) => (
+                      <SelectItem key={method.method_id} value={method.method_id}>
+                        {method.name} <span className="text-muted-foreground ml-1">({method.type})</span>
+                      </SelectItem>
+                    ))}
+                  {allMethods.length === 0 && (
+                     <p className="p-2 text-xs text-center text-muted-foreground">No hay métodos disponibles</p>
+                  )}
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={handleAddToQueue} 
+                disabled={!selectedId} 
+                variant="outline"
+                className="bg-white font-bold text-xs uppercase tracking-widest border-slate-200 shadow-sm transition-all active:scale-95"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Agregar a cola
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-200/60">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSyncChanges} 
+                  disabled={!hasChanges || isSaving}
+                  className="font-bold text-xs uppercase tracking-widest bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-100 transition-all active:scale-95"
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {isSaving ? "Guardando..." : "Sincronizar Cambios"}
+                </Button>
+                {hasChanges && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={handleDiscard}
+                    className="text-slate-400 hover:text-orange-500 font-black text-[10px] uppercase tracking-tighter"
+                  >
+                    <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                    Descartar
+                  </Button>
+                )}
+              </div>
+              {hasChanges && (
+                <Badge className="bg-orange-50 text-orange-600 border-orange-100 animate-pulse font-black text-[10px]">
+                  CAMBIOS PENDIENTES
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      <div className="space-y-2">
-        {selectedMethods.length === 0 ? (
-          <p className="text-sm text-gray-500">
-            {t("details.payment_methods.empty")}
-          </p>
-        ) : (
-          selectedMethods.map((method) => (
-            <EntityItem
-              key={method.method_id}
-              initials={method.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-              title={method.name}
-              description={t("details.payment_methods.type", { type: method.type })}
-              action={
-                mode === "edit" ? (
-                  <button
-                    className="text-sm text-red-500 hover:underline"
-                    onClick={() => handleRemove(method.method_id)}
-                  >
-                    {t("details.payment_methods.remove")}
-                  </button>
-                ) : null
-              }
-            />
-          ))
-        )}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 px-1">
+           <h3 className="font-black uppercase tracking-[0.25em] text-slate-500 flex items-center gap-3">
+            Métodos Habilitados {displayMethods.length}
+        
+          </h3>
+        </div>
+
+        <div className="rounded-xl border bg-white divide-y overflow-hidden shadow-sm">
+          {loading && branchMethods.length === 0 ? (
+            <div className="p-12 text-center text-slate-400 font-bold text-xs uppercase animate-pulse tracking-widest italic">
+              Cargando métodos...
+            </div>
+          ) : displayMethods.length === 0 ? (
+            <div className="p-12 text-center text-slate-300">
+              <WalletCards className="h-10 w-10 mx-auto mb-3 opacity-20" />
+              <p className="text-[10px] uppercase font-black tracking-[0.2em]">Sin métodos configurados</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {displayMethods.map((method) => (
+                <div 
+                  key={method.method_id} 
+                  className="group flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors"
+                >
+                  <EntityItem
+                    initials={method.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                    title={method.name}
+                    description={method.type}
+                  />
+                  {!isViewMode && (
+                    <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => setMethodToRemove(method.method_id)}
+                        className="h-9 w-9 text-slate-400 hover:text-destructive hover:bg-red-50 rounded-lg"
+                      >
+                        <Trash2 size={18} />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {mode === "edit" && (
-        <Button onClick={handleSave} disabled={!dirty || loading}>
-          {loading ? t("create.form.buttons.saving") : t("create.form.buttons.save")}
-        </Button>
-      )}
+      <GeneralAlertDialog
+        open={!!methodToRemove}
+        onOpenChange={(open) => !open && setMethodToRemove(null)}
+        title="¿Quitar método de pago?"
+        description="Esta acción se aplicará en el servidor cuando sincronices los cambios."
+        actionText="Quitar"
+        actionVariant="destructive"
+        onAction={() => {
+          if(methodToRemove) {
+            setRemovedIds(prev => [...prev, methodToRemove]);
+            setMethodToRemove(null);
+            toast.warning("Método marcado para eliminar");
+          }
+        }}
+      />
     </div>
   );
 }

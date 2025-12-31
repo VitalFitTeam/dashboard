@@ -128,12 +128,12 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
       title: "General",
       items: [
         { label: "DashboardOperativo", icon: HomeIcon, href: "/" },
+        
         {
           label: "ConfiguracionLocal",
           icon: BuildingStorefrontIcon,
           subitems: [
-            { label: "InformacionHorarios", href: "/branch/settings" },
-            { label: "CapacidadAforo", href: "/branch/capacity" },
+            { label: "InformacionHorarios", href: "/branches/active/edit", },
           ],
         },
       ],

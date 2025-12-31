@@ -7,16 +7,19 @@ import { useTranslations } from "next-intl";
 interface Filters {
     search: string;
     category: string;
+    limit?: number; 
 }
 
 export function useServices(token: string | null, page: number, filters: Filters) {
-    const t = useTranslations("catalog.services"); // Scope principal
+    const t = useTranslations("catalog.services");
     
     const [services, setServices] = useState<ServiceFullDetail[]>([]);
     const [categories, setCategories] = useState<ServiceCategoryInfo[]>([]);
     const [summary, setSummary] = useState<ServicesSummary>();
     const [isLoading, setIsLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
+
+    const currentLimit = filters.limit || 10;
 
     const filtersKey = JSON.stringify(filters);
     const lastFiltersRef = useRef(filtersKey);
@@ -27,7 +30,6 @@ export function useServices(token: string | null, page: number, filters: Filters
         }
 
         let toastId: string | number | undefined;
-        
         if (isManual) {
             toastId = toast.loading(t("table.downloading")); 
         }
@@ -42,7 +44,7 @@ export function useServices(token: string | null, page: number, filters: Filters
             const [servicesRes, categoriesRes, serviceSummary] = await Promise.all([
                 api.products.getServices(token, {
                     page: page,
-                    limit: 10,
+                    limit: currentLimit, 
                     sort: "desc",
                     search: filters.search?.trim() || undefined,
                     category: categoryParam,
@@ -71,7 +73,6 @@ export function useServices(token: string | null, page: number, filters: Filters
             });
 
             if (isManual && toastId){
-                // Usamos una notificación de éxito genérica
                 toast.success(t("notifications.successTitle"), { id: toastId });
             }
                 
@@ -85,15 +86,15 @@ export function useServices(token: string | null, page: number, filters: Filters
         } finally {
             setIsLoading(false);
         }
-    }, [token, page, filtersKey, t]);
+    }, [token, page, filtersKey, currentLimit, t]); 
 
     useEffect(() => {
         loadData();
     }, [loadData]);
 
     const totalPages = useMemo(() => {
-        return totalItems > 0 ? Math.ceil(totalItems / 10) : 1;
-    }, [totalItems]);
+        return totalItems > 0 ? Math.ceil(totalItems / currentLimit) : 1;
+    }, [totalItems, currentLimit]);
 
     return {
         services,

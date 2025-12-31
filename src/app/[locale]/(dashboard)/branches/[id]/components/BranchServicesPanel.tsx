@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState, forwardRef } from "react";
+import React, { useEffect, useState, forwardRef, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, Trash2, LayoutList, RotateCcw } from "lucide-react";
 import { getInitials } from "@/utils";
 import {
   Select,
@@ -17,211 +17,156 @@ import {
   BranchServicePrice,
   CreateBranchServicePriceItem,
   ServiceFullDetail,
-  UpdateBranchServicePrice,
 } from "@vitalfit/sdk";
 import { api } from "@/lib/sdk-config";
 import EditBranchServiceModal from "./EditBranchServiceModal";
 import { toast } from "sonner";
 import { branchServiceSchema } from "@/lib/validation/branchServiceSchema";
 import EntityItem from "@/components/layout/EntityItem";
+import { PaginationControls } from "@/components/ui/table/PaginationControls";
+import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
+import { ServiceGlobalSelector } from "@/components/modules/branches/ServiceGlobalSelector";
 
 interface BranchServicePanelProps {
   branchId: string;
   mode: "view" | "edit";
 }
 
-import { useTranslations } from "next-intl";
-
-const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
+const BranchServicePanel = forwardRef<HTMLDivElement, BranchServicePanelProps>((props, ref) => {
   const { branchId, mode = "edit" } = props;
   const t = useTranslations("branches");
   const { token } = useAuth();
   const isDisabled = mode === "view";
-
-  const [allServices, setAllServices] = useState<ServiceFullDetail[]>([]);
   const [services, setServices] = useState<BranchServicePrice[]>([]);
-  const [newServices, setNewServices] = useState<
-    CreateBranchServicePriceItem[]
-  >([]);
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null,
-  );
+  const [newServices, setNewServices] = useState<CreateBranchServicePriceItem[]>([]);
+  const [removedIds, setRemovedIds] = useState<string[]>([]); 
+  const [selectedService, setSelectedService] = useState<ServiceFullDetail | null>(null);
+  
   const [aforo, setAforo] = useState<number>(0);
   const [priceMember, setPriceMember] = useState<number>(0);
   const [priceNonMember, setPriceNonMember] = useState<number>(0);
   const [isVisible, setIsVisible] = useState<boolean>(true);
 
-  const [loading, setLoading] = useState(false);
-  const [dirty, setDirty] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [serviceToEdit, setServiceToEdit] = useState<BranchServicePrice | null>(
-    null,
-  );
+  const [serviceToEdit, setServiceToEdit] = useState<BranchServicePrice | null>(null);
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
 
-  useEffect(() => {
-    if (!token) {
-      return;
-    }
-    const fetchServices = async () => {
-      try {
-        const response = await api.products.getServices(token, { page: 1 });
-        toast.success(t("details.services.success_load_catalog"));
-        setAllServices(response.data || []);
-      } catch (err) {
-        console.error("Error cargando servicios:", err);
-        toast.error(t("details.services.error_load_catalog"));
-      }
-    };
-    fetchServices();
-  }, [token, t]);
-
-  useEffect(() => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
+  const fetchBranchServices = useCallback(async () => {
     if (!token || !branchId) {
       return;
+    setIsLoading(true);
     }
-    const fetchBranchServices = async () => {
-      setIsLoading(true);
-      try {
-        const response = await api.products.getBranchServices(branchId, token);
-        setServices(response.data || []);
-      } catch (err) {
-        console.error("Error cargando servicios de la sucursal:", err);
-        toast.error(t("details.services.error_load_branch"));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchBranchServices();
+    try {
+      const response = await api.products.getBranchServices(branchId, token);
+      setServices(response.data || []);
+      setNewServices([]);
+      setRemovedIds([]);
+    } catch (err) {
+      toast.error(t("details.services.error_load_branch"));
+    } finally {
+      setIsLoading(false);
+    }
   }, [token, branchId, t]);
 
-  const handleAddService = () => {
-    if (!selectedServiceId) { return; }
+  useEffect(() => {
+    fetchBranchServices();
+  }, [fetchBranchServices]);
 
-    const service = allServices.find((s) => s.service_id === selectedServiceId);
-    if (!service) { return; }
+  const handleAddLocal = () => {
+    if (!selectedService) {
+      return;
+    }
 
-    const newService: CreateBranchServicePriceItem = {
-      service_id: service.service_id,
+    const newItem: CreateBranchServicePriceItem = {
+      service_id: selectedService.service_id,
       max_capacity: aforo,
       price_for_member: priceMember,
       price_for_non_member: priceNonMember,
       is_visible: isVisible,
     };
 
-    const result = branchServiceSchema.safeParse(newService);
+    const result = branchServiceSchema.safeParse(newItem);
     if (!result.success) {
-      const messages = result.error.issues
-        .map((issue) => `${String(issue.path[0])}: ${issue.message}`)
-        .join("\n");
-
-      toast.error(messages);
+      toast.error(result.error.issues[0].message);
       return;
     }
 
-    setServices((prev) => [
-      ...prev,
-      { ...newService, service_name: service.name } as BranchServicePrice,
-    ]);
-    setNewServices((prev) => [...prev, newService]);
-    setDirty(true);
+    if (removedIds.includes(selectedService.service_id)) {
+        setRemovedIds(prev => prev.filter(id => id !== selectedService.service_id));
+    }
 
-    setSelectedServiceId(null);
-    setAforo(0);
-    setPriceMember(0);
-    setPriceNonMember(0);
-    setIsVisible(true);
-
-    toast.success(t("details.services.success_added", { name: service.name }));
+    setServices((prev) => [...prev, { ...newItem, service_name: selectedService.name } as BranchServicePrice]);
+    setNewServices((prev) => [...prev, newItem]);
+    
+    setSelectedService(null);
+    setAforo(0); setPriceMember(0); setPriceNonMember(0);
+    toast.info("Servicio añadido a la cola local");
   };
 
-  const handleRemoveService = async (serviceId: string) => {
+  const handleSaveSync = async () => {
     if (!token || !branchId) {
       return;
     }
-    setIsLoading(true);
+    if (newServices.length === 0 && removedIds.length === 0) {
+      toast.error("No hay cambios pendientes");
+      return;
+    }
+
+    setIsSaving(true);
     try {
-      const isNew = newServices.find((s) => s.service_id === serviceId);
-      if (isNew) {
-        setNewServices((prev) =>
-          prev.filter((s) => s.service_id !== serviceId),
-        );
-      } else {
-        await api.products.removeBranchService(branchId, serviceId, token);
+      if (newServices.length > 0) {
+        await api.products.addBranchService(newServices, branchId, token);
       }
-      const removedService = services.find((s) => s.service_id === serviceId);
-      setServices((prev) => prev.filter((s) => s.service_id !== serviceId));
-      setDirty(true);
-      toast.success(
-        t("details.services.success_removed", { name: removedService?.service_name ?? "" }),
-      );
-    } catch (err) {
-      console.error("Error eliminando servicio:", err);
-      toast.error(t("details.services.error_removing"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!token || !branchId) {
-      return;
-    }
-    if (newServices.length === 0) {
-      toast.error(t("details.services.no_new_services"));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await api.products.addBranchService(newServices, branchId, token);
-      const response = await api.products.getBranchServices(branchId, token);
-      setServices(response.data || []);
-      setNewServices([]);
-      setDirty(false);
+      for (const id of removedIds) {
+        await api.products.removeBranchService(branchId, id, token);
+      }
 
       toast.success(t("details.services.save_success"));
-    } catch (err) {
-      console.error("Error guardando servicios:", err);
+      await fetchBranchServices(); 
+    } catch (error) {
+      console.error(error);
       toast.error(t("details.services.save_error"));
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
-  const handleUpdateService = async (updatedData: {
-    max_capacity: number;
-    price_for_member: number;
-    price_for_non_member: number;
-    is_visible: boolean;
-  }) => {
+
+  const handleRemoveLocal = (serviceId: string) => {
+    const isNew = newServices.some(s => s.service_id === serviceId);
+    
+    if (isNew) {
+      setNewServices(prev => prev.filter(s => s.service_id !== serviceId));
+    } else {
+      setRemovedIds(prev => [...prev, serviceId]);
+    }
+
+    setServices(prev => prev.filter(s => s.service_id !== serviceId));
+    
+    toast.warning("Servicio quitado (pendiente de sincronizar)");
+  };
+
+  const handleDiscard = () => {
+    fetchBranchServices();
+    toast.info("Cambios locales descartados");
+  };
+
+  const handleUpdateService = async (updatedData: any) => {
     if (!serviceToEdit || !token || !branchId) {
       return;
     }
-
     try {
-      await api.products.updateBranchService(
-        branchId,
-        serviceToEdit.service_id,
-        updatedData,
-        token,
-      );
-
-      setServices((prev) =>
-        prev.map((s) =>
-          s.service_id === serviceToEdit.service_id
-            ? { ...s, ...updatedData }
-            : s,
-        ),
-      );
-
+      await api.products.updateBranchService(branchId, serviceToEdit.service_id, updatedData, token);
+      setServices((prev) => prev.map((s) => s.service_id === serviceToEdit.service_id ? { ...s, ...updatedData } : s));
       setEditModalOpen(false);
-      setServiceToEdit(null);
-
-      toast.success(t("details.services.success_update", { name: serviceToEdit.service_name ?? "" }));
+      toast.success(t("details.services.success_update", { name: serviceToEdit.service_name }));
     } catch (err) {
-      console.error("Error actualizando servicio:", err);
       toast.error(t("details.services.error_update"));
     }
   };
@@ -238,158 +183,148 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
     setEditModalOpen(true);
   };
 
+  const hasChanges = newServices.length > 0 || removedIds.length > 0;
+
+  const activeServiceIds = useMemo(() => services.map(s => s.service_id), [services]);
+
+  const totalPages = Math.ceil(services.length / pageSize) || 1;
+  const currentServices = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return services.slice(start, start + pageSize);
+  }, [services, currentPage, pageSize]);
+
   return (
-    <div className="space-y-10">
+    <div ref={ref} className="space-y-10 animate-in fade-in duration-500">
       <section>
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl text-orange-400 font-semibold tracking-tight uppercase ">
           {t("details.services.title")}
         </h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-sm text-slate-500 font-medium">
           {t("details.services.subtitle")}
         </p>
       </section>
 
-      {!isDisabled && (
-        <div className="p-4 border rounded-lg bg-gray-50">
-          <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-end">
-            <div className="flex-grow min-w-[200px] space-y-1.5">
-              <p className="text-sm font-medium text-gray-700">
-                {t("details.services.add.title")}
-              </p>
-              <Select
-                value={selectedServiceId ?? ""}
-                onValueChange={setSelectedServiceId}
-              >
-                <SelectTrigger id="service-select">
-                  <SelectValue placeholder={t("details.services.add.select_placeholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {allServices
-                    .filter(
-                      (s) =>
-                        !services.some(
-                          (asv) => asv.service_id === s.service_id,
-                        ),
-                    )
-                    .map((service) => (
-                      <SelectItem
-                        key={service.service_id}
-                        value={service.service_id}
-                      >
-                        {service.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+      {!isDisabled && token && (
+        <div className="p-6 border rounded-2xl bg-slate-50/50 shadow-sm">
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+              <div className="space-y-1.5 lg:col-span-1">
+                <label className="text-[11px] font-black uppercase tracking-wider text-slate-400 ml-1">
+                  {t("details.services.add.title")}
+                </label>
+                <ServiceGlobalSelector
+                  token={token}
+                  onSelect={setSelectedService}
+                  excludeIds={activeServiceIds} 
+                  placeholder={t("details.services.add.select_placeholder")}
+                />
+              </div>
+
+              <InputField label={t("details.services.add.capacity")} type="number" value={aforo} onChange={(e) => setAforo(Number(e.target.value))} className="bg-white" />
+              <InputField label={t("details.services.add.member_price")} type="number" value={priceMember} onChange={(e) => setPriceMember(Number(e.target.value))} className="bg-white" />
+              <InputField label={t("details.services.add.non_member_price")} type="number" value={priceNonMember} onChange={(e) => setPriceNonMember(Number(e.target.value))} className="bg-white" />
             </div>
 
-            <InputField
-              label={t("details.services.add.capacity")}
-              type="number"
-              min={0}
-              value={aforo}
-              onChange={(e) => setAforo(Number(e.target.value))}
-            />
-            <InputField
-              label={t("details.services.add.member_price")}
-              type="number"
-              min={0}
-              value={priceMember}
-              onChange={(e) => setPriceMember(Number(e.target.value))}
-            />
-            <InputField
-              label={t("details.services.add.non_member_price")}
-              type="number"
-              min={0}
-              value={priceNonMember}
-              onChange={(e) => setPriceNonMember(Number(e.target.value))}
-            />
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={isVisible}
-                onChange={(e) => setIsVisible(e.target.checked)}
-                className="h-4 w-4"
-              />
-              <label className="text-sm">{t("details.services.add.visible")}</label>
+            <div className="flex items-center justify-between pt-4 border-t border-slate-200/60">
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="outline" disabled={!selectedService || aforo <= 0} onClick={handleAddLocal} className="font-bold text-xs uppercase tracking-widest bg-white">
+                  <Plus size={16} className="mr-2" /> {t("details.services.add.button")}
+                </Button>
+                <Button onClick={handleSaveSync} disabled={!hasChanges || isSaving} className="font-bold text-xs uppercase tracking-widest bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-100">
+                  {isSaving ? t("create.form.buttons.saving") : "Sincronizar Cambios"}
+                </Button>
+                {hasChanges && (
+                  <Button variant="ghost" onClick={handleDiscard} className="text-slate-400 hover:text-orange-500 font-black text-[10px] uppercase tracking-tighter">
+                    <RotateCcw size={14} className="mr-1" /> Descartar
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="visible-check" checked={isVisible} onChange={(e) => setIsVisible(e.target.checked)} className="h-4 w-4 rounded accent-orange-500 cursor-pointer" />
+                <label htmlFor="visible-check" className="text-[11px] font-black uppercase tracking-tighter text-slate-500 cursor-pointer">{t("details.services.add.visible")}</label>
+              </div>
             </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!selectedServiceId || aforo <= 0}
-              onClick={handleAddService}
-            >
-              <Plus size={16} className="mr-2" /> {t("details.services.add.button")}
-            </Button>
           </div>
         </div>
       )}
 
-      <div>
-        <h3 className="text-sm font-medium text-gray-800 mb-4">
-          {t("details.services.assigned_title")}
-        </h3>
-        {isLoading ? (
-          <p className="text-sm text-gray-500">{t("details.services.loading")}</p>
-        ) : services.length === 0 ? (
-          <p className="text-sm text-gray-500">{t("details.services.empty")}</p>
-        ) : (
-          services.map((service) => (
-            <EntityItem
-              key={service.service_id}
-              initials={getInitials(service.service_name ?? "??")}
-              title={
-                service.service_name ?? `${t("catalog.services.id_prefix")}: ${service.service_id}`
-              }
-              description={t("details.services.description", {
-                capacity: service.max_capacity,
-                memberPrice: service.price_for_member,
-                nonMemberPrice: service.price_for_non_member,
-                visible: service.is_visible ? t("details.services.yes") : t("details.services.no"),
-              })}
-              action={
-                !isDisabled ? (
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      onClick={() => handleViewService(service)}
-                      variant="outline"
-                    >
-                      <Eye size={20} />
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => handleEditService(service)}
-                      variant="outline"
-                    >
-                      <Pencil size={20} />
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => handleRemoveService(service.service_id)}
-                      variant="outline"
-                    >
-                      <Trash2 size={20} />
-                    </Button>
-                  </div>
-                ) : undefined
-              }
-            />
-          ))
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 px-1">
+          <h3 className="font-black uppercase tracking-[0.25em] text-slate-500 flex items-center gap-3">
+            {t("details.services.assigned_title")} {services.length}
+
+            {hasChanges && (
+               <Badge className="bg-orange-50 text-orange-600 border-orange-100 animate-pulse font-black text-[10px]">
+                  CAMBIOS PENDIENTES
+                </Badge>
+            )}
+          </h3>
+        </div>
+
+        <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
+          {isLoading && services.length === 0 ? (
+            <div className="p-12 text-center text-slate-400 font-bold text-xs uppercase animate-pulse tracking-widest italic">
+              {t("details.services.loading")}
+            </div>
+          ) : services.length === 0 ? (
+            <div className="p-12 text-center text-slate-300">
+              <LayoutList className="h-10 w-10 mx-auto mb-3 opacity-20" />
+              <p className="text-[10px] uppercase font-black tracking-[0.2em]">{t("details.services.empty")}</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {currentServices.map((service) => (
+                <div key={service.service_id} className="group flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
+                  <EntityItem
+                    initials={getInitials(service.service_name ?? "??")}
+                    title={service.service_name ?? `${t("catalog.services.id_prefix")}: ${service.service_id}`}
+                    description={t("details.services.description", {
+                      capacity: service.max_capacity,
+                      memberPrice: service.price_for_member,
+                      nonMemberPrice: service.price_for_non_member,
+                      visible: service.is_visible ? t("details.services.yes") : t("details.services.no"),
+                    })}
+                  />
+                  {!isDisabled && (
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
+                      <Button variant="ghost" size="icon" onClick={() => handleViewService(service)} className="h-9 w-9 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg">
+                        <Eye size={18} />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleEditService(service)} className="h-9 w-9 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg">
+                        <Pencil size={17} />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleRemoveLocal(service.service_id)} className="h-9 w-9 text-slate-400 hover:text-destructive hover:bg-red-50 rounded-lg">
+                        <Trash2 size={18} />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {services.length > 0 && (
+          <div className="flex items-center justify-between pt-4 px-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{t("pagination.show")}</span>
+              <Select value={pageSize.toString()} onValueChange={(val) => { setPageSize(Number(val)); setCurrentPage(1); }}>
+                <SelectTrigger className="h-8 w-16 text-[11px] font-bold border-slate-200 shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[5, 10, 20, 50].map(size => <SelectItem key={size} value={size.toString()} className="text-xs">{size}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <PaginationControls page={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          </div>
         )}
       </div>
 
-      {!isDisabled && (
-        <Button onClick={handleSave} disabled={!dirty || loading}>
-          {loading ? t("create.form.buttons.saving") : t("create.form.buttons.save")}
-        </Button>
-      )}
-
       <EditBranchServiceModal
         open={editModalOpen && !!serviceToEdit}
-        onClose={() => setEditModalOpen(false)}
+        onClose={() => { setEditModalOpen(false); setServiceToEdit(null); }}
         service={serviceToEdit!}
         onSave={handleUpdateService}
         mode={modalMode}
@@ -398,4 +333,5 @@ const BranchServicePanel = forwardRef((props: BranchServicePanelProps, ref) => {
   );
 });
 
+BranchServicePanel.displayName = "BranchServicePanel";
 export default BranchServicePanel;

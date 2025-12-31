@@ -7,6 +7,8 @@ interface InstructorFilters {
   search?: string;
   sort?: "asc" | "desc";
   identity_doc?: string;
+  limit?: number; 
+  skipSummary?: boolean; 
 }
 
 export function useInstructors(token: string | null, page: number, filters: InstructorFilters) {
@@ -15,35 +17,42 @@ export function useInstructors(token: string | null, page: number, filters: Inst
   const [isLoading, setIsLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
 
+  const limit = filters.limit || 10;
+
   const loadData = useCallback(async (isManual = false) => {
     if (!token){
-         return;
+       return;
     }
 
     let toastId;
     if (isManual) {
-        toastId = toast.loading("Actualizando instructores...");
+      toastId = toast.loading("Actualizando instructores...");
     }
     
     setIsLoading(true);
     try {
-      const [instructorsRes, summaryRes] = await Promise.all([
+      const promises: [Promise<any>, Promise<any> | null] = [
         api.instructor.getInstructors({ 
-          limit: 10, 
+          limit, 
           page, 
           search: filters.search || undefined,
           sort: filters.sort || "desc",
           identity_doc: filters.identity_doc || undefined
         }, token),
-        api.instructor.getSummary(token)
-      ]);
+        filters.skipSummary ? null : api.instructor.getSummary(token)
+      ];
+
+      const [instructorsRes, summaryRes] = await Promise.all(promises);
 
       setData(instructorsRes.data || []);
       setTotalItems(instructorsRes.total || 0); 
-      setSummary(summaryRes?.data ?? null);
+      
+      if (summaryRes) {
+        setSummary(summaryRes.data ?? null);
+      }
 
-      if (isManual){
-         toast.success("Sincronizado", { id: toastId });
+      if (isManual) {
+        toast.success("Sincronizado", { id: toastId });
       }
     } catch (error) {
       console.error(error);
@@ -51,7 +60,7 @@ export function useInstructors(token: string | null, page: number, filters: Inst
     } finally {
       setIsLoading(false);
     }
-  }, [token, page, filters.search, filters.sort, filters.identity_doc]);
+  }, [token, page, filters.search, filters.sort, filters.identity_doc, filters.skipSummary, limit]);
 
   useEffect(() => {
     loadData();
@@ -61,7 +70,8 @@ export function useInstructors(token: string | null, page: number, filters: Inst
     data,
     summary,
     isLoading,
-    totalPages: Math.ceil(totalItems / 10) || 1,
+    totalItems,
+    totalPages: Math.ceil(totalItems / limit) || 1,
     refresh: () => loadData(true),
   };
 }

@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/select";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { MapPin } from "lucide-react";
-import { BranchDetails, UpdateBranchRequest } from "@vitalfit/sdk";
-import { useState } from "react";
+import { BranchDetails, UpdateBranchRequest, User } from "@vitalfit/sdk";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
@@ -88,7 +88,10 @@ const transformDataForAPI = (data: BranchDetails): UpdateBranchRequest => {
     latitude: data.latitude,
     longitude: data.longitude,
     max_capacity: data.max_capacity,
-    manager_id: data.manager,
+    manager_id:
+      typeof (data as any).manager === "object"
+        ? (data as any).manager?.user_id
+        : (data as any).manager || "",
     operating_hours: opHours,
     payment_methods: [],
   };
@@ -103,8 +106,22 @@ export default function BranchBasicDataPanel({
 }: BasicDataPanelProps) {
   const t = useTranslations("branches");
   const [loading, setLoading] = useState(false);
+  const [allBranchAdmins, setAllBranchAdmins] = useState<User[]>([]);
   const isViewMode = mode === "view";
   const { token } = useAuth();
+
+  useEffect(() => {
+    if (!token) return;
+    const loadAdmins = async () => {
+      try {
+        const res = await api.user.getBranchAdmins(token);
+        setAllBranchAdmins(res.data || []);
+      } catch (error) {
+        console.error("Error loading branch admins:", error);
+      }
+    };
+    loadAdmins();
+  }, [token]);
 
   const statusOptions: { label: string; value: BranchDetails["status"] }[] = [
     { label: t("table.status.active"), value: "Active" },
@@ -234,6 +251,40 @@ export default function BranchBasicDataPanel({
                 {statusOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <label
+              htmlFor="manager"
+              className="block text-sm font-medium text-gray-700"
+            >
+              {t("create.form.admin.manager")}
+            </label>
+            <Select
+              value={
+                typeof (formData as any).manager === "object"
+                  ? (formData as any).manager?.user_id
+                  : (formData as any).manager || ""
+              }
+              onValueChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  manager: value,
+                }))
+              }
+              disabled={isViewMode}
+            >
+              <SelectTrigger id="manager">
+                <SelectValue placeholder={t("create.form.admin.manager_placeholder")} />
+              </SelectTrigger>
+              <SelectContent>
+                {allBranchAdmins.map((admin) => (
+                  <SelectItem key={admin.user_id} value={admin.user_id}>
+                    {`${admin.first_name} ${admin.last_name}`}
                   </SelectItem>
                 ))}
               </SelectContent>
