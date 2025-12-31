@@ -38,7 +38,6 @@ export function useCancellation(token: string | null, filters: Filters, page: nu
         search: debouncedSearch?.trim() || undefined,
       });
 
-      // Basado en tu console.log:
       setCancellationData(response.data || []);
       setTotalItems(response.total || 0); 
       setError(null);

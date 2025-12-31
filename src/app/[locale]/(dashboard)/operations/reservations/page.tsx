@@ -19,7 +19,7 @@ import { User, PaginatedTotal } from "@vitalfit/sdk";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, parseISO, isAfter, isBefore, parse } from "date-fns";
 import { es } from "date-fns/locale";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 // Interfaz para las reservas
 interface Booking {

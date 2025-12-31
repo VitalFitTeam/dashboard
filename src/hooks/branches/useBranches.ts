@@ -45,7 +45,7 @@ export function useBranches({
           },
           token,
         );
-
+        
         setData(response);
       } catch (err) {
         setError("Error al cargar las sucursales");

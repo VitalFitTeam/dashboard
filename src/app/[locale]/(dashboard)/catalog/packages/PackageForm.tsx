@@ -11,10 +11,24 @@ import {
   PackageItemDetail,
   CreatePackagePayload,
 } from "@vitalfit/sdk";
-import { PackageFormState } from "./new/page";
 import EntityItem from "@/components/layout/EntityItem";
+import { useTranslations } from "next-intl";
 
-export type PackageItemUI = PackageItemDetail & { name: string }; // Para UI
+export interface PackageItemUI {
+  serviceId: string;
+  sessionsIncluded: number;
+  name: string;
+}
+
+export interface PackageFormState {
+  name: string;
+  description: string;
+  price: number;
+  startAt: string;
+  endAt: string;
+  packageItems: PackageItemUI[];
+  isActive?: boolean;
+}
 
 interface PackageFormProps {
   formData: PackageFormState;
@@ -30,6 +44,7 @@ export default function PackageForm({
   services = [],
 }: PackageFormProps) {
   const isEditable = mode !== "view";
+  const t = useTranslations("catalog.packages");
 
   const handleFieldChange = <K extends keyof PackageFormState>(
     field: K,
@@ -92,7 +107,7 @@ export default function PackageForm({
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm font-medium">Nombre</label>
+          <label className="text-sm font-medium">{t("form.labels.name")}</label>
           <Input
             disabled={!isEditable}
             value={formData.name || ""}
@@ -101,7 +116,7 @@ export default function PackageForm({
         </div>
 
         <div>
-          <label className="text-sm font-medium">Precio ($)</label>
+          <label className="text-sm font-medium">{t("form.labels.price")}</label>
           <Input
             type="number"
             disabled={!isEditable}
@@ -112,7 +127,7 @@ export default function PackageForm({
       </div>
 
       <div>
-        <label className="text-sm font-medium">Descripción</label>
+        <label className="text-sm font-medium">{t("form.labels.description")}</label>
         <Textarea
           disabled={!isEditable}
           value={formData.description || ""}
@@ -122,7 +137,7 @@ export default function PackageForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="text-sm font-medium">Fecha inicio</label>
+          <label className="text-sm font-medium">{t("form.labels.start_at")}</label>
           <Calendar24
             date={dateStart}
             disabled={!isEditable}
@@ -130,7 +145,7 @@ export default function PackageForm({
           />
         </div>
         <div>
-          <label className="text-sm font-medium">Fecha fin</label>
+          <label className="text-sm font-medium">{t("form.labels.end_at")}</label>
           <Calendar24
             date={dateEnd}
             disabled={!isEditable}
@@ -142,13 +157,13 @@ export default function PackageForm({
       {isEditable && services.length > 0 && (
         <div>
           <label className="block text-sm font-medium mb-1">
-            Agregar servicio
+            {t("form.labels.add_service")}
           </label>
           <select
             className="border p-2 w-full"
             onChange={(e) => handleAddService(e.target.value)}
           >
-            <option value="">Selecciona un servicio</option>
+            <option value="">{t("form.labels.service_placeholder")}</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -165,7 +180,7 @@ export default function PackageForm({
           return (
             <EntityItem
               key={item.serviceId}
-              title={`${serviceName} — ${item.sessionsIncluded} sesiones`}
+              title={`${serviceName} — ${t("form.labels.sessions", { count: item.sessionsIncluded })}`}
               initials={(serviceName || "?")
                 .split(" ")
                 .map((w) => w[0])
@@ -178,7 +193,7 @@ export default function PackageForm({
                     className="text-red-500"
                     onClick={() => handleRemoveService(item.serviceId)}
                   >
-                    Quitar
+                    {t("form.labels.remove")}
                   </Button>
                 )
               }
@@ -202,7 +217,7 @@ export default function PackageForm({
       {/* Estado */}
       {"isActive" in formData && (
         <div>
-          <label className="text-sm font-medium">Estado</label>
+          <label className="text-sm font-medium">{t("form.labels.status")}</label>
           <Badge
             variant="outline"
             className={
@@ -211,7 +226,7 @@ export default function PackageForm({
                 : "border-yellow-300 text-yellow-700"
             }
           >
-            {formData.isActive ? "Activa" : "Inactiva"}
+            {formData.isActive ? t("table.status.active") : t("table.status.inactive")}
           </Badge>
         </div>
       )}

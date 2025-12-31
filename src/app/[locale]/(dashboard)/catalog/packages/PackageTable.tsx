@@ -4,16 +4,19 @@ import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
-import ArrowDownTray from "@heroicons/react/24/outline/ArrowDownTrayIcon";
-import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
+import {
+  ArrowDownTrayIcon as ArrowDownTray,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { useRouter } from "next/navigation";
-import { Notification } from "@/components/ui/Notification";
+import { useRouter } from "@/i18n/navigation";
+import { toast } from "sonner";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { PackageListItem } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
 
 interface PackageTableProps {
   data: PackageListItem[];
@@ -37,12 +40,12 @@ export default function PackageTable({
 }: PackageTableProps) {
   const [searchInput, setSearchInput] = useState(filters.search);
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const [pendingRow, setPendingRow] = useState<string | null>(null);
 
   const { token } = useAuth();
   const router = useRouter();
+  const t = useTranslations("catalog.packages");
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -62,33 +65,37 @@ export default function PackageTable({
       console.error("packageId no disponible en esta fila", row);
       return;
     }
-    router.push(`/packages/${row.packageId}`);
+    router.push(`/catalog/packages/${row.packageId}`);
   };
 
   const handleEdit = (row: PackageListItem) => {
-    router.push(`/packages/${row.packageId}/edit`);
+    router.push(`/catalog/packages/${row.packageId}/edit`);
   };
 
   const handleDelete = async (pkg: PackageListItem) => {
-    const PackageId = pkg.packageId;
+    const pkgId = pkg.packageId;
 
-    if (!token) {
-      setDeleteError("No estás autenticado para realizar esta acción.");
+    if (!pkgId) {
+      toast.error(t("notifications.invalid_id"));
       setDeleteRowId(null);
       return;
     }
 
-    setPendingRow(PackageId);
-    setDeleteError(null);
+    if (!token) {
+      toast.error(t("notifications.auth_error"));
+      setDeleteRowId(null);
+      return;
+    }
+
+    setPendingRow(pkgId);
 
     try {
-      await api.packages.deletePackage(PackageId, token);
-      setShowSuccess(true);
+      await api.packages.deletePackage(pkgId, token);
+      toast.success(t("notifications.delete_success"));
       onReload();
-      setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
-      console.error("Error al eliminar la paquete:", error);
-      setDeleteError("Error al eliminar la paquete. Intenta nuevamente.");
+      console.error("Error al eliminar el paquete:", error);
+      toast.error(t("notifications.delete_error"));
     } finally {
       setDeleteRowId(null);
       setPendingRow(null);
@@ -96,10 +103,10 @@ export default function PackageTable({
   };
 
   const columns: Column<PackageListItem>[] = [
-    { header: "Nombre", accessor: "name" },
-    { header: "Descripción", accessor: "description" },
+    { header: t("table.columns.name"), accessor: "name" },
+    { header: t("table.columns.description"), accessor: "description" },
     {
-      header: "Duración (días)",
+      header: t("table.columns.duration"),
       accessor: "endAt",
       render: (_value, row) => {
         const start = row.startAt ? new Date(row.startAt) : null;
@@ -113,17 +120,17 @@ export default function PackageTable({
       },
     },
     {
-      header: "Precio",
+      header: t("table.columns.price"),
       accessor: "price",
       render: (value) => value ?? "-",
     },
     {
-      header: "Status",
+      header: t("table.columns.status"),
       accessor: "isActive",
       render: (value) => {
         const config = value
-          ? { text: "Activa", color: "text-green-700 border-green-300" }
-          : { text: "Inactiva", color: "text-yellow-700 border-yellow-300" };
+          ? { text: t("table.status.active"), color: "text-green-700 border-green-300" }
+          : { text: t("table.status.inactive"), color: "text-yellow-700 border-yellow-300" };
         return (
           <Badge variant="outline" className={`border ${config.color}`}>
             {config.text}
@@ -139,7 +146,7 @@ export default function PackageTable({
         <div className="relative w-full sm:w-[250px]">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar membresía por nombre"
+            placeholder={t("table.placeholder")}
             className="pl-9"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -149,7 +156,7 @@ export default function PackageTable({
         <div className="flex items-center gap-4">
           <Button variant="outline">
             <ArrowDownTray className="mr-2 h-4 w-4" />
-            Descargar
+            {t("table.download")}
           </Button>
         </div>
       </div>
@@ -166,17 +173,17 @@ export default function PackageTable({
             <RowActions
               actions={[
                 {
-                  label: "Ver Detalles",
+                  label: t("table.actions.view"),
                   icon: Eye,
                   onClick: () => handleView(row),
                 },
                 {
-                  label: "Modificar",
+                  label: t("table.actions.edit"),
                   icon: Pencil,
                   onClick: () => handleEdit(row),
                 },
                 {
-                  label: "Eliminar",
+                  label: t("table.actions.delete"),
                   icon: Trash2,
                   onClick: () => setDeleteRowId(row.packageId),
                   variant: "danger",
@@ -189,10 +196,10 @@ export default function PackageTable({
                 open={deleteRowId === row.packageId}
                 onOpenChange={(open) => !open && setDeleteRowId(null)}
                 trigger={null}
-                title="Confirmar eliminación"
-                description="¿Estás seguro de que deseas eliminar esta membresía? Esta acción no se puede deshacer."
-                actionText="Eliminar"
-                cancelText="Cancelar"
+                title={t("table.delete_dialog.title")}
+                description={t("table.delete_dialog.description", { name: row.name })}
+                actionText={t("table.delete_dialog.confirm")}
+                cancelText={t("table.delete_dialog.cancel")}
                 onAction={() => handleDelete(row)}
                 actionVariant="destructive"
               />
@@ -201,21 +208,7 @@ export default function PackageTable({
         )}
       />
 
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="Membresía eliminada correctamente"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
 
-      {deleteError && (
-        <Notification
-          variant="destructive"
-          description={deleteError}
-          onClose={() => setDeleteError(null)}
-        />
-      )}
     </>
   );
 }

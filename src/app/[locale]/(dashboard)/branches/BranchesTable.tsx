@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { PaginatedBranch } from "@vitalfit/sdk";
 import { Input } from "@/components/ui/Input";
 import {
@@ -11,18 +10,18 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
-import { SelectValue } from "@radix-ui/react-select";
-import { Download, Eye, Pencil, Search, Trash2, X } from "lucide-react";
+import { Download, Eye, Pencil, Search, Trash2 } from "lucide-react";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog"; 
+import { toast } from "sonner"; 
 
-export type FilterChangeHandler = (
-  key: string,
-  value: string | undefined,
-) => void;
+export type FilterChangeHandler = (key: string, value: string | undefined) => void;
 
 interface BranchesTableProps {
   data: PaginatedBranch[];
@@ -42,8 +41,6 @@ interface BranchRow {
   name: string;
 }
 
-import { useTranslations } from "next-intl";
-
 export default function BranchesTable({
   data,
   isLoading,
@@ -57,79 +54,55 @@ export default function BranchesTable({
   onBranchDeleted,
 }: BranchesTableProps) {
   const t = useTranslations("branches");
-  const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
-
-  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
-  const [pendingRow, setPendingRow] = useState<BranchRow | null>(null);
-  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { token } = useAuth();
   const router = useRouter();
 
-  const handleView = (row: BranchRow) => {
-    router.replace(`/branches/${row.branch_id}`);
-  };
+  const [inputFilters, setInputFilters] = useState<Record<string, string>>({});
+  const [pendingRow, setPendingRow] = useState<BranchRow | null>(null);
 
-  const handleEdit = (row: BranchRow) => {
-    router.replace(`/branches/${row.branch_id}/edit`);
-  };
+  const handleView = (row: BranchRow) => router.replace(`/branches/${row.branch_id}`);
+  const handleEdit = (row: BranchRow) => router.replace(`/branches/${row.branch_id}/edit`);
 
   const confirmDelete = (row: BranchRow) => {
     setPendingRow(row);
-    setDeleteRowId(row.branch_id);
   };
 
   const handleDelete = async () => {
-    if (!pendingRow) {
+    if (!pendingRow || !token) {
       return;
     }
-    api.branch
-      .delete(pendingRow.branch_id, token || "")
-      .then(() => {
-        setDeleteSuccess(t("table.delete_dialog.success", { name: pendingRow.name }));
-        if (typeof onBranchDeleted === "function") {
-          onBranchDeleted();
-        }
-      })
-      .catch((error) => {
-        setDeleteError(t("table.delete_dialog.error"));
-        console.error("Error al eliminar (directo del SDK):", error);
-      })
-      .finally(() => {
-        setDeleteRowId(null);
-        setPendingRow(null);
-      });
+
+    try {
+      await api.branch.delete(pendingRow.branch_id, token);
+      toast.success(t("table.delete_dialog.success", { name: pendingRow.name }));
+      if (onBranchDeleted){
+         onBranchDeleted();
+      }
+    } catch (error) {
+      toast.error(t("table.delete_dialog.error"));
+      console.error(error);
+    } finally {
+      setPendingRow(null);
+    }
   };
 
   const columns: Column<PaginatedBranch>[] = [
-    {
-      accessor: "name",
-      header: t("table.columns.name"),
-    },
+    { accessor: "name", header: t("table.columns.name") },
     { header: t("table.columns.tax_id"), accessor: "tax_id" },
     {
       header: t("table.columns.manager"),
       accessor: "manager_name",
       render: (_, row) => `${row.manager_name} ${row.manager_last_name}`,
     },
-    {
-      header: t("table.columns.country"),
-      accessor: "country_name",
-    },
+    { header: t("table.columns.country"), accessor: "country_name" },
     {
       accessor: "status",
       header: t("table.columns.status"),
       render: (value) => {
         const statusConfig = {
           Active: { text: t("table.status.active"), color: "text-green-700 border-green-300" },
-          Inactive: {
-            text: t("table.status.inactive"),
-            color: "text-red-700 border-red-300",
-          },
-          Maintenance: {
-            text: t("table.status.maintenance"),
-            color: "text-yellow-700 border-yellow-300",
-          },
+          Inactive: { text: t("table.status.inactive"), color: "text-red-700 border-red-300" },
+          Maintenance: { text: t("table.status.maintenance"), color: "text-yellow-700 border-yellow-300" },
         };
         const config = statusConfig[value as keyof typeof statusConfig] ?? {
           text: t("table.status.unknown"),
@@ -143,37 +116,18 @@ export default function BranchesTable({
       },
     },
   ];
-
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (inputFilters.search) {
-        onFilterChange?.("name", inputFilters.search);
-        onFilterChange?.("tax_id", inputFilters.search);
-      } else {
-        onFilterChange?.("name", undefined);
-        onFilterChange?.("tax_id", undefined);
-      }
-
-      if (inputFilters.status) {
-        onFilterChange?.("status", inputFilters.status);
-      }
+      onFilterChange?.("name", inputFilters.search || undefined);
+      onFilterChange?.("tax_id", inputFilters.search || undefined);
+      onFilterChange?.("status", inputFilters.status || undefined);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [inputFilters]);
 
-  useEffect(() => {
-    if (deleteSuccess || deleteError) {
-      const timer = setTimeout(() => {
-        setDeleteSuccess(null);
-        setDeleteError(null);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [deleteSuccess, deleteError]);
-
   return (
     <>
+      {/* Selector de Filtros */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="relative w-full sm:w-[250px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -181,18 +135,15 @@ export default function BranchesTable({
             placeholder={t("table.placeholder")}
             className="pl-9"
             value={inputFilters.search || ""}
-            onChange={(e) =>
-              setInputFilters((prev) => ({ ...prev, search: e.target.value }))
-            }
+            onChange={(e) => setInputFilters((p) => ({ ...p, search: e.target.value }))}
           />
         </div>
+        
         <Select
           value={inputFilters.status || ""}
-          onValueChange={(value) =>
-            setInputFilters((prev) => ({ ...prev, status: value }))
-          }
+          onValueChange={(value) => setInputFilters((p) => ({ ...p, status: value }))}
         >
-          <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder={t("table.filter_status")} />
           </SelectTrigger>
           <SelectContent>
@@ -202,10 +153,9 @@ export default function BranchesTable({
           </SelectContent>
         </Select>
 
-        {filterValues.name || filterValues.tax_id || filterValues.status ? (
+        {(filterValues.name || filterValues.status) && (
           <Button
-            variant="outline"
-            className="mt-2 sm:mt-0 border-gray-300 text-gray-700 hover:bg-gray-100"
+            variant="ghost"
             onClick={() => {
               onFilterChange("name", undefined);
               onFilterChange("tax_id", undefined);
@@ -215,62 +165,29 @@ export default function BranchesTable({
           >
             {t("table.clear_filters")}
           </Button>
-        ) : null}
+        )}
 
-        <div className="flex items-center gap-4">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            {t("table.download")}
-          </Button>
-        </div>
+        <Button variant="outline">
+          <Download className="mr-2 h-4 w-4" />
+          {t("table.download")}
+        </Button>
       </div>
 
-      {deleteRowId && pendingRow && (
-        <Alert className="mt-2 w-full max-w-md">
-          <AlertTitle className="text-black">{t("table.delete_dialog.title")}</AlertTitle>
-          <AlertDescription className="text-gray-900">
-            {t("table.delete_dialog.description")}
-          </AlertDescription>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              className="border-white"
-              onClick={() => {
-                setDeleteRowId(null);
-                setPendingRow(null);
-              }}
-            >
-              {t("table.delete_dialog.cancel")}
-            </Button>
-            <Button
-              variant="destructive"
-              className="text-white"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4 text-white" />
-              {t("table.delete_dialog.confirm")}
-            </Button>
-          </div>
-        </Alert>
-      )}
-
-      {deleteSuccess && (
-        <Alert className="w-full max-w-md border-green-300 bg-white text-green-800 mb-4">
-          <AlertTitle>{t("table.delete_dialog.success_title")}</AlertTitle>
-          <AlertDescription>{deleteSuccess}</AlertDescription>
-        </Alert>
-      )}
-
-      {deleteError && (
-        <Alert className="w-full max-w-md border-red-300 bg-white text-red-800 mb-4">
-          <AlertTitle>{t("table.delete_dialog.error_title")}</AlertTitle>
-          <AlertDescription>{deleteError}</AlertDescription>
-        </Alert>
-      )}
+      <GeneralAlertDialog
+        open={!!pendingRow}
+        onOpenChange={(isOpen) => !isOpen && setPendingRow(null)}
+        title={t("table.delete_dialog.title")}
+        description={t("table.delete_dialog.description")}
+        actionText={t("table.delete_dialog.confirm")}
+        cancelText={t("table.delete_dialog.cancel")}
+        onAction={handleDelete}
+        actionVariant="destructive"
+      />
 
       <DataTable
         columns={columns}
         data={data}
+        isLoading={isLoading}
         page={page}
         pageSize={pageSize}
         onPageChange={onPageChange}
@@ -281,11 +198,7 @@ export default function BranchesTable({
           <RowActions
             actions={[
               { label: t("table.actions.view"), icon: Eye, onClick: () => handleView(row) },
-              {
-                label: t("table.actions.edit"),
-                icon: Pencil,
-                onClick: () => handleEdit(row),
-              },
+              { label: t("table.actions.edit"), icon: Pencil, onClick: () => handleEdit(row) },
               {
                 label: t("table.actions.delete"),
                 icon: Trash2,
