@@ -4,22 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TabSelector } from "@/components/ui/TabSelector";
 import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import BranchBasicDataPanel from "./BranchBasicDataPanel";
 import BranchServicePanel from "./BranchServicesPanel";
 import BranchInstructorPanel from "./BranchInstructorsPanel";
 import BranchEquipmentPanel from "./BranchEquipmentPanel";
 import BranchPaymentMethodPanel from "./BranchPaymentMethodsPanel";
-
-import { BranchDetails, ServiceFullDetail } from "@vitalfit/sdk";
 import BranchStaffManager from "./BranchStaffManager";
+
+import { BranchDetails } from "@vitalfit/sdk";
+import { useAuth } from "@/context/AuthContext";
+import { UserRole } from "@/lib/roles";
 
 interface BranchFormContainerProps {
   mode?: "view" | "edit";
   branch: BranchDetails;
 }
-
-import { useTranslations } from "next-intl";
 
 export default function BranchFormContainer({
   mode = "edit",
@@ -27,10 +29,12 @@ export default function BranchFormContainer({
 }: BranchFormContainerProps) {
   const t = useTranslations("branches");
   const router = useRouter();
+  const { hasRole } = useAuth();
+  
   const [formData, setFormData] = useState<BranchDetails>({ ...branch });
-  const [allServicesFromApi, setAllServicesFromApi] = useState<
-    ServiceFullDetail[]
-  >([]);
+
+  const isBranchAdmin = hasRole(UserRole.BRANCH_ADMIN);
+  const isSuperAdmin = hasRole(UserRole.SUPER_ADMIN);
 
   const tabs = [
     {
@@ -47,9 +51,7 @@ export default function BranchFormContainer({
     {
       value: "payment",
       label: t("details.tabs.payment"),
-      content: (
-        <BranchPaymentMethodPanel mode={mode} branchId={branch.branch_id} />
-      ),
+      content: <BranchPaymentMethodPanel mode={mode} branchId={branch.branch_id} />,
     },
     {
       value: "services",
@@ -59,9 +61,7 @@ export default function BranchFormContainer({
     {
       value: "instructors",
       label: t("details.tabs.instructors"),
-      content: (
-        <BranchInstructorPanel mode={mode} branchId={branch.branch_id} />
-      ),
+      content: <BranchInstructorPanel mode={mode} branchId={branch.branch_id} />,
     },
     {
       value: "equipment",
@@ -71,32 +71,39 @@ export default function BranchFormContainer({
     {
       value: "Staff",
       label: "Staff",
-      content: <BranchStaffManager  mode={mode}  branchId={branch.branch_id} />,
+      content: <BranchStaffManager mode={mode} branchId={branch.branch_id} />,
     },
     {
-      value: "Politicas comerciales",
-      label: "Politicas",
-      content: <p>Politicas comerciales de la sucursal</p>,
+      value: "policies",
+      label: "Políticas",
+      content: <div className="p-4 text-sm italic text-slate-400">Políticas comerciales de la sede</div>,
     },
   ];
 
+  const handleEditNavigation = () => {
+    const targetId = isBranchAdmin ? "active" : branch.branch_id; 
+    router.push(`/branches/${targetId}/edit`);
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h1 className="text-2xl font-bold">
-            {mode === "edit" ? t("details.edit_title") : t("details.title")}
-          </h1>
-          <p className="text-gray-500">
-            {t("details.info_of", { name: formData.name })}
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between p-4 bg-white border shadow-sm rounded-xl">
+        <div className="flex flex-col text-left">
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            {mode === "edit" ? "Configuración de Sede" : "Detalles de Sede"}
+          </span>
+          <span className="text-sm font-bold text-slate-700">{formData.name}</span>
         </div>
 
-        <div className="flex gap-2">
-          {mode === "view" && (
+        <div className="flex gap-3">
+          {mode === "view" && (isSuperAdmin || isBranchAdmin) && (
             <Button
-              onClick={() => router.push(`/branches/${branch.branch_id}/edit`)}
+              variant="outline"
+              size="sm"
+              className="text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
+              onClick={handleEditNavigation}
             >
+              <Pencil className="w-4 h-4 mr-2" />
               {t("table.actions.edit")}
             </Button>
           )}

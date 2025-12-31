@@ -1,53 +1,57 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
-import BranchFormContainer from "../components/BranchFormContainer";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+
 import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
+import { UserRole } from "@/lib/roles";
 import { BranchDetails } from "@vitalfit/sdk";
 
-import { useTranslations } from "next-intl";
+import BranchFormContainer from "../components/BranchFormContainer";
 
 export default function EditBranchPage() {
   const t = useTranslations("branches");
   const params = useParams();
   const router = useRouter();
-  const { token } = useAuth();
-  const id = params?.id as string | undefined;
+  const { token, user, hasRole, loading: authLoading } = useAuth();
+
   const [loading, setLoading] = useState(true);
   const [branch, setBranch] = useState<BranchDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!id) {
-      router.replace("/branches");
-      return;
+  const effectiveId = useMemo(() => {
+    if (authLoading || !user) {
+      return null;
     }
-    if (!token) {
+
+    if (hasRole(UserRole.BRANCH_ADMIN) || params?.id === "active") {
+      return user.activeBranch?.id;
+    }
+
+    return params?.id as string | undefined;
+  }, [params?.id, user, hasRole, authLoading]);
+
+  useEffect(() => {
+    if (authLoading || !effectiveId || !token) {
+      if (!authLoading && !effectiveId) {
+        router.replace("/");
+      }
       return;
     }
 
     let mounted = true;
     setLoading(true);
-    setError(null);
 
     (async () => {
       try {
-        const branchData = await api.branch.getBranchById(id, token);
-        if (!mounted) {
-          return;
+        const branchData = await api.branch.getBranchById(effectiveId, token);
+        if (mounted) {
+          setBranch(branchData);
         }
-        setBranch(branchData);
-      } catch (err: any) {
-        if (!mounted) {
-          return;
-        }
-        const status = err?.response?.status ?? err?.status ?? null;
-        if (status === 404) {
-          router.replace("/branches");
-        } else {
-          console.error("Error cargando sucursal:", err);
+      } catch (err) {
+        if (mounted) {
           setError(t("details.error_loading"));
         }
       } finally {
@@ -56,21 +60,28 @@ export default function EditBranchPage() {
         }
       }
     })();
-    return () => {
-      mounted = false;
-    };
-  }, [id, token, router]);
 
-  if (loading) {
-    return <div className="p-6">{t("details.loading")}</div>;
+    return () => { mounted = false; };
+  }, [effectiveId, token, router, authLoading, t]);
+
+  if (authLoading || loading) {
+    return (
+      <div className="flex items-center justify-center p-20">
+        <div className="text-[10px] font-black uppercase tracking-[0.2em] animate-pulse text-slate-400">
+          Sincronizando permisos...
+        </div>
+      </div>
+    );
   }
 
-  if (error) {
-    return <div className="p-6 text-red-500">{error}</div>;
-  }
-
-  if (!branch) {
-    return <div className="p-6">{t("details.not_found")}</div>;
+  if (error || !branch) {
+    return (
+      <div className="p-12 text-center">
+        <p className="text-red-500 font-bold uppercase text-xs tracking-widest">
+          {error || "Acceso Denegado"}
+        </p>
+      </div>
+    );
   }
 
   return <BranchFormContainer mode="edit" branch={branch} />;
