@@ -161,56 +161,76 @@
     "language": "Language"
   },
   "analytics": {
+    "finance": {
+      "title": "Detailed Finance Report",
+      "subtitle": "Cash flow analysis, solvency, and financial projections",
+      "export": "Export",
+      "stats": {
+        "weekly_revenue": "Weekly Revenue",
+        "mrr": "MRR (Recurring Revenue)",
+        "accounts_receivable": "Accounts Receivable",
+        "active_branches": "Active Branches",
+        "average_ticket": "Average Ticket"
+      },
+      "filters": {
+        "all_branches": "All Branches",
+        "loading": "Loading...",
+        "start_date": "Start Date",
+        "end_date": "End Date",
+        "clear": "Clear fields",
+        "placeholder_range": "Select range",
+        "ranges": {
+          "this_month": "This Month",
+          "last_month": "Last Month",
+          "last_3_months": "Last 3 Months",
+          "custom": "Custom Range"
+        }
+      },
+      "charts": {
+        "cash_flow": {
+          "title": "Projected Cash Flow",
+          "description": "Realized income per month (Current Year)",
+          "series_label": "Income"
+        },
+        "monthly_revenue": {
+          "title": "Revenue Evolution",
+          "description": "Monthly total billing comparison",
+          "series_label": "Billing"
+        }
+      },
+      "billing_matrix": {
+        "title": "Billing Matrix",
+        "description": "Comparative breakdown of concepts by each active branch",
+        "no_data": "No billing data available for the selected period.",
+        "column_concept": "Concept",
+        "column_total": "Total Concept",
+        "footer_totals": "TOTALS BY BRANCH",
+        "error": "Error loading financial matrix"
+      }
+    },
     "sales": {
       "title": "Sales Report",
+      "subtitle": "Commercial performance, payment methods, and instructor productivity",
       "stats": {
         "total_sales": "Total Sales",
         "membership_sales": "Membership Sales",
-        "transactions": "Transactions",
-        "comparison": "{amount} vs. Previous Month"
-      },
-      "filters": {
-        "all_branches": "All branches",
-        "ranges": {
-          "today": "Today",
-          "this_week": "This week",
-          "this_month": "This month",
-          "last_month": "Previous month"
-        }
+        "transactions": "Total Transactions",
+        "comparison": "{amount} vs. last month"
       },
       "charts": {
         "by_hour": {
           "title": "Sales by Hour",
-          "error": "Error loading sales by hour.",
-          "description": "Sales from {start} to {end}.",
-          "series_label": "Total Sales",
-          "footer_change": "↑ 5.2% vs. previous period",
-          "footer_text": "Data grouped by sale closing hour."
+          "description": "Commercial activity peaks during the day",
+          "series_label": "Volume"
         },
         "payment_method": {
-          "title": "Sales by Payment Method",
-          "description": "Customer payment preference",
-          "error": "Error loading payment methods.",
-          "no_data": "No data",
-          "footer_total": "Total sold: ${amount}",
-          "config_label": "Sales"
+          "title": "Payment Methods",
+          "description": "Revenue distribution by channel",
+          "footer_total": "Total Revenue: {amount}"
         },
         "category_sales": {
           "title": "Sales by Service",
-          "description": "Revenue distribution by type",
-          "error": "Error loading service data.",
-          "footer_total": "Total categories: {count}",
-          "growth_label": "{value}% growth"
-        },
-        "top_instructors": {
-          "title": "Sales by Lead Instructor",
-          "description": "Showing instructors with highest sales between {start} and {end}.",
-          "error": "Error loading instructor data.",
-          "no_data": "No instructor sales data for this period.",
-          "config": {
-            "value": "Total Sales",
-            "label": "Instructor"
-          }
+          "description": "Distribution by product and service categories"
         }
       }
     }

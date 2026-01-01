@@ -34,7 +34,6 @@ export const StatCard: React.FC<StatCardProps> = ({
         <CardTitle className="text-[16px] font-semibold text-[#111827]">
           {title}
         </CardTitle>
-¡¡
         {icon && <div className="text-[#111827]">{icon}</div>}
       </CardHeader>
       

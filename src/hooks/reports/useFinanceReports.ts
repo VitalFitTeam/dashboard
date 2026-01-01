@@ -1,4 +1,3 @@
-// hooks/reports/useFinanceReports.ts
 import { api } from "@/lib/sdk-config";
 import { useReportBase } from "./useReportBase";
 import { KPICard, ChartData, BillingMatrix } from "@vitalfit/sdk";
@@ -27,14 +26,14 @@ export const useFinanceReports = {
       }
     ),
 
-  useAverageTicket: (jwt: string | null, branchId?: string) =>
-    useReportBase<KPICard>(
-      jwt ? ["finance", "averageTicket", jwt, branchId] : null,
+  useActiveBranches: (jwt: string | null) =>
+    useReportBase<number>(
+      jwt ? ["finance", "activeBranches", jwt] : null,
       () => {
         if (!jwt){
              throw new Error("No JWT provided");
         }
-        return api.report.averageTicketKPI(jwt, branchId);
+        return api.report.totalActiveBranches(jwt);
       }
     ),
 
@@ -59,7 +58,7 @@ export const useFinanceReports = {
         return api.report.averageCLVKPI(jwt, branchId);
       }
     ),
-
+ 
   useTotalTransactions: (jwt: string | null, branchId?: string) =>
     useReportBase<KPICard>(
       jwt ? ["finance", "totalTransactions", jwt, branchId] : null,
@@ -94,14 +93,14 @@ export const useFinanceReports = {
       }
     ),
 
-    useBillingMatrix: (jwt: string | null, branchId?: string) =>
-    useReportBase<ChartData[]>(
-      jwt ? ["finance", "billingMatrix", jwt, branchId] : null,
+    useBillingMatrix: (jwt: string | null, start?: string, end?: string) =>
+    useReportBase<BillingMatrix>(
+      jwt ? ["finance", "billingMatrix", jwt, start, end] : null,
       () => {
         if (!jwt){
              throw new Error("No JWT provided");
         }
-        return api.report.billingByBranchMatrix(jwt, branchId);
+        return api.report.billingByBranchMatrix(jwt, start, end);
       }
     )
 };

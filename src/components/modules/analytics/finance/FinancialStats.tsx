@@ -1,79 +1,83 @@
-import { StatCard } from "@/components/ui/StatCard";
+"use client";
+
 import { useFinanceReports } from "@/hooks/reports/useFinanceReports";
-import { DollarSign, TrendingUp, Ticket, Users } from "lucide-react";
+import { 
+  DollarSign, 
+  TrendingUp, 
+  WalletCards, 
+  Building
+} from "lucide-react"; 
+import { ReportStatItem } from "../ReportStatItem";
+import { useTranslations } from "next-intl";
 
 interface StatProps {
   token: string | null;
+  branchId?: string | undefined; 
 }
 
-export function WeeklyRevenueStat({ token }: StatProps) {
-  const { data, isLoading } = useFinanceReports.useWeeklyRevenue(token);
-
+export function WeeklyRevenueStat({ token, branchId }: StatProps) {
+  const t = useTranslations("analytics.finance.stats");
+  const { data, isLoading } = useFinanceReports.useWeeklyRevenue(token, branchId);
+  
   return (
-    <StatCard 
-      title="Ingresos Semanales"
-      value={data?.value || "$0"}
-      isLoading={isLoading}
-      icon={<DollarSign className="h-5 w-5 text-gray-400" />}
-      trend={{ 
-        value: data?.trend_percent || 0, 
-        isPositive: data?.is_positive, 
-        label: data?.trend_label 
-      }}
+    <ReportStatItem
+      data={data} 
+      isLoading={isLoading} 
+      defaultTitle={t("weekly_revenue")} 
+      icon={DollarSign}
+      formatType="currency"
     />
   );
 }
 
-export function MRRStat({ token }: StatProps) {
-  const { data, isLoading } = useFinanceReports.useMRR(token);
-
+export function MRRStat({ token, branchId }: StatProps) {
+  const t = useTranslations("analytics.finance.stats");
+  const { data, isLoading } = useFinanceReports.useMRR(token, branchId);
+  
   return (
-    <StatCard 
-      title="MRR (Mensual)"
-      value={data?.value || "$0"}
-      isLoading={isLoading}
-      icon={<TrendingUp className="h-5 w-5 text-gray-400" />}
-      trend={{ 
-        value: data?.trend_percent || 0, 
-        isPositive: data?.is_positive, 
-        label: data?.trend_label 
-      }}
+    <ReportStatItem 
+      data={data} 
+      isLoading={isLoading} 
+      defaultTitle={t("mrr")} 
+      icon={TrendingUp}
+      formatType="currency"
     />
   );
 }
 
-export function AverageTicketStat({ token }: StatProps) {
-  const { data, isLoading } = useFinanceReports.useAverageTicket(token);
-
+export function AccountsReceivableStat({ token, branchId }: StatProps) {
+  const t = useTranslations("analytics.finance.stats");
+  const { data, isLoading } = useFinanceReports.useAccountsReceivable(token, branchId);
+  
   return (
-    <StatCard 
-      title="Ticket Promedio"
-      value={data?.value || "$0"}
-      isLoading={isLoading}
-      icon={<Ticket className="h-5 w-5 text-gray-400" />}
-      trend={{ 
-        value: data?.trend_percent || 0, 
-        isPositive: data?.is_positive, 
-        label: data?.trend_label 
-      }}
+    <ReportStatItem 
+      data={data} 
+      isLoading={isLoading} 
+      defaultTitle={t("accounts_receivable")} 
+      icon={WalletCards} 
+      formatType="currency"
     />
   );
 }
 
-export function CLVStat({ token }: StatProps) {
-  const { data, isLoading } = useFinanceReports.useCLV(token);
+export function ActiveBranchesCount({ token }: StatProps) {
+  const t = useTranslations("analytics.finance.stats");
+  const { data, isLoading } = useFinanceReports.useActiveBranches(token);
+  
+  const processedData = data !== undefined ? {
+    current_value: data,
+    previous_value: data,
+    change_percentage: 0,
+    is_positive: true
+  } : null;
 
   return (
-    <StatCard 
-      title="LTV (Valor Cliente)"
-      value={data?.value || "$0"}
-      isLoading={isLoading}
-      icon={<Users className="h-5 w-5 text-gray-400" />}
-      trend={{ 
-        value: data?.trend_percent || 0, 
-        isPositive: data?.is_positive, 
-        label: data?.trend_label 
-      }}
+    <ReportStatItem 
+      data={processedData} 
+      isLoading={isLoading} 
+      defaultTitle={t("active_branches")} 
+      icon={Building}
+      formatType="number"
     />
   );
 }

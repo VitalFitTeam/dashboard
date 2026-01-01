@@ -5,25 +5,25 @@ import { useFinanceReports } from "@/hooks/reports/useFinanceReports";
 import { mapChartResponse } from "@/utils/mapChartResponse";
 import { useTranslations } from "next-intl";
 
-export function ProjectedCashFlowReport({ token, branchId }: { token: string; branchId?: string }) {
-  const t = useTranslations("analytics.finance.charts.cash_flow");
+export function MonthlyRevenueReport({ token, branchId }: { token: string; branchId?: string }) {
+  const t = useTranslations("analytics.finance.charts.monthly_revenue");
   
-  const { data: rawResponse, isLoading } = useFinanceReports.useMonthlyCashFlow(token, branchId);
+  const { data: rawResponse, isLoading } = useFinanceReports.useMonthlyRevenueChart(token, branchId);
 
   const chartData = mapChartResponse(rawResponse);
 
   const seriesConfig = [
     {
-      key: "valor", 
+      key: "valor",
       label: t("series_label"), 
-      color: "#4ade80", 
-      type: "bar" as const,
+      color: "#3b82f6", 
+      type: "line" as const, 
     },
   ];
 
   return (
     <BaseMultiChart
-      title={t("title")} 
+      title={t("title")}
       description={t("description")}
       data={chartData}
       series={seriesConfig}
