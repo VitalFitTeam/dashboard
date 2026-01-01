@@ -9,6 +9,7 @@ import {
 } from "lucide-react"; 
 import { ReportStatItem } from "../ReportStatItem";
 import { useTranslations } from "next-intl";
+import { StatCard } from "@/components/ui/StatCard";
 
 interface StatProps {
   token: string | null;
@@ -63,21 +64,13 @@ export function AccountsReceivableStat({ token, branchId }: StatProps) {
 export function ActiveBranchesCount({ token }: StatProps) {
   const t = useTranslations("analytics.finance.stats");
   const { data, isLoading } = useFinanceReports.useActiveBranches(token);
-  
-  const processedData = data !== undefined ? {
-    current_value: data,
-    previous_value: data,
-    change_percentage: 0,
-    is_positive: true
-  } : null;
 
   return (
-    <ReportStatItem 
-      data={processedData} 
+    <StatCard 
+      value={data} 
       isLoading={isLoading} 
-      defaultTitle={t("active_branches")} 
+      title={t("active_branches")} 
       icon={Building}
-      formatType="number"
     />
   );
 }
