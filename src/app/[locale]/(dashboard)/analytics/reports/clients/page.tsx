@@ -102,7 +102,7 @@ export default function ClientReportPage() {
           onEndDateChange={setEndDate}
           loadingBranches={loadingBranches}
           onClear={() => {
-            setBranchId(activeBranchId || "all");
+            setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
             setRange("this-month");
             setStartDate(startOfMonth(new Date()));
             setEndDate(endOfMonth(new Date()));

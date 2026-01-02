@@ -235,7 +235,6 @@
         "global_sales": "Global Sales",
         "membership_sales": "Membership Sales",
         "transactions": "Total Transactions",
-        "average_ticket": "Average Ticket",
         "comparison": "{amount} vs. previous month"
       },
       "charts": {
@@ -304,38 +303,60 @@
         "custom": "Custom"
       }
     },
-    "cohort": {
-      "title": "Cohort Retention",
-      "description": "Monthly tracking of new client behavior.",
-      "table": {
-        "month": "Cohort",
-        "size": "Base",
-        "retention_month": "Month {n}"
+    "clients": {
+      "header": {
+        "title": "Client Report",
+        "subtitle": "Detailed analysis of loyalty, retention, and staff",
+        "export": "Export Report"
       },
-      "messages": {
-        "error": "Error loading retention data",
-        "no_data": "Not enough data to generate analysis"
+      "stats": {
+        "total_clients": "Total clients",
+        "active_members": "Active clients",
+        "new_clients": "New clients",
+        "retention_rate": "Retention rate"
+      },
+      "filters": {
+        "all_branches": "All branches",
+        "ranges": {
+          "this_month": "This month",
+          "last_month": "Last month",
+          "last_3_months": "Last 3 months",
+          "custom": "Custom"
+        }
+      },
+      "cohort": {
+        "title": "Cohort Retention",
+        "description": "Monthly tracking of new client behavior.",
+        "table": {
+          "month": "Cohort",
+          "size": "Base",
+          "retention_month": "Month {n}"
+        },
+        "messages": {
+          "error": "Error loading retention data",
+          "no_data": "Not enough data to generate analysis"
+        }
+      },
+      "services": {
+        "title": "Most Used Services",
+        "description": "Usage frequency by class type or service",
+        "label_usage": "Usage count"
+      },
+      "instructors": {
+        "title": "Top 5 Instructors",
+        "description": "By total attendance in the period",
+        "label_usage": "attendances",
+        "messages": {
+          "select_dates": "Select a date range to view the ranking",
+          "no_data": "No instructor data found"
+        }
+      },
+      "growth": {
+        "title": "New vs Recurring",
+        "description": "Monthly comparison of acquisition and loyalty",
+        "label_new": "New",
+        "label_recurring": "Recurring"
       }
-    },
-    "services": {
-      "title": "Most Used Services",
-      "description": "Usage frequency by class type or service",
-      "label_usage": "Usage count"
-    },
-    "instructors": {
-      "title": "Top 5 Instructors",
-      "description": "By total attendance in the period",
-      "label_usage": "attendances",
-      "messages": {
-        "select_dates": "Select a date range to view the ranking",
-        "no_data": "No instructor data found"
-      }
-    },
-    "growth": {
-      "title": "New vs Recurring",
-      "description": "Monthly comparison of acquisition and loyalty",
-      "label_new": "New",
-      "label_recurring": "Recurring"
     }
   }
   },
