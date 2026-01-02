@@ -32,17 +32,14 @@ export default function Clients() {
         <StatCard
           title={t("stats.total")}
           value={<h3 className="text-4xl">{stats.total} {t("stats.unit")}</h3>}
-          bottomMarkup={true}
         />
         <StatCard
           title={t("stats.active")}
           value={<h3 className="text-4xl text-green-500">{stats.active} {t("stats.unit")}</h3>}
-          bottomMarkup={true}
         />
         <StatCard
           title={t("stats.inactive")}
           value={<h3 className="text-4xl text-red-500">{stats.blocked} {t("stats.unit")}</h3>}
-          bottomMarkup={true}
         />
       </div>
 
