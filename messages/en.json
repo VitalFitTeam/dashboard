@@ -161,62 +161,35 @@
     "language": "Language"
   },
   "analytics": {
+    "common": {
+      "no_data": "No data available for the selected period",
+      "loading": "Loading data...",
+      "error": "An error occurred while loading the information"
+    },
     "finance": {
       "title": "Detailed Finance Report",
-      "subtitle": "Cash flow analysis, solvency, and financial projections",
+      "subtitle": "Analysis of cash flow, solvency, and financial projections",
       "export": "Export",
       "stats": {
         "weekly_revenue": "Weekly Revenue",
-        "mrr": "MRR (Recurring Revenue)",
+        "mrr": "MRR (Monthly Recurring Revenue)",
         "accounts_receivable": "Accounts Receivable",
         "active_branches": "Active Branches",
-        "average_ticket": "Average Ticket",
-        "clv": "Average Customer Lifetime Value (CLV)"
+        "average_ticket": "Average Ticket"
       },
       "filters": {
-        "all_branches": "All Branches",
+        "all_branches": "All branches",
         "loading": "Loading...",
-        "start_date": "Start Date",
-        "end_date": "End Date",
+        "start_date": "Start date",
+        "end_date": "End date",
         "clear": "Clear fields",
         "placeholder_range": "Select range",
         "ranges": {
-          "this_month": "This Month",
-          "last_month": "Last Month",
-          "last_3_months": "Last 3 Months",
-          "custom": "Custom Range"
+          "this_month": "This month",
+          "last_month": "Last month",
+          "last_3_months": "Last 3 months",
+          "custom": "Custom"
         }
-      },
-      "charts": {
-        "cash_flow": {
-          "title": "Projected Cash Flow",
-          "description": "Realized income per month (Current Year)",
-          "series_label": "Income"
-        },
-        "monthly_revenue": {
-          "title": "Revenue Evolution",
-          "description": "Monthly total billing comparison",
-          "series_label": "Billing"
-        }
-      },
-      "billing_matrix": {
-        "title": "Billing Matrix",
-        "description": "Comparative breakdown of concepts by each active branch",
-        "no_data": "No billing data available for the selected period.",
-        "column_concept": "Concept",
-        "column_total": "Total Concept",
-        "footer_totals": "TOTALS BY BRANCH",
-        "error": "Error loading financial matrix"
-      }
-    },
-    "sales": {
-      "title": "Sales Report",
-      "subtitle": "Commercial performance, payment methods, and instructor productivity",
-      "stats": {
-        "total_sales": "Total Sales",
-        "membership_sales": "Membership Sales",
-        "transactions": "Total Transactions",
-        "comparison": "{amount} vs. last month"
       },
       "charts": {
         "cash_flow": {

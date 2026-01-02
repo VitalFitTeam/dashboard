@@ -5,12 +5,8 @@ import {
   DollarSign, 
   TrendingUp, 
   WalletCards, 
-<<<<<<< HEAD
-  Building
-=======
   Building,
   UserIcon
->>>>>>> da69483 (Feature/reports finance (#129))
 } from "lucide-react"; 
 import { ReportStatItem } from "../ReportStatItem";
 import { useTranslations } from "next-intl";
@@ -65,10 +61,7 @@ export function AccountsReceivableStat({ token, branchId }: StatProps) {
     />
   );
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> da69483 (Feature/reports finance (#129))
 export function ActiveBranchesCount({ token }: StatProps) {
   const t = useTranslations("analytics.finance.stats");
   const { data, isLoading } = useFinanceReports.useActiveBranches(token);
@@ -81,9 +74,6 @@ export function ActiveBranchesCount({ token }: StatProps) {
       icon={<Building className="h-5 w-5" />} 
     />
   );
-<<<<<<< HEAD
-}
-=======
 }
 
 export function AverageCLV({ token, branchId }: StatProps) {
@@ -100,4 +90,3 @@ export function AverageCLV({ token, branchId }: StatProps) {
     />
   );
 }
->>>>>>> da69483 (Feature/reports finance (#129))

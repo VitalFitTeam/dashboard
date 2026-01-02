@@ -102,9 +102,6 @@ export const useFinanceReports = {
         }
         return api.report.billingByBranchMatrix(jwt, start, end);
       }
-<<<<<<< HEAD
-    )
-=======
     ),
 
     useAverageCLV: (jwt: string | null, branchId?: string) =>
@@ -117,5 +114,4 @@ export const useFinanceReports = {
         return api.report.averageCLVKPI(jwt, branchId);
       }
     ),
->>>>>>> da69483 (Feature/reports finance (#129))
 };

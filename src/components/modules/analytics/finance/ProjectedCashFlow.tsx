@@ -30,9 +30,12 @@ export function ProjectedCashFlowReport({ token, branchId }: { token: string; br
       indexKey="name"
       isLoading={isLoading}
 <<<<<<< HEAD
+<<<<<<< HEAD
       valueType="currency"  
 =======
 >>>>>>> da69483 (Feature/reports finance (#129))
+=======
+>>>>>>> development
     />
   );
 }
