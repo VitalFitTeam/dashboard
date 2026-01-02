@@ -81,7 +81,7 @@ export function ServiceForm({
                 <SelectTrigger className={`${isView ? "bg-gray-50" : ""} ${formErrors?.category_id ? "border-red-500" : ""}`}>
                   <SelectValue placeholder={t("fields.categoryPlaceholder")} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[200px] overflow-y-auto">
                   {categories.map((c) => (
                     <SelectItem key={c.category_id} value={c.category_id}>
                       {c.name}
