@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  AccountsReceivableStat, 
-  ActiveBranchesCount, 
-  MRRStat, 
-  WeeklyRevenueStat 
+import {
+  AccountsReceivableStat,
+  ActiveBranchesCount,
+  AverageCLV,
+  MRRStat,
+  WeeklyRevenueStat,
 } from "@/components/modules/analytics/finance/FinancialStats";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -26,12 +27,16 @@ export default function FinancePage() {
 
   const [branchId, setBranchId] = useState<string>("all");
   const [range, setRange] = useState("this-month");
-  const [startDate, setStartDate] = useState<Date | undefined>(startOfMonth(new Date()));
-  const [endDate, setEndDate] = useState<Date | undefined>(endOfMonth(new Date()));
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    startOfMonth(new Date())
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    endOfMonth(new Date())
+  );
 
-  const { branches, isLoading: loadingBranches } = useBranches({ 
-    token: token ?? "", 
-    limit: 100 
+  const { branches, isLoading: loadingBranches } = useBranches({
+    token: token ?? "",
+    limit: 100,
   });
 
   if (!token) {
@@ -42,7 +47,7 @@ export default function FinancePage() {
   const branchOptions = [
     { value: "all", label: t("filters.all_branches") },
     ...branches.map((b) => ({
-      value: b.branch_id, 
+      value: b.branch_id,
       label: b.name,
     })),
   ];
@@ -93,24 +98,21 @@ export default function FinancePage() {
         />
       </div>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         <WeeklyRevenueStat token={token} branchId={selectedBranch} />
         <MRRStat token={token} branchId={selectedBranch} />
         <AccountsReceivableStat token={token} branchId={selectedBranch} />
         <ActiveBranchesCount token={token} />
+        <AverageCLV token={token} branchId={selectedBranch} />
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
-        <ProjectedCashFlowReport token={token} branchId={selectedBranch}/>
-        <MonthlyRevenueReport token={token} branchId={selectedBranch}/>
+        <ProjectedCashFlowReport token={token} branchId={selectedBranch} />
+        <MonthlyRevenueReport token={token} branchId={selectedBranch} />
       </section>
 
       <section className="mt-10">
-        <BillingMatrixReport 
-          token={token} 
-          startDate={sDate}
-          endDate={eDate}
-        />
+        <BillingMatrixReport token={token} startDate={sDate} endDate={eDate} />
       </section>
     </div>
   );
