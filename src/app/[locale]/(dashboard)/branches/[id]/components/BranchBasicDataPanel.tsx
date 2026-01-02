@@ -1,9 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { MapPin } from "lucide-react";
+
+import { BranchDetails, UpdateBranchRequest, User } from "@vitalfit/sdk";
+import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
+import { branchDetailsSchema } from "@/lib/validation/branchDetailsSchema";
+import { UserRole } from "@/lib/roles";
+
 import BranchSchedule from "@/components/modules/branches/details/BranchSchedule";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import InputField from "@/components/ui/InputField";
 import MapboxPicker from "@/components/ui/MapboxPicker";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,27 +24,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { MapPin } from "lucide-react";
-import { BranchDetails, UpdateBranchRequest, User } from "@vitalfit/sdk";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/sdk-config";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { branchDetailsSchema } from "@/lib/validation/branchDetailsSchema";
 
 interface BasicDataPanelProps {
   mode?: "view" | "edit";
   formData: BranchDetails;
   setFormData: React.Dispatch<React.SetStateAction<BranchDetails>>;
 }
-
-const statusOptions: { label: string; value: BranchDetails["status"] }[] = [
-  { label: "Activa", value: "Active" },
-  { label: "Inactiva", value: "Inactive" },
-  { label: "En mantenimiento", value: "Maintenance" },
-];
 
 interface MapSelectData {
   latitud: string;
@@ -42,62 +40,13 @@ interface MapSelectData {
 }
 
 const toHHMMSS = (input?: string | null) => {
-  if (!input) {
-    return "00:00:00";
-  }
+  if (!input) return "00:00:00";
   const s = input.trim();
-  if (/^\d{1,2}:\d{2}:\d{2}$/.test(s)) {
-    return s;
-  }
+  if (/^\d{1,2}:\d{2}:\d{2}$/.test(s)) return s;
   const hm = /^(\d{1,2}):(\d{2})$/.exec(s);
-  if (hm) {
-    return `${hm[1].padStart(2, "0")}:${hm[2]}:00`;
-  }
-  const ampm = /^(\d{1,2}):(\d{2})(?:\s*)(AM|PM)$/i.exec(s);
-  if (ampm) {
-    let hh = Number(ampm[1]);
-    const mm = ampm[2];
-    const period = ampm[3].toUpperCase();
-    if (period === "PM" && hh < 12) {
-      hh += 12;
-    }
-    if (period === "AM" && hh === 12) {
-      hh = 0;
-    }
-    return `${hh.toString().padStart(2, "0")}:${mm}:00`;
-  }
+  if (hm) return `${hm[1].padStart(2, "0")}:${hm[2]}:00`;
   return "00:00:00";
 };
-
-const transformDataForAPI = (data: BranchDetails): UpdateBranchRequest => {
-  const opHours = data.operating_hours.map((h) => ({
-    day_of_week: h.day_of_week,
-    open_time: h.is_closed ? "00:00:00" : toHHMMSS(h.open_time),
-    close_time: h.is_closed ? "00:00:00" : toHHMMSS(h.close_time),
-    is_closed: h.is_closed,
-  }));
-
-  return {
-    name: data.name,
-    tax_id: data.tax_id,
-    address: data.address,
-    phone: data.phone,
-    status: data.status,
-    state: data.state,
-    country: data.country,
-    latitude: data.latitude,
-    longitude: data.longitude,
-    max_capacity: data.max_capacity,
-    manager_id:
-      typeof (data as any).manager === "object"
-        ? (data as any).manager?.user_id
-        : (data as any).manager || "",
-    operating_hours: opHours,
-    payment_methods: [],
-  };
-};
-
-import { useTranslations } from "next-intl";
 
 export default function BranchBasicDataPanel({
   mode = "edit",
@@ -108,10 +57,17 @@ export default function BranchBasicDataPanel({
   const [loading, setLoading] = useState(false);
   const [allBranchAdmins, setAllBranchAdmins] = useState<User[]>([]);
   const isViewMode = mode === "view";
-  const { token } = useAuth();
+  const { token, hasRole } = useAuth();
+
+  const isSuperAdmin = hasRole(UserRole.SUPER_ADMIN);
+
+  const currentManagerId = (formData as any).manager || "";
+  const currentManagerFullName = (formData as any).manager_first_name
+    ? `${(formData as any).manager_first_name} ${(formData as any).manager_last_name}`
+    : "Seleccionar Manager";
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !isSuperAdmin) return;
     const loadAdmins = async () => {
       try {
         const res = await api.user.getBranchAdmins(token);
@@ -121,40 +77,42 @@ export default function BranchBasicDataPanel({
       }
     };
     loadAdmins();
-  }, [token]);
+  }, [token, isSuperAdmin]);
 
-  const statusOptions: { label: string; value: BranchDetails["status"] }[] = [
-    { label: t("table.status.active"), value: "Active" },
-    { label: t("table.status.inactive"), value: "Inactive" },
-    { label: t("table.status.maintenance"), value: "Maintenance" },
-  ];
-
-  const handleMapSelect = (data: MapSelectData) => {
-    setFormData((prev) => ({
-      ...prev,
-      latitude: Number(data.latitud) || 0,
-      longitude: Number(data.longitud) || 0,
-      address: data.address ?? prev.address,
-      state: data.state ?? prev.state,
-      country: data.country ?? prev.country,
+  const transformDataForAPI = (data: BranchDetails): UpdateBranchRequest => {
+    const opHours = data.operating_hours.map((h) => ({
+      day_of_week: h.day_of_week,
+      open_time: h.is_closed ? "00:00:00" : toHHMMSS(h.open_time),
+      close_time: h.is_closed ? "00:00:00" : toHHMMSS(h.close_time),
+      is_closed: h.is_closed,
     }));
-  };
 
-  const handleScheduleChange = (updatedSchedule: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      operating_hours: updatedSchedule,
-    }));
+    return {
+      name: data.name,
+      tax_id: data.tax_id,
+      address: data.address,
+      phone: data.phone,
+      status: data.status,
+      state: data.state,
+      country: data.country,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      max_capacity: data.max_capacity,
+      manager_id:
+        typeof (data as any).manager === "object"
+          ? (data as any).manager?.user_id
+          : (data as any).manager || "",
+      operating_hours: opHours,
+      payment_methods: [],
+    };
   };
 
   const handleSaveChanges = async () => {
     const result = branchDetailsSchema.safeParse(formData);
-
     if (!result.success) {
       const messages = result.error.issues
         .map((issue) => `${String(issue.path[0])}: ${issue.message}`)
         .join("\n");
-
       toast.error(messages);
       return;
     }
@@ -170,6 +128,21 @@ export default function BranchBasicDataPanel({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleManagerChange = (id: string) => {
+    if (!isSuperAdmin) {
+      return;
+    }
+
+    const selectedAdmin = allBranchAdmins.find((a) => a.user_id === id);
+
+    setFormData((prev: any) => ({
+      ...prev,
+      manager: id,
+      manager_first_name: selectedAdmin?.first_name || prev.manager_first_name,
+      manager_last_name: selectedAdmin?.last_name || prev.manager_last_name,
+    }));
   };
 
   return (
@@ -192,7 +165,6 @@ export default function BranchBasicDataPanel({
             }
             readOnly={isViewMode}
           />
-
           <InputField
             id="taxId"
             label={t("details.basic.tax_id")}
@@ -202,7 +174,6 @@ export default function BranchBasicDataPanel({
             }
             readOnly={isViewMode}
           />
-
           <InputField
             id="phone"
             label={t("details.basic.phone")}
@@ -212,7 +183,6 @@ export default function BranchBasicDataPanel({
             }
             readOnly={isViewMode}
           />
-
           <InputField
             id="maxCapacity"
             label={t("details.basic.capacity")}
@@ -228,185 +198,197 @@ export default function BranchBasicDataPanel({
           />
 
           <div className="flex flex-col space-y-2">
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               {t("details.basic.status")}
             </label>
             <Select
               value={formData.status ?? ""}
-              onValueChange={(value) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  status: value as "Active" | "Inactive" | "Maintenance",
-                }))
+              onValueChange={(value: any) =>
+                setFormData((prev) => ({ ...prev, status: value }))
               }
               disabled={isViewMode}
             >
-              <SelectTrigger id="status">
-                <SelectValue placeholder={t("details.basic.status_placeholder")} />
+              <SelectTrigger>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                <SelectItem value="Active">
+                  {t("table.status.active")}
+                </SelectItem>
+                <SelectItem value="Inactive">
+                  {t("table.status.inactive")}
+                </SelectItem>
+                <SelectItem value="Maintenance">
+                  {t("table.status.maintenance")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex flex-col space-y-2">
-            <label
-              htmlFor="manager"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="text-sm font-medium text-gray-700">
               {t("create.form.admin.manager")}
             </label>
             <Select
-              value={
-                typeof (formData as any).manager === "object"
-                  ? (formData as any).manager?.user_id
-                  : (formData as any).manager || ""
-              }
-              onValueChange={(value) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  manager: value,
-                }))
-              }
-              disabled={isViewMode}
+              value={currentManagerId}
+              onValueChange={handleManagerChange} 
+              disabled={isViewMode || !isSuperAdmin}
             >
-              <SelectTrigger id="manager">
-                <SelectValue placeholder={t("create.form.admin.manager_placeholder")} />
+              <SelectTrigger
+                className={
+                  !isSuperAdmin && !isViewMode
+                    ? "bg-gray-50 opacity-100 border-gray-200"
+                    : ""
+                }
+              >
+                <SelectValue placeholder={currentManagerFullName}>
+                  {currentManagerFullName}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {allBranchAdmins.map((admin) => (
-                  <SelectItem key={admin.user_id} value={admin.user_id}>
-                    {`${admin.first_name} ${admin.last_name}`}
+                {!isSuperAdmin ? (
+                  <SelectItem value={currentManagerId}>
+                    {currentManagerFullName}
                   </SelectItem>
-                ))}
+                ) : (
+                  allBranchAdmins.map((admin) => (
+                    <SelectItem key={admin.user_id} value={admin.user_id}>
+                      {`${admin.first_name} ${admin.last_name}`}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
+            {!isSuperAdmin && !isViewMode && (
+              <p className="text-[10px] text-orange-600 font-medium italic mt-1">
+                * Solo un Super Administrador puede cambiar el encargado.
+              </p>
+            )}
           </div>
         </form>
-        <Alert variant="default" className="mt-6">
+
+        <Alert className="mt-6">
           <InformationCircleIcon className="h-4 w-4" />
-          <AlertDescription>
-            {t("details.basic.hint")}
-          </AlertDescription>
+          <AlertDescription>{t("details.basic.hint")}</AlertDescription>
         </Alert>
       </section>
 
-      <section>
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">{t("details.basic.location_title")}</h2>
-        <p className="text-sm text-gray-600 mb-4">
+      <section className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
+        <div className="flex items-center gap-2 mb-1">
+          <MapPin className="w-5 h-5 text-slate-500" />
+          <h2 className="text-lg font-bold text-slate-900">
+            {t("details.basic.location_title")}
+          </h2>
+        </div>
+        <p className="text-sm text-slate-500 mb-6">
           {t("details.basic.location_subtitle")}
         </p>
 
-        <div className="grid grid-cols-6 gap-4">
-          <div className="col-span-6">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="md:col-span-6">
             <InputField
               label={t("create.form.location.address")}
-              id="address"
-              name="address"
-              placeholder={t("create.form.location.address_placeholder")}
-              value={formData.address ?? ""}
+              value={formData.address || ""}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, address: e.target.value }))
               }
               readOnly={isViewMode}
             />
           </div>
-          <div className="col-span-6 md:col-span-3">
+
+          <div className="md:col-span-3">
             <InputField
               label={t("create.form.location.state")}
-              id="state"
-              name="state"
-              value={formData.state ?? ""}
-              placeholder={t("create.form.location.state")}
-              readOnly={isViewMode || !formData.state}
-              className={isViewMode ? "bg-gray-100" : ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, state: e.target.value }))
-              }
+              value={formData.state || ""}
+              readOnly
+              className="bg-slate-50 border-slate-200"
             />
           </div>
-
-          <div className="col-span-6 md:col-span-3">
+          <div className="md:col-span-3">
             <InputField
               label={t("create.form.location.country")}
-              id="country"
-              name="country"
-              value={formData.country ?? ""}
-              placeholder={t("create.form.location.country")}
-              readOnly={isViewMode || !formData.country}
-              className={isViewMode ? "bg-gray-100" : ""}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, country: e.target.value }))
-              }
+              value={formData.country || ""}
+              readOnly
+              className="bg-slate-50 border-slate-200"
             />
           </div>
 
-          <div className="col-span-6 flex items-center gap-2 mt-4">
-            <MapPin className="w-4 h-4 text-gray-700" />
-            <span className="text-sm font-medium text-gray-700">
-              {t("create.form.location.gps_coords")}
-            </span>
-          </div>
-
-          <div className="col-span-6 md:col-span-3">
+          <div className="md:col-span-3">
             <InputField
               label={t("create.form.location.latitude")}
-              id="latitude"
-              name="latitude"
+              value={
+                formData.latitude !== undefined ? String(formData.latitude) : ""
+              }
               readOnly
-              className="bg-gray-100 border-gray-300"
-              value={formData.latitude ?? ""}
+              className="bg-slate-50 border-slate-200 font-mono text-xs font-bold"
             />
           </div>
-
-          <div className="col-span-6 md:col-span-3">
+          <div className="md:col-span-3">
             <InputField
               label={t("create.form.location.longitude")}
-              id="longitude"
-              name="longitude"
+              value={
+                formData.longitude !== undefined
+                  ? String(formData.longitude)
+                  : ""
+              }
               readOnly
-              className="bg-gray-100 border-gray-300"
-              value={formData.longitude ?? ""}
+              className="bg-slate-50 border-slate-200 font-mono text-xs  font-bold"
             />
           </div>
         </div>
 
-        <div className="mt-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-1 block">
-            {t("details.basic.map_title")}
-          </h3>
-          <MapboxPicker
-            lat={formData.latitude ? String(formData.latitude) : "0"}
-            lng={formData.longitude ? String(formData.longitude) : "0"}
-            onSelect={handleMapSelect}
-          />
+        <div className="mt-8">
+          <div className="rounded-xl overflow-hidden border border-slate-200">
+            <MapboxPicker
+              key={`${formData.latitude}-${formData.longitude}`}
+              lat={formData.latitude ? String(formData.latitude) : "10.4903"}
+              lng={formData.longitude ? String(formData.longitude) : "-66.8835"}
+              onSelect={(data: MapSelectData) => {
+                if (isViewMode) {
+                  return;
+                }
+                setFormData((prev) => ({
+                  ...prev,
+                  latitude: Number(data.latitud),
+                  longitude: Number(data.longitud),
+                  address: data.address || prev.address,
+                  state: data.state || prev.state,
+                  country: data.country || prev.country,
+                }));
+              }}
+            />
+          </div>
         </div>
       </section>
 
-      {/* Horarios */}
       <section>
         <h2 className="text-lg font-semibold text-gray-900 mb-1">
           {t("details.basic.schedule_title")}
         </h2>
         <BranchSchedule
           schedule={formData.operating_hours || []}
-          onScheduleChange={handleScheduleChange}
+          onScheduleChange={(updatedSchedule: any) =>
+            setFormData((prev) => ({
+              ...prev,
+              operating_hours: updatedSchedule,
+            }))
+          }
           mode={mode}
         />
       </section>
 
       {!isViewMode && (
-        <Button onClick={handleSaveChanges} disabled={loading}>
-          {loading ? t("create.form.buttons.saving") : t("create.form.buttons.save")}
-        </Button>
+        <div className="flex justify-end pt-4">
+          <Button
+            onClick={handleSaveChanges}
+            disabled={loading}
+            className="w-full md:w-auto"
+          >
+            {loading
+              ? t("create.form.buttons.saving")
+              : t("create.form.buttons.save")}
+          </Button>
+        </div>
       )}
     </div>
   );
