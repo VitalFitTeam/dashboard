@@ -161,57 +161,139 @@
     "language": "Idioma"
   },
   "analytics": {
-    "sales": {
-      "title": "Reporte de Ventas",
+    "common": {
+      "no_data": "No hay datos disponibles para el periodo seleccionado",
+      "loading": "Cargando datos...",
+      "error": "Ha ocurrido un error al cargar la información"
+    },
+    "finance": {
+      "title": "Reporte de Finanzas Detallado",
+      "subtitle": "Análisis de flujo de caja, solvencia y proyecciones financieras",
+      "export": "Exportar",
       "stats": {
-        "total_sales": "Ventas Totales",
-        "membership_sales": "Ventas de Membresías",
-        "transactions": "Transacciones",
-        "comparison": "{amount} vs. Mes Anterior"
+        "weekly_revenue": "Ingresos Semanales",
+        "mrr": "MRR (Ingreso Recurrente)",
+        "accounts_receivable": "Cuentas por Cobrar",
+        "active_branches": "Sucursales Activas",
+        "average_ticket": "Ticket Promedio",
+        "clv": "Valor de Vida del Cliente (CLV)"
       },
       "filters": {
         "all_branches": "Todas las sucursales",
+        "loading": "Cargando...",
+        "start_date": "Fecha inicio",
+        "end_date": "Fecha fin",
+        "clear": "Limpiar campos",
+        "placeholder_range": "Seleccionar rango",
         "ranges": {
-          "today": "Hoy",
-          "this_week": "Esta semana",
           "this_month": "Este mes",
-          "last_month": "Mes anterior"
+          "last_month": "Mes pasado",
+          "last_3_months": "Últimos 3 meses",
+          "custom": "Personalizado"
         }
+      },
+      "charts": {
+        "cash_flow": {
+          "title": "Flujo de Caja Proyectado",
+          "description": "Ingresos realizados por mes (Año actual)",
+          "series_label": "Ingresos"
+        },
+        "monthly_revenue": {
+          "title": "Evolución de Ingresos",
+          "description": "Comparativa de facturación total mensual",
+          "series_label": "Facturación"
+        }
+      },
+      "billing_matrix": {
+        "title": "Matriz de Facturación",
+        "description": "Desglose comparativo de conceptos por cada sede activa",
+        "no_data": "No hay datos de facturación para el periodo seleccionado.",
+        "column_concept": "Concepto",
+        "column_total": "Total Concepto",
+        "footer_totals": "TOTALES POR SEDE",
+        "error": "Error al cargar la matriz financiera"
+      }
+    },
+    "sales": {
+      "title": "Reporte de Ventas",
+      "subtitle": "Rendimiento comercial, métodos de pago y productividad de instructores",
+      "stats": {
+        "total_sales": "Ventas Totales",
+        "membership_sales": "Ventas de Membresías",
+        "transactions": "Transacciones Totales",
+        "comparison": "{amount} vs. mes anterior"
       },
       "charts": {
         "by_hour": {
           "title": "Ventas por Hora",
-          "error": "Error al cargar las ventas por hora.",
-          "description": "Ventas desde las {start} hasta las {end}.",
-          "series_label": "Ventas Totales",
-          "footer_change": "↑ 5.2% vs. periodo anterior",
-          "footer_text": "Datos agrupados por hora de cierre de venta."
+          "description": "Picos de actividad comercial durante el día",
+          "series_label": "Volumen"
         },
         "payment_method": {
-          "title": "Ventas por Método de Pago",
-          "description": "Preferencia de pago de los clientes",
-          "error": "Error al cargar los métodos de pago.",
-          "no_data": "Sin datos",
-          "footer_total": "Total vendido: ${amount}",
-          "config_label": "Ventas"
+          "title": "Métodos de Pago",
+          "description": "Distribución de recaudación por canal",
+          "footer_total": "Recaudación Total: {amount}"
         },
         "category_sales": {
           "title": "Ventas por Servicio",
-          "description": "Distribución de ingresos por tipo",
-          "error": "Error al cargar datos de servicios.",
-          "footer_total": "Categorías totales: {count}",
-          "growth_label": "{value}% de crecimiento"
-        },
-        "top_instructors": {
-          "title": "Ventas por Instructor Principal",
-          "description": "Mostrando instructores con mayores ventas entre {start} y {end}.",
-          "error": "Error al cargar datos de instructores.",
-          "no_data": "No hay datos de ventas de instructores para este periodo.",
-          "config": {
-            "value": "Ventas Totales",
-            "label": "Instructor"
-          }
+          "description": "Distribución por categorías de productos y servicios"
         }
+      }
+    },
+    "clients": {
+      
+      "header": {
+        "title": "Reporte de Clientes",
+        "subtitle": "Análisis detallado de fidelización, retención y staff",
+        "export": "Exportar Reporte"
+      },
+      "stats": {
+        "total_clients": "Total de clientes",
+        "active_members": "Clientes activos",
+        "new_clients": "Nuevos clientes",
+        "retention_rate": "Tasa de retención"
+      },
+      "filters": {
+        "all_branches": "Todas las sucursales",
+        "ranges": {
+          "this_month": "Este mes",
+          "last_month": "Mes pasado",
+          "last_3_months": "Últimos 3 meses",
+          "custom": "Personalizado"
+        }
+      },
+      "cohort": {
+        "title": "Retención de Cohortes",
+        "description": "Seguimiento mensual del comportamiento de nuevos clientes.",
+        "table": {
+          "month": "Cohorte",
+          "size": "Base",
+          "retention_month": "Mes {n}"
+        },
+        "messages": {
+          "error": "Error al cargar los datos de retención",
+          "no_data": "No hay datos suficientes para generar el análisis"
+        }
+      },
+      "services": {
+        "title": "Servicios más utilizados",
+        "description": "Frecuencia de uso por tipo de clase o servicio",
+        "label_usage": "Cantidad de usos"
+      },
+      "instructors": {
+        "title": "Top 5 Instructores",
+        "description": "Por asistencias totales en el periodo",
+        "label_usage": "asistencias",
+        "messages": {
+          "select_dates": "Selecciona un rango de fechas para ver el ranking",
+          "no_data": "No se encontraron datos de instructores"
+        }
+      },
+      "growth": {
+        "title": "Nuevos vs Recurrentes",
+        "description": "Comparativa mensual de captación y fidelización",
+        "label_new": "Nuevos",
+        "label_recurring": "Recurrentes"
       }
     }
   },

@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 
 interface Option {
   value: string;
@@ -17,16 +18,13 @@ interface ReportFiltersProps {
   branches: Option[];
   branchValue: string;
   onBranchChange: (value: string) => void;
-
   ranges: Option[];
   rangeValue: string;
   onRangeChange: (value: string) => void;
-
   startDate?: Date;
   endDate?: Date;
   onStartDateChange: (date?: Date) => void;
   onEndDateChange: (date?: Date) => void;
-
   loadingBranches?: boolean;
   onClear: () => void;
 }
@@ -45,16 +43,19 @@ export function ReportFilters({
   loadingBranches,
   onClear,
 }: ReportFiltersProps) {
+
+  const t = useTranslations("analytics.finance.filters");
+
   return (
     <div className="flex items-center gap-3 flex-wrap">
       <Select onValueChange={onBranchChange} value={branchValue}>
-        <SelectTrigger className="w-[170px]">
-          <SelectValue placeholder="Todas las sucursales" />
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder={t("all_branches")} />
         </SelectTrigger>
         <SelectContent>
           {loadingBranches ? (
             <SelectItem value="loading" disabled>
-              Cargando...
+              {t("loading")}
             </SelectItem>
           ) : (
             branches.map((b) => (
@@ -65,9 +66,10 @@ export function ReportFilters({
           )}
         </SelectContent>
       </Select>
+
       <Select onValueChange={onRangeChange} value={rangeValue}>
-        <SelectTrigger className="w-[140px]">
-          <SelectValue placeholder="Este mes" />
+        <SelectTrigger className="w-[150px]">
+          <SelectValue placeholder={t("placeholder_range")} />
         </SelectTrigger>
         <SelectContent>
           {ranges.map((r) => (
@@ -88,7 +90,7 @@ export function ReportFilters({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {startDate ? format(startDate, "yyyy-MM-dd") : "Fecha inicio"}
+            {startDate ? format(startDate, "yyyy-MM-dd") : t("start_date")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -100,7 +102,6 @@ export function ReportFilters({
           />
         </PopoverContent>
       </Popover>
-
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -111,7 +112,7 @@ export function ReportFilters({
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {endDate ? format(endDate, "yyyy-MM-dd") : "Fecha fin"}
+            {endDate ? format(endDate, "yyyy-MM-dd") : t("end_date")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -124,8 +125,8 @@ export function ReportFilters({
         </PopoverContent>
       </Popover>
 
-      <Button variant="outline" onClick={onClear}>
-        Limpiar campos
+      <Button variant="ghost" onClick={onClear} className="text-orange-600 hover:text-orange-700 hover:bg-orange-50">
+        {t("clear")}
       </Button>
     </div>
   );

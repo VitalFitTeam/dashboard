@@ -16,7 +16,6 @@ export function InstructorStats({ nextClass, studentCount, monthlyCount }: any) 
         title={t("next_class")}
         value={nextClass}
         icon={<Clock className="h-5 w-5 text-blue-500" />}
-        bottomMarkup={false}
         description={tCommon("starts")}
       />
 
@@ -24,7 +23,6 @@ export function InstructorStats({ nextClass, studentCount, monthlyCount }: any) 
         title={t("students_today")}
         value={studentCount?.value?.toString() || "0"}
         icon={<Users className="h-5 w-5 text-green-500" />}
-        bottomMarkup={false}
         description={
           <span className={studentCount?.is_positive ? "text-green-600" : "text-red-600"}>
             {studentCount?.is_positive ? "+" : ""}
@@ -37,7 +35,6 @@ export function InstructorStats({ nextClass, studentCount, monthlyCount }: any) 
         title={t("monthly_classes")}
         value={monthlyCount?.value?.toString() || "0"}
         icon={<GraduationCap className="h-5 w-5 text-purple-500" />}
-        bottomMarkup={false}
         description={`${t("meta") || "Meta"}: ${monthlyCount?.target || 0}`}
       />
     </div>

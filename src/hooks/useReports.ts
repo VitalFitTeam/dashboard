@@ -11,20 +11,6 @@ const reportFetcher = async (action: () => Promise<any>) => {
   }
 };
 
-export const useMostUsedServices = (
-  token: string | null,
-  start: string,
-  end: string
-) => {
-  const key = token && start && end ? ["mostUsedServices", token, start, end] : null;
-  const fetcher = () => api.report.mostUsedServices(token || "", start, end);
-
-  const { data, error, isLoading } = useSWR<ChartData[], Error>(key, () =>
-    reportFetcher(fetcher)
-  );
-
-  return { data, isLoading, error };
-};
 
 export const useSalesByCategory = (
   token: string | null,
@@ -112,17 +98,6 @@ export const useGlobalStats = (token: string | null) => {
 export const useTotalActiveBranches = (token: string | null) => {
   const key = token ? ["totalActiveBranches", token] : null;
   const fetcher = () => api.report.totalActiveBranches(token || "");
-  
-  const { data, error, isLoading } = useSWR<number, Error>(key, () =>
-    reportFetcher(fetcher)
-  );
-
-  return { data, isLoading, error };
-};
-
-export const useTotalClients = (token: string | null) => {
-  const key = token ? ["totalClients", token] : null;
-  const fetcher = () => api.report.totalClients(token || "");
   
   const { data, error, isLoading } = useSWR<number, Error>(key, () =>
     reportFetcher(fetcher)

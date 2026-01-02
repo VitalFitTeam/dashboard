@@ -133,7 +133,7 @@ export default function SalesReport() {
               {t("stats.comparison", { amount: gobalSales?.total_last_month ?? 0 })}
             </span>
           }
-          bottomMarkup
+          
         />
 
         <StatCard
@@ -141,7 +141,7 @@ export default function SalesReport() {
           icon={<Users className="h-4 w-4 text-primary" />}
           value="-"
           description={<span className="text-gray-400 font-semibold">-</span>}
-          bottomMarkup
+          
         />
 
         <StatCard
@@ -149,7 +149,7 @@ export default function SalesReport() {
           icon={<ShoppingCart className="h-4 w-4 text-primary" />}
           value="-"
           description={<span className="text-gray-400 font-semibold">-</span>}
-          bottomMarkup
+          
         />
       </section>
 
