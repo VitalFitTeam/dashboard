@@ -161,6 +161,11 @@
     "language": "Idioma"
   },
   "analytics": {
+    "common": {
+      "no_data": "No hay datos disponibles para el periodo seleccionado",
+      "loading": "Cargando datos...",
+      "error": "Ha ocurrido un error al cargar la información"
+    },
     "finance": {
       "title": "Reporte de Finanzas Detallado",
       "subtitle": "Análisis de flujo de caja, solvencia y proyecciones financieras",
@@ -232,6 +237,62 @@
           "title": "Ventas por Servicio",
           "description": "Distribución por categorías de productos y servicios"
         }
+      }
+    },
+    "clients": {
+      
+      "header": {
+        "title": "Reporte de Clientes",
+        "subtitle": "Análisis detallado de fidelización, retención y staff",
+        "export": "Exportar Reporte"
+      },
+      "stats": {
+        "total_clients": "Total de clientes",
+        "active_members": "Clientes activos",
+        "new_clients": "Nuevos clientes",
+        "retention_rate": "Tasa de retención"
+      },
+      "filters": {
+        "all_branches": "Todas las sucursales",
+        "ranges": {
+          "this_month": "Este mes",
+          "last_month": "Mes pasado",
+          "last_3_months": "Últimos 3 meses",
+          "custom": "Personalizado"
+        }
+      },
+      "cohort": {
+        "title": "Retención de Cohortes",
+        "description": "Seguimiento mensual del comportamiento de nuevos clientes.",
+        "table": {
+          "month": "Cohorte",
+          "size": "Base",
+          "retention_month": "Mes {n}"
+        },
+        "messages": {
+          "error": "Error al cargar los datos de retención",
+          "no_data": "No hay datos suficientes para generar el análisis"
+        }
+      },
+      "services": {
+        "title": "Servicios más utilizados",
+        "description": "Frecuencia de uso por tipo de clase o servicio",
+        "label_usage": "Cantidad de usos"
+      },
+      "instructors": {
+        "title": "Top 5 Instructores",
+        "description": "Por asistencias totales en el periodo",
+        "label_usage": "asistencias",
+        "messages": {
+          "select_dates": "Selecciona un rango de fechas para ver el ranking",
+          "no_data": "No se encontraron datos de instructores"
+        }
+      },
+      "growth": {
+        "title": "Nuevos vs Recurrentes",
+        "description": "Comparativa mensual de captación y fidelización",
+        "label_new": "Nuevos",
+        "label_recurring": "Recurrentes"
       }
     }
   },

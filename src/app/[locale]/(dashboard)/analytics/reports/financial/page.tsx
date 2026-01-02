@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { 
   AccountsReceivableStat, 
   ActiveBranchesCount, 
@@ -18,34 +18,49 @@ import { MonthlyRevenueReport } from "@/components/modules/analytics/finance/Mon
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { BillingMatrixReport } from "@/components/modules/analytics/finance/BillingMatrixBanch";
 import { useTranslations } from "next-intl";
+import { UserRole } from "@/lib/roles";
 
 export default function FinancePage() {
-  // Al usar el scope "analytics.finance", las llaves dentro deben ser relativas
   const t = useTranslations("analytics.finance");
-  const { token } = useAuth();
+  const { token, user, hasRole } = useAuth();
+
+  const activeBranchId = user?.activeBranch?.id;
+  const isGlobalAdmin = hasRole([UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN]);
 
   const [branchId, setBranchId] = useState<string>("all");
   const [range, setRange] = useState("this-month");
   const [startDate, setStartDate] = useState<Date | undefined>(startOfMonth(new Date()));
   const [endDate, setEndDate] = useState<Date | undefined>(endOfMonth(new Date()));
 
+  useEffect(() => {
+    if (activeBranchId && !isGlobalAdmin) {
+      setBranchId(activeBranchId);
+    }
+  }, [activeBranchId, isGlobalAdmin]);
+
   const { branches, isLoading: loadingBranches } = useBranches({ 
     token: token ?? "", 
     limit: 100 
   });
 
+
+  const branchOptions = useMemo(() => {
+    if (!isGlobalAdmin && user?.activeBranch) {
+      return [{ value: user.activeBranch.id, label: user.activeBranch.name }];
+    }
+
+    return [
+      { value: "all", label: t("filters.all_branches") },
+      ...branches.map((b) => ({
+        value: b.branch_id, 
+        label: b.name,
+      })),
+    ];
+  }, [branches, isGlobalAdmin, user?.activeBranch, t]);
+
   if (!token) {
     return null;
   }
-
-  // 1. Mapeo de opciones (usando llaves relativas al scope inicializado)
-  const branchOptions = [
-    { value: "all", label: t("filters.all_branches") },
-    ...branches.map((b) => ({
-      value: b.branch_id, 
-      label: b.name,
-    })),
-  ];
 
   const rangeOptions = [
     { value: "this-month", label: t("filters.ranges.this_month") },
@@ -59,7 +74,7 @@ export default function FinancePage() {
   const eDate = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
 
   return (
-    <div className="min-h-screen dark:bg-gray-900 p-6 md:p-10 space-y-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-10 space-y-8">
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
@@ -85,7 +100,7 @@ export default function FinancePage() {
           onEndDateChange={setEndDate}
           loadingBranches={loadingBranches}
           onClear={() => {
-            setBranchId("all");
+            setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
             setRange("this-month");
             setStartDate(startOfMonth(new Date()));
             setEndDate(endOfMonth(new Date()));

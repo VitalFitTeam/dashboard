@@ -60,17 +60,16 @@ export function AccountsReceivableStat({ token, branchId }: StatProps) {
     />
   );
 }
-
 export function ActiveBranchesCount({ token }: StatProps) {
   const t = useTranslations("analytics.finance.stats");
   const { data, isLoading } = useFinanceReports.useActiveBranches(token);
 
   return (
     <StatCard 
-      value={data} 
+      value={data ?? 0}
       isLoading={isLoading} 
       title={t("active_branches")} 
-      icon={Building}
+      icon={<Building className="h-5 w-5" />} 
     />
   );
 }
