@@ -26,19 +26,23 @@ export default function ClientReportPage() {
   const t = useTranslations("analytics.clients");
   const { token, user, hasRole } = useAuth();
 
+  const isGlobalAdmin = hasRole([UserRole.SUPER_ADMIN]);
   const activeBranchId = user?.activeBranch?.id;
-  const isGlobalAdmin = hasRole([UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN]);
 
-  const [branchId, setBranchId] = useState<string>("all");
+  const [branchId, setBranchId] = useState<string>(() => {
+    return user?.activeBranch?.id || "all";
+  });
+
   const [range, setRange] = useState("this-month");
   const [startDate, setStartDate] = useState<Date | undefined>(startOfMonth(new Date()));
   const [endDate, setEndDate] = useState<Date | undefined>(endOfMonth(new Date()));
 
+
   useEffect(() => {
-    if (activeBranchId && !isGlobalAdmin) {
+    if (activeBranchId && branchId === "all" && !isGlobalAdmin) {
       setBranchId(activeBranchId);
     }
-  }, [activeBranchId, isGlobalAdmin]);
+  }, [activeBranchId, isGlobalAdmin, branchId]);
 
   const { branches, isLoading: loadingBranches } = useBranches({ 
     token: token ?? "", 
@@ -98,7 +102,7 @@ export default function ClientReportPage() {
           onEndDateChange={setEndDate}
           loadingBranches={loadingBranches}
           onClear={() => {
-            setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
+            setBranchId(activeBranchId || "all");
             setRange("this-month");
             setStartDate(startOfMonth(new Date()));
             setEndDate(endOfMonth(new Date()));
@@ -107,15 +111,15 @@ export default function ClientReportPage() {
       </div>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <TotalClients token={token} />
+        <TotalClients token={token} branchId={selectedBranch} />
         <ActiveMember token={token} branchId={selectedBranch} />
         <NewClients token={token} branchId={selectedBranch} />
-        <RetentionRate token={token} />
+        <RetentionRate token={token} branchId={selectedBranch} />
       </section>
 
       <div className="space-y-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          <div className="xl:col-span-1 bg-white dark:bg-gray-900  rounded-2xl border border-slate-200/60 shadow-sm">
+          <div className="xl:col-span-1 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 shadow-sm">
             <NewVsRecurringReport 
               token={token} 
               branchId={selectedBranch} 
@@ -123,7 +127,10 @@ export default function ClientReportPage() {
           </div>
 
           <div className="xl:col-span-2 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-slate-200/60 shadow-sm overflow-x-auto">
-            <CohortAnalysisReport token={token} branchId={selectedBranch} />
+            <CohortAnalysisReport 
+              token={token} 
+              branchId={selectedBranch} 
+            />
           </div>
         </div>
       </div>

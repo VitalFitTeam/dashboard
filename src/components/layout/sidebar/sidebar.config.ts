@@ -1,6 +1,6 @@
 import { UserRole } from "@/lib/roles";
 
-import { Calendar, ChartBar, UserIcon, Megaphone } from "lucide-react";
+import { Calendar, ChartBar, UserIcon, Megaphone, DollarSign } from "lucide-react";
 
 import {
   CurrencyDollarIcon,
@@ -82,7 +82,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
           icon: CurrencyDollarIcon,
           subitems: [
             { label: "GestionMembresias", href: "/finance/memberships" },
-            { label: "AlertasVencimiento", href: "/finance/expiration-alerts" },
           ],
         },
         { label: "ReportesFinancieros",
@@ -152,9 +151,17 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
       items: [
         { label: "RegistroPagos", icon: CurrencyDollarIcon, href: "/finance/billing"},
         { label: "GestionMembresias", icon: CurrencyDollarIcon, href: "/finance/memberships" },
-        { label: "ReporteVentasLocal", icon: ChartBarIcon, href: "/finance/sales-report" },
       ],
     },
+    {
+      title: "ReportesFinancieros",
+      items: [
+        { label: "ReporteClientes", icon: UserIcon, href: "/analytics/reports/clients" },
+        { label: "ReporteFinanciero", icon: ChartBar, href: "/analytics/reports/financial"  },
+        { label: "ReporteVentas", icon: ChartBar, href: "/analytics/reports/sales"  },
+      ],
+    },
+    
   ],
 
   [UserRole.INSTRUCTOR]: [
@@ -174,19 +181,29 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
       title: "Finanzas",
       items: [
         { label: "Dashboard", icon: HomeIcon, href: "/" },
-        { label: "FacturacionElectronica", icon: CurrencyDollarIcon, href: "/finance/billing" },
-        { label: "ReportesFinancieros", icon: ChartBarIcon, href: "/finance/reports" },
+        { label: "FacturacionElectronica", icon: CurrencyDollarIcon, href: "/analytics/billing" },
       ],
     },
+    {
+      title: "ReportesFinancieros",
+      items: [
+        { label: "Dashboard", icon: HomeIcon, href: "/" },
+        { label: "ReporteClientes", icon: UserIcon, href: "/analytics/reports/clients" },
+        { label: "ReporteFinanciero", icon: ChartBar, href: "/analytics/reports/financial"  },
+        { label: "ReporteVentas", icon: ChartBar, href: "/analytics/reports/sales"  },
+      ],
+    },
+    
   ],
 
   [UserRole.DATA_ANALYST]: [
     {
-      title: "Analytics",
+      title: "ReportesFinancieros",
       items: [
         { label: "Dashboard", icon: HomeIcon, href: "/" },
-        { label: "ReportesDetallados", icon: ChartBarIcon, href: "/analytics/reports" },
-        { label: "TendenciasCohortes", icon: ChartBar, href: "/analytics/trends" },
+        { label: "ReporteClientes", icon: UserIcon, href: "/analytics/reports/clients" },
+        { label: "ReporteFinanciero", icon: ChartBar, href: "/analytics/reports/financial"  },
+        { label: "ReporteVentas", icon: DollarSign, href: "/analytics/reports/sales"  },
       ],
     },
   ],

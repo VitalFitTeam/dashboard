@@ -28,9 +28,9 @@ export default function SalesByHourChart({
   const description = t.rich("description", {
     start: startHour,
     end: endHour,
+    strong: (chunks) => <strong className="font-bold text-foreground">{chunks}</strong>,
     strongNode: (chunks) => <strong className="font-bold text-foreground">{chunks}</strong>, 
   });
-
   const chartData = useMemo(() => {
     if (!data || !Array.isArray(data)){
        return [];

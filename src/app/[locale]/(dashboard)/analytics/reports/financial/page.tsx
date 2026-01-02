@@ -25,42 +25,35 @@ export default function FinancePage() {
   const { token, user, hasRole } = useAuth();
 
   const activeBranchId = user?.activeBranch?.id;
-  const isGlobalAdmin = hasRole([UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN]);
+  const isGlobalAdmin = hasRole([UserRole.SUPER_ADMIN]);
 
-  const [branchId, setBranchId] = useState<string>("all");
-  const [range, setRange] = useState("this-month");
-  const [startDate, setStartDate] = useState<Date | undefined>(startOfMonth(new Date()));
-  const [endDate, setEndDate] = useState<Date | undefined>(endOfMonth(new Date()));
-
-  useEffect(() => {
-    if (activeBranchId && !isGlobalAdmin) {
-      setBranchId(activeBranchId);
-    }
-  }, [activeBranchId, isGlobalAdmin]);
-
-  const { branches, isLoading: loadingBranches } = useBranches({ 
-    token: token ?? "", 
-    limit: 100 
+  const [branchId, setBranchId] = useState<string>(() => {
+    return user?.activeBranch?.id || "all";
   });
+  const [range, setRange] = useState("custom");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
+ useEffect(() => {
+    if (user?.activeBranch?.id && branchId === "all" && !isGlobalAdmin) {
+      setBranchId(user.activeBranch.id);
+    }
+  }, [user, isGlobalAdmin, branchId]);
+
+  const { branches, isLoading: loadingBranches } = useBranches({
+    token: token ?? "",
+    limit: 100,
+  });
 
   const branchOptions = useMemo(() => {
     if (!isGlobalAdmin && user?.activeBranch) {
       return [{ value: user.activeBranch.id, label: user.activeBranch.name }];
     }
-
     return [
       { value: "all", label: t("filters.all_branches") },
-      ...branches.map((b) => ({
-        value: b.branch_id, 
-        label: b.name,
-      })),
+      ...branches.map((b) => ({ value: b.branch_id, label: b.name })),
     ];
   }, [branches, isGlobalAdmin, user?.activeBranch, t]);
-
-  if (!token) {
-    return null;
-  }
 
   const rangeOptions = [
     { value: "this-month", label: t("filters.ranges.this_month") },
@@ -70,9 +63,14 @@ export default function FinancePage() {
   ];
 
   const selectedBranch = branchId === "all" ? undefined : branchId;
+  const hasValidRange = !!(startDate && endDate);
+  
   const sDate = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
   const eDate = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
 
+  if (!token) {
+    return null;
+  }
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-10 space-y-8">
       <PageHeader

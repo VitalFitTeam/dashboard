@@ -27,20 +27,23 @@ import { UserRole } from "@/lib/roles";
 export default function SalesPage() {
   const t = useTranslations("analytics.Sales");
   const { token, user, hasRole } = useAuth();
+  console.log(user);
 
   const activeBranchId = user?.activeBranch?.id;
-  const isGlobalAdmin = hasRole([UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN]);
+  const isGlobalAdmin = hasRole([UserRole.SUPER_ADMIN]);
 
-  const [branchId, setBranchId] = useState<string>("all");
+  const [branchId, setBranchId] = useState<string>(() => {
+    return user?.activeBranch?.id || "all";
+  });
   const [range, setRange] = useState("custom");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
-  useEffect(() => {
-    if (activeBranchId && !isGlobalAdmin) {
-      setBranchId(activeBranchId);
+ useEffect(() => {
+    if (user?.activeBranch?.id && branchId === "all" && !isGlobalAdmin) {
+      setBranchId(user.activeBranch.id);
     }
-  }, [activeBranchId, isGlobalAdmin]);
+  }, [user, isGlobalAdmin, branchId]);
 
   const { branches, isLoading: loadingBranches } = useBranches({
     token: token ?? "",
@@ -101,7 +104,7 @@ export default function SalesPage() {
           onEndDateChange={setEndDate}
           loadingBranches={loadingBranches}
           onClear={() => {
-            setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
+            setBranchId(user?.activeBranch?.id || "all");
             setRange("custom");
             setStartDate(undefined);
             setEndDate(undefined);
@@ -119,7 +122,11 @@ export default function SalesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 min-h-[400px]">
-          <SalesByHourChart token={token} startHour={" "} endHour={" "} />
+         <SalesByHourChart 
+            token={token} 
+            startHour="00:00" 
+            endHour="23:59" 
+          />
         </div>
 
         <div className="lg:col-span-1">
