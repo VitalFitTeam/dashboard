@@ -61,7 +61,6 @@ export function AccountsReceivableStat({ token, branchId }: StatProps) {
     />
   );
 }
-
 export function ActiveBranchesCount({ token }: StatProps) {
   const t = useTranslations("analytics.finance.stats");
   const { data, isLoading } = useFinanceReports.useActiveBranches(token);

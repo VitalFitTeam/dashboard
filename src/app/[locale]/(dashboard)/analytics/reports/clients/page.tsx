@@ -26,19 +26,23 @@ export default function ClientReportPage() {
   const t = useTranslations("analytics.clients");
   const { token, user, hasRole } = useAuth();
 
+  const isGlobalAdmin = hasRole([UserRole.SUPER_ADMIN]);
   const activeBranchId = user?.activeBranch?.id;
-  const isGlobalAdmin = hasRole([UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN]);
 
-  const [branchId, setBranchId] = useState<string>("all");
+  const [branchId, setBranchId] = useState<string>(() => {
+    return user?.activeBranch?.id || "all";
+  });
+
   const [range, setRange] = useState("this-month");
   const [startDate, setStartDate] = useState<Date | undefined>(startOfMonth(new Date()));
   const [endDate, setEndDate] = useState<Date | undefined>(endOfMonth(new Date()));
 
+
   useEffect(() => {
-    if (activeBranchId && !isGlobalAdmin) {
+    if (activeBranchId && branchId === "all" && !isGlobalAdmin) {
       setBranchId(activeBranchId);
     }
-  }, [activeBranchId, isGlobalAdmin]);
+  }, [activeBranchId, isGlobalAdmin, branchId]);
 
   const { branches, isLoading: loadingBranches } = useBranches({ 
     token: token ?? "", 

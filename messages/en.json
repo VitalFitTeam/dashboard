@@ -214,32 +214,55 @@
         "error": "Error loading financial matrix"
       }
     },
-    "sales": {
-      "title": "Sales Report",
-      "subtitle": "Commercial performance, payment methods, and instructor productivity",
-      "stats": {
-        "total_sales": "Total Sales",
-        "membership_sales": "Membership Sales",
-        "transactions": "Total Transactions",
-        "comparison": "{amount} vs. previous month"
-      },
-      "charts": {
-        "by_hour": {
-          "title": "Sales by Hour",
-          "description": "Commercial activity peaks during the day",
-          "series_label": "Volume"
-        },
-        "payment_method": {
-          "title": "Payment Methods",
-          "description": "Revenue distribution by channel",
-          "footer_total": "Total Revenue: {amount}"
-        },
-        "category_sales": {
-          "title": "Sales by Service",
-          "description": "Distribution by product and service categories"
-        }
-      }
+    "Sales": {
+  "title": "Sales Report",
+  "subtitle": "Commercial performance, payment methods, and branch productivity",
+  "export": "Export Report",
+  "stats": {
+    "total_sales": "Total Sales",
+    "membership_sales": "Membership Sales",
+    "transactions": "Total Transactions",
+    "comparison": "vs. previous month"
+  },
+  "filters": {
+    "all_branches": "All branches",
+    "required_title": "Selection Required",
+    "required_description": "Please select a date range to view sales distribution.",
+    "ranges": {
+      "this_month": "This month",
+      "last_month": "Last month",
+      "last_3_months": "Last 3 months",
+      "custom": "Custom"
+    }
+  },
+  "charts": {
+    "by_hour": {
+      "title": "Sales by Hour",
+      "description": "Peak commercial activity throughout the day",
+      "series_label": "Volume"
     },
+    "top_branches": {
+      "title": "Top Selling Branches",
+      "description": "Comparison of total revenue per branch",
+      "sales_label": "Total Sales"
+    },
+    "payment_method": {
+      "title": "Payment Methods",
+      "description": "Collection distribution by channel",
+      "amount": "Amount",
+      "footer_total": "Total Collection: {amount}",
+      "footer_text": "{count} payment methods detected",
+      "filters_required_title": "Filters Required",
+      "filters_required_description": "Select a date range to view payment methods."
+    },
+    "category_sales": {
+      "title": "Sales by Service",
+      "description": "Distribution by product and service categories",
+      "footer_total": "Total services: {total}",
+      "value_label": "Sales"
+    }
+  }
+},
     "clients": {
       "header": {
         "title": "Client Report",
