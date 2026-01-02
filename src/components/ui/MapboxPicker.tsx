@@ -33,15 +33,21 @@ export default function MapboxPicker({
       return;
     }
 
+    const initialLng = lng ? parseFloat(lng) : -66.9036;
+    const initialLat = lat ? parseFloat(lat) : 10.4806;
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [
-        lng ? parseFloat(lng) : -66.9036,
-        lat ? parseFloat(lat) : 10.4806,
-      ],
-      zoom: 12,
+      center: [initialLng, initialLat],
+      zoom: 14, 
     });
+
+    if (lat && lng) {
+      marker.current = new mapboxgl.Marker({ color: "#f97316" })
+        .setLngLat([initialLng, initialLat])
+        .addTo(map.current);
+    }
 
     map.current.on("click", async (e) => {
       const longitude = e.lngLat.lng;
@@ -94,6 +100,23 @@ export default function MapboxPicker({
       map.current?.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (map.current && lat && lng) {
+      const nLat = parseFloat(lat);
+      const nLng = parseFloat(lng);
+      
+      map.current.flyTo({ center: [nLng, nLat] });
+      
+      if (marker.current) {
+        marker.current.setLngLat([nLng, nLat]);
+      } else {
+        marker.current = new mapboxgl.Marker({ color: "#f97316" })
+          .setLngLat([nLng, nLat])
+          .addTo(map.current);
+      }
+    }
+  }, [lat, lng]);
 
   return (
     <div
