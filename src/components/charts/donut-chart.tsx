@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { PieChart, Pie, LabelList, Cell } from "recharts";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
@@ -18,147 +19,155 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
 
-type DonutDatum = Record<string, string | number>;
-
-interface DonutChartProps {
+interface ReusableDonutChartProps<T> {
   title: string;
   description?: string;
-  data: DonutDatum[];
-  dataKey: string; 
-  labelKey: string; 
+  data?: T[];
+  dataKey: keyof T;
+  labelKey: keyof T;
   config?: ChartConfig;
   footerText?: string;
-  growth?: number; 
+  growth?: number;
   height?: number;
+  isLoading?: boolean;
 }
 
-export function ReusableDonutChart({
+const DEFAULT_COLORS = ["#60a5fa", "#3b82f6", "#2563eb", "#1d4ed8", "#1e40af"];
+
+export function ReusableDonutChart<T extends Record<string, any>>({
   title,
   description,
-  data,
+  data = [],
   dataKey,
   labelKey,
   config = {},
   footerText,
   growth,
   height = 260,
-}: DonutChartProps) {
-  const colors = ["#60a5fa", "#3b82f6", "#2563eb", "#1d4ed8", "#1e40af"];
-
-
-  const safeData = data.map((item) => {
-    const value = item[dataKey];
-    const numeric = typeof value === "string" ? parseFloat(value) : value;
-
-    return {
+  isLoading = false,
+}: ReusableDonutChartProps<T>) {
+  
+  const safeData = React.useMemo(() => {
+    return data.map((item) => ({
       ...item,
-      [dataKey]: isNaN(numeric) ? 0 : numeric,
-    };
-  });
-  const total = safeData.reduce((acc, item) => acc + (item[dataKey] as number), 0);
+      [dataKey]: Number(item[dataKey]) || 0,
+    }));
+  }, [data, dataKey]);
 
-  const percentFormatter = (label: string) => {
-    const item = safeData.find((x) => x[labelKey] === label);
-    if (!item) {
+  const total = React.useMemo(() => 
+    safeData.reduce((acc, item) => acc + (item[dataKey] as number), 0),
+    [safeData, dataKey]
+  );
+
+  const growthInfo = React.useMemo(() => {
+    if (growth === undefined) {
       return null;
     }
-
-    const value = item[dataKey] as number;
-    const pct = total > 0 ? (value / total) * 100 : 0;
-
-    return pct < 6 ? null : `${pct.toFixed(1)}%`;
-  };
-
-  const growthStatus = (() => {
-    if (growth === undefined){
-       return null;
-    }
-    if (growth > 0){
+    if (growth > 0) {
       return {
-        icon: <TrendingUp className="h-4 w-4 text-green-500" />,
-        text: `Trending up by ${growth}% this month`,
-        className: "text-green-600",
-      };
-    }
-      
-    if (growth < 0){
-      return {
-        icon: <TrendingDown className="h-4 w-4 text-red-500" />,
-        text: `Trending down by ${Math.abs(growth)}% this month`,
-        className: "text-red-600",
-      };
-    }
-      
-    return {
-      icon: <Minus className="h-4 w-4 text-muted-foreground" />,
-      text: "No change this month",
-      className: "text-muted-foreground",
+      icon: <TrendingUp className="h-4 w-4" />,
+      text: `Subió un ${growth}%`,
+      color: "text-green-600"
     };
-  })();
+    }
+    if (growth < 0) {
+      return {
+      icon: <TrendingDown className="h-4 w-4" />,
+      text: `Bajó un ${Math.abs(growth)}%`,
+      color: "text-red-600"
+    };
+    }
+    return {
+      icon: <Minus className="h-4 w-4" />,
+      text: "Sin cambios",
+      color: "text-muted-foreground"
+    };
+  }, [growth]);
+
+  if (isLoading) {
+    return (
+      <Card className="flex flex-col">
+        <CardHeader className="items-center pb-2">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-4 w-48 mt-2" />
+        </CardHeader>
+        <CardContent className="flex justify-center py-6">
+          <Skeleton className="h-40 w-40 rounded-full" />
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <Skeleton className="h-4 w-full" />
+        </CardFooter>
+      </Card>
+    );
+  }
 
   return (
-     <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle className="text-lg">{title}</CardTitle>
-        {description && (
-          <CardDescription className="text-sm">
-            {description}
-          </CardDescription>
-        )}
+    <Card className="flex flex-col h-full shadow-sm border-none bg-white dark:bg-slate-950">
+      <CardHeader className="items-center pb-0 text-center">
+        <CardTitle className="text-lg font-bold">{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
 
-     <CardContent className="flex-1 pb-0">
+      <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={config}
-          className="mx-auto aspect-square"
+          className="mx-auto aspect-square w-full"
           style={{ maxHeight: height }}
         >
           <PieChart>
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent nameKey={labelKey} />}
+              content={<ChartTooltipContent nameKey={labelKey as string} hideLabel />}
             />
-
             <Pie
-              data={safeData}
-              dataKey={dataKey}
-              nameKey={labelKey}
-              innerRadius="55%"
+              data={safeData.length ? safeData : [{ [dataKey]: 1 }]}
+              dataKey={dataKey as string}
+              nameKey={labelKey as string}
+              innerRadius="60%"
               outerRadius="80%"
-              paddingAngle={3}
+              paddingAngle={4}
+              cornerRadius={4}
             >
-              {safeData.map((_, i) => (
-                <Cell key={i} fill={colors[i % colors.length]} />
-              ))}
-
+              {safeData.length > 0 ? (
+                safeData.map((_, i) => (
+                  <Cell 
+                    key={`cell-${i}`} 
+                    fill={DEFAULT_COLORS[i % DEFAULT_COLORS.length]} 
+                    className="stroke-background hover:opacity-80 transition-opacity"
+                  />
+                ))
+              ) : (
+                <Cell fill="#e5e7eb" />
+              )}
+              
               <LabelList
-                dataKey={labelKey}
-                formatter={percentFormatter}
+                dataKey={labelKey as string}
                 position="outside"
-                className="fill-foreground"
-                fontSize={12}
-                stroke="none"
+                className="fill-muted-foreground"
+                fontSize={11}
+                formatter={(value: string) => {
+                  const item = safeData.find(d => d[labelKey] === value);
+                  const val = item ? (item[dataKey] as number) : 0;
+                  const pct = total > 0 ? (val / total) * 100 : 0;
+                  return pct > 8 ? `${pct.toFixed(0)}%` : "";
+                }}
               />
             </Pie>
           </PieChart>
         </ChartContainer>
       </CardContent>
 
-      {(footerText || growthStatus) && (
-        <CardFooter className="flex-col gap-2 text-sm mt-2">
-          {growthStatus && (
-            <div
-              className={`flex items-center gap-2 font-medium ${growthStatus.className}`}
-            >
-              {growthStatus.text} {growthStatus.icon}
+      {(footerText || growthInfo) && (
+        <CardFooter className="flex-col gap-1 text-sm pt-4">
+          {growthInfo && (
+            <div className={`flex items-center gap-2 font-medium ${growthInfo.color}`}>
+              {growthInfo.text} {growthInfo.icon}
             </div>
           )}
-
           {footerText && (
-            <div className="text-muted-foreground text-xs">
-              {footerText}
-            </div>
+            <div className="text-muted-foreground text-xs text-center">{footerText}</div>
           )}
         </CardFooter>
       )}

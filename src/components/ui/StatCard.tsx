@@ -11,7 +11,7 @@ export type StatCardProps = {
   className?: string;
   variant?: "classic" | "modern"; 
   trend?: {
-    value: string | number;
+    value?: string | number;
     isPositive?: boolean;
     label?: string;
   };

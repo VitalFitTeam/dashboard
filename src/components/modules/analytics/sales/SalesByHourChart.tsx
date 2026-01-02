@@ -1,10 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { useSalesByHour } from "@/hooks/useReports";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { AdaptableLineDotsChart } from "@/components/charts/line-dots";
+import { useSalesReports } from "@/hooks/reports/useSalesReports";
+import { BaseMultiChart } from "@/components/charts/BaseMultiChart";
 
 type SalesByHourChartProps = {
   token: string;
@@ -17,71 +16,61 @@ export default function SalesByHourChart({
   startHour,
   endHour,
 }: SalesByHourChartProps) {
+  const t = useTranslations("analytics.Sales.charts.by_hour");
+  
+  const { data, isLoading } = useSalesReports.useSalesByHour(
+    token,
+    startHour,
+    endHour
+  );
 
-  const t = useTranslations("analytics.sales.charts.by_hour");
 
-  const {
-    data: salesByHour,
-    isLoading: isLoadingSalesByHour,
-    error: errorSalesByHour,
-  } = useSalesByHour(token, startHour, endHour);
+  const description = t.rich("description", {
+    start: startHour,
+    end: endHour,
+    strongNode: (chunks) => <strong className="font-bold text-foreground">{chunks}</strong>, 
+  });
 
-  if (errorSalesByHour) {
-    return (
-      <Card className="h-[420px] border-red-300 shadow-md">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-semibold text-red-600">
-            {t("title")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-red-500 text-sm">
-          {t("error")}
-        </CardContent>
-      </Card>
-    );
-  }
+  const chartData = useMemo(() => {
+    if (!data || !Array.isArray(data)){
+       return [];
+    
+    }
+    return data.map((item: any, index: number) => {
 
-  if (isLoadingSalesByHour || !salesByHour) {
-    return (
-      <Card className="h-[420px] p-4 shadow-sm">
-        <Skeleton className="h-full w-full rounded-xl" />
-      </Card>
-    );
-  }
+      const hourValue = item.hour !== undefined ? item.hour : index;
+      const formattedHour = `${hourValue.toString().padStart(2, "0")}:00`;
 
-  const rawDataArray = (salesByHour as any)?.data || (salesByHour as any);
+      const numericValue = typeof item.value === "string" 
+        ? parseFloat(item.value.replace(/[^0-9.-]+/g, "")) 
+        : item.value;
 
-  const adaptedChartData = (rawDataArray as any[]).map((item) => ({
-    ...item,
-    value: parseFloat(item.value),
-    hour: item.hour || 0,
-  }));
+      return {
+        ...item,
+        hourLabel: formattedHour, 
+        value: numericValue || 0,  
+      };
+    });
+  }, [data]);
 
   return (
-    <Card className="shadow-lg rounded-2xl border border-gray-200 bg-white dark:bg-neutral-900">
-      <CardHeader className="pb-1">
-        <CardTitle className="text-xl font-semibold tracking-tight">
-          {t("title")}
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {t.rich("description", {
-            start: startHour,
-            end: endHour,
-            strong: (chunks) => <strong>{chunks}</strong>,
-          })}
-        </p>
-      </CardHeader>
-
-      <CardContent className="px-4">
-        <AdaptableLineDotsChart
-          description=""
-          data={adaptedChartData}
-          seriesLabel={t("series_label")}
-          footerChange={t("footer_change")}
-          footerText={t("footer_text")}
-          height={200}
-        />
-      </CardContent>
-    </Card>
+    <div className="w-full">
+      <BaseMultiChart
+        title={t("title")}
+        description={description as any}
+        data={chartData}
+        isLoading={isLoading}
+        indexKey="hourLabel" 
+        valueType="currency"
+        series={[
+          { 
+            key: "value", 
+            label: t("series_label") || "Ventas", 
+            color: "#f97316", 
+            type: "line" 
+          },
+        ]}
+      />
+    </div>
   );
 }

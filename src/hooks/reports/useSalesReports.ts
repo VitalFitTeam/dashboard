@@ -82,7 +82,7 @@ export const useSalesReports = {
     ),
 
     useTopBranches: (jwt: string | null) =>
-    useReportBase<ChartData[]>(
+    useReportBase<TopBranch[]>(
       jwt ? ["sales", "topBranches", jwt]: null,
       () => {
         if (!jwt) {
