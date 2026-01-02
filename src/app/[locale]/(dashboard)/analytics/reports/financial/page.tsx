@@ -1,11 +1,21 @@
 "use client";
 
+<<<<<<< HEAD
 import { useState, useEffect, useMemo } from "react";
 import { 
   AccountsReceivableStat, 
   ActiveBranchesCount, 
   MRRStat, 
   WeeklyRevenueStat 
+=======
+import { useState } from "react";
+import {
+  AccountsReceivableStat,
+  ActiveBranchesCount,
+  AverageCLV,
+  MRRStat,
+  WeeklyRevenueStat,
+>>>>>>> da69483 (Feature/reports finance (#129))
 } from "@/components/modules/analytics/finance/FinancialStats";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -18,6 +28,7 @@ import { MonthlyRevenueReport } from "@/components/modules/analytics/finance/Mon
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { BillingMatrixReport } from "@/components/modules/analytics/finance/BillingMatrixBanch";
 import { useTranslations } from "next-intl";
+<<<<<<< HEAD
 import { UserRole } from "@/lib/roles";
 
 export default function FinancePage() {
@@ -58,10 +69,44 @@ export default function FinancePage() {
     ];
   }, [branches, isGlobalAdmin, user?.activeBranch, t]);
 
+=======
+
+export default function FinancePage() {
+  // Al usar el scope "analytics.finance", las llaves dentro deben ser relativas
+  const t = useTranslations("analytics.finance");
+  const { token } = useAuth();
+
+  const [branchId, setBranchId] = useState<string>("all");
+  const [range, setRange] = useState("this-month");
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    startOfMonth(new Date())
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    endOfMonth(new Date())
+  );
+
+  const { branches, isLoading: loadingBranches } = useBranches({
+    token: token ?? "",
+    limit: 100,
+  });
+
+>>>>>>> da69483 (Feature/reports finance (#129))
   if (!token) {
     return null;
   }
 
+<<<<<<< HEAD
+=======
+  // 1. Mapeo de opciones (usando llaves relativas al scope inicializado)
+  const branchOptions = [
+    { value: "all", label: t("filters.all_branches") },
+    ...branches.map((b) => ({
+      value: b.branch_id,
+      label: b.name,
+    })),
+  ];
+
+>>>>>>> da69483 (Feature/reports finance (#129))
   const rangeOptions = [
     { value: "this-month", label: t("filters.ranges.this_month") },
     { value: "last-month", label: t("filters.ranges.last_month") },
@@ -74,7 +119,11 @@ export default function FinancePage() {
   const eDate = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-10 space-y-8">
+=======
+    <div className="min-h-screen dark:bg-gray-900 p-6 md:p-10 space-y-8">
+>>>>>>> da69483 (Feature/reports finance (#129))
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
@@ -100,7 +149,11 @@ export default function FinancePage() {
           onEndDateChange={setEndDate}
           loadingBranches={loadingBranches}
           onClear={() => {
+<<<<<<< HEAD
             setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
+=======
+            setBranchId("all");
+>>>>>>> da69483 (Feature/reports finance (#129))
             setRange("this-month");
             setStartDate(startOfMonth(new Date()));
             setEndDate(endOfMonth(new Date()));
@@ -108,11 +161,16 @@ export default function FinancePage() {
         />
       </div>
 
+<<<<<<< HEAD
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+=======
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+>>>>>>> da69483 (Feature/reports finance (#129))
         <WeeklyRevenueStat token={token} branchId={selectedBranch} />
         <MRRStat token={token} branchId={selectedBranch} />
         <AccountsReceivableStat token={token} branchId={selectedBranch} />
         <ActiveBranchesCount token={token} />
+<<<<<<< HEAD
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
@@ -126,6 +184,18 @@ export default function FinancePage() {
           startDate={sDate}
           endDate={eDate}
         />
+=======
+        <AverageCLV token={token} branchId={selectedBranch} />
+      </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
+        <ProjectedCashFlowReport token={token} branchId={selectedBranch} />
+        <MonthlyRevenueReport token={token} branchId={selectedBranch} />
+      </section>
+
+      <section className="mt-10">
+        <BillingMatrixReport token={token} startDate={sDate} endDate={eDate} />
+>>>>>>> da69483 (Feature/reports finance (#129))
       </section>
     </div>
   );

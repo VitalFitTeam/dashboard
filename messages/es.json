@@ -175,7 +175,8 @@
         "mrr": "MRR (Ingreso Recurrente)",
         "accounts_receivable": "Cuentas por Cobrar",
         "active_branches": "Sucursales Activas",
-        "average_ticket": "Ticket Promedio"
+        "average_ticket": "Ticket Promedio",
+        "clv": "Valor de Vida del Cliente (CLV)"
       },
       "filters": {
         "all_branches": "Todas las sucursales",
