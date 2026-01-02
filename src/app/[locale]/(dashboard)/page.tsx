@@ -36,10 +36,10 @@ export default function DashboardPage() {
       />
     ),
     [UserRole.ACCOUNTANT]: (
-      <div className="p-8 font-medium">Panel Contador - Próximamente</div>
+      <SuperAdminDashboard  />
     ),
     [UserRole.DATA_ANALYST]: (
-      <div className="p-8 font-medium">Panel Analista - Próximamente</div>
+      <SuperAdminDashboard  />
     ),
     [UserRole.RECEPTIONIST]: (
       <div className="p-8 font-medium">Panel Recepción - Próximamente</div>
