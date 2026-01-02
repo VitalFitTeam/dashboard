@@ -5,7 +5,8 @@ import {
   DollarSign, 
   TrendingUp, 
   WalletCards, 
-  Building
+  Building,
+  UserIcon
 } from "lucide-react"; 
 import { ReportStatItem } from "../ReportStatItem";
 import { useTranslations } from "next-intl";
@@ -72,4 +73,19 @@ export function ActiveBranchesCount({ token }: StatProps) {
       icon={<Building className="h-5 w-5" />} 
     />
   );
+}
+
+export function AverageCLV({ token, branchId }: StatProps) {
+  const t = useTranslations("analytics.finance.stats");
+  const { data, isLoading } = useFinanceReports.useAverageCLV(token, branchId);
+  
+  return (
+    <ReportStatItem
+      data={data} 
+      isLoading={isLoading} 
+      defaultTitle={t("clv")}
+      icon={UserIcon}
+      formatType="number" 
+    />
+  );
 }

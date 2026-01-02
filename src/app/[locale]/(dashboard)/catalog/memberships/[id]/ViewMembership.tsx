@@ -4,8 +4,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import MembershipForm from "../MembershipForm";
 import { MembershipType } from "@vitalfit/sdk";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 
 interface ViewMembershipProps {
   membership: MembershipType;

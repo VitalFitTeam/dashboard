@@ -175,7 +175,8 @@
         "mrr": "MRR (Ingreso Recurrente)",
         "accounts_receivable": "Cuentas por Cobrar",
         "active_branches": "Sucursales Activas",
-        "average_ticket": "Ticket Promedio"
+        "average_ticket": "Ticket Promedio",
+        "clv": "Valor de Vida del Cliente (CLV)"
       },
       "filters": {
         "all_branches": "Todas las sucursales",
@@ -213,60 +214,34 @@
         "error": "Error al cargar la matriz financiera"
       }
     },
-    "Sales": {
+    "sales": {
       "title": "Reporte de Ventas",
       "subtitle": "Rendimiento comercial, métodos de pago y productividad de instructores",
-      "export": "Exportar Reporte",
-      "filters": {
-        "all_branches": "Todas las Sucursales",
-        "required_title": "Rango de fechas requerido",
-        "required_description": "Por favor, selecciona una fecha de inicio y fin para generar este gráfico.",
-        "ranges": {
-          "this_month": "Este Mes",
-          "last_month": "Mes Pasado",
-          "last_3_months": "Últimos 3 Meses",
-          "custom": "Rango Personalizado"
-        },
-        "clear": "Limpiar Filtros"
-      },
       "stats": {
         "total_sales": "Ventas Totales",
-        "global_sales": "Ventas Globales",
         "membership_sales": "Ventas de Membresías",
         "transactions": "Transacciones Totales",
-        "average_ticket": "Ticket Promedio",
         "comparison": "{amount} vs. mes anterior"
       },
       "charts": {
         "by_hour": {
           "title": "Ventas por Hora",
-          "description": "Distribución de ingresos desde las <strongNode>{start}</strongNode> hasta las <strongNode>{end}</strongNode>",
-          "series_label": "Ventas ($)"
-        },
-        "category_sales": {
-          "title": "Ventas por Categoría",
-          "description": "Desglose de ingresos por tipo de servicio o producto",
-          "value_label": "Monto",
-          "footer_total": "Total de {total} en {count} categorías"
+          "description": "Picos de actividad comercial durante el día",
+          "series_label": "Volumen"
         },
         "payment_method": {
           "title": "Métodos de Pago",
-          "description": "Preferencia de pago de los clientes",
-          "amount": "Monto",
-          "footer_text": "Se detectaron {count} métodos de pago activos"
+          "description": "Distribución de recaudación por canal",
+          "footer_total": "Recaudación Total: {amount}"
         },
-        "top_branches": {
-          "title": "Top 5 Sucursales",
-          "description": "Sucursales con mayor rendimiento este mes",
-          "sales_label": "Ventas Mensuales"
+        "category_sales": {
+          "title": "Ventas por Servicio",
+          "description": "Distribución por categorías de productos y servicios"
         }
-      },
-      "common": {
-        "no_data": "No hay datos disponibles para este periodo",
-        "loading": "Cargando reporte..."
       }
     },
     "clients": {
+      
       "header": {
         "title": "Reporte de Clientes",
         "subtitle": "Análisis detallado de fidelización, retención y staff",
@@ -320,25 +295,8 @@
         "label_new": "Nuevos",
         "label_recurring": "Recurrentes"
       }
-    },
-      "charts": {
-        "by_hour": {
-          "title": "Ventas por Hora",
-          "description": "Picos de actividad comercial durante el día",
-          "series_label": "Volumen"
-        },
-        "payment_method": {
-          "title": "Métodos de Pago",
-          "description": "Distribución de recaudación por canal",
-          "footer_total": "Recaudación Total: {amount}"
-        },
-        "category_sales": {
-          "title": "Ventas por Servicio",
-          "description": "Distribución por categorías de productos y servicios"
-        }
-      }
-    },
-    
+    }
+  },
   "dashboards": {
     "super_admin": {
       "stats": {

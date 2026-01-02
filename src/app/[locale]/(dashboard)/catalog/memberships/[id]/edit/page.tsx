@@ -8,10 +8,11 @@ import MembershipForm from "../../MembershipForm";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { MembershipType } from "@vitalfit/sdk";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createMembershipSchema } from "@/lib/validation/membershipSchema";
 import { toast } from "sonner";
+import { useRouter } from "@/i18n/navigation";
 
 export default function EditMembership() {
   const t = useTranslations("catalog.memberships");
@@ -54,7 +55,7 @@ export default function EditMembership() {
       try {
         const membershipData = await api.membership.getMembershipTypeByID(
           id,
-          token,
+          token
         );
         if (!mounted) {
           return;
@@ -103,9 +104,11 @@ export default function EditMembership() {
 
   const validate = (
     formData: MembershipType,
-    setErrors: (errors: Partial<Record<keyof MembershipType, string>>) => void,
+    setErrors: (errors: Partial<Record<keyof MembershipType, string>>) => void
   ): boolean => {
-    const schema = createMembershipSchema((key) => t(`validations.${key.split('.').pop()}`));
+    const schema = createMembershipSchema((key) =>
+      t(`validations.${key.split(".").pop()}`)
+    );
     const result = schema.safeParse(formData);
 
     if (!result.success) {
@@ -118,7 +121,7 @@ export default function EditMembership() {
           }
           return acc;
         },
-        {} as Partial<Record<keyof MembershipType, string>>,
+        {} as Partial<Record<keyof MembershipType, string>>
       );
 
       setErrors(formattedErrors);
@@ -156,7 +159,7 @@ export default function EditMembership() {
       await api.membership.updateMembershipType(
         formData.membership_type_id,
         payload,
-        token,
+        token
       );
       toast.success(t("edit.success"));
       setTimeout(() => router.replace("/catalog/memberships"), 1500);

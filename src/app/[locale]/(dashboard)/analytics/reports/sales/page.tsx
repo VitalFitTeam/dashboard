@@ -27,7 +27,6 @@ import { UserRole } from "@/lib/roles";
 export default function SalesPage() {
   const t = useTranslations("analytics.Sales");
   const { token, user, hasRole } = useAuth();
-  console.log(user);
 
   const activeBranchId = user?.activeBranch?.id;
   const isGlobalAdmin = hasRole([UserRole.SUPER_ADMIN]);

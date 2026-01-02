@@ -102,5 +102,16 @@ export const useFinanceReports = {
         }
         return api.report.billingByBranchMatrix(jwt, start, end);
       }
-    )
+    ),
+
+    useAverageCLV: (jwt: string | null, branchId?: string) =>
+    useReportBase<KPICard>(
+      jwt ? ["finance", "averageCLVKPI", jwt, branchId]: null,
+      () => {
+        if (!jwt) {
+            throw new Error("No JWT provided");
+        }
+        return api.report.averageCLVKPI(jwt, branchId);
+      }
+    ),
 };

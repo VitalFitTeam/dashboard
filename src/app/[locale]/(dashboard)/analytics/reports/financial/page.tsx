@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { 
   AccountsReceivableStat, 
   ActiveBranchesCount, 
+  AverageCLV, 
   MRRStat, 
   WeeklyRevenueStat 
 } from "@/components/modules/analytics/finance/FinancialStats";
@@ -106,24 +107,21 @@ export default function FinancePage() {
         />
       </div>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         <WeeklyRevenueStat token={token} branchId={selectedBranch} />
         <MRRStat token={token} branchId={selectedBranch} />
         <AccountsReceivableStat token={token} branchId={selectedBranch} />
         <ActiveBranchesCount token={token} />
+        <AverageCLV token={token} branchId={selectedBranch} />
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
-        <ProjectedCashFlowReport token={token} branchId={selectedBranch}/>
-        <MonthlyRevenueReport token={token} branchId={selectedBranch}/>
+        <ProjectedCashFlowReport token={token} branchId={selectedBranch} />
+        <MonthlyRevenueReport token={token} branchId={selectedBranch} />
       </section>
 
       <section className="mt-10">
-        <BillingMatrixReport 
-          token={token} 
-          startDate={sDate}
-          endDate={eDate}
-        />
+        <BillingMatrixReport token={token} startDate={sDate} endDate={eDate} />
       </section>
     </div>
   );
