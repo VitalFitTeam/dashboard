@@ -215,94 +215,54 @@
       }
     },
     "Sales": {
-      "title": "Sales Report",
-      "subtitle": "Commercial performance, payment methods, and instructor productivity",
-      "export": "Export Report",
-      "filters": {
-        "all_branches": "All Branches",
-        "required_title": "Date range required",
-        "required_description": "Please select a start and end date to generate this chart.",
-        "ranges": {
-          "this_month": "This Month",
-          "last_month": "Last Month",
-          "last_3_months": "Last 3 Months",
-          "custom": "Custom Range"
-        },
-        "clear": "Clear Filters"
-      },
-      "stats": {
-        "total_sales": "Total Sales",
-        "global_sales": "Global Sales",
-        "membership_sales": "Membership Sales",
-        "transactions": "Total Transactions",
-        "comparison": "{amount} vs. previous month"
-      },
-      "charts": {
-        "by_hour": {
-          "title": "Sales by Hour",
-          "description": "Revenue distribution from <strong>{start}</strong> to <strong>{end}</strong>",
-          "series_label": "Sales ($)"
-        },
-        "category_sales": {
-          "title": "Sales by Category",
-          "description": "Revenue breakdown by service or product type",
-          "value_label": "Amount",
-          "footer_total": "Total of {total} across {count} categories"
-        },
-        "payment_method": {
-          "title": "Payment Methods",
-          "description": "Customer payment preferences",
-          "amount": "Amount",
-          "footer_text": "{count} active payment methods detected"
-        },
-        "top_branches": {
-          "title": "Top 5 Branches",
-          "description": "Highest performing branches this month",
-          "sales_label": "Monthly Sales"
-        }
-      },
-      "common": {
-        "no_data": "No data available for this period",
-        "loading": "Loading report..."
-      }
+  "title": "Sales Report",
+  "subtitle": "Commercial performance, payment methods, and branch productivity",
+  "export": "Export Report",
+  "stats": {
+    "total_sales": "Total Sales",
+    "membership_sales": "Membership Sales",
+    "transactions": "Total Transactions",
+    "comparison": "vs. previous month"
+  },
+  "filters": {
+    "all_branches": "All branches",
+    "required_title": "Selection Required",
+    "required_description": "Please select a date range to view sales distribution.",
+    "ranges": {
+      "this_month": "This month",
+      "last_month": "Last month",
+      "last_3_months": "Last 3 months",
+      "custom": "Custom"
+    }
+  },
+  "charts": {
+    "by_hour": {
+      "title": "Sales by Hour",
+      "description": "Peak commercial activity throughout the day",
+      "series_label": "Volume"
     },
-      "charts": {
-        "by_hour": {
-          "title": "Sales by Hour",
-          "description": "Peaks of commercial activity during the day",
-          "series_label": "Volume"
-        },
-        "payment_method": {
-          "title": "Payment Methods",
-          "description": "Collection distribution by channel",
-          "footer_total": "Total Collection: {amount}"
-        },
-        "category_sales": {
-          "title": "Sales by Service",
-          "description": "Distribution by product and service categories"
-        }
-      },
-  "clients": {
-    "header": {
-      "title": "Client Report",
-      "subtitle": "Detailed analysis of loyalty, retention, and staff",
-      "export": "Export Report"
+    "top_branches": {
+      "title": "Top Selling Branches",
+      "description": "Comparison of total revenue per branch",
+      "sales_label": "Total Sales"
     },
-    "stats": {
-      "total_clients": "Total clients",
-      "active_members": "Active clients",
-      "new_clients": "New clients",
-      "retention_rate": "Retention rate"
+    "payment_method": {
+      "title": "Payment Methods",
+      "description": "Collection distribution by channel",
+      "amount": "Amount",
+      "footer_total": "Total Collection: {amount}",
+      "footer_text": "{count} payment methods detected",
+      "filters_required_title": "Filters Required",
+      "filters_required_description": "Select a date range to view payment methods."
     },
-    "filters": {
-      "all_branches": "All branches",
-      "ranges": {
-        "this_month": "This month",
-        "last_month": "Last month",
-        "last_3_months": "Last 3 months",
-        "custom": "Custom"
-      }
-    },
+    "category_sales": {
+      "title": "Sales by Service",
+      "description": "Distribution by product and service categories",
+      "footer_total": "Total services: {total}",
+      "value_label": "Sales"
+    }
+  }
+},
     "clients": {
       "header": {
         "title": "Client Report",
@@ -358,7 +318,6 @@
         "label_recurring": "Recurring"
       }
     }
-  }
   },
   "dashboards": {
     "super_admin": {

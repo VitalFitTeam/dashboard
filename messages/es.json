@@ -214,32 +214,55 @@
         "error": "Error al cargar la matriz financiera"
       }
     },
-    "sales": {
-      "title": "Reporte de Ventas",
-      "subtitle": "Rendimiento comercial, métodos de pago y productividad de instructores",
-      "stats": {
-        "total_sales": "Ventas Totales",
-        "membership_sales": "Ventas de Membresías",
-        "transactions": "Transacciones Totales",
-        "comparison": "{amount} vs. mes anterior"
-      },
-      "charts": {
-        "by_hour": {
-          "title": "Ventas por Hora",
-          "description": "Picos de actividad comercial durante el día",
-          "series_label": "Volumen"
-        },
-        "payment_method": {
-          "title": "Métodos de Pago",
-          "description": "Distribución de recaudación por canal",
-          "footer_total": "Recaudación Total: {amount}"
-        },
-        "category_sales": {
-          "title": "Ventas por Servicio",
-          "description": "Distribución por categorías de productos y servicios"
-        }
-      }
+    "Sales": {
+  "title": "Reporte de Ventas",
+  "subtitle": "Rendimiento comercial, métodos de pago y productividad de sucursales",
+  "export": "Exportar Reporte",
+  "stats": {
+    "total_sales": "Ventas Totales",
+    "membership_sales": "Ventas de Membresías",
+    "transactions": "Transacciones Totales",
+    "comparison": "vs. mes anterior"
+  },
+  "filters": {
+    "all_branches": "Todas las sucursales",
+    "required_title": "Selección requerida",
+    "required_description": "Por favor, seleccione un rango de fechas para visualizar la distribución de ventas.",
+    "ranges": {
+      "this_month": "Este mes",
+      "last_month": "Mes pasado",
+      "last_3_months": "Últimos 3 meses",
+      "custom": "Personalizado"
+    }
+  },
+  "charts": {
+    "by_hour": {
+      "title": "Ventas por Hora",
+      "description": "Picos de actividad comercial durante el día",
+      "series_label": "Volumen"
     },
+    "top_branches": {
+      "title": "Sucursales con mayores ventas",
+      "description": "Comparativa de ingresos totales por sucursal",
+      "sales_label": "Ventas totales"
+    },
+    "payment_method": {
+      "title": "Métodos de Pago",
+      "description": "Distribución de recaudación por canal",
+      "amount": "Monto",
+      "footer_total": "Recaudación Total: {amount}",
+      "footer_text": "Se detectaron {count} métodos de pago",
+      "filters_required_title": "Filtros requeridos",
+      "filters_required_description": "Selecciona un rango de fechas para visualizar los métodos de pago."
+    },
+    "category_sales": {
+      "title": "Ventas por Servicio",
+      "description": "Distribución por categorías de productos y servicios",
+      "footer_total": "Total servicios: {total}",
+      "value_label": "Ventas"
+    }
+  }
+},
     "clients": {
       
       "header": {
