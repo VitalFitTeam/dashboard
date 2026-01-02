@@ -175,7 +175,8 @@
         "mrr": "MRR (Monthly Recurring Revenue)",
         "accounts_receivable": "Accounts Receivable",
         "active_branches": "Active Branches",
-        "average_ticket": "Average Ticket"
+        "average_ticket": "Average Ticket", 
+        "clv": "Average Customer Lifetime Value (CLV)"
       },
       "filters": {
         "all_branches": "All branches",
