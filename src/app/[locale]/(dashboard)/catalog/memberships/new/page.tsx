@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import MembershipForm from "../MembershipForm";
 import { api } from "@/lib/sdk-config";
-import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { createMembershipSchema } from "@/lib/validation/membershipSchema";
 import { toast } from "sonner";
+import { useRouter } from "@/i18n/navigation";
 
 type ValidationResult = {
   success: boolean;

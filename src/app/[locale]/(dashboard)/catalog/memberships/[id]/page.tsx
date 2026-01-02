@@ -2,11 +2,12 @@
 
 import { useAuth } from "@/context/AuthContext";
 import ViewMembership from "./ViewMembership";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
 import { MembershipType, DataResponse } from "@vitalfit/sdk";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 
 export default function ViewMembershipPage() {
   const t = useTranslations("catalog.memberships");

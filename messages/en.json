@@ -161,37 +161,42 @@
     "language": "Language"
   },
   "analytics": {
+    "common": {
+      "no_data": "No data available for the selected period",
+      "loading": "Loading data...",
+      "error": "An error occurred while loading the information"
+    },
     "finance": {
       "title": "Detailed Finance Report",
-      "subtitle": "Cash flow analysis, solvency, and financial projections",
+      "subtitle": "Analysis of cash flow, solvency, and financial projections",
       "export": "Export",
       "stats": {
         "weekly_revenue": "Weekly Revenue",
-        "mrr": "MRR (Recurring Revenue)",
+        "mrr": "MRR (Monthly Recurring Revenue)",
         "accounts_receivable": "Accounts Receivable",
         "active_branches": "Active Branches",
-        "average_ticket": "Average Ticket",
+        "average_ticket": "Average Ticket", 
         "clv": "Average Customer Lifetime Value (CLV)"
       },
       "filters": {
-        "all_branches": "All Branches",
+        "all_branches": "All branches",
         "loading": "Loading...",
-        "start_date": "Start Date",
-        "end_date": "End Date",
+        "start_date": "Start date",
+        "end_date": "End date",
         "clear": "Clear fields",
         "placeholder_range": "Select range",
         "ranges": {
-          "this_month": "This Month",
-          "last_month": "Last Month",
-          "last_3_months": "Last 3 Months",
-          "custom": "Custom Range"
+          "this_month": "This month",
+          "last_month": "Last month",
+          "last_3_months": "Last 3 months",
+          "custom": "Custom"
         }
       },
       "charts": {
         "cash_flow": {
           "title": "Projected Cash Flow",
-          "description": "Realized income per month (Current Year)",
-          "series_label": "Income"
+          "description": "Revenue realized per month (Current year)",
+          "series_label": "Revenue"
         },
         "monthly_revenue": {
           "title": "Revenue Evolution",
@@ -201,8 +206,8 @@
       },
       "billing_matrix": {
         "title": "Billing Matrix",
-        "description": "Comparative breakdown of concepts by each active branch",
-        "no_data": "No billing data available for the selected period.",
+        "description": "Comparative breakdown of concepts for each active branch",
+        "no_data": "There is no billing data for the selected period.",
         "column_concept": "Concept",
         "column_total": "Total Concept",
         "footer_totals": "TOTALS BY BRANCH",
@@ -216,7 +221,7 @@
         "total_sales": "Total Sales",
         "membership_sales": "Membership Sales",
         "transactions": "Total Transactions",
-        "comparison": "{amount} vs. last month"
+        "comparison": "{amount} vs. previous month"
       },
       "charts": {
         "by_hour": {
@@ -233,6 +238,61 @@
           "title": "Sales by Service",
           "description": "Distribution by product and service categories"
         }
+      }
+    },
+    "clients": {
+      "header": {
+        "title": "Client Report",
+        "subtitle": "Detailed analysis of loyalty, retention, and staff",
+        "export": "Export Report"
+      },
+      "stats": {
+        "total_clients": "Total clients",
+        "active_members": "Active clients",
+        "new_clients": "New clients",
+        "retention_rate": "Retention rate"
+      },
+      "filters": {
+        "all_branches": "All branches",
+        "ranges": {
+          "this_month": "This month",
+          "last_month": "Last month",
+          "last_3_months": "Last 3 months",
+          "custom": "Custom"
+        }
+      },
+      "cohort": {
+        "title": "Cohort Retention",
+        "description": "Monthly tracking of new client behavior.",
+        "table": {
+          "month": "Cohort",
+          "size": "Base",
+          "retention_month": "Month {n}"
+        },
+        "messages": {
+          "error": "Error loading retention data",
+          "no_data": "Not enough data to generate analysis"
+        }
+      },
+      "services": {
+        "title": "Most Used Services",
+        "description": "Usage frequency by class type or service",
+        "label_usage": "Usage count"
+      },
+      "instructors": {
+        "title": "Top 5 Instructors",
+        "description": "By total attendance in the period",
+        "label_usage": "attendances",
+        "messages": {
+          "select_dates": "Select a date range to view the ranking",
+          "no_data": "No instructor data found"
+        }
+      },
+      "growth": {
+        "title": "New vs Recurring",
+        "description": "Monthly comparison of acquisition and loyalty",
+        "label_new": "New",
+        "label_recurring": "Recurring"
       }
     }
   },

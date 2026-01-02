@@ -3,16 +3,17 @@ import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import { StatCard } from "@/components/ui/StatCard";
 import { AlertTriangle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useTopBranches, useTotalActiveBranches, useTotalClients } from "@/hooks/useReports";
+import { useTopBranches, useTotalActiveBranches } from "@/hooks/useReports";
 import { BuildingOffice2Icon } from "@heroicons/react/24/solid";
 import { FranchisePerformanceItem } from "../analytics/FranchisePerformanceItem";
+
+import { TotalClients } from "../analytics/clients/ClientsStat";
 
 export default function SuperAdminDashboard() {
     const { token } = useAuth();
 
     const { data: totalActiveBranch, isLoading: isLoadingBranches } = useTotalActiveBranches(token);
     const { data: topActiveBranch, isLoading: isLoadingTopBranches } = useTopBranches(token);
-    const { data: totalClients, isLoading: isLoadingClients } = useTotalClients(token);
 
     const normalizeTrend = (value?: string) =>
         value?.toLowerCase() === "up" || value?.toLowerCase() === "down"
@@ -23,31 +24,27 @@ export default function SuperAdminDashboard() {
         <div className="min-h-screen">
             <div className="max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard
+                    {/* <StatCard
                         title="Ventas globales"
-                        value={<h3 className="ml-1.5 font-normal">$ 1,250,000</h3>}
-                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
+                        value={"$ 1,250,000"}
+                        icon={CurrencyDollarIcon}
                         description={<span className="text-green-600">+20.1% vs mes pasado</span>}
-                    />
+                    /> */}
 
-                    <StatCard
+                    {/* <StatCard
                         title="Sucursales Activas"
                         value={isLoadingBranches ? "-" : totalActiveBranch}
-                        icon={<BuildingOffice2Icon className="h-5 w-5 text-gray-500" />}
-                    />
+                        icon={BuildingOffice2Icon}
+                    /> */}
 
-                    <StatCard
-                        title="Clientes totales"
-                        value={isLoadingClients ? "-" : totalClients}
-                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
-                    />
+                    {/* <TotalClients token={token}/> */}
 
-                    <StatCard
+                    {/* <StatCard
                         title="NPS Global"
                         value={<h3 className="ml-1.5 font-normal">8.63</h3>}
-                        icon={<CurrencyDollarIcon className="h-5 w-5 text-gray-500" />}
+                        icon={CurrencyDollarIcon}
                         description={<span className="text-red-600">-1.2% vs mes anterior</span>}
-                    />
+                    /> */}
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <Card>
