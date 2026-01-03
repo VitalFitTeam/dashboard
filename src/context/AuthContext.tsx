@@ -27,6 +27,7 @@ export interface SessionUser extends Omit<SdkUser, "role"> {
   branch_id?: string;
   assignedBranches: BranchStaff[];
   managedBranches: BranchStaff[];
+  instructorBranches: BranchStaff[];
   activeBranch?: BranchStaff; 
 }
 
@@ -76,37 +77,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const getUserProfile = useCallback(
     async (token: string): Promise<SessionUser | null> => {
       const decoded = decodeToken(token);
-      if (!decoded) return null;
+      if (!decoded) {
+        return null;
+      }
 
       try {
-        const [profileResponse, branchesRes, managedRes] = await Promise.all([
+        const [profileResponse, branchesRes, managedRes, instructorRes] = await Promise.all([
           api.user.WhoAmI(token),
           api.staff.getStaffBranches(token),
-          api.staff.getManagedBranches(token)
+          api.staff.getManagedBranches(token),
+          api.staff.getInstructorBranches(token)
         ]);
-
+      
         const sdkData = profileResponse.user;
-        if (!sdkData) return null;
+        if (!sdkData) {
+          return null;
+        }
 
         const rawRoleName = (sdkData.role as any)?.name?.toLowerCase();
         const userRole = rawRoleName as UserRole;
 
-        if (!VALID_ROLES.includes(userRole)) return null;
+        if (!VALID_ROLES.includes(userRole)){
+           return null;
+        }
 
         const assignedBranches = branchesRes.data || [];
         const managedBranches = managedRes.data || [];
+        const instructorBranches = instructorRes.data || [];
+        console.log("sucursales asignadas",instructorBranches);  
         
-        // Unificamos todas las ramas para encontrar una activa por defecto
-        const allAvailableBranches = [...assignedBranches, ...managedBranches];
+        
+        const allAvailableBranches = [
+        ...assignedBranches, 
+        ...managedBranches, 
+        ...instructorBranches
+      ];
 
-        // Lógica de sucursal activa: 1. LocalStorage, 2. Primera disponible, 3. undefined
         const savedBranchId = localStorage.getItem("active_branch_id");
         const activeBranch = 
           allAvailableBranches.find(b => b.id === savedBranchId) || 
           allAvailableBranches[0] || 
           undefined;
 
-        // Si se seleccionó una por defecto (y no estaba en storage), la guardamos
         if (activeBranch && !savedBranchId) {
           localStorage.setItem("active_branch_id", activeBranch.id);
         }
@@ -117,6 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           role_label: ROLE_LABELS[userRole] ?? rawRoleName,
           assignedBranches,
           managedBranches,
+          instructorBranches,
           activeBranch,
           branch_id: activeBranch?.id || (sdkData as any).branch_id,
         };
@@ -130,7 +143,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const switchBranch = useCallback((branch: BranchStaff) => {
     setUser((prev) => {
-      if (!prev) return null;
+      if (!prev) {
+        return null;
+      }
       return { ...prev, activeBranch: branch, branch_id: branch.id };
     });
     localStorage.setItem("active_branch_id", branch.id);
@@ -194,7 +209,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const hasRole = useCallback(
     (roles: UserRole | UserRole[]) => {
-      if (!user?.role) return false;
+      if (!user?.role) {
+        return false;
+      }
       const allowed = Array.isArray(roles) ? roles : [roles];
       return allowed.includes(user.role);
     },
