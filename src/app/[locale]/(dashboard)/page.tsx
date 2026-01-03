@@ -7,6 +7,7 @@ import { SidebarMenuSkeleton } from "@/components/ui/sidebar";
 import SuperAdminDashboard from "@/components/modules/dashboard/SuperAdminDashboard";
 import BranchAdminDashboard from "@/components/modules/dashboard/BranchDashboard";
 import InstructorDashboard from "@/components/modules/dashboard/InstructorDashboard";
+import ReceptionDashboard from "@/components/modules/dashboard/ReceptionDashboard";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -42,7 +43,8 @@ export default function DashboardPage() {
       <SuperAdminDashboard  />
     ),
     [UserRole.RECEPTIONIST]: (
-      <div className="p-8 font-medium">Panel Recepción - Próximamente</div>
+      <ReceptionDashboard user={user} 
+        activeBranch={user.activeBranch} />
     ),
   };
 

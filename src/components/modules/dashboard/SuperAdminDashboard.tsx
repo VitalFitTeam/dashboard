@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { GlobalStats } from "../analytics/sales/SalesStats";
-import { ActiveBranchesCount } from "../analytics/finance/FinancialStats";
+import { ActiveBranchesCount, WeeklyRevenueStat } from "../analytics/finance/FinancialStats";
 import { TotalClients } from "../analytics/clients/ClientsStat";
 import { FranchisePerformanceCard } from "./superadmin/FranchisePerformanceCard";
 import { SystemAlertsCard } from "./superadmin/SystemAlertsCard";
@@ -43,6 +43,7 @@ export default function SuperAdminDashboard() {
             <GlobalStats token={token} />
             <ActiveBranchesCount token={token} />
             <TotalClients token={token} />
+            <WeeklyRevenueStat token={token}  branchId=" " />
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             <div className="col-span-4">
