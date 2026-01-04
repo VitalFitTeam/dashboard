@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NavUser } from "../NavUser";
 import { useTranslations } from "next-intl";
-import { Building2, ChevronsUpDown, Landmark, Check } from "lucide-react";
+import { ChevronsUpDown, Landmark, Check } from "lucide-react";
 
 export default function SidebarDashboard() {
   const { user, loading, switchBranch } = useAuth();
@@ -37,14 +37,15 @@ export default function SidebarDashboard() {
     return <SidebarMenuSkeleton />;
   }
 
-  // Combinamos ramas evitando duplicados mediante el ID
-  const allAvailableBranches = Array.from(
-    new Map(
-      [...(user.assignedBranches || []), ...(user.managedBranches || [])].map(
-        (b) => [b.id, b]
-      )
-    ).values()
-  );
+ const allAvailableBranches = Array.from(
+  new Map(
+    [
+      ...(user.assignedBranches || []),
+      ...(user.managedBranches || []),
+      ...(user.instructorBranches || []) 
+    ].map((b) => [b.id, b])
+  ).values()
+);
 
   const sections = sidebarMenusByRole[user.role] ?? [];
 
@@ -55,9 +56,6 @@ export default function SidebarDashboard() {
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
-                {/* El Trigger ahora es dinámico: 
-                  Si hay más de una sucursal, permite abrir el menú. 
-                */}
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     size="lg"
@@ -70,22 +68,17 @@ export default function SidebarDashboard() {
 
                     <div className="grid flex-1 text-left text-sm leading-tight ml-2">
                       <span className="truncate font-bold text-slate-900">
-                        {/* Priorizamos la sucursal activa del contexto */}
                         {user.activeBranch?.name || t("select_branch")}
                       </span>
                       <span className="truncate text-[11px] text-muted-foreground font-medium uppercase tracking-tighter">
                         {user.role_label}
                       </span>
                     </div>
-                    
-                    {/* Solo mostramos las flechas si hay opciones de cambio */}
                     {allAvailableBranches.length > 1 && (
                       <ChevronsUpDown className="ml-auto size-4 text-slate-400" />
                     )}
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
-
-                {/* Contenido del Dropdown solo si hay más de una sucursal */}
                 {allAvailableBranches.length > 1 && (
                   <DropdownMenuContent
                     className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-xl p-2 shadow-xl"
