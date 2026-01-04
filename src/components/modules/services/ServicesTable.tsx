@@ -9,7 +9,6 @@ import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { ServiceFullDetail, ServiceCategoryInfo } from "@vitalfit/sdk";
-import { useRouter } from "next/navigation";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -21,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RowActions } from "@/components/ui/table/RowActions";
+import { useRouter } from "@/i18n/navigation";
 
 interface ServicesTableProps {
   data: ServiceFullDetail[];

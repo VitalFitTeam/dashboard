@@ -49,7 +49,9 @@ export default function CreateMembership() {
 
   const validateMembership = (data: MembershipFormData): ValidationResult => {
     try {
-      const schema = createMembershipSchema((key) => t(`validations.${key.split('.').pop()}`));
+      const schema = createMembershipSchema((key) =>
+        t(`validations.${key.split(".").pop()}`)
+      );
 
       const dataToValidate = {
         ...data,
@@ -95,8 +97,6 @@ export default function CreateMembership() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-
 
     const validation = validateMembership(formData);
     if (!validation.success) {
@@ -157,9 +157,7 @@ export default function CreateMembership() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded shadow">
       <form onSubmit={handleSubmit} className="space-y-2">
         <PageHeader title={t("create.title")}></PageHeader>
-        <p className="text-sm text-muted-foreground">
-          {t("create.subtitle")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("create.subtitle")}</p>
 
         <MembershipForm
           formData={formData}
