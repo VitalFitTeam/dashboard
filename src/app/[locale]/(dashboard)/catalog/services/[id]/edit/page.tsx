@@ -21,6 +21,8 @@ export default function EditService() {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const serviceId = id as string;
+  
+  const isInitialized = useRef(false);
 
   const { service, categories, banners, isLoading } = useEditServiceData(serviceId, token);
   const imgHook = useServiceImages();
@@ -29,10 +31,24 @@ export default function EditService() {
     setTimeout(() => router.replace("/catalog/services"), 1500);
   });
 
-  useEffect(() => {
-    if (service && service.service_id && categories.length > 0) {
-      
-      formHook.fillForm(service);
+useEffect(() => {
+    if (service && categories.length > 0 && !isInitialized.current) {
+
+      const rawService = service as any;
+
+      const dataForForm = {
+        ...service,
+
+        category_id: service.category_id ? String(service.category_id) : "",
+        
+        duration: service.duration_minutes?.toString() || "",
+        priority: service.priority_score?.toString() || "",
+        is_featured: service.is_featured ? "true" : "false",
+        
+        banner_id: rawService.banner_id || ""
+      };
+
+      formHook.fillForm(dataForForm);
 
       const initialImgs = service.images?.map((img: any, i: number) => ({
         id: img.image_id || `idx-${i}`,
@@ -47,8 +63,9 @@ export default function EditService() {
       })) || [];
       
       imgHook.setServiceImages(initialImgs);
+      isInitialized.current = true;
     }
-  }, [service, categories.length, formHook.fillForm]); 
+  }, [service, categories, formHook.fillForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +83,6 @@ export default function EditService() {
       );
 
       toast.dismiss(toastId);
-
       await formHook.submitUpdate(imagesPayload);
 
     } catch (error: any) {
