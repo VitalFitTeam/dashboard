@@ -3,15 +3,14 @@
 import { useFinanceReports } from "@/hooks/reports/useFinanceReports";
 import { 
   DollarSign, 
-  TrendingUp, 
-  WalletCards, 
   Building,
-  UserIcon
+  Percent
 } from "lucide-react"; 
 import { useTranslations } from "next-intl";
 import { StatCard } from "@/components/ui/StatCard";
 import { useBranchReport } from "@/hooks/reports/useBranchReport";
 import { ReportStatItem } from "../../analytics/ReportStatItem";
+import { useMemo } from "react";
 
 interface StatProps {
   token: string | null;
@@ -19,13 +18,24 @@ interface StatProps {
 }
 
 export function MonthlySalesKPI({ token, branchId }: StatProps) {
+  const t = useTranslations("analytics.Sales.stats");
   const { data, isLoading } = useBranchReport.useMonthlySalesKPI(token, branchId);
   
+  const mappedData = useMemo(() => {
+    if (!data) {
+      return null;
+    }
+    return {
+      ...data,
+      title: t("monthly_sales")
+    };
+  }, [data, t]);
+
   return (
     <ReportStatItem
-      data={data} 
+      data={mappedData} 
       isLoading={isLoading} 
-      defaultTitle="Total Sales (Month)" 
+      defaultTitle={t("monthly_sales")} 
       icon={DollarSign}
       formatType="currency"
     />
@@ -33,14 +43,25 @@ export function MonthlySalesKPI({ token, branchId }: StatProps) {
 }
 
 export function OccupancyKPI({ token, branchId }: StatProps) {
+  const t = useTranslations("analytics.branch.Occupancy.stats");
   const { data, isLoading } = useBranchReport.useOccupancyKPI(token, branchId);
   
+  const mappedData = useMemo(() => {
+    if (!data){
+       return null;
+    }
+    return {
+      ...data,
+      title: t("average_occupancy")
+    };
+  }, [data, t]);
+
   return (
     <ReportStatItem
-      data={data} 
+      data={mappedData} 
       isLoading={isLoading} 
-      defaultTitle="Average Occupation" 
-      icon={DollarSign}
+      defaultTitle={t("average_occupancy")} 
+      icon={Percent}
       formatType="percentage"
     />
   );
@@ -59,4 +80,3 @@ export function ActiveBranchesCount({ token }: StatProps) {
     />
   );
 }
-

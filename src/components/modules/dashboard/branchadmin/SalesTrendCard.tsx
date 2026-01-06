@@ -19,20 +19,20 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBranchReport } from "@/hooks/reports/useBranchReport";
+import { useTranslations } from "next-intl";
 
 export const SalesTrendCard = ({ token, branchId }: { token: string | null; branchId?: string }) => {
+  const t = useTranslations("analytics.Sales.charts.sales_trend");
   const { data: response, isLoading } = useBranchReport.useWeeklySalesChart(token, branchId);
 
-  // Transformación de datos para Recharts
   const chartData = useMemo(() => {
     const rawData = response || [];
     return rawData.map((item: any) => ({
-      day: item.label.substring(0, 3), // "Mon", "Tue", etc.
+      day: item.label.substring(0, 3), 
       ventas: Number(item.value),
     }));
   }, [response]);
 
-  // Formateador para el eje Y y Tooltip
   const currencyFormatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -42,8 +42,12 @@ export const SalesTrendCard = ({ token, branchId }: { token: string | null; bran
   return (
     <Card className="shadow-sm border-none bg-white dark:bg-slate-950">
       <CardHeader>
-        <CardTitle className="text-lg font-bold tracking-tight">Tendencia de Ventas</CardTitle>
-        <CardDescription>Ingresos generados en los últimos 7 días</CardDescription>
+        <CardTitle className="text-lg font-bold tracking-tight">
+          {t("title")}
+        </CardTitle>
+        <CardDescription>
+          {t("description")}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -100,6 +104,7 @@ export const SalesTrendCard = ({ token, branchId }: { token: string | null; bran
                 <Area
                   type="monotone"
                   dataKey="ventas"
+                  name={t("series_label")} 
                   stroke="hsl(var(--primary))"
                   fillOpacity={1}
                   fill="url(#colorVentas)"

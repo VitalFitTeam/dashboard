@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { useBranchReport } from "@/hooks/reports/useBranchReport";
 import { BaseMultiChart } from "@/components/charts/BaseMultiChart";
+import { useTranslations } from "next-intl";
 
 interface ClassOccupancyAnalyticsProps {
   token: string | null;
@@ -13,15 +14,15 @@ export function ClassOccupancyAnalytics({
   token,
   branchId,
 }: ClassOccupancyAnalyticsProps) {
+  const t = useTranslations("analytics.branch.Occupancy.class_analytics");
     
   const { data, isLoading } = useBranchReport.useClassOccupancyChart(
     token,
-    "1439465a-74dc-4f0d-b75a-27363ddeae12"
+    branchId
   );
 
-  console.log("clases", data)
   const formattedData = useMemo(() => {
-    const rawData = response || [];
+    const rawData = data || [];
 
     if (!Array.isArray(rawData)) {
       return [];
@@ -31,22 +32,22 @@ export function ClassOccupancyAnalytics({
       name: item.label.split("(")[0].trim(),
       ocupacion: Number(item.value),
     }));
-  }, [response]);
+  }, [data]);
 
-  const seriesConfig = [
+  const seriesConfig = useMemo(() => [
     {
       key: "ocupacion",
-      label: "Porcentaje de Ocupación",
+      label: t("series_label"),
       color: "hsl(var(--primary))",
       type: "bar" as const,
     },
-  ];
+  ], [t]);
 
   return (
     <div className="h-full">
       <BaseMultiChart
-        title="Ocupación por Disciplina"
-        description="Porcentaje de llenado promedio por tipo de clase"
+        title={t("title")}
+        description={t("description")}
         data={formattedData}
         series={seriesConfig}
         indexKey="name"

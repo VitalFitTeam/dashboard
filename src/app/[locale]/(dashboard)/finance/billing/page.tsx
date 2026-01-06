@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -49,18 +49,18 @@ export default function BillingPage() {
     if (user?.activeBranch?.id && user.activeBranch.id !== selectedBranch) {
       setSelectedBranch(user.activeBranch.id);
     }
-  }, [user?.activeBranch?.id]); 
+  }, [user?.activeBranch?.id]);
 
   if (!token) {
     return null;
   }
-  const canSwitchBranch = hasRole([
-    "branch_admin",
-    "super_admin",
-    "accountant",
-  ] as any);
 
+  const canSwitchBranch = hasRole(["branch_admin", "super_admin", "accountant"] as any);
   const canCreateInvoice = hasRole(["branch_admin", "super_admin"] as any);
+
+  const filteredBranches = user?.activeBranch?.id
+    ? branches.filter((b) => b.branch_id === user.activeBranch?.id)
+    : branches;
 
   const handleSearchChange = (val: string) => {
     const timer = setTimeout(() => {
@@ -100,10 +100,8 @@ export default function BillingPage() {
         <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto">
           <Select
             value={selectedBranch || "all"}
-            onValueChange={(v) =>
-              setSelectedBranch(v === "all" ? undefined : v)
-            }
-            disabled={loadingBranches || !canSwitchBranch}
+            onValueChange={(v) => setSelectedBranch(v === "all" ? undefined : v)}
+            disabled={loadingBranches || !canSwitchBranch || filteredBranches.length <= 1}
           >
             <SelectTrigger className="w-full md:w-[220px]">
               <div className="flex items-center gap-2">
@@ -113,10 +111,11 @@ export default function BillingPage() {
             </SelectTrigger>
 
             <SelectContent className="max-h-[300px]">
-              {canSwitchBranch && (
+              {!user?.activeBranch?.id && canSwitchBranch && (
                 <SelectItem value="all">{t("allBranches")}</SelectItem>
               )}
-              {branches.map((branch) => (
+              
+              {filteredBranches.map((branch) => (
                 <SelectItem key={branch.branch_id} value={branch.branch_id}>
                   {branch.name}
                 </SelectItem>

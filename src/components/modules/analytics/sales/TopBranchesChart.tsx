@@ -27,11 +27,13 @@ export default function TopBranchesChart({ token }: TopBranchesChartProps) {
     }));
   }, [data]);
 
+  const branchCount = data?.length || 0;
+
   return (
     <div className="h-full ">
       <BaseMultiChart
         title={t("title")}
-        description={t("description")}
+       description={t("description", { count: branchCount })}
         data={chartData}
         isLoading={isLoading}
         indexKey="label"

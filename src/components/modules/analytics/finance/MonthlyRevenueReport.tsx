@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { BaseMultiChart } from "@/components/charts/BaseMultiChart";
 import { useFinanceReports } from "@/hooks/reports/useFinanceReports";
-import { mapChartResponse } from "@/utils/mapChartResponse";
 import { useTranslations } from "next-intl";
 
 export function MonthlyRevenueReport({ token, branchId }: { token: string; branchId?: string }) {
@@ -10,7 +10,16 @@ export function MonthlyRevenueReport({ token, branchId }: { token: string; branc
   
   const { data: rawResponse, isLoading } = useFinanceReports.useMonthlyRevenueChart(token, branchId);
 
-  const chartData = mapChartResponse(rawResponse);
+  const chartData = useMemo(() => {
+    if (!rawResponse || !Array.isArray(rawResponse)) {
+      return [];
+    }
+    
+    return rawResponse.map((item: any) => ({
+      name: item.label,         
+      valor: Number(item.value)
+    }));
+  }, [rawResponse]);
 
   const seriesConfig = [
     {
@@ -27,8 +36,9 @@ export function MonthlyRevenueReport({ token, branchId }: { token: string; branc
       description={t("description")}
       data={chartData}
       series={seriesConfig}
-      indexKey="name"
+      indexKey="name"         
       isLoading={isLoading}
+      valueType="currency"   
     />
   );
 }

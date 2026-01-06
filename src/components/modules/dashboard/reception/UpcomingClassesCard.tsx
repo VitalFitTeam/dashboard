@@ -1,18 +1,24 @@
 "use client";
-
-import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area"; // Componente de Shadcn
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, Users, User2 } from "lucide-react";
 import { useBranchReport } from "@/hooks/reports/useBranchReport";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
+
+const dateLocales = {
+  es: es,
+  en: enUS,
+};
 
 export const UpcomingClassesCard = ({ token, branchId }: { token: string | null; branchId?: string }) => {
+  const t = useTranslations("analytics.branch.UpcomingClasses");
+  const locale = useLocale() as keyof typeof dateLocales;
+  
   const { data: response, isLoading } = useBranchReport.useUpcomingClasses(token, branchId);
-  console.log("clases", response);
   
   const classes = response || [];
 
@@ -22,25 +28,25 @@ export const UpcomingClassesCard = ({ token, branchId }: { token: string | null;
     const diffInMinutes = (start.getTime() - now.getTime()) / (1000 * 60);
 
     if (diffInMinutes <= 0 && diffInMinutes >= -60) {
-        return { label: "En curso", variant: "error" as const };
+        return { label: t("status.ongoing"), variant: "error" as const };
     }
     if (diffInMinutes > 0 && diffInMinutes <= 30) {
-        return { label: "Inicia pronto", variant: "default" as const };
+        return { label: t("status.starting_soon"), variant: "default" as const };
     }
-    return { label: "Programada", variant: "outline" as const };
+    return { label: t("status.scheduled"), variant: "outline" as const };
   };
 
   return (
     <Card className="h-full border-none shadow-sm bg-white dark:bg-slate-950 flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="space-y-1">
-          <CardTitle className="text-lg font-bold">Clases de Hoy</CardTitle>
+          <CardTitle className="text-lg font-bold">{t("title")}</CardTitle>
           <CardDescription>
-            {classes.length} sesiones programadas
+            {t("description", { count: classes.length })}
           </CardDescription>
         </div>
         <Badge variant="secondary" className="font-mono">
-          {format(new Date(), "eee dd", { locale: es })}
+          {format(new Date(), "eee dd", { locale: dateLocales[locale] })}
         </Badge>
       </CardHeader>
 
@@ -80,7 +86,7 @@ export const UpcomingClassesCard = ({ token, branchId }: { token: string | null;
                         </div>
                         <div className="flex items-center text-slate-500">
                           <Users className="mr-1 h-3.5 w-3.5" />
-                          Cap. {cls.max_capacity}
+                          {t("capacity", { max: cls.max_capacity })}
                         </div>
                       </div>
                     </div>
@@ -92,7 +98,7 @@ export const UpcomingClassesCard = ({ token, branchId }: { token: string | null;
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground border-2 border-dashed rounded-xl">
              <Clock className="h-10 w-10 mb-2 opacity-20" />
-             <p className="text-sm italic">No hay más clases para hoy</p>
+             <p className="text-sm italic">{t("empty_state")}</p>
           </div>
         )}
       </CardContent>

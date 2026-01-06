@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBranchReport } from "@/hooks/reports/useBranchReport";
+import { useTranslations } from "next-intl";
 
 interface ActivityHeatmapCardProps {
   token: string | null;
@@ -12,6 +13,7 @@ interface ActivityHeatmapCardProps {
 }
 
 export const ActivityHeatmapCard = ({ token, branchId }: ActivityHeatmapCardProps) => {
+  const t = useTranslations("analytics.branch.Occupancy.heatmap");
 
   const { data: response, isLoading } = useBranchReport.useActivityHeatmap(token, branchId);
 
@@ -41,16 +43,16 @@ export const ActivityHeatmapCard = ({ token, branchId }: ActivityHeatmapCardProp
 
   const getHeatColor = (val: number) => {
     if (val === 0) {
-        return "bg-slate-100 dark:bg-slate-800";
+      return "bg-slate-100 dark:bg-slate-800";
     }
-    if (val < 25){
-         return "bg-orange-100 text-orange-800";
+    if (val < 25) {
+       return "bg-orange-100 text-orange-800";
     }
     if (val < 50) {
-        return "bg-orange-300 text-orange-900";
+       return "bg-orange-300 text-orange-900";
     }
     if (val < 75) {
-        return "bg-orange-500 text-white";
+       return "bg-orange-500 text-white";
     }
     return "bg-orange-600 text-white shadow-[0_0_8px_rgba(234,88,12,0.3)]";
   };
@@ -58,15 +60,14 @@ export const ActivityHeatmapCard = ({ token, branchId }: ActivityHeatmapCardProp
   return (
     <Card className="shadow-sm border-none bg-white dark:bg-slate-950">
       <CardHeader>
-        <CardTitle className="text-lg font-bold">Mapa de calor de actividad</CardTitle>
-        <CardDescription>
-          Horarios de mayor afluencia en la sede
-        </CardDescription>
+        <CardTitle className="text-lg font-bold">{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           <div className="flex gap-1 mb-2 ml-12">
-            {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
+            {/* Cargamos las iniciales de los días desde el JSON */}
+            {t.raw("days").map((d: string, i: number) => (
               <span key={i} className="flex-1 text-[10px] text-center text-muted-foreground font-bold">
                 {d}
               </span>
@@ -91,7 +92,7 @@ export const ActivityHeatmapCard = ({ token, branchId }: ActivityHeatmapCardProp
                       <div
                         key={i}
                         className={`flex-1 h-6 rounded-sm ${getHeatColor(val)} transition-all hover:scale-110 hover:z-10 cursor-help border border-white/10`}
-                        title={`Ocupación: ${val}%`}
+                        title={t("tooltip", { val })}
                       />
                     ))}
                   </div>
@@ -99,8 +100,9 @@ export const ActivityHeatmapCard = ({ token, branchId }: ActivityHeatmapCardProp
               ))}
             </div>
           )}
+          
           <div className="flex items-center justify-between pt-6 text-[9px] text-muted-foreground uppercase font-bold tracking-widest">
-            <span>Menos flujo</span>
+            <span>{t("legend_low")}</span>
             <div className="flex gap-1.5">
               <div className="w-3.5 h-3.5 rounded-sm bg-slate-100 border" />
               <div className="w-3.5 h-3.5 rounded-sm bg-orange-100" />
@@ -108,7 +110,7 @@ export const ActivityHeatmapCard = ({ token, branchId }: ActivityHeatmapCardProp
               <div className="w-3.5 h-3.5 rounded-sm bg-orange-500" />
               <div className="w-3.5 h-3.5 rounded-sm bg-orange-600" />
             </div>
-            <span>Más flujo</span>
+            <span>{t("legend_high")}</span>
           </div>
         </div>
       </CardContent>

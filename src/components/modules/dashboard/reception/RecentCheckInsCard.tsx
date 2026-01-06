@@ -6,7 +6,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBranchReport } from "@/hooks/reports/useBranchReport";
 import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale"; 
+import { useTranslations, useLocale } from "next-intl";
+
+const dateFnsLocales = {
+  es: es,
+  en: enUS,
+};
 
 interface RecentCheckInsCardProps {
   token: string | null;
@@ -14,6 +20,9 @@ interface RecentCheckInsCardProps {
 }
 
 export const RecentCheckInsCard = ({ token, branchId }: RecentCheckInsCardProps) => {
+  const t = useTranslations("analytics.branch.RecentCheckIns");
+  const locale = useLocale() as keyof typeof dateFnsLocales; 
+  
   const { data: response, isLoading } = useBranchReport.useRecentCheckIns(token, branchId);
 
   const checkIns = response || [];
@@ -30,15 +39,14 @@ export const RecentCheckInsCard = ({ token, branchId }: RecentCheckInsCardProps)
   return (
     <Card className="h-full border-none shadow-sm bg-white dark:bg-slate-950">
       <CardHeader>
-        <CardTitle className="text-lg font-bold">Check-ins Recientes</CardTitle>
+        <CardTitle className="text-lg font-bold">{t("title")}</CardTitle>
         <CardDescription>
-          {checkIns.length} ingresos registrados hoy
+          {t("description", { count: checkIns.length })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           {isLoading ? (
-            // Skeletons de carga
             Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center space-x-4">
                 <Skeleton className="h-9 w-9 rounded-full" />
@@ -70,7 +78,7 @@ export const RecentCheckInsCard = ({ token, branchId }: RecentCheckInsCardProps)
                   <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tighter">
                     {formatDistanceToNow(new Date(item.check_in_time), {
                       addSuffix: true,
-                      locale: es,
+                      locale: dateFnsLocales[locale] || es,
                     })}
                   </span>
                 </div>
@@ -78,7 +86,7 @@ export const RecentCheckInsCard = ({ token, branchId }: RecentCheckInsCardProps)
             ))
           ) : (
             <div className="py-10 text-center text-sm text-muted-foreground italic border-2 border-dashed rounded-xl">
-              No hay ingresos recientes
+              {t("empty_state")}
             </div>
           )}
         </div>

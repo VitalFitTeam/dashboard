@@ -1,15 +1,14 @@
 "use client";
 
-import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { SessionUser } from "@/context/AuthContext";
 import { BranchStaff } from "@vitalfit/sdk";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { CheckInsToday, OccupancyStat } from "./reception/ReceptionStats";
 import { RecentCheckInsCard } from "./reception/RecentCheckInsCard";
 import { ClassCapacityMonitor } from "./reception/ClassCapacityMonitor";
 import { UpcomingClassesCard } from "./reception/UpcomingClassesCard";
+import { useTranslations } from "next-intl";
 
 interface ReceptionDashboardProps {
   user: SessionUser;
@@ -21,56 +20,51 @@ export default function ReceptionDashboard({
   activeBranch,
 }: ReceptionDashboardProps) {
   const { token } = useAuth();
+  const t = useTranslations("dashboards.ReceptionDashboard");
+  
   const branchId = activeBranch?.id || "all";
+  const branchName = activeBranch?.name || t("global");
 
   if (!token) {
     return null;
   }
 
-  return (
-    <div className="flex-1 min-h-screen bg-slate-50/50 dark:bg-transparent transition-colors">
+ return (
+    <div className="w-full bg-transparent transition-colors">
       <div className="max-w-[1600px] mx-auto p-4 md:p-8 space-y-8">
         
         <PageHeader 
-          title={`Recepción: ${activeBranch?.name || "Global"}`}
+          title={t("title", { branch: branchName })}
           subtitle={
             <span className="text-muted-foreground italic">
-              ¡Buen día, <span className="text-primary font-bold">{user.first_name}</span>! 
-              Control de acceso y aforo listo para operar.
+              {t("welcome", { name: user.first_name })}{" "}
+              <span className="text-primary font-bold">
+                {t("status_ready")}
+              </span>
             </span>
           }
         />
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-white/50 border shadow-sm">
-            <TabsTrigger value="overview">Panel de Control</TabsTrigger>
-            <TabsTrigger value="history">Historial del Día</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <OccupancyStat token={token} branchId={branchId} />
+            <CheckInsToday token={token} branchId={branchId} />
+          </div>
 
-          <TabsContent value="overview" className="space-y-6 animate-in fade-in-50 duration-500">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              <OccupancyStat token={token} branchId={branchId} />
-              <CheckInsToday token={token} branchId={branchId} />
+            <div className="lg:col-span-8 space-y-6">
+              <ClassCapacityMonitor token={token} branchId={branchId} />
+              <RecentCheckInsCard token={token} branchId={branchId} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-
-              <div className="lg:col-span-8 space-y-6">
-                <ClassCapacityMonitor token={token} branchId={branchId} />
-                
-                <RecentCheckInsCard token={token} branchId={branchId} />
-              </div>
-
-              <div className="lg:col-span-4 flex flex-col gap-6">
-                <div className="flex-1 min-h-[500px]">
-                  <UpcomingClassesCard token={token} branchId={branchId} />
-                </div>
-              </div>
-
+            <div className="lg:col-span-4">
+              <UpcomingClassesCard token={token} branchId={branchId} />
             </div>
-          </TabsContent>
-        </Tabs>
+
+          </div>
+        </div>
       </div>
     </div>
   );

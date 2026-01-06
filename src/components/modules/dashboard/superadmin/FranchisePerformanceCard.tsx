@@ -1,8 +1,11 @@
+"use client";
+
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSalesReports } from "@/hooks/reports/useSalesReports";
 import { FranchisePerformanceItem } from "../../analytics/FranchisePerformanceItem";
+import { useTranslations } from "next-intl";
 
 interface BranchData {
   label: string;
@@ -18,6 +21,7 @@ interface FranchisePerformanceCardProps {
 
 export const FranchisePerformanceCard = ({ token }: FranchisePerformanceCardProps) => {
 
+  const t = useTranslations("analytics.Sales.charts.top_branches");
   const { data: response, isLoading } = useSalesReports.useTopBranches(token);
   
   const branches = response;
@@ -34,13 +38,13 @@ export const FranchisePerformanceCard = ({ token }: FranchisePerformanceCardProp
     <Card className="h-full border-none shadow-sm">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
-          Rendimiento por Franquicia
+          {t("title")}
         </CardTitle>
         <div className="text-sm text-gray-500">
           {isLoading ? (
             <Skeleton className="h-4 w-32" />
           ) : (
-            `Top ${branches?.length ?? 0} sedes por volumen de ventas`
+            t("description", { count: branches?.length ?? 0 })
           )}
         </div>
       </CardHeader>
@@ -74,7 +78,7 @@ export const FranchisePerformanceCard = ({ token }: FranchisePerformanceCardProp
             ))
           ) : (
             <div className="text-center py-10 text-muted-foreground text-sm italic">
-              No hay datos de sedes disponibles
+              {t("empty_state")}
             </div>
           )}
         </div>

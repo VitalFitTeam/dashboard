@@ -16,6 +16,7 @@ export function MostUsedServicesReport({ token, startDate, endDate }: Props) {
   const t = useTranslations("analytics.clients.services");  
   const { data, isLoading } = useClientReport.useMostUsedServices(token, startDate, endDate);
 
+
   const chartData = useMemo(() => {
     if (!data || !Array.isArray(data)) {
       return [];

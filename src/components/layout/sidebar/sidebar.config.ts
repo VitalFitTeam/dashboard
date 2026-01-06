@@ -178,16 +178,15 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
 
  [UserRole.ACCOUNTANT]: [
     {
-      title: "Finanzas",
+      title: "General",
       items: [
         { label: "Dashboard", icon: HomeIcon, href: "/" },
-        { label: "FacturacionElectronica", icon: CurrencyDollarIcon, href: "/analytics/billing" },
+        { label: "FacturacionElectronica", icon: CurrencyDollarIcon, href: "/finance/billing" },
       ],
     },
     {
       title: "ReportesFinancieros",
       items: [
-        { label: "Dashboard", icon: HomeIcon, href: "/" },
         { label: "ReporteClientes", icon: UserIcon, href: "/analytics/reports/clients" },
         { label: "ReporteFinanciero", icon: ChartBar, href: "/analytics/reports/financial"  },
         { label: "ReporteVentas", icon: ChartBar, href: "/analytics/reports/sales"  },
@@ -213,10 +212,9 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
       title: "Recepcion",
       items: [
         { label: "Dashboard", icon: HomeIcon, href: "/" },
-        { label: "ClientesSocios", icon: UsersIcon, href: "/clients" },
-        { label: "CheckinCheckout", icon: UsersIcon, href: "/operations/attendance" },
-        { label: "GestionReservas", icon: Calendar, href: "/operations/reservations" },
-        { label: "RegistroPagos", icon: CurrencyDollarIcon, href: "/payments" },
+        { label: "ClientesSocios", icon: UsersIcon, href: "/clients/register"  },
+        { label: "AgendaCalendario", icon: Calendar, href: "/operations/calendar" },
+        { label: "ReservasActivas", icon: Calendar, href: "/operations/reservations" },
         { label: "QuejasSugerencias", icon: Megaphone, href: "/clients/feedback" },
       ],
     },
