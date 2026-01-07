@@ -175,8 +175,13 @@
         "mrr": "MRR (Monthly Recurring Revenue)",
         "accounts_receivable": "Accounts Receivable",
         "active_branches": "Active Branches",
-        "average_ticket": "Average Ticket", 
+        "average_ticket": "Average Ticket",
         "clv": "Average Customer Lifetime Value (CLV)"
+      },
+      "financial_summary": {
+        "title": "Cash Summary",
+        "description": "Gross income by category",
+        "total_net": "Net Total"
       },
       "filters": {
         "all_branches": "All branches",
@@ -215,54 +220,61 @@
       }
     },
     "Sales": {
-  "title": "Sales Report",
-  "subtitle": "Commercial performance, payment methods, and branch productivity",
-  "export": "Export Report",
-  "stats": {
-    "total_sales": "Total Sales",
-    "membership_sales": "Membership Sales",
-    "transactions": "Total Transactions",
-    "comparison": "vs. previous month"
-  },
-  "filters": {
-    "all_branches": "All branches",
-    "required_title": "Selection Required",
-    "required_description": "Please select a date range to view sales distribution.",
-    "ranges": {
-      "this_month": "This month",
-      "last_month": "Last month",
-      "last_3_months": "Last 3 months",
-      "custom": "Custom"
-    }
-  },
-  "charts": {
-    "by_hour": {
-      "title": "Sales by Hour",
-      "description": "Peak commercial activity throughout the day",
-      "series_label": "Volume"
+      "title": "Sales Report",
+      "subtitle": "Commercial performance, payment methods, and branch productivity",
+      "export": "Export Report",
+      "stats": {
+        "total_sales": "Total Sales",
+        "membership_sales": "Membership Sales",
+        "transactions": "Total Transactions",
+        "comparison": "vs. previous month",
+        "monthly_sales": "Monthly Sales"
+      },
+      "filters": {
+        "all_branches": "All branches",
+        "required_title": "Selection Required",
+        "required_description": "Please select a date range to view sales distribution.",
+        "ranges": {
+          "this_month": "This month",
+          "last_month": "Last month",
+          "last_3_months": "Last 3 months",
+          "custom": "Custom"
+        }
+      },
+      "charts": {
+        "by_hour": {
+          "title": "Sales by Hour",
+          "description": "Peak commercial activity throughout the day",
+          "series_label": "Volume"
+        },
+        "top_branches": {
+          "title": "Franchise Performance",
+          "description": "Top {count} branches by sales volume",
+          "sales_label": "Total sales",
+          "empty_state": "No branch data available"
+        },
+        "payment_method": {
+          "title": "Payment Methods",
+          "description": "Collection distribution by channel",
+          "amount": "Amount",
+          "footer_total": "Total Collection: {amount}",
+          "footer_text": "{count} payment methods detected",
+          "filters_required_title": "Filters Required",
+          "filters_required_description": "Select a date range to view payment methods."
+        },
+        "category_sales": {
+          "title": "Sales by Service",
+          "description": "Distribution by product and service categories",
+          "footer_total": "Total services: {total}",
+          "value_label": "Sales"
+        },
+        "sales_trend": {
+          "title": "Sales Trend",
+          "description": "Revenue generated over the last 7 days",
+          "series_label": "Sales"
+        }
+      }
     },
-    "top_branches": {
-      "title": "Top Selling Branches",
-      "description": "Comparison of total revenue per branch",
-      "sales_label": "Total Sales"
-    },
-    "payment_method": {
-      "title": "Payment Methods",
-      "description": "Collection distribution by channel",
-      "amount": "Amount",
-      "footer_total": "Total Collection: {amount}",
-      "footer_text": "{count} payment methods detected",
-      "filters_required_title": "Filters Required",
-      "filters_required_description": "Select a date range to view payment methods."
-    },
-    "category_sales": {
-      "title": "Sales by Service",
-      "description": "Distribution by product and service categories",
-      "footer_total": "Total services: {total}",
-      "value_label": "Sales"
-    }
-  }
-},
     "clients": {
       "header": {
         "title": "Client Report",
@@ -317,30 +329,78 @@
         "label_new": "New",
         "label_recurring": "Recurring"
       }
+    },
+    "branch": {
+      "Occupancy": {
+        "stats": {
+          "current_occupancy": "Current Occupancy",
+          "checkins_today": "Check-ins Today",
+          "real_time": "Real-time",
+          "average_occupancy": "Average Occupancy"
+        },
+        "heatmap": {
+          "title": "Activity Heatmap",
+          "description": "Peak footfall times at the branch",
+          "days": [
+            "M",
+            "T",
+            "W",
+            "T",
+            "F",
+            "S",
+            "S"
+          ],
+          "legend_low": "Low traffic",
+          "legend_high": "High traffic",
+          "tooltip": "Occupancy: {val}%"
+        },
+        "class_analytics": {
+          "title": "Occupancy by Discipline",
+          "description": "Average fill percentage by class type",
+          "series_label": "Occupancy Percentage"
+        }
+      },
+      "ClassCapacity": {
+        "title": "Real-Time Capacity",
+        "description": "Session attendance monitoring",
+        "placeholder_loading": "Loading classes...",
+        "placeholder_select": "Select today's class",
+        "empty_state": "Select a class to view capacity",
+        "ratio_label": "Entry Ratio",
+        "occupied": "{percentage}% Occupied",
+        "free_slots": "{count, plural, =0 {No spots available} =1 {# spot available} other {# spots available}}",
+        "max_capacity": "Maximum capacity allowed: <bold>{max} people</bold>",
+        "status": {
+          "available": "Available",
+          "almost_full": "Almost full",
+          "sold_out": "Sold out"
+        }
+      },
+      "RecentCheckIns": {
+        "title": "Recent Check-ins",
+        "description": "{count, plural, =0 {No entries recorded today} =1 {1 entry recorded today} other {# entries recorded today}}",
+        "empty_state": "No recent check-ins"
+      },
+      "UpcomingClasses": {
+        "title": "Today's Classes",
+        "description": "{count, plural, =0 {No sessions scheduled} =1 {1 session scheduled} other {# sessions scheduled}}",
+        "empty_state": "No more classes for today",
+        "capacity": "Cap. {max}",
+        "status": {
+          "ongoing": "Ongoing",
+          "starting_soon": "Starting soon",
+          "scheduled": "Scheduled"
+        }
+      }
     }
   },
   "dashboards": {
-    "super_admin": {
-      "stats": {
-        "global_sales": "Global Sales",
-        "active_branches": "Active Branches",
-        "total_clients": "Total Clients",
-        "global_nps": "Global NPS",
-        "vs_last_month": "{value} vs. last month"
-      },
-      "performance": {
-        "title": "Franchise Performance",
-        "subtitle": "Top {count} locations by sales volume"
-      },
-      "alerts": {
-        "title": "System Alerts",
-        "subtitle": "Critical notifications",
-        "items": {
-          "low_occupancy": "Critical low occupancy",
-          "pending_finance": "Pending financial report",
-          "new_franchisee": "New franchisee",
-          "sync_error": "Sync error"
-        }
+    "no_dashboard": "You do not have a dashboard assigned to your role.",
+    "SuperAdminDashboard": {
+      "header": {
+        "title": "Dashboard",
+        "subtitle": "Welcome to your franchise network's executive summary.",
+        "download_report": "Download Report"
       }
     },
     "InstructorDashboard": {
@@ -372,6 +432,35 @@
         "updated": "Data updated",
         "error_loading": "Error loading reports"
       }
+    },
+    "ReceptionDashboard": {
+      "title": "Reception: {branch}",
+      "welcome": "Good morning, {name}!",
+      "status_ready": "Access control and capacity monitoring ready to operate.",
+      "global": "Global",
+      "tabs": {
+        "control_panel": "Control Panel",
+        "history": "Daily History"
+      }
+     
+    },
+     "BranchDashboard": {
+        "title": "Dashboard: {branch}",
+        "welcome": "Hello, {name}!",
+        "subtitle": "Here is the summary of what is happening at your branch today.",
+        "global": "Global"
+      },
+    "DataAnalystDashboard": {
+      "title": "Data Analysis: {branch}",
+      "welcome": "Welcome, {name}!",
+      "status_ready": "Explore trends and performance metrics.",
+      "global": "Global Network"
+    },
+    "AccountantDashboard": {
+      "title": "Accounting Management: {branch}",
+      "welcome": "Hello, {name}",
+      "subtitle": "review the financial status and payment reconciliation.",
+      "global": "Global Consolidated"
     }
   },
   "catalog": {
@@ -2156,6 +2245,7 @@
         "notAvailable": "N/A"
       }
     }
+   
   },
   "branches": {
     "title": "BRANCHES",

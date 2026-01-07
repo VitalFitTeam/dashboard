@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html className={`${montserrat.variable} ${bebas.variable}`}> 
+    <html className="admin-theme min-h-screen bg-background"> 
       <body>
         <AuthProvider>
           {children} 

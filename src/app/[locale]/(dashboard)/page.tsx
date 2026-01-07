@@ -7,18 +7,23 @@ import { SidebarMenuSkeleton } from "@/components/ui/sidebar";
 import SuperAdminDashboard from "@/components/modules/dashboard/SuperAdminDashboard";
 import BranchAdminDashboard from "@/components/modules/dashboard/BranchDashboard";
 import InstructorDashboard from "@/components/modules/dashboard/InstructorDashboard";
+import ReceptionDashboard from "@/components/modules/dashboard/ReceptionDashboard";
+import { useTranslations } from "next-intl"; // Hook de traducción
+import DataAnalystDashboard from "@/components/modules/dashboard/DataAnalystDashboard";
+import AccountantDashboard from "@/components/modules/dashboard/AccountantDashboard";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
+  const t = useTranslations("dashboards"); 
 
   if (loading) {
     return <SidebarMenuSkeleton />;
   }
 
-
   if (!user) {
     return null; 
   }
+
   const dashboards: Record<UserRole, React.ReactNode> = {
     [UserRole.SUPER_ADMIN]: (
       <SuperAdminDashboard  />
@@ -36,21 +41,28 @@ export default function DashboardPage() {
       />
     ),
     [UserRole.ACCOUNTANT]: (
-      <SuperAdminDashboard  />
+      <AccountantDashboard  user={user} 
+        activeBranch={user.activeBranch} />
     ),
     [UserRole.DATA_ANALYST]: (
-      <SuperAdminDashboard  />
+      <DataAnalystDashboard
+        user={user} 
+        activeBranch={user.activeBranch} 
+      />
     ),
     [UserRole.RECEPTIONIST]: (
-      <div className="p-8 font-medium">Panel Recepción - Próximamente</div>
+      <ReceptionDashboard 
+        user={user} 
+        activeBranch={user.activeBranch} 
+      />
     ),
   };
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
+    <div className="flex-1 w-full">
       {dashboards[user.role] || (
-        <div className="p-8 text-center text-muted-foreground">
-          No tienes un dashboard asignado para tu rol.
+        <div className="p-8 text-center text-muted-foreground italic">
+          {t("no_dashboard")}
         </div>
       )}
     </div>

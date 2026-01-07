@@ -1,9 +1,9 @@
 interface FranchisePerformanceItemProps {
   name: string;
   status: string;
-  revenue: string;
+  revenue: number; 
   growth: number;
-  trend?: "up" | "down" | undefined;
+  trend?: "up" | "down" | "neutral"; 
   withBorder?: boolean;
 }
 

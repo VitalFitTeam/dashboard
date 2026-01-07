@@ -178,6 +178,11 @@
         "average_ticket": "Ticket Promedio",
         "clv": "Valor de Vida del Cliente (CLV)"
       },
+      "financial_summary": {
+        "title": "Resumen de Caja",
+        "description": "Ingresos brutos por categoría",
+        "total_net": "Total Neto"
+      },
       "filters": {
         "all_branches": "Todas las sucursales",
         "loading": "Cargando...",
@@ -215,56 +220,62 @@
       }
     },
     "Sales": {
-  "title": "Reporte de Ventas",
-  "subtitle": "Rendimiento comercial, métodos de pago y productividad de sucursales",
-  "export": "Exportar Reporte",
-  "stats": {
-    "total_sales": "Ventas Totales",
-    "membership_sales": "Ventas de Membresías",
-    "transactions": "Transacciones Totales",
-    "comparison": "vs. mes anterior"
-  },
-  "filters": {
-    "all_branches": "Todas las sucursales",
-    "required_title": "Selección requerida",
-    "required_description": "Por favor, seleccione un rango de fechas para visualizar la distribución de ventas.",
-    "ranges": {
-      "this_month": "Este mes",
-      "last_month": "Mes pasado",
-      "last_3_months": "Últimos 3 meses",
-      "custom": "Personalizado"
-    }
-  },
-  "charts": {
-    "by_hour": {
-      "title": "Ventas por Hora",
-      "description": "Picos de actividad comercial durante el día",
-      "series_label": "Volumen"
+      "title": "Reporte de Ventas",
+      "subtitle": "Rendimiento comercial, métodos de pago y productividad de sucursales",
+      "export": "Exportar Reporte",
+      "stats": {
+        "total_sales": "Ventas Totales",
+        "membership_sales": "Ventas de Membresías",
+        "transactions": "Transacciones Totales",
+        "comparison": "vs. mes anterior",
+        "monthly_sales": "Ventas del Mes"
+      },
+      "filters": {
+        "all_branches": "Todas las sucursales",
+        "required_title": "Selección requerida",
+        "required_description": "Por favor, seleccione un rango de fechas para visualizar la distribución de ventas.",
+        "ranges": {
+          "this_month": "Este mes",
+          "last_month": "Mes pasado",
+          "last_3_months": "Últimos 3 meses",
+          "custom": "Personalizado"
+        }
+      },
+      "charts": {
+        "by_hour": {
+          "title": "Ventas por Hora",
+          "description": "Picos de actividad comercial durante el día",
+          "series_label": "Volumen"
+        },
+        "top_branches": {
+          "title": "Rendimiento por Franquicia",
+          "description": "Top {count} sedes por volumen de ventas",
+          "sales_label": "Ventas totales",
+          "empty_state": "No hay datos de sedes disponibles"
+        },
+        "payment_method": {
+          "title": "Métodos de Pago",
+          "description": "Distribución de recaudación por canal",
+          "amount": "Monto",
+          "footer_total": "Recaudación Total: {amount}",
+          "footer_text": "Se detectaron {count} métodos de pago",
+          "filters_required_title": "Filtros requeridos",
+          "filters_required_description": "Selecciona un rango de fechas para visualizar los métodos de pago."
+        },
+        "category_sales": {
+          "title": "Ventas por Servicio",
+          "description": "Distribución por categorías de productos y servicios",
+          "footer_total": "Total servicios: {total}",
+          "value_label": "Ventas"
+        },
+        "sales_trend": {
+          "title": "Tendencia de Ventas",
+          "description": "Ingresos generados en los últimos 7 días",
+          "series_label": "Ventas"
+        }
+      }
     },
-    "top_branches": {
-      "title": "Sucursales con mayores ventas",
-      "description": "Comparativa de ingresos totales por sucursal",
-      "sales_label": "Ventas totales"
-    },
-    "payment_method": {
-      "title": "Métodos de Pago",
-      "description": "Distribución de recaudación por canal",
-      "amount": "Monto",
-      "footer_total": "Recaudación Total: {amount}",
-      "footer_text": "Se detectaron {count} métodos de pago",
-      "filters_required_title": "Filtros requeridos",
-      "filters_required_description": "Selecciona un rango de fechas para visualizar los métodos de pago."
-    },
-    "category_sales": {
-      "title": "Ventas por Servicio",
-      "description": "Distribución por categorías de productos y servicios",
-      "footer_total": "Total servicios: {total}",
-      "value_label": "Ventas"
-    }
-  }
-},
     "clients": {
-      
       "header": {
         "title": "Reporte de Clientes",
         "subtitle": "Análisis detallado de fidelización, retención y staff",
@@ -318,30 +329,70 @@
         "label_new": "Nuevos",
         "label_recurring": "Recurrentes"
       }
+    },
+    "branch": {
+      "Occupancy": {
+        "stats": {
+          "current_occupancy": "Ocupación Actual",
+          "checkins_today": "Check-ins Hoy",
+          "real_time": "En tiempo real",
+          "average_occupancy": "Ocupación Promedio"
+        },
+        "heatmap": {
+          "title": "Mapa de calor de actividad",
+          "description": "Horarios de mayor afluencia en la sede",
+          "days": ["L", "M", "M", "J", "V", "S", "D"],
+          "legend_low": "Menos flujo",
+          "legend_high": "Más flujo",
+          "tooltip": "Ocupación: {val}%"
+        },
+        "class_analytics": {
+          "title": "Ocupación por Disciplina",
+          "description": "Porcentaje de llenado promedio por tipo de clase",
+          "series_label": "Porcentaje de Ocupación"
+        }
+      },
+      "ClassCapacity": {
+        "title": "Cupos en Tiempo Real",
+        "description": "Monitoreo de asistencia por sesión",
+        "placeholder_loading": "Cargando clases...",
+        "placeholder_select": "Seleccionar clase de hoy",
+        "empty_state": "Selecciona una clase para ver el aforo",
+        "ratio_label": "Ratio de Entrada",
+        "occupied": "{percentage}% Ocupado",
+        "free_slots": "{count, plural, =0 {Sin cupos disponibles} =1 {# cupo libre} other {# cupos libres}}",
+        "max_capacity": "Capacidad máxima permitida: <bold>{max} personas</bold>",
+        "status": {
+          "available": "Disponible",
+          "almost_full": "Casi lleno",
+          "sold_out": "Agotado"
+        }
+      },
+      "RecentCheckIns": {
+        "title": "Check-ins Recientes",
+        "description": "{count, plural, =0 {Sin ingresos registrados hoy} =1 {1 ingreso registrado hoy} other {# ingresos registrados hoy}}",
+        "empty_state": "No hay ingresos recientes"
+      },
+      "UpcomingClasses": {
+        "title": "Clases de Hoy",
+        "description": "{count, plural, =0 {Sin sesiones programadas} =1 {1 sesión programada} other {# sesiones programadas}}",
+        "empty_state": "No hay más clases para hoy",
+        "capacity": "Cap. {max}",
+        "status": {
+          "ongoing": "En curso",
+          "starting_soon": "Inicia pronto",
+          "scheduled": "Programada"
+        }
+      }
     }
   },
   "dashboards": {
-    "super_admin": {
-      "stats": {
-        "global_sales": "Ventas globales",
-        "active_branches": "Sucursales Activas",
-        "total_clients": "Clientes totales",
-        "global_nps": "NPS Global",
-        "vs_last_month": "{value} vs. mes pasado"
-      },
-      "performance": {
-        "title": "Rendimiento por Franquicia",
-        "subtitle": "Top {count} sedes por volumen de ventas"
-      },
-      "alerts": {
-        "title": "Alertas del Sistema",
-        "subtitle": "Notificaciones críticas",
-        "items": {
-          "low_occupancy": "Baja ocupación crítica",
-          "pending_finance": "Reporte financiero pendiente",
-          "new_franchisee": "Nuevo franquiciado",
-          "sync_error": "Error de sincronización"
-        }
+    "no_dashboard": "No tienes un dashboard asignado para tu rol.",
+    "SuperAdminDashboard": {
+      "header": {
+        "title": "Dashboard",
+        "subtitle": "Bienvenido al resumen ejecutivo de tu red de franquicias.",
+        "download_report": "Descargar Reporte"
       }
     },
     "InstructorDashboard": {
@@ -373,6 +424,34 @@
         "updated": "Datos actualizados",
         "error_loading": "Error al cargar los reportes"
       }
+    },
+    "ReceptionDashboard": {
+      "title": "Recepción: {branch}",
+      "welcome": "¡Buen día, {name}!",
+      "status_ready": "Control de acceso y aforo listo para operar.",
+      "global": "Global",
+      "tabs": {
+        "control_panel": "Panel de Control",
+        "history": "Historial del Día"
+      }
+    },
+    "BranchDashboard": {
+      "title": "Panel: {branch}",
+      "welcome": "¡Hola, {name}!",
+      "subtitle": "Aquí tienes el resumen de lo que sucede en tu sede hoy.",
+      "global": "Global"
+    },
+    "DataAnalystDashboard": {
+      "title": "Análisis de Datos: {branch}",
+      "welcome": "Bienvenido, {name}!",
+      "status_ready": "Explora tendencias y métricas de rendimiento.",
+      "global": "Red Global"
+    },
+    "AccountantDashboard": {
+      "title": "Gestión Contable: {branch}",
+      "welcome": "Hola, {name}",
+      "subtitle": "revisa el estado financiero y la conciliación de pagos.",
+      "global": "Consolidado Global"
     }
   },
   "catalog": {
