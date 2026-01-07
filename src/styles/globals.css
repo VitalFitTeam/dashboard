@@ -169,50 +169,94 @@ body {
 
 @layer components {
   .admin-theme {
- 
+
+    /* ---------------- HEADINGS ---------------- */
+
     h1, h2, h3 {
-      font-family: var(--font-body), sans-serif; /* Montserrat */
-      color: var(--foreground); 
-      @apply font-black italic uppercase tracking-tighter antialiased;
+      font-family: var(--font-body), sans-serif;
+      color: var(--foreground);
+      @apply uppercase antialiased;
     }
 
     h1 {
-      @apply text-3xl md:text-4xl leading-tight mb-6;
-
+      @apply text-3xl md:text-4xl font-black italic tracking-tighter mb-6 leading-tight;
       letter-spacing: -0.04em;
     }
 
-
     h2 {
-      @apply text-xl md:text-2xl mt-10 mb-4 pb-2 border-b border-border flex items-center gap-3;
+      @apply text-xl md:text-2xl font-black tracking-tight mt-12 mb-6 pb-3
+             border-b border-border flex items-center gap-3 relative;
 
       &::before {
         content: "";
-        @apply h-6 w-1.5 bg-primary -skew-x-12; 
+        @apply h-6 w-1 bg-primary rounded-sm;
+        transform: skewX(-12deg);
       }
     }
 
     h3 {
-      @apply text-lg font-extrabold mb-1 tracking-tight;
+      @apply text-base md:text-lg font-extrabold tracking-tight mb-2;
     }
 
-    h4, p, span, label, input, button, td {
+    h4 {
       font-family: var(--font-body), sans-serif;
+      @apply text-[10px] font-black uppercase tracking-[0.25em] mb-2 text-primary;
+      opacity: 0.85;
+    }
 
+    /* ---------------- BODY TEXT ---------------- */
+
+    p {
+      font-family: var(--font-body), sans-serif;
+      @apply text-sm font-medium leading-relaxed text-muted-foreground;
+    }
+
+    span {
+      font-family: var(--font-body), sans-serif;
+      @apply text-sm;
+    }
+
+    label {
+      font-family: var(--font-body), sans-serif;
+      @apply text-xs font-bold uppercase tracking-wide text-muted-foreground;
+    }
+
+    /* ---------------- FORM ELEMENTS ---------------- */
+
+    input {
+      font-family: var(--font-body), sans-serif;
       @apply not-italic;
     }
 
-
-    h4 {
-      @apply text-[10px] font-black text-primary tracking-[0.2em] uppercase mb-2;
-      opacity: 0.9;
+    button {
+      font-family: var(--font-body), sans-serif;
+      @apply not-italic;
     }
 
-    p {
-      @apply text-sm text-muted-foreground font-medium leading-relaxed;
+    td {
+      font-family: var(--font-body), sans-serif;
+      @apply text-sm;
     }
+
+    /* ---------------- METRICS ---------------- */
+
     .metric-value {
-      @apply font-black italic text-4xl md:text-5xl tracking-tighter text-foreground;
+      font-family: var(--font-body), sans-serif;
+      @apply text-4xl md:text-5xl font-black italic tracking-tighter text-foreground;
+    }
+
+    .metric-label {
+      @apply text-[10px] uppercase tracking-widest text-muted-foreground font-bold;
+    }
+
+    /* ---------------- UTILITIES ---------------- */
+
+    .section-muted {
+      @apply text-xs uppercase tracking-widest text-muted-foreground font-bold;
+    }
+
+    .divider {
+      @apply h-px w-full bg-border my-6;
     }
   }
 }

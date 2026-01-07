@@ -140,7 +140,8 @@
     "select_branch": "Select Branch",
     "available_branches": "Available branches",
     "no_branches": "No branches assigned",
-    "system_footer": "Vitalfit System"
+    "system_footer": "Vitalfit System",
+    "PoliticasComerciales": "Commercial Policies"
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -2364,24 +2365,15 @@
           }
         },
         "confirm": {
-          "title": "Commercial Policies",
-          "subtitle": "Select the corresponding commercial policies for the branch",
-          "checkbox_label": "Select by checking the policies",
-          "footer_hint": "These policies will be visible to the members of this branch",
-          "next_steps": {
-            "title": "Ready to create",
-            "description": "Review the information before confirming. Once the branch is created, you can modify these data from the branch management."
-          },
-          "policies": {
-            "p1": "Totally free registration for a limited time.",
-            "p2": "Flexible membership with a minimum cancellation period of only 1 month.",
-            "p3": "Access to on-site personal trainer at no additional cost at each schedule.",
-            "p4": "Specialized classes for adults +50 years old.",
-            "p5": "'Bring a friend' benefit: 15 days of free access for a companion.",
-            "p6": "Diversity of group classes included: Dance, Boxing, Yoga and more.",
-            "p7": "Exclusive/free parking for members.",
-            "p8": "Commitment to safety: Secure and monitored facilities for a worry-free experience."
-          }
+         "title": "Policies Confirmation",
+        "subtitle": "Before continuing, please confirm you are aware of the system rules and policies.",
+        "checkbox_label": "Please confirm:",
+        "acceptPolicies": "I accept the system policies.",
+        "linkText": "View full policies",
+        "footer_hint": "Your acceptance is required to continue.",
+        "toastTitle": "Policies Accepted",
+        "toastDescription": "You have confirmed that you are aware of and accept the system policies."
+         
         },
         "buttons": {
           "back": "Back",
@@ -2574,6 +2566,60 @@
       "opening_required": "Opening time is required",
       "closing_required": "Closing time is required",
       "payment_method_required": "You must select at least one payment method"
+    }
+  },
+  "settings": {
+    "Policies": {
+      "title": "Commercial Policies",
+      "subtitle": "Manage business rules, billing, and global access parameters.",
+      "loading": "Loading commercial rules...",
+      "saving": "Saving changes...",
+      "empty": "There are currently no commercial rules configured.",
+       "updateSuccessTitle": "Policy Updated!",
+      "updateSuccessDescription": "The policy value was successfully saved.",
+      "updateErrorTitle": "Update Failed",
+      "updateErrorDescription": "The policy could not be saved. Please try again.",
+      "actions": {
+        "refresh": "Refresh Policies"
+      },
+      "categories": {
+        "invoice": {
+          "title": "Billing",
+          "description": "Due dates, payments, and financial limits rules."
+        },
+        "class": {
+          "title": "Classes",
+          "description": "Class cancellation and access conditions."
+        },
+        "access": {
+          "title": "Access",
+          "description": "Entry windows and schedule controls."
+        },
+        "membership": {
+          "title": "Memberships",
+          "description": "Grace periods and subscription status."
+        },
+        "discount": {
+          "title": "Discounts",
+          "description": "Maximum discount limits applicable."
+        }
+      },
+      "card": {
+        "actions": {
+          "save": "Save"
+        },
+        "status": {
+          "saved": "Saved ✓"
+        },
+        "footer": {
+          "label": "Policy Configuration"
+        },
+        "units": {
+          "days": "DAYS",
+          "hours": "HRS",
+          "minutes": "MIN"
+        }
+      }
     }
   }
 }

@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import { Download, Eye, Pencil, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { Notification } from "@/components/ui/Notification";
 import { FiscalDocument } from "./data";
+import { useRouter } from "@/i18n/navigation";
 
 interface FiscalTableProps {
   data: FiscalDocument[];

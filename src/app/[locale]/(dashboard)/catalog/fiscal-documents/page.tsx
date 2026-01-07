@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import FiscalTable from "./FiscalTable";
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { mockFiscalDocuments, type FiscalDocument } from "./data";
+import { useRouter } from "@/i18n/navigation";
 
 export default function FiscalDocument() {
   const router = useRouter();

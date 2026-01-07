@@ -73,11 +73,6 @@ export default function BranchFormContainer({
       label: "Staff",
       content: <BranchStaffManager mode={mode} branchId={branch.branch_id} />,
     },
-    {
-      value: "policies",
-      label: "Políticas",
-      content: <div className="p-4 text-sm italic text-slate-400">Políticas comerciales de la sede</div>,
-    },
   ];
 
   const handleEditNavigation = () => {
