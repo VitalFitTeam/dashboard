@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import FiscalForm from "../FiscalForm";
 import { mockFiscalDocuments, FiscalDocument } from "../data";
-import { Pencil } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
 
 export default function FiscalDocumentDetailPage() {
   const params = useParams();

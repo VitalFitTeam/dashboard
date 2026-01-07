@@ -140,7 +140,8 @@
     "select_branch": "Seleccionar Sede",
     "available_branches": "Sedes disponibles",
     "no_branches": "No hay sedes asignadas",
-    "system_footer": "Sistema Vitalfit"
+    "system_footer": "Sistema Vitalfit",
+    "PoliticasComerciales": "Políticas Comerciales"
   },
   "LocaleSwitcher": {
     "label": "Cambiar idioma",
@@ -2246,24 +2247,14 @@
           }
         },
         "confirm": {
-          "title": "Políticas Comerciales",
-          "subtitle": "Seleccionas las políticas comerciales correspondientes para la sucursal",
-          "checkbox_label": "Selecciona dándole al check las políticas",
-          "footer_hint": "Estas políticas serán visibles para los miembros de esta sucursal",
-          "next_steps": {
-            "title": "Listo para crear",
-            "description": "Revise la información antes de confirmar. Una vez creada la sucursal, podrá modificar estos datos desde la gestión de sucursales."
-          },
-          "policies": {
-            "p1": "Inscripción totalmente gratuita por tiempo limitado.",
-            "p2": "Membresía flexible con un periodo mínimo de cancelación de solo 1 mes.",
-            "p3": "Acceso a entrenador personal de planta sin costo adicional en cada horario.",
-            "p4": "Clases especializadas para adultos +50 años.",
-            "p5": "Beneficio 'Trae un amigo': 15 días de acceso gratuito para un acompañante.",
-            "p6": "Diversidad de clases grupales incluidas: Baile, Boxeo, Yoga y más.",
-            "p7": "Estacionamiento exclusivo/gratuito para miembros.",
-            "p8": "Compromiso con la seguridad: Instalaciones seguras y monitoreadas para una experiencia libre de preocupaciones."
-          }
+        "title": "Confirmación de políticas",
+        "subtitle": "Antes de continuar, confirma que conoces las reglas y políticas del sistema.",
+        "checkbox_label": "Por favor confirma:",
+        "acceptPolicies": "Acepto las políticas del sistema.",
+        "linkText": "Ver políticas completas",
+        "footer_hint": "Tu aceptación es obligatoria para continuar.",
+        "toastTitle": "Políticas aceptadas",
+        "toastDescription": "Has confirmado que conoces y aceptas las políticas del sistema."
         },
         "buttons": {
           "back": "Anterior",
@@ -2456,6 +2447,60 @@
       "opening_required": "La hora de apertura es obligatoria",
       "closing_required": "La hora de cierre es obligatoria",
       "payment_method_required": "Debe seleccionar al menos un método de pago"
+    }
+  },
+  "settings": {
+    "Policies": {
+      "title": "Políticas Comerciales",
+      "subtitle": "Administra las reglas de negocio, facturación y acceso global del sistema.",
+      "loading": "Cargando reglas comerciales...",
+      "saving": "Guardando cambios...",
+      "empty": "No hay reglas comerciales configuradas actualmente.",
+      "updateSuccessTitle": "¡Política actualizada!",
+      "updateSuccessDescription": "El valor de la política se ha guardado correctamente.",
+      "updateErrorTitle": "Error al actualizar",
+      "updateErrorDescription": "No se pudo guardar la política. Intenta de nuevo.",
+      "actions": {
+        "refresh": "Actualizar políticas"
+      },
+      "categories": {
+        "invoice": {
+          "title": "Facturación",
+          "description": "Reglas de vencimiento, pagos y límites financieros."
+        },
+        "class": {
+          "title": "Clases",
+          "description": "Condiciones de cancelación y acceso a clases."
+        },
+        "access": {
+          "title": "Acceso",
+          "description": "Ventanas de entrada y control de horarios."
+        },
+        "membership": {
+          "title": "Membresías",
+          "description": "Períodos de gracia y estado de suscripciones."
+        },
+        "discount": {
+          "title": "Descuentos",
+          "description": "Límites máximos de descuentos aplicables."
+        }
+      },
+      "card": {
+        "actions": {
+          "save": "Guardar"
+        },
+        "status": {
+          "saved": "Guardado ✓"
+        },
+        "footer": {
+          "label": "Configuración de la política"
+        },
+        "units": {
+          "days": "DÍAS",
+          "hours": "HRS",
+          "minutes": "MIN"
+        }
+      }
     }
   }
 }

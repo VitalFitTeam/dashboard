@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import FiscalForm from "../FiscalForm";
+import { useRouter } from "@/i18n/navigation";
 
 export default function NewFiscalDocumentPage() {
     const router = useRouter();

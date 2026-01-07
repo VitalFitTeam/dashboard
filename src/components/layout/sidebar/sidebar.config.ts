@@ -116,6 +116,8 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
             icon: Cog6ToothIcon, 
             subitems: [
                 { label: "PoliticasContrasena", href: "/catalog/password" },
+                { label: "PoliticasComerciales", href: "/settings/commercial-policies" },
+                
             ]
         },
       ],

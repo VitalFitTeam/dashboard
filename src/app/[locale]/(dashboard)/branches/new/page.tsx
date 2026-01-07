@@ -1,5 +1,4 @@
 import CreateForm from "./CreateForm";
-import { api } from "@/lib/sdk-config";
 import { User } from "@vitalfit/sdk";
 import { Country, State, City } from "@/models/location";
 const MOCK_COUNTRIES: Country[] = [{ id: "co1", name: "Venezuela" }];

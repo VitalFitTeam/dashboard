@@ -31,8 +31,8 @@ export default function MapboxPicker({
   useEffect(() => {
     if (!mapContainer.current) {
       return;
-    }
 
+    }
     const initialLng = lng ? parseFloat(lng) : -66.9036;
     const initialLat = lat ? parseFloat(lat) : 10.4806;
 
@@ -40,10 +40,10 @@ export default function MapboxPicker({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
       center: [initialLng, initialLat],
-      zoom: 14, 
+      zoom: 14,
     });
 
-    if (lat && lng) {
+    if (lat && lng && !isNaN(initialLat) && !isNaN(initialLng)) {
       marker.current = new mapboxgl.Marker({ color: "#f97316" })
         .setLngLat([initialLng, initialLat])
         .addTo(map.current);
@@ -62,20 +62,22 @@ export default function MapboxPicker({
       }
 
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${mapboxgl.accessToken}`,
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${mapboxgl.accessToken}&language=en`
       );
       const data = await res.json();
 
       if (data.features && data.features.length > 0) {
         const place = data.features[0];
-        let address = place.place_name;
+        const ctx = place.context || [];
+        
         let city = "";
         let state = "";
         let country = "";
 
-        for (const c of place.context || []) {
-          if (c.id.includes("place")) {
-            city = c.text;
+        // Mapeo preciso
+        for (const c of ctx) {
+          if (c.id.includes("place") || c.id.includes("locality")){
+             city = c.text;
           }
           if (c.id.includes("region")) {
             state = c.text;
@@ -85,13 +87,16 @@ export default function MapboxPicker({
           }
         }
 
+        const finalState = state || city || country || "N/A";
+        const finalCity = city || state || "N/A";
+
         onSelect({
           latitud: latitude.toFixed(6),
           longitud: longitude.toFixed(6),
-          address,
-          city,
-          state,
-          country,
+          address: place.place_name,
+          city: finalCity,
+          state: finalState,
+          country: country,
         });
       }
     });
@@ -99,6 +104,7 @@ export default function MapboxPicker({
     return () => {
       map.current?.remove();
     };
+
   }, []);
 
   useEffect(() => {
@@ -106,14 +112,16 @@ export default function MapboxPicker({
       const nLat = parseFloat(lat);
       const nLng = parseFloat(lng);
       
-      map.current.flyTo({ center: [nLng, nLat] });
-      
-      if (marker.current) {
-        marker.current.setLngLat([nLng, nLat]);
-      } else {
-        marker.current = new mapboxgl.Marker({ color: "#f97316" })
-          .setLngLat([nLng, nLat])
-          .addTo(map.current);
+      if (!isNaN(nLat) && !isNaN(nLng)) {
+        map.current.flyTo({ center: [nLng, nLat], zoom: 15 });
+        
+        if (marker.current) {
+          marker.current.setLngLat([nLng, nLat]);
+        } else {
+          marker.current = new mapboxgl.Marker({ color: "#f97316" })
+            .setLngLat([nLng, nLat])
+            .addTo(map.current);
+        }
       }
     }
   }, [lat, lng]);
@@ -121,7 +129,7 @@ export default function MapboxPicker({
   return (
     <div
       ref={mapContainer}
-      className="w-full h-64 border border-gray-300 rounded-md overflow-hidden"
+      className="w-full h-64 border border-gray-300 rounded-md overflow-hidden shadow-sm"
     />
   );
 }
