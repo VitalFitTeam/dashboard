@@ -7,7 +7,13 @@ import { ReportFilters } from "@/components/modules/analytics/ReportFilter";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
-import { endOfMonth, format, startOfMonth } from "date-fns";
+import { 
+  endOfMonth, 
+  format, 
+  startOfMonth, 
+  subMonths, 
+  endOfDay 
+} from "date-fns";
 import { useTranslations } from "next-intl";
 import { UserRole } from "@/lib/roles";
 
@@ -34,15 +40,45 @@ export default function ClientReportPage() {
   });
 
   const [range, setRange] = useState("this-month");
-  const [startDate, setStartDate] = useState<Date | undefined>(startOfMonth(new Date()));
-  const [endDate, setEndDate] = useState<Date | undefined>(endOfMonth(new Date()));
-
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     if (activeBranchId && branchId === "all" && !isGlobalAdmin) {
       setBranchId(activeBranchId);
     }
   }, [activeBranchId, isGlobalAdmin, branchId]);
+
+  useEffect(() => {
+    const now = new Date();
+
+    if (range === "this-month") {
+      setStartDate(startOfMonth(now));
+      setEndDate(endOfDay(now));
+    } else if (range === "last-month") {
+      const lastMonth = subMonths(now, 1);
+      setStartDate(startOfMonth(lastMonth));
+      setEndDate(endOfMonth(lastMonth));
+    } else if (range === "last-3-months") {
+      setStartDate(startOfMonth(subMonths(now, 2)));
+      setEndDate(endOfDay(now));
+    }
+
+  }, [range]);
+
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date);
+    if (date) {
+      setRange("custom");
+    }
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    setEndDate(date);
+    if (date){
+       setRange("custom");
+    }
+  };
 
   const { branches, isLoading: loadingBranches } = useBranches({ 
     token: token ?? "", 
@@ -59,8 +95,8 @@ export default function ClientReportPage() {
     ];
   }, [branches, isGlobalAdmin, user?.activeBranch, t]);
 
-  const sDate = useMemo(() => startDate ? format(startDate, "yyyy-MM-dd") : format(startOfMonth(new Date()), "yyyy-MM-dd"), [startDate]);
-  const eDate = useMemo(() => endDate ? format(endDate, "yyyy-MM-dd") : format(endOfMonth(new Date()), "yyyy-MM-dd"), [endDate]);
+  const sDate = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
+  const eDate = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
 
   const rangeOptions = [
     { value: "this-month", label: t("filters.ranges.this_month") },
@@ -88,7 +124,7 @@ export default function ClientReportPage() {
         }
       />
 
-      <div className="bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm border border-slate-200/60 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm border border-slate-200/60 dark:border-gray-700 sticky top-4 z-10 backdrop-blur-md bg-white/90">
         <ReportFilters
           branches={branchOptions}
           branchValue={branchId}
@@ -98,14 +134,13 @@ export default function ClientReportPage() {
           onRangeChange={setRange}
           startDate={startDate}
           endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
+          // ✅ Pasamos handlers
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
           loadingBranches={loadingBranches}
           onClear={() => {
             setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
-            setRange("this-month");
-            setStartDate(startOfMonth(new Date()));
-            setEndDate(endOfMonth(new Date()));
+            setRange("this-month"); 
           }}
         />
       </div>
@@ -134,21 +169,27 @@ export default function ClientReportPage() {
 
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 shadow-sm">
-          <MostUsedServicesReport 
-            token={token} 
-            branchId={selectedBranch} 
-            startDate={sDate} 
-            endDate={eDate} 
-          />
+          {sDate && eDate ? (
+            <MostUsedServicesReport 
+              token={token} 
+              branchId={selectedBranch} 
+              startDate={sDate} 
+              endDate={eDate} 
+            />
+          ) : (
+            <div className="p-8 text-center text-slate-400">Seleccione un rango de fechas</div>
+          )}
         </div>
 
         <div className="lg:col-span-4 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 shadow-sm">
-          <TopInstructorsReport 
-            token={token} 
-            branchId={selectedBranch} 
-            startDate={sDate} 
-            endDate={eDate} 
-          />
+          {sDate && eDate && (
+             <TopInstructorsReport 
+               token={token} 
+               branchId={selectedBranch} 
+               startDate={sDate} 
+               endDate={eDate} 
+             />
+          )}
         </div>
       </section>
     </div>

@@ -235,6 +235,7 @@
         "all_branches": "All branches",
         "required_title": "Selection Required",
         "required_description": "Please select a date range to view sales distribution.",
+        
         "ranges": {
           "this_month": "This month",
           "last_month": "Last month",
@@ -273,7 +274,26 @@
           "title": "Sales Trend",
           "description": "Revenue generated over the last 7 days",
           "series_label": "Sales"
+        },
+        "demography": {
+          "age": "Age",
+          "gender": "Gender",
+          "values": {
+            "male": "Male",
+            "female": "Female",
+            "prefer-not-to-say": "Prefer not to say",
+            "other": "Other"
+          },
+          "ui": {
+            "title_age": "Sales by Age",
+            "title_gender": "Sales by Gender",
+            "description": "Demographic income distribution",
+            "loading": "Loading data...",
+            "no_data": "No data available",
+            "tooltip_sales": "Sales"
+          }
         }
+       
       }
     },
     "clients": {

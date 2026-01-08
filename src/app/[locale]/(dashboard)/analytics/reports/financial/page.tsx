@@ -16,7 +16,14 @@ import { ReportFilters } from "@/components/modules/analytics/ReportFilter";
 import { useBranches } from "@/hooks/branches/useBranches";
 import { ProjectedCashFlowReport } from "@/components/modules/analytics/finance/ProjectedCashFlow";
 import { MonthlyRevenueReport } from "@/components/modules/analytics/finance/MonthlyRevenueReport";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+
+import { 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  subMonths, 
+  endOfDay 
+} from "date-fns";
 import { BillingMatrixReport } from "@/components/modules/analytics/finance/BillingMatrixBanch";
 import { useTranslations } from "next-intl";
 import { UserRole } from "@/lib/roles";
@@ -31,15 +38,50 @@ export default function FinancePage() {
   const [branchId, setBranchId] = useState<string>(() => {
     return user?.activeBranch?.id || "all";
   });
-  const [range, setRange] = useState("custom");
+
+
+  const [range, setRange] = useState("this-month");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
- useEffect(() => {
+  useEffect(() => {
     if (user?.activeBranch?.id && branchId === "all" && !isGlobalAdmin) {
       setBranchId(user.activeBranch.id);
     }
   }, [user, isGlobalAdmin, branchId]);
+
+
+  useEffect(() => {
+    const now = new Date();
+
+    if (range === "this-month") {
+      setStartDate(startOfMonth(now));
+      setEndDate(endOfDay(now));
+    } else if (range === "last-month") {
+      const lastMonth = subMonths(now, 1);
+      setStartDate(startOfMonth(lastMonth));
+      setEndDate(endOfMonth(lastMonth));
+    } else if (range === "last-3-months") {
+      setStartDate(startOfMonth(subMonths(now, 2)));
+      setEndDate(endOfDay(now));
+    }
+
+  }, [range]);
+
+
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date);
+    if (date) {
+      setRange("custom");
+    }
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    setEndDate(date);
+    if (date) {
+      setRange("custom");
+    }
+  };
 
   const { branches, isLoading: loadingBranches } = useBranches({
     token: token ?? "",
@@ -64,7 +106,6 @@ export default function FinancePage() {
   ];
 
   const selectedBranch = branchId === "all" ? undefined : branchId;
-  const hasValidRange = !!(startDate && endDate);
   
   const sDate = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
   const eDate = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
@@ -72,8 +113,9 @@ export default function FinancePage() {
   if (!token) {
     return null;
   }
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-10 space-y-8">
+    <div className="min-h-screen dark:bg-gray-900 p-6 md:p-10 space-y-8 pb-20">
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
@@ -85,7 +127,7 @@ export default function FinancePage() {
         }
       />
 
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 sticky top-4 z-10 backdrop-blur-md">
         <ReportFilters
           branches={branchOptions}
           branchValue={branchId}
@@ -95,14 +137,13 @@ export default function FinancePage() {
           onRangeChange={setRange}
           startDate={startDate}
           endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
           loadingBranches={loadingBranches}
           onClear={() => {
             setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
-            setRange("this-month");
-            setStartDate(startOfMonth(new Date()));
-            setEndDate(endOfMonth(new Date()));
+            setRange("this-month"); 
+
           }}
         />
       </div>
@@ -121,6 +162,7 @@ export default function FinancePage() {
       </section>
 
       <section className="mt-10">
+
         <BillingMatrixReport token={token} startDate={sDate} endDate={eDate} />
       </section>
     </div>

@@ -57,7 +57,6 @@ const COLUMNS_MEMBERSHIPS: Column<ClientMembershipItem>[] = [
       accessor: "user" as any,
       render: (_, row) => (
         <div className="flex flex-col">
-          {/* ✅ Protección: Verifica si row.user existe */}
           <span className="font-medium text-sm text-slate-900">
             {row.user 
               ? `${row.user.first_name} ${row.user.last_name}` 
@@ -74,7 +73,6 @@ const COLUMNS_MEMBERSHIPS: Column<ClientMembershipItem>[] = [
       accessor: "membership_type" as any,
       render: (_, row) => (
         <span className="font-medium text-sm text-slate-700">
-          {/* ✅ Protección: Evita el crash si membership_type es null */}
           {row.membership_type?.name || "Sin plan asignado"}
         </span>
       ),
@@ -84,7 +82,6 @@ const COLUMNS_MEMBERSHIPS: Column<ClientMembershipItem>[] = [
       accessor: "price" as any,
       render: (_, row) => (
         <span className="text-sm font-medium">
-          {/* ✅ Protección: Si no hay precio, muestra $0 */}
           ${row.membership_type?.price ?? 0}
         </span>
       ),
@@ -94,7 +91,6 @@ const COLUMNS_MEMBERSHIPS: Column<ClientMembershipItem>[] = [
       accessor: "start_date",
       render: (value) => (
         <span className="text-sm text-slate-600">
-          {/* ✅ Protección: Verifica que value exista antes de crear Date */}
           {value ? new Date(value as string).toLocaleDateString() : "—"}
         </span>
       ),
@@ -112,7 +108,7 @@ const COLUMNS_MEMBERSHIPS: Column<ClientMembershipItem>[] = [
       header: t("table.status"),
       accessor: "status",
       render: (value) => {
-        const status = String(value || ""); // Protección si status es null
+        const status = String(value || ""); 
         
         const styles: Record<string, string> = {
           Active: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -120,14 +116,12 @@ const COLUMNS_MEMBERSHIPS: Column<ClientMembershipItem>[] = [
           Cancelled: "bg-rose-50 text-rose-700 border-rose-200",
         };
         
-        // Normalización para evitar errores por mayúsculas/minúsculas
         const statusKey = Object.keys(styles).find(
             k => k.toLowerCase() === status.toLowerCase()
         ) || status;
 
         return (
           <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${styles[statusKey] || "bg-slate-50 text-slate-700 border-slate-200"}`}>
-            {/* Verifica si existe la traducción, si no, muestra el status tal cual */}
             {status ? t(`statuses.${status.toLowerCase()}`) : "—"}
           </span>
         );

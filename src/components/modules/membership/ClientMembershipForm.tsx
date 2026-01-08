@@ -158,7 +158,6 @@ export default function ClientMembershipForm({ data }: ClientMembershipFormProps
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold uppercase text-red-500/70">{t("audit.reason")}</Label>
-                  {/* ✅ Protección: cancellation_reason puede ser null */}
                   <Input readOnly value={data.cancellation_reason?.description || t("audit.defaultReason")} className="bg-white border-red-50 h-11 text-red-800 text-sm focus-visible:ring-0" />
                 </div>
                 <div className="space-y-2">
