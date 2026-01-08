@@ -3,11 +3,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import UsersForm from "../UsersForm";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Users } from "@/models/users";
 import { api } from "@/lib/sdk-config";
 import { SignUpRequest, UserGender } from "@vitalfit/sdk";
+import { useRouter } from "@/i18n/navigation";
 
 export default function CreateUserPage() {
     const router = useRouter();
@@ -120,7 +120,7 @@ export default function CreateUserPage() {
             setSuccess("Usuario creado exitosamente. Se ha enviado un correo de verificación.");
 
             setTimeout(() => {
-                router.replace("/users");
+                router.replace("/users/users");
             }, 2000);
 
         } catch (err: any) {
@@ -157,7 +157,7 @@ export default function CreateUserPage() {
                     <Button
                         type="button"
                         variant="secondary"
-                        onClick={() => router.replace("/users")}
+                        onClick={() => router.replace("/users/users")}
                         className="flex-1"
                         disabled={isLoading}
                     >

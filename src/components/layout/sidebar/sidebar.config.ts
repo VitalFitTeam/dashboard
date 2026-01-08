@@ -58,8 +58,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
           icon: UserIcon,
           subitems: [
             { label: "RegistroConsulta", href: "/clients/register" }, 
-            { label: "SegmentacionScoring", href: "/clients/scoring" },
-            { label: "QuejasSugerencias", href: "/clients/feedback" },
           ],
         },
         {
@@ -68,7 +66,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
           subitems: [
             { label: "CalendarioClases", href: "/operations/calendar" },
             { label: "GestionReservas", href: "/operations/reservations" },
-            { label: "TrackingAsistencia", href: "/operations/attendance" },
           ],
         },
       ],
@@ -103,7 +100,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
           subitems: [
             { label: "GestionBanners",  href: "/marketing/banners" },
             { label: "Promociones",href: "/marketing/promotions" },
-            { label: "MerchandisingCrosssell", href: "/marketing/merchandising" },
           ],
         },
       ],
@@ -115,7 +111,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
             label: "AjustesSistema", 
             icon: Cog6ToothIcon, 
             subitems: [
-                { label: "PoliticasContrasena", href: "/catalog/password" },
                 { label: "PoliticasComerciales", href: "/settings/commercial-policies" },
                 
             ]

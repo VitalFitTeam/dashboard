@@ -273,6 +273,25 @@
           "title": "Tendencia de Ventas",
           "description": "Ingresos generados en los últimos 7 días",
           "series_label": "Ventas"
+        },
+        "demography": {
+          "age": "Edad",
+          "gender": "Género",
+          "values": {
+            "male": "Masculino",
+            "female": "Femenino",
+            "prefer-not-to-say": "No especificado",
+            "other": "Otro"
+          },
+          "ui": {
+            "title_age": "Ventas por Edad",
+            "title_gender": "Ventas por Género",
+            "description": "Distribución demográfica de ingresos",
+            "loading": "Cargando datos...",
+            "no_data": "No hay datos disponibles",
+            "tooltip_sales": "Ventas"
+          }
+          
         }
       }
     },

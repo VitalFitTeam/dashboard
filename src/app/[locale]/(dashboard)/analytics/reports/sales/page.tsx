@@ -3,7 +3,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
+import { 
+  format, 
+  startOfMonth, 
+  endOfMonth, 
+  subMonths, 
+  endOfDay 
+} from "date-fns";
 import { FileDown } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -20,6 +26,7 @@ import SalesByHourChart from "@/components/modules/analytics/sales/SalesByHourCh
 import PaymentMethodPieChart from "@/components/modules/analytics/sales/PaymentMethodPieChart";
 import CategorySalesDonutChart from "@/components/modules/analytics/sales/ServiceSalesDonutChart";
 import TopBranchesChart from "@/components/modules/analytics/sales/TopBranchesChart";
+import { DemographicSalesSection } from "@/components/modules/analytics/sales/DemographicSalesSection"; 
 
 import { useBranches } from "@/hooks/branches/useBranches";
 import { UserRole } from "@/lib/roles";
@@ -34,15 +41,46 @@ export default function SalesPage() {
   const [branchId, setBranchId] = useState<string>(() => {
     return user?.activeBranch?.id || "all";
   });
-  const [range, setRange] = useState("custom");
+  
+  const [range, setRange] = useState("this-month"); 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
- useEffect(() => {
+  useEffect(() => {
     if (user?.activeBranch?.id && branchId === "all" && !isGlobalAdmin) {
       setBranchId(user.activeBranch.id);
     }
   }, [user, isGlobalAdmin, branchId]);
+
+  useEffect(() => {
+    const now = new Date();
+
+    if (range === "this-month") {
+      setStartDate(startOfMonth(now));
+      setEndDate(endOfDay(now));
+    } else if (range === "last-month") {
+      const lastMonth = subMonths(now, 1);
+      setStartDate(startOfMonth(lastMonth));
+      setEndDate(endOfMonth(lastMonth));
+    } else if (range === "last-3-months") {
+      setStartDate(startOfMonth(subMonths(now, 2)));
+      setEndDate(endOfDay(now));
+    }
+  }, [range]);
+
+  const handleStartDateChange = (date: Date | undefined) => {
+    setStartDate(date);
+    if (date) {
+      setRange("custom"); 
+    }
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    setEndDate(date);
+    if (date) {
+      setRange("custom");
+    }
+  };
 
   const { branches, isLoading: loadingBranches } = useBranches({
     token: token ?? "",
@@ -77,7 +115,7 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="min-h-screen dark:bg-gray-900 p-6 md:p-10 space-y-8">
+    <div className="min-h-screen dark:bg-gray-900 p-6 md:p-10 space-y-8 pb-20">
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
@@ -89,7 +127,7 @@ export default function SalesPage() {
         }
       />
 
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 sticky top-4 z-10 backdrop-blur-md">
         <ReportFilters
           branches={branchOptions}
           branchValue={branchId}
@@ -99,8 +137,8 @@ export default function SalesPage() {
           onRangeChange={setRange}
           startDate={startDate}
           endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
+          onStartDateChange={handleStartDateChange}
+          onEndDateChange={handleEndDateChange}
           loadingBranches={loadingBranches}
           onClear={() => {
             setBranchId(user?.activeBranch?.id || "all");
@@ -110,7 +148,6 @@ export default function SalesPage() {
           }}
         />
       </div>
-
 
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <TotalSales token={token} />
@@ -122,10 +159,10 @@ export default function SalesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 min-h-[400px]">
          <SalesByHourChart 
-            token={token} 
-            startHour="00:00" 
-            endHour="23:59" 
-          />
+           token={token} 
+           startHour="00:00" 
+           endHour="23:59" 
+         />
         </div>
 
         <div className="lg:col-span-1">
@@ -133,7 +170,7 @@ export default function SalesPage() {
         </div>
       </div>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div className="min-h-[400px]">
           {hasValidRange ? (
             <CategorySalesDonutChart token={token} startDate={sDate} endDate={eDate} />
@@ -154,6 +191,15 @@ export default function SalesPage() {
               description={t("filters.required_description")} 
             />
           )}
+        </div>
+
+        <div className="min-h-[400px]">
+           <DemographicSalesSection 
+             token={token}
+             branchId={selectedBranch}
+             startDate={sDate}
+             endDate={eDate}
+           />
         </div>
       </section>
     </div>
