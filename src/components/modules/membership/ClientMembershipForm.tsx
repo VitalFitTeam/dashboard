@@ -47,14 +47,13 @@ export default function ClientMembershipForm({ data }: ClientMembershipFormProps
           </p>
         </div>
         <Badge variant={getStatusVariant(data.status)} className="h-9 px-6 uppercase text-xs font-bold tracking-widest shadow-sm">
-          {/* Usamos las traducciones de estados definidas previamente en el JSON general */}
           {t(`statusLabels.${data.status.toLowerCase()}`)}
         </Badge>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          
+
           <Card className="shadow-none border-slate-100">
             <CardHeader className="pb-4">
               <CardTitle className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{t("clientInfo.sectionTitle")}</CardTitle>
@@ -62,11 +61,21 @@ export default function ClientMembershipForm({ data }: ClientMembershipFormProps
             <CardContent className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase text-slate-600 ml-1">{t("clientInfo.fullName")}</Label>
-                <Input readOnly value={`${data.user.first_name} ${data.user.last_name}`} className="bg-slate-100 border-none h-11 font-medium focus-visible:ring-0" />
+
+                <Input 
+                  readOnly 
+                  value={data.user ? `${data.user.first_name} ${data.user.last_name}` : "Usuario Desconocido"} 
+                  className="bg-slate-100 border-none h-11 font-medium focus-visible:ring-0" 
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase text-slate-600 ml-1">{t("clientInfo.email")}</Label>
-                <Input readOnly value={data.user.email} className="bg-slate-100 border-none h-11 focus-visible:ring-0" />
+
+                <Input 
+                  readOnly 
+                  value={data.user?.email || "—"} 
+                  className="bg-slate-100 border-none h-11 focus-visible:ring-0" 
+                />
               </div>
               <div className="sm:col-span-2 space-y-2">
                 <Label className="text-xs font-bold uppercase text-slate-600 ml-1">{t("clientInfo.systemId")}</Label>
@@ -83,15 +92,30 @@ export default function ClientMembershipForm({ data }: ClientMembershipFormProps
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase text-slate-600 ml-1">{t("subscription.membershipType")}</Label>
-                  <Input readOnly value={data.membership_type.name} className="bg-slate-100 border-none h-11 font-bold focus-visible:ring-0" />
+
+                  <Input 
+                    readOnly 
+                    value={data.membership_type?.name || "Sin Plan Asignado"} 
+                    className="bg-slate-100 border-none h-11 font-bold focus-visible:ring-0" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase text-slate-600 ml-1">{t("subscription.price")}</Label>
-                  <Input readOnly value={`$${data.membership_type.price.toFixed(2)}`} className="bg-slate-100 border-none h-11 font-bold text-[#f28733] focus-visible:ring-0" />
+
+                  <Input 
+                    readOnly 
+                    value={`$${(data.membership_type?.price ?? 0).toFixed(2)}`} 
+                    className="bg-slate-100 border-none h-11 font-bold text-[#f28733] focus-visible:ring-0" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase text-slate-600 ml-1">{t("subscription.duration")}</Label>
-                  <Input readOnly value={data.membership_type.duration_days} className="bg-slate-100 border-none h-11 focus-visible:ring-0" />
+
+                  <Input 
+                    readOnly 
+                    value={data.membership_type?.duration_days ?? 0} 
+                    className="bg-slate-100 border-none h-11 focus-visible:ring-0" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase text-slate-600 ml-1">{t("subscription.invoiceId")}</Label>
@@ -101,7 +125,8 @@ export default function ClientMembershipForm({ data }: ClientMembershipFormProps
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase text-slate-600 ml-1">{t("subscription.description")}</Label>
                 <p className="text-sm p-4 bg-slate-100 rounded-md text-slate-600 italic">
-                  {data.membership_type.description || t("subscription.defaultDescription")}
+
+                  {data.membership_type?.description || t("subscription.defaultDescription")}
                 </p>
               </div>
             </CardContent>
@@ -133,6 +158,7 @@ export default function ClientMembershipForm({ data }: ClientMembershipFormProps
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold uppercase text-red-500/70">{t("audit.reason")}</Label>
+                  {/* ✅ Protección: cancellation_reason puede ser null */}
                   <Input readOnly value={data.cancellation_reason?.description || t("audit.defaultReason")} className="bg-white border-red-50 h-11 text-red-800 text-sm focus-visible:ring-0" />
                 </div>
                 <div className="space-y-2">

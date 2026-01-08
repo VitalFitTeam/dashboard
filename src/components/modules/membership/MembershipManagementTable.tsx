@@ -51,14 +51,21 @@ export default function MembershipManagementTable({
     return () => clearTimeout(timeout);
   }, [searchInput, filters.search, onFilterChange]);
 
-  const COLUMNS_MEMBERSHIPS: Column<ClientMembershipItem>[] = [
+const COLUMNS_MEMBERSHIPS: Column<ClientMembershipItem>[] = [
     {
       header: t("table.client"),
       accessor: "user" as any,
       render: (_, row) => (
         <div className="flex flex-col">
-          <span className="font-medium text-sm text-slate-900">{`${row.user.first_name} ${row.user.last_name}`}</span>
-          <span className="text-xs text-muted-foreground">{row.user.email}</span>
+          {/* ✅ Protección: Verifica si row.user existe */}
+          <span className="font-medium text-sm text-slate-900">
+            {row.user 
+              ? `${row.user.first_name} ${row.user.last_name}` 
+              : "Usuario desconocido"}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {row.user?.email || "—"}
+          </span>
         </div>
       ),
     },
@@ -66,38 +73,62 @@ export default function MembershipManagementTable({
       header: t("table.plan"),
       accessor: "membership_type" as any,
       render: (_, row) => (
-        <span className="font-medium text-sm text-slate-700">{row.membership_type.name}</span>
+        <span className="font-medium text-sm text-slate-700">
+          {/* ✅ Protección: Evita el crash si membership_type es null */}
+          {row.membership_type?.name || "Sin plan asignado"}
+        </span>
       ),
     },
     {
       header: t("table.price"),
       accessor: "price" as any,
-      render: (_, row) => <span className="text-sm font-medium">${row.membership_type.price}</span>,
+      render: (_, row) => (
+        <span className="text-sm font-medium">
+          {/* ✅ Protección: Si no hay precio, muestra $0 */}
+          ${row.membership_type?.price ?? 0}
+        </span>
+      ),
     },
     {
       header: t("table.start"),
       accessor: "start_date",
-      render: (value) => <span className="text-sm text-slate-600">{new Date(value as string).toLocaleDateString()}</span>,
+      render: (value) => (
+        <span className="text-sm text-slate-600">
+          {/* ✅ Protección: Verifica que value exista antes de crear Date */}
+          {value ? new Date(value as string).toLocaleDateString() : "—"}
+        </span>
+      ),
     },
     {
       header: t("table.expiry"),
       accessor: "end_date",
-      render: (value) => <span className="text-sm text-slate-600">{new Date(value as string).toLocaleDateString()}</span>,
+      render: (value) => (
+        <span className="text-sm text-slate-600">
+           {value ? new Date(value as string).toLocaleDateString() : "—"}
+        </span>
+      ),
     },
     {
       header: t("table.status"),
       accessor: "status",
       render: (value) => {
-        const status = String(value);
+        const status = String(value || ""); // Protección si status es null
+        
         const styles: Record<string, string> = {
           Active: "bg-emerald-50 text-emerald-700 border-emerald-200",
           Expired: "bg-amber-50 text-amber-700 border-amber-200",
           Cancelled: "bg-rose-50 text-rose-700 border-rose-200",
         };
         
+        // Normalización para evitar errores por mayúsculas/minúsculas
+        const statusKey = Object.keys(styles).find(
+            k => k.toLowerCase() === status.toLowerCase()
+        ) || status;
+
         return (
-          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${styles[status] || "bg-slate-50 text-slate-700 border-slate-200"}`}>
-            {t(`statuses.${status.toLowerCase()}`)}
+          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${styles[statusKey] || "bg-slate-50 text-slate-700 border-slate-200"}`}>
+            {/* Verifica si existe la traducción, si no, muestra el status tal cual */}
+            {status ? t(`statuses.${status.toLowerCase()}`) : "—"}
           </span>
         );
       },
