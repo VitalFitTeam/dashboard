@@ -443,14 +443,13 @@
         "control_panel": "Control Panel",
         "history": "Daily History"
       }
-     
     },
-     "BranchDashboard": {
-        "title": "Dashboard: {branch}",
-        "welcome": "Hello, {name}!",
-        "subtitle": "Here is the summary of what is happening at your branch today.",
-        "global": "Global"
-      },
+    "BranchDashboard": {
+      "title": "Dashboard: {branch}",
+      "welcome": "Hello, {name}!",
+      "subtitle": "Here is the summary of what is happening at your branch today.",
+      "global": "Global"
+    },
     "DataAnalystDashboard": {
       "title": "Data Analysis: {branch}",
       "welcome": "Welcome, {name}!",
@@ -471,7 +470,7 @@
       "id_prefix": "Service ID",
       "stats": {
         "total": "Total",
-        "actives": "Actives",
+        "actives": "Active",
         "featured": "Featured",
         "unit": "SERVICES"
       },
@@ -493,7 +492,7 @@
           "delete": "Delete"
         },
         "deleteDialog": {
-          "title": "Confirm deletion",
+          "title": "Confirm Deletion",
           "description": "Are you sure you want to delete this service? This action cannot be undone.",
           "confirm": "Delete",
           "cancel": "Cancel"
@@ -503,12 +502,12 @@
         "missingImages": "Missing images",
         "missingImagesDesc": "The service requires at least one image.",
         "uploadingImages": "Uploading images...",
-        "processError": "Error processing the service",
+        "processError": "Error processing service",
         "tryAgain": "Try again later",
         "imageTooHeavy": "Image is too heavy (Max 5MB)",
         "loadError": "Error loading services",
         "deleteSuccess": "Service deleted successfully",
-        "deleteError": "Error deleting the service",
+        "deleteError": "Error deleting service",
         "errorTitle": "Error",
         "successTitle": "Success"
       },
@@ -516,18 +515,18 @@
         "title": "CREATE NEW SERVICE",
         "title_edit": "EDIT SERVICE",
         "subtitle": "Complete the information",
-        "subtitle_edit": "Modify the necessary fields",
+        "subtitle_edit": "Modify necessary fields",
         "loadingData": "Loading catalog information...",
         "tabs": {
           "general": "General Information",
-          "images": "Images & Banner"
+          "images": "Images and Banner"
         },
         "fields": {
           "name": "Service Name",
-          "namePlaceholder": "Ex: Personalized Training",
+          "namePlaceholder": "E.g.: Personalized Training",
           "category": "Category",
           "categoryPlaceholder": "Select category",
-          "description": "Detailed Description",
+          "description": "Detailed description",
           "descriptionPlaceholder": "Write a description here...",
           "duration": "Duration (Minutes)",
           "priority": "Priority",
@@ -544,7 +543,7 @@
           "saving": "Saving changes..."
         },
         "ImageUploader": {
-          "dropzone": "Drag and drop service photos or browse",
+          "dropzone": "Drag and drop photos for the service or browse",
           "dropToReorder": "Drop to reorder images",
           "movingImage": "Moving image #{index}",
           "dragging": "Dragging...",
@@ -566,7 +565,7 @@
           },
           "previewModal": {
             "title": "Image Preview",
-            "helper": "Click outside the image or press ESC to close",
+            "helper": "Click outside or press ESC to close",
             "close": "Close"
           },
           "cropModal": {
@@ -574,8 +573,8 @@
             "helper": "Drag to adjust crop • Use mouse wheel to zoom",
             "zoom": "Zoom",
             "rotation": "Rotation",
-            "rotateLeft": "Rotate left",
-            "rotateRight": "Rotate right",
+            "rotateLeft": "Rotate Left",
+            "rotateRight": "Rotate Right",
             "cancel": "Cancel",
             "apply": "Apply crop"
           }
@@ -610,7 +609,7 @@
           "inactive": "Inactive"
         },
         "actions": {
-          "view": "View Details",
+          "view": "View detail",
           "edit": "Edit",
           "delete": "Delete"
         },
@@ -619,7 +618,7 @@
         "update_button": "Update",
         "delete_dialog": {
           "title": "Are you absolutely sure?",
-          "description": "This action cannot be undone. It will permanently delete the payment method:",
+          "description": "This action cannot be undone. The following payment method will be permanently deleted: {name}",
           "action_delete": "Yes, delete"
         }
       },
@@ -647,24 +646,24 @@
           "visibility": "Visibility",
           "surcharge_fixed": "Fixed Surcharge (Amount)",
           "surcharge_percentage": "Percentage Surcharge (%)",
-          "description": "Client Instructions"
+          "description": "Customer Instructions"
         },
         "placeholders": {
-          "name_example": "Ex: Bank Transfer Chase",
-          "display_name": "Name visible to the customer",
+          "name_example": "E.g.: Mobile Payment Bank A",
+          "display_name": "Name visible to customer",
           "type": "Select type",
-          "description": "Ex: Please send proof via WhatsApp after finishing the transaction..."
+          "description": "E.g.: Please send receipt via WhatsApp after finishing transaction..."
         },
         "sections": {
           "config_details": "Configuration Details"
         },
         "config": {
-          "phone": "Phone Number",
+          "phone": "Phone",
           "bank_id": "Bank ID (Code)",
-          "tax_id": "Tax ID / SSN",
+          "tax_id": "Tax ID / RIF",
           "bank_name": "Bank Name",
           "account_number": "Account Number",
-          "email": "Email Address (Zelle)"
+          "email": "Email (Zelle)"
         },
         "messages": {
           "no_config_required": "No additional data required for this method.",
@@ -673,7 +672,7 @@
         "actions": {
           "back": "Back",
           "cancel": "Cancel",
-          "edit": "Modify"
+          "edit": "Edit"
         }
       },
       "notifications": {
@@ -682,19 +681,19 @@
         "update_success_title": "Changes saved",
         "update_success_description": "The method '{name}' has been updated.",
         "delete_success": "Payment method deleted successfully.",
-        "delete_error": "Could not delete the payment method.",
+        "delete_error": "Could not delete payment method.",
         "error_title": "Error",
         "load_error": "Could not load information.",
         "validation_error_title": "Validation Error",
         "conflict_error_title": "Duplicate Name",
-        "conflict_error_description": "A method with that name already exists."
+        "conflict_error_description": "A method with this name already exists."
       },
       "errors": {
-        "invalid_name_format": "The name must include 'Pago Movil', 'Zelle' or 'Bank Transfer'"
+        "invalid_name_format": "Name must include 'Mobile Payment', 'Zelle' or 'Bank Transfer'"
       },
       "validations": {
         "name_required": "Name is required",
-        "name_max": "Name cannot exceed 100 caracteres",
+        "name_max": "Name cannot exceed 100 characters",
         "name_format": "Name can only contain letters, numbers, and hyphens",
         "type_required": "Method type is required",
         "processing_type_required": "Processing type is required",
@@ -705,6 +704,22 @@
       "title": "EQUIPMENT",
       "addButton": "Add Equipment",
       "loading": "Loading equipment...",
+      "create": {
+        "title": "ADD EQUIPMENT",
+        "subtitle": "Complete the information to register the new equipment",
+        "button": "Save Equipment",
+        "loading": "Saving...",
+        "success": "Equipment registered successfully!",
+        "error_create": "Could not create equipment. Please try again."
+      },
+      "details": {
+        "title": "EQUIPMENT DETAILS",
+        "subtitle": "Detailed information for: {name}",
+        "loading": "Loading equipment...",
+        "not_found": "Equipment not found",
+        "back": "Back",
+        "edit": "Edit"
+      },
       "categories": {
         "Cardio": "Cardio",
         "Strength": "Strength",
@@ -724,72 +739,58 @@
           "brand": "Brand"
         },
         "actions": {
-          "view": "View",
-          "edit": "Modify",
-          "delete": "Delete"
+          "delete": "Delete",
+          "view": "View details",
+          "edit": "Edit"
         },
         "delete_dialog": {
-          "title": "Confirm deletion",
-          "description": "Are you sure you want to delete \"{name}\"?",
+          "title": "Confirm Deletion",
+          "description": "Are you sure you want to delete this equipment? This action cannot be undone.",
           "confirm": "Delete",
           "cancel": "Cancel"
         }
       },
-      "form": {
-        "labels": {
-          "name": "Name",
-          "category": "Category",
-          "description": "Description",
-          "model": "Model",
-          "brand": "Brand"
-        },
-        "placeholders": {
-          "name": "Add a name",
-          "category": "Select a category",
-          "description": "Add a description",
-          "model": "Add a model",
-          "brand": "Add a brand"
-        },
-        "errors": {
-          "name_required": "Name is required.",
-          "description_required": "Description is required.",
-          "brand_required": "Brand is required.",
-          "model_required": "Model is required.",
-          "category_required": "Category is required."
-        }
-      },
-      "create": {
-        "title": "CREATE EQUIPMENT",
-        "subtitle": "Enter the information for new equipment",
-        "button": "Create",
-        "loading": "Saving...",
-        "success": "Equipment created successfully!",
-        "connection_error_title": "Connection error",
-        "connection_error_desc": "Could not connect to the server. Try again.",
-        "server_error_title": "Error creating equipment"
-      },
-      "edit": {
-        "title": "EDIT EQUIPMENT",
-        "subtitle": "Modify the equipment information",
-        "button": "Save Changes",
-        "loading": "Saving...",
-        "success": "Equipment updated successfully!",
-        "cancel": "Cancel",
-        "loading_data": "Loading equipment data...",
-        "not_found": "Equipment not found",
-        "error_loading": "Error loading equipment"
-      },
-      "details": {
-        "title": "EQUIPMENT DETAILS",
-        "subtitle": "Equipment information: {name}",
-        "back": "Back",
-        "edit": "Modify",
-        "not_found": "Equipment not found.",
-        "loading": "Loading details..."
-      },
       "notifications": {
         "delete_success": "Equipment deleted successfully",
         "delete_error": "Error deleting equipment."
+      },
+      "form": {
+        "labels": {
+          "name": "Equipment Name*",
+          "category": "Category*",
+          "brand": "Brand",
+          "model": "Model",
+          "description": "Description",
+          "serial_number": "Serial Number",
+          "purchase_date": "Purchase Date",
+          "status": "Status"
+        },
+        "placeholders": {
+          "name": "E.g.: Treadmill X1",
+          "category": "Select a category",
+          "brand": "E.g.: LifeFitness",
+          "model": "E.g.: Series 500",
+          "description": "Describe the equipment condition or specs..."
+        },
+        "errors": {
+          "name_required": "Equipment name is required",
+          "description_required": "Description is required",
+          "model_required": "Model is required",
+          "brand_required": "Brand is required"
+        }
+      },
+      "edit": {
+        "title": "EDIT EQUIPMENT",
+        "subtitle": "Modify details for equipment: {name}",
+        "loading_data": "Loading equipment data...",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "messages": {
+          "success": "Equipment updated successfully!",
+          "error_fetch": "Could not load equipment.",
+          "error_update": "Error updating equipment"
+        }
       }
     },
     "memberships": {
@@ -812,12 +813,12 @@
         },
         "actions": {
           "view": "View Details",
-          "edit": "Modify",
+          "edit": "Edit",
           "delete": "Delete"
         },
         "delete_dialog": {
-          "title": "Confirm deletion",
-          "description": "Are you sure you want to delete the membership \"{name}\"? This action cannot be undone.",
+          "title": "Confirm Deletion",
+          "description": "Are you sure you want to delete membership \"{name}\"? This action cannot be undone.",
           "confirm": "Delete",
           "cancel": "Cancel"
         }
@@ -839,23 +840,23 @@
       },
       "create": {
         "title": "CREATE MEMBERSHIP",
-        "subtitle": "Add the membership information",
+        "subtitle": "Add membership information",
         "button_create": "Create",
         "button_saving": "Saving...",
         "success": "Membership created successfully!",
-        "error_connection": "Connection Error",
+        "error_connection": "Connection error",
         "error_connection_description": "Could not connect to the server. Try again later.",
         "error_create": "Error creating membership",
         "error_auth": "Authentication token not found."
       },
       "edit": {
-        "title": "MODIFY MEMBERSHIP",
-        "subtitle": "Modify the membership information {name}",
+        "title": "EDIT MEMBERSHIP",
+        "subtitle": "Modify membership information for {name}",
         "button_cancel": "Cancel",
         "button_save": "Save Changes",
         "button_saving": "Saving...",
         "success": "Membership updated successfully!",
-        "error_connection": "Connection Error",
+        "error_connection": "Connection error",
         "error_connection_description": "Could not connect to the server. Try again later.",
         "error_update": "Error updating membership",
         "error_load": "Could not load membership information.",
@@ -863,10 +864,10 @@
       },
       "view": {
         "title": "MEMBERSHIP DETAILS",
-        "button_edit": "Modify",
+        "button_edit": "Edit",
         "loading": "Loading Membership...",
         "error_load": "Could not load membership information.",
-        "error_auth": "Session expired or unauthorized. Please log in again.",
+        "error_auth": "Session expired or unauthorized. Please try logging in again.",
         "not_found": "Membership not found or unavailable."
       },
       "notifications": {
@@ -909,461 +910,421 @@
         },
         "actions": {
           "view": "View Details",
-          "edit": "Modify",
+          "edit": "Edit",
           "delete": "Delete"
         },
         "delete_dialog": {
-          "title": "Confirm deletion",
-          "description": "Are you sure you want to delete the package \"{name}\"? This action cannot be undone.",
+          "title": "Confirm Deletion",
+          "description": "Are you sure you want to delete package \"{name}\"? This action cannot be undone.",
           "confirm": "Delete",
           "cancel": "Cancel"
         }
       },
       "form": {
         "labels": {
-          "name": "Name",
-          "price": "Price ($)",
+          "name": "Package Name",
+          "price": "Price",
           "description": "Description",
           "start_at": "Start Date",
           "end_at": "End Date",
+          "services_included": "Included Services",
+          "sessions_count": "Sessions",
           "status": "Status",
-          "add_service": "Add service",
-          "service_placeholder": "Select a service",
-          "sessions": "{count} sessions",
-          "remove": "Remove"
-        }
-      },
-      "create": {
-        "title": "CREATE PACKAGE",
-        "subtitle": "Complete the information for the new package",
-        "button_create": "Create package",
-        "button_creating": "Creating...",
-        "success": "Package created successfully!",
-        "error_create": "Could not create the package. Try again."
-      },
-      "edit": {
-        "title": "EDIT PACKAGE",
-        "subtitle": "Modify the package data: {name}",
-        "button_save": "Save changes",
-        "button_cancel": "Cancel",
-        "button_saving": "Saving...",
-        "success": "Package updated successfully!",
-        "error_update": "Error updating the package",
-        "error_load": "Could not load the package."
-      },
-      "view": {
-        "title": "PACKAGE DETAILS",
-        "button_edit": "Modify",
-        "loading": "Loading Packages...",
-        "error_load": "Could not load package information."
-      },
-      "notifications": {
-        "delete_success": "Package deleted successfully",
-        "delete_error": "Error deleting the package. Try again.",
-        "auth_error": "You are not authenticated to perform this action.",
-        "invalid_id": "Invalid package ID",
-        "services_load_error": "Could not load services.",
-        "success_title": "Success",
-        "error_title": "Error"
-      }
-    },
-    "equipment": {
-      "title": "EQUIPMENT",
-      "addButton": "Add Equipment",
-      "loading": "Loading equipment...",
-      "categories": {
-        "Cardio": "Cardio",
-        "Strength": "Strength",
-        "FreeWeight": "Free Weight",
-        "Functional": "Functional",
-        "Accessory": "Accessory"
-      },
-      "table": {
-        "filter_placeholder": "Filter by name",
-        "category_placeholder": "Category",
-        "all_categories": "All Categories",
-        "download": "Download",
-        "columns": {
-          "name": "Equipment",
-          "category": "Category",
-          "model": "Model",
-          "brand": "Brand"
-        },
-        "actions": {
-          "view": "View",
-          "edit": "Modify",
-          "delete": "Delete"
-        },
-        "delete_dialog": {
-          "title": "Confirm deletion",
-          "description": "Are you sure you want to delete \"{name}\"?",
-          "confirm": "Delete",
-          "cancel": "Cancel"
-        }
-      },
-      "form": {
-        "labels": {
-          "name": "Name",
-          "category": "Category",
-          "description": "Description",
-          "model": "Model",
-          "brand": "Brand"
-        },
-        "placeholders": {
-          "name": "Add a name",
-          "category": "Select a category",
-          "description": "Add a description",
-          "model": "Add a model",
-          "brand": "Add a brand"
+          "remove": "Remove",
+          "add_service": "Add Service"
         },
         "errors": {
-          "name_required": "Name is required.",
-          "description_required": "Description is required.",
-          "brand_required": "Brand is required.",
-          "model_required": "Model is required.",
-          "category_required": "Category is required."
-        }
-      },
-      "create": {
-        "title": "CREATE EQUIPMENT",
-        "subtitle": "Enter the information for new equipment",
-        "button": "Create",
-        "loading": "Saving...",
-        "success": "Equipment created successfully!",
-        "connection_error_title": "Connection error",
-        "connection_error_desc": "Could not connect to the server. Try again.",
-        "server_error_title": "Error creating equipment"
-      },
-      "edit": {
-        "title": "EDIT EQUIPMENT",
-        "subtitle": "Modify the equipment information",
-        "button": "Save Changes",
-        "loading": "Saving...",
-        "success": "Equipment updated successfully!",
-        "cancel": "Cancel",
-        "loading_data": "Loading equipment data...",
-        "not_found": "Equipment not found",
-        "error_loading": "Error loading equipment"
-      },
-      "details": {
-        "title": "EQUIPMENT DETAILS",
-        "subtitle": "Equipment information: {name}",
-        "back": "Back",
-        "edit": "Modify",
-        "not_found": "Equipment not found.",
-        "loading": "Loading details..."
-      },
-      "notifications": {
-        "delete_success": "Equipment deleted successfully",
-        "delete_error": "Error deleting equipment."
-      }
-    },
-    "memberships": {
-      "title": "MEMBERSHIPS",
-      "add_button": "Add a membership",
-      "loading": "Loading Memberships...",
-      "table": {
-        "placeholder": "Search membership by name",
-        "download": "Download",
-        "columns": {
-          "name": "Name",
-          "description": "Description",
-          "duration": "Duration (days)",
-          "price": "Price",
-          "status": "Status"
-        },
-        "status": {
-          "active": "Active",
-          "inactive": "Inactive"
-        },
-        "actions": {
-          "view": "View Details",
-          "edit": "Modify",
-          "delete": "Delete"
-        },
-        "delete_dialog": {
-          "title": "Confirm deletion",
-          "description": "Are you sure you want to delete the membership \"{name}\"? This action cannot be undone.",
-          "confirm": "Delete",
-          "cancel": "Cancel"
-        }
-      },
-      "form": {
-        "labels": {
-          "name": "Name*",
-          "description": "Description*",
-          "duration_days": "Duration (Days)*",
-          "price": "Price ($)*",
-          "status": "Status"
+          "name_required": "Package name is required",
+          "description_required": "Description is required",
+          "price_min": "Price must be greater than 0",
+          "start_date_required": "Start date is required",
+          "end_date_required": "End date is required",
+          "at_least_one_service": "You must add at least one service to the package",
+          "sessions_min": "Sessions must be at least 1",
+          "invalid_date_range": "End date must be after the start date"
         },
         "placeholders": {
-          "name": "E.g.: Premium Membership",
-          "description": "E.g.: Unlimited access to all facilities",
-          "duration_days": "E.g.: 30",
-          "price": "E.g.: 99.99"
+          "select_service": "-- Select a service --"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save Package"
+        },
+        "messages": {
+          "validation_error": "Please fill in the required fields correctly"
         }
       },
       "create": {
-        "title": "CREATE MEMBERSHIP",
-        "subtitle": "Add the membership information",
-        "button_create": "Create",
-        "button_saving": "Saving...",
-        "success": "Membership created successfully!",
-        "error_connection": "Connection Error",
-        "error_connection_description": "Could not connect to the server. Try again later.",
-        "error_create": "Error creating membership",
-        "error_auth": "Authentication token not found."
-      },
-      "edit": {
-        "title": "MODIFY MEMBERSHIP",
-        "subtitle": "Modify the membership information {name}",
-        "button_cancel": "Cancel",
-        "button_save": "Save Changes",
-        "button_saving": "Saving...",
-        "success": "Membership updated successfully!",
-        "error_connection": "Connection Error",
-        "error_connection_description": "Could not connect to the server. Try again later.",
-        "error_update": "Error updating membership",
-        "error_load": "Could not load membership information.",
-        "error_auth": "Authentication token not found."
-      },
-      "view": {
-        "title": "MEMBERSHIP DETAILS",
-        "button_edit": "Modify",
-        "loading": "Loading Membership...",
-        "error_load": "Could not load membership information.",
-        "error_auth": "Session expired or unauthorized. Please log in again.",
-        "not_found": "Membership not found or unavailable."
-      },
-      "notifications": {
-        "delete_success": "Membership deleted successfully",
-        "delete_error": "Error deleting membership. Try again.",
-        "delete_auth_error": "You are not authenticated to perform this action."
-      },
-      "validations": {
-        "name_required": "Name is required",
-        "name_max": "Name cannot exceed 100 characters",
-        "description_required": "Description is required",
-        "description_max": "Description cannot exceed 500 characters",
-        "duration_int": "Duration must be an integer",
-        "duration_min": "Duration cannot be zero (0) or negative",
-        "duration_max": "Maximum duration is 3650 days (10 years)",
-        "price_min": "Price cannot be zero (0) or negative",
-        "price_max": "Maximum price is 999,999.99",
-        "validation_error": "Unexpected validation error"
-      }
-    },
-    "packages": {
-      "title": "SERVICE PACKAGES",
-      "add_button": "Add a package",
-      "loading": "Loading packages...",
-      "error_loading": "Error loading packages",
-      "table": {
-        "placeholder": "Search package by name",
-        "download": "Download",
-        "downloading": "Downloading...",
-        "columns": {
-          "name": "Name",
-          "description": "Description",
-          "duration": "Duration (days)",
-          "price": "Price",
-          "status": "Status"
-        },
-        "status": {
-          "active": "Active",
-          "inactive": "Inactive"
-        },
-        "actions": {
-          "view": "View Details",
-          "edit": "Modify",
-          "delete": "Delete"
-        },
-        "delete_dialog": {
-          "title": "Confirm deletion",
-          "description": "Are you sure you want to delete the package \"{name}\"? This action cannot be undone.",
-          "confirm": "Delete",
-          "cancel": "Cancel"
-        }
-      },
-      "form": {
-        "labels": {
-          "name": "Name",
-          "price": "Price ($)",
-          "description": "Description",
-          "start_at": "Start Date",
-          "end_at": "End Date",
-          "status": "Status",
-          "add_service": "Add service",
-          "service_placeholder": "Select a service",
-          "sessions": "{count} sessions",
-          "remove": "Remove"
-        }
-      },
-      "create": {
-        "title": "CREATE PACKAGE",
-        "subtitle": "Complete the information for the new package",
-        "button_create": "Create package",
-        "button_creating": "Creating...",
-        "success": "Package created successfully!",
-        "error_create": "Could not create the package. Try again."
+        "title": "Create Package",
+        "subtitle": "Define services and pricing for the new package",
+        "loading_services": "Loading available services...",
+        "loading_create": "Creating package...",
+        "button_create": "Create Package",
+        "button_creating": "Saving...",
+        "success": "Package created successfully",
+        "error_create": "Error while creating package"
       },
       "edit": {
         "title": "EDIT PACKAGE",
-        "subtitle": "Modify the package data: {name}",
+        "subtitle": "Modify details for package: {name}",
         "button_save": "Save changes",
         "button_cancel": "Cancel",
         "button_saving": "Saving...",
         "success": "Package updated successfully!",
-        "error_update": "Error updating the package",
-        "error_load": "Could not load the package."
+        "error_update": "Error updating package",
+        "error_load": "Could not load package."
       },
       "view": {
         "title": "PACKAGE DETAILS",
-        "button_edit": "Modify",
+        "button_edit": "Edit",
         "loading": "Loading Packages...",
         "error_load": "Could not load package information."
       },
       "notifications": {
         "delete_success": "Package deleted successfully",
-        "delete_error": "Error deleting the package. Try again.",
+        "delete_error": "Error deleting package. Please try again.",
         "auth_error": "You are not authenticated to perform this action.",
         "invalid_id": "Invalid package ID",
         "services_load_error": "Could not load services.",
         "success_title": "Success",
         "error_title": "Error"
       }
-    }
-  },
-  "cancellationReason": {
-    "title": "Cancellation Reasons",
-    "addButton": "Add Reason",
-    "loading": "Loading reasons...",
-    "error": "There was an error loading the data.",
-    "retry": "Retry",
-    "CausesTable": {
-      "searchPlaceholder": "Filter by description...",
-      "download": "Download",
-      "columns": {
-        "description": "Description",
-        "status": "Status",
-        "descriptionPlaceholder": "e.g., Moved away, financial reasons, etc."
-      },
-      "status": {
-        "active": "Active",
-        "inactive": "Inactive"
-      },
-      "createModeHelp": "* New cancellation reasons are created as active by default.",
-      "descriptionHelp": "Clearly describe the reason why the customer is canceling their subscription.",
-      "actions": {
-        "view": "View",
-        "edit": "Edit",
-        "delete": "Delete",
-        "save": "Save",
-        "cancel": "Cancel"
-      },
-      "deleteModal": {
-        "title": "Confirm Deletion",
-        "description": "Are you sure you want to delete this reason? This action cannot be undone.",
-        "confirm": "Delete",
-        "cancel": "Cancel",
-        "success": "Reason deleted successfully.",
-        "error": "Could not delete the reason."
-      }
-    }
-  },
-  "Promotions": {
-    "title": "PROMOTIONS AND DISCOUNTS",
-    "add_button": "Add Promotion",
-    "error_loading": "Error loading promotions",
-    "stats": {
-      "total": "Total",
-      "active": "Active",
-      "inactive": "Inactive",
-      "unit": "Promos"
     },
-    "table": {
-      "columns": {
-        "promotion": "Promotion",
-        "benefit": "Benefit",
-        "validity": "Validity",
-        "status": "Status"
-      },
-      "status": {
+    "cancellationReason": {
+      "title": "CANCELLATION REASONS",
+      "addButton": "Add Reason",
+      "loading": "Loading reasons...",
+      "error": "An error occurred while loading data.",
+      "retry": "Retry",
+      "CausesTable": {
+        "searchPlaceholder": "Filter by description...",
+        "download": "Download",
+        "columns": {
+          "description": "Description",
+          "status": "Status",
+          "descriptionPlaceholder": "E.g.: Relocation, financial reasons..."
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "createModeHelp": "* New cancellation reasons are created as active by default.",
+        "descriptionHelp": "Clearly describe the reason why the customer is canceling their subscription.",
+        "actions": {
+          "view": "View",
+          "edit": "Edit",
+          "delete": "Delete",
+          "save": "Save",
+          "cancel": "Cancel"
+        },
+        "deleteModal": {
+          "title": "Confirm Deletion",
+          "description": "Are you sure you want to delete this reason? This action cannot be undone.",
+          "confirm": "Delete",
+          "cancel": "Cancel",
+          "success": "Reason deleted successfully",
+          "error": "Could not delete reason"
+        }
+      }
+    },
+    "Promotions": {
+      "title": "PROMOTIONS AND DISCOUNTS",
+      "add_button": "Add Promotion",
+      "error_loading": "Error loading promotions",
+      "stats": {
+        "total": "Total",
         "active": "Active",
         "inactive": "Inactive",
-        "expired": "Expired"
+        "unit": "Promos"
       },
-      "filters": {
-        "search_placeholder": "Search by name or code...",
-        "clear": "Clear"
+      "table": {
+        "columns": {
+          "promotion": "Promotion",
+          "benefit": "Benefit",
+          "validity": "Validity",
+          "status": "Status"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "expired": "Expired"
+        },
+        "filters": {
+          "search_placeholder": "Search by name or code...",
+          "clear": "Clear"
+        },
+        "export": "Export",
+        "delete_dialog": {
+          "title": "Delete promotion?",
+          "description": "This action cannot be undone. Promotion \"{name}\" will be permanently deleted.",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
       },
-      "export": "Export",
-      "delete_dialog": {
-        "title": "Delete promotion?",
-        "description": "This action cannot be undone. The promotion \"{name}\" will be permanently deleted.",
-        "confirm": "Delete",
-        "cancel": "Cancel"
+      "actions": {
+        "view": "View details",
+        "edit": "Edit",
+        "delete": "Delete",
+        "delete_loading": "Deleting promotion...",
+        "delete_success": "Promotion deleted successfully",
+        "delete_error": "Error deleting"
+      },
+      "form": {
+        "labels": {
+          "name": "Promotion Name",
+          "code": "Code (Coupon)",
+          "type": "Discount Type",
+          "value": "Discount Value",
+          "start_date": "Start Date",
+          "end_date": "End Date",
+          "is_active": "Active and visible promotion"
+        },
+        "placeholders": {
+          "name": "E.g.: Fitness Summer",
+          "code": "SUMMER2025",
+          "type": "Select type",
+          "percentage": "Percentage (%)",
+          "fixed": "Fixed Amount ($)"
+        }
+      },
+      "create": {
+        "title": "NEW PROMOTION",
+        "subtitle": "Configure coupon details for your members.",
+        "button_cancel": "Cancel",
+        "button_submit": "Create Promotion",
+        "button_loading": "Saving...",
+        "success_title": "Promotion created!",
+        "success_description": "The code {code} has been successfully registered.",
+        "error_title": "Save Error",
+        "error_default": "There was a problem with the submitted data."
+      },
+      "edit": {
+        "title": "EDIT PROMOTION",
+        "subtitle": "Modify selected promotion parameters to update its benefits.",
+        "loading": "Loading promotion data...",
+        "error_fetch": "Could not load promotion",
+        "not_found": "Promotion not found",
+        "success_update": "Promotion updated successfully",
+        "error_update": "Error updating",
+        "button_cancel": "Cancel",
+        "button_submit": "Update Promotion",
+        "button_loading": "Saving changes...",
+        "error_update_description": "No changes detected to save."
+      },
+      "details": {
+        "title": "PROMOTION DETAILS",
+        "subtitle": "Detailed information about the coupon, validity, and configured benefits.",
+        "not_found": "Promotion not found",
+        "loading": "Loading details...",
+        "error_fetch": "Could not load promotion information",
+        "button_back": "Back",
+        "button_edit": "Edit",
+        "button_list": "Back to list"
       }
     },
-    "actions": {
-      "view": "View details",
-      "edit": "Edit",
-      "delete": "Delete",
-      "delete_loading": "Deleting promotion...",
-      "delete_success": "Promotion successfully deleted",
-      "delete_error": "Error during deletion"
-    },
-    "form": {
-      "labels": {
-        "name": "Promotion Name",
-        "code": "Code (Coupon)",
-        "type": "Discount Type",
-        "value": "Discount Value",
-        "start_date": "Start Date",
-        "end_date": "End Date",
-        "is_active": "Active and visible promotion"
+    "instructor": {
+      "title": "Instructors",
+      "add_button": "Add Instructor",
+      "stats": {
+        "total": "Total Instructors",
+        "active": "Active",
+        "blocked": "Blocked"
       },
-      "placeholders": {
-        "name": "e.g., Summer Fitness",
-        "code": "SUMMER2025",
-        "type": "Select type",
-        "percentage": "Percentage (%)",
-        "fixed": "Fixed Amount ($)"
+      "table": {
+        "search_placeholder": "Search by name, last name, or email...",
+        "download_csv": "Download CSV",
+        "columns": {
+          "name": "Name",
+          "email": "Email",
+          "document": "Document",
+          "phone": "Phone"
+        },
+        "actions": {
+          "view": "View Details",
+          "edit": "Modify",
+          "delete": "Delete"
+        },
+        "messages": {
+          "deleting": "Deleting instructor...",
+          "deleted_success": "Instructor deleted",
+          "delete_error": "Error deleting record",
+          "export_start": "Export started..."
+        },
+        "delete_dialog": {
+          "title": "Are you sure?",
+          "description": "Instructor {name} will be permanently deleted.",
+          "action": "Delete"
+        }
+      },
+      "create": {
+        "title": "Create Instructor",
+        "subtitle": "Fill in the information for the new instructor"
+      },
+      "detail": {
+        "title": "Instructor Details",
+        "edit_button": "Modify",
+        "loading": "Loading instructor information...",
+        "errors": {
+          "fetch_error": "Could not load instructor information.",
+          "not_found": "Instructor not found."
+        }
+      },
+      "edit": {
+        "title": "Edit Instructor",
+        "subtitle": "Modify data for Instructor: {name}",
+        "cancel": "Cancel",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "loading": "Loading Instructor...",
+        "messages": {
+          "success": "Instructor updated successfully!",
+          "error_fetch": "Could not load instructor.",
+          "error_update": "Error updating instructor",
+          "conflict_error": "An instructor is already registered with these credentials."
+        }
+      },
+      "form": {
+        "loading": "Loading Instructor...",
+        "edit_title": "Edit Instructor",
+        "edit_subtitle": "Modifying data for",
+        "labels": {
+          "first_name": "First Name*",
+          "last_name": "Last Name*",
+          "identity_document": "Identity Document*",
+          "specialties": "Specialty",
+          "biography": "Biography",
+          "email": "Email Address*",
+          "phone": "Phone Number*",
+          "birth_date": "Birth Date*",
+          "gender": "Gender*"
+        },
+        "placeholders": {
+          "first_name": "First Name",
+          "last_name": "Last Name",
+          "identity_document": "ID Number",
+          "email": "email@example.com",
+          "select_specialty": "-- Select --"
+        },
+        "gender_options": {
+          "male": "Male",
+          "female": "Female",
+          "other": "Prefer not to say"
+        },
+        "errors": {
+          "check_fields": "Please check the form fields",
+          "auth_required": "You are not authenticated. Please log in again.",
+          "conflict": "An instructor with these credentials already exists.",
+          "server_error": "Unknown error while creating instructor",
+          "first_name_required": "First name is required",
+          "first_name_max": "First name cannot exceed 50 characters",
+          "first_name_invalid": "First name can only contain letters and spaces",
+          "last_name_required": "Last name is required",
+          "last_name_max": "Last name cannot exceed 50 characters",
+          "last_name_invalid": "Last name can only contain letters and spaces",
+          "email_required": "Email is required",
+          "email_invalid": "Invalid email format",
+          "email_max": "Email cannot exceed 100 characters",
+          "document_required": "Identity document is required",
+          "document_max": "Document cannot exceed 20 characters",
+          "phone_required": "Phone number is required",
+          "phone_max": "Phone number cannot exceed 20 characters",
+          "birth_date_required": "Birth date is required",
+          "birth_date_age": "Instructor must be at least 18 years old",
+          "birth_date_future": "Birth date cannot be in the future",
+          "gender_required": "Gender is required",
+          "gender_invalid": "Invalid gender selection",
+          "biography_max": "Biography cannot exceed 500 characters",
+          "url_invalid": "The photo URL must be valid"
+        },
+        "create": {
+          "title": "Create Instructor",
+          "subtitle": "Complete the information for the new instructor",
+          "success": "Instructor created successfully!",
+          "success_update": "Instructor updated successfully!",
+          "loading": "Creating..."
+        },
+        "buttons": {
+          "create": "Create",
+          "cancel": "Cancel",
+          "creating": "Saving...",
+          "save_changes": "Save Changes"
+        },
+        "messages": {
+          "validation_error": "Please check the errors in the form",
+          "success": "Instructor created successfully",
+          "generic_error": "An unexpected error has occurred",
+          "conflict_error": "Email or ID is already registered",
+          "auth_error": "Session expired, please log in again"
+        }
       }
     },
-    "create": {
-      "title": "NEW PROMOTION",
-      "subtitle": "Configure the coupon details for your members.",
-      "button_cancel": "Cancel",
-      "button_submit": "Create Promotion",
-      "button_loading": "Saving...",
-      "success_title": "Promotion created!",
-      "success_description": "The code {code} has been successfully registered.",
-      "error_title": "Save error",
-      "error_default": "A problem occurred with the submitted data."
-    },
-    "edit": {
-      "title": "EDIT PROMOTION",
-      "subtitle": "Modify the selected promotion parameters to update its benefits.",
-      "loading": "Loading promotion data...",
-      "error_fetch": "Could not load promotion",
-      "not_found": "Promotion not found",
-      "success_update": "Promotion updated successfully",
-      "error_update": "Update error",
-      "error_update_description": "No changes were detected to save.",
-      "button_cancel": "Cancel",
-      "button_submit": "Update Promotion",
-      "button_loading": "Saving changes..."
-    },
-    "details": {
-      "title": "PROMOTION DETAILS",
-      "subtitle": "Detailed information about the coupon, validity, and configured benefits.",
-      "not_found": "Promotion not found",
-      "loading": "Loading details...",
-      "error_fetch": "Could not load promotion information",
-      "button_back": "Back",
-      "button_edit": "Modify",
-      "button_list": "Back to list"
+    "fiscal_documents": {
+      "title": "FISCAL DOCUMENTS",
+      "subtitle": "List of fiscal documents catalog",
+      "add_button": "Add Document",
+      "create": {
+        "title": "NEW FISCAL DOCUMENT"
+      },
+      "edit": {
+        "title": "EDIT FISCAL DOCUMENT"
+      },
+      "view": {
+        "title": "DOCUMENT DETAILS"
+      },
+      "table": {
+        "search_placeholder": "Search document...",
+        "download": "Download",
+        "downloading": "Generating download...",
+        "columns": {
+          "name": "Document Name",
+          "prefix": "Prefix or Series",
+          "created_at": "Creation Date"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "delete_dialog": {
+          "title": "Confirm Deletion",
+          "description": "Are you sure you want to delete the document \"{name}\"? This action cannot be undone.",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        },
+        "notifications": {
+          "deleting": "Deleting document...",
+          "delete_success": "Document deleted successfully",
+          "delete_error": "Error deleting the document"
+        }
+      },
+      "form": {
+        "description_helper": "Enter basic data for fiscal series identification.",
+        "labels": {
+          "name": "Document Name*",
+          "prefix": "Prefix or Series*"
+        },
+        "placeholders": {
+          "name": "E.g.: Sales Invoice",
+          "prefix": "E.g.: S001"
+        },
+        "buttons": {
+          "save": "Save",
+          "saving": "Processing...",
+          "cancel": "Cancel"
+        },
+        "notifications": {
+          "create_success": "Document created successfully",
+          "update_success": "Document updated successfully",
+          "error": "An error occurred while processing the request"
+        }
+      },
+      "errors": {
+        "name_min": "Name must be at least 3 characters long",
+        "name_max": "Name is too long",
+        "prefix_required": "Prefix is required",
+        "prefix_max": "Prefix must not exceed 10 characters",
+        "prefix_invalid": "Only letters, numbers, and hyphens are allowed"
+      }
     }
   },
   "common": {
@@ -2246,7 +2207,6 @@
         "notAvailable": "N/A"
       }
     }
-   
   },
   "branches": {
     "title": "BRANCHES",
@@ -2365,15 +2325,14 @@
           }
         },
         "confirm": {
-         "title": "Policies Confirmation",
-        "subtitle": "Before continuing, please confirm you are aware of the system rules and policies.",
-        "checkbox_label": "Please confirm:",
-        "acceptPolicies": "I accept the system policies.",
-        "linkText": "View full policies",
-        "footer_hint": "Your acceptance is required to continue.",
-        "toastTitle": "Policies Accepted",
-        "toastDescription": "You have confirmed that you are aware of and accept the system policies."
-         
+          "title": "Policies Confirmation",
+          "subtitle": "Before continuing, please confirm you are aware of the system rules and policies.",
+          "checkbox_label": "Please confirm:",
+          "acceptPolicies": "I accept the system policies.",
+          "linkText": "View full policies",
+          "footer_hint": "Your acceptance is required to continue.",
+          "toastTitle": "Policies Accepted",
+          "toastDescription": "You have confirmed that you are aware of and accept the system policies."
         },
         "buttons": {
           "back": "Back",
@@ -2575,7 +2534,7 @@
       "loading": "Loading commercial rules...",
       "saving": "Saving changes...",
       "empty": "There are currently no commercial rules configured.",
-       "updateSuccessTitle": "Policy Updated!",
+      "updateSuccessTitle": "Policy Updated!",
       "updateSuccessDescription": "The policy value was successfully saved.",
       "updateErrorTitle": "Update Failed",
       "updateErrorDescription": "The policy could not be saved. Please try again.",
@@ -2621,5 +2580,35 @@
         }
       }
     }
+  },
+  "auth": {
+  "activate": {
+    "title": "CONFIRM YOUR PASSWORD",
+    "description": "Please enter your new password to activate your account.",
+    "password_label": "Password",
+    "password_placeholder": "Enter your password",
+    "confirm_password_label": "Confirm Password",
+    "confirm_password_placeholder": "Confirm your password",
+    "button_confirm": "Confirm",
+    "button_loading": "Processing...",
+    "success_message": "Account activated successfully!",
+    "footer_text": "Dashboard System",
+    "login_link": "Login",
+    "remember_password": "Do you remember your password?",
+    "errors": {
+      "invalid_token": "Invalid or expired token.",
+      "check_password": "The password does not meet the requirements.",
+      "confirm_required": "You must confirm your password",
+      "passwords_dont_match": "Passwords do not match",
+      "password_requirements": "Password must include uppercase, numbers, and special characters.",
+      "server_error": "Error activating the account.",
+      "password_min": "Minimum 8 characters.",
+      "password_uppercase": "Uppercase letter missing.",
+      "password_lowercase": "Lowercase letter missing.",
+      "password_number": "Number missing.",
+      "password_special": "Special character missing."
+      
+    }
   }
+}
 }

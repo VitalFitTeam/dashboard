@@ -9,10 +9,11 @@ import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { Banner } from "@vitalfit/sdk";
-import { useRouter } from "next/navigation";
+
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { Notification } from "@/components/ui/Notification";
 import { Switch } from "@/components/ui/switch";
+import { useRouter } from "@/i18n/navigation";
 
 interface StatsData {
     total: number;
@@ -75,7 +76,6 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
         }
     }, [token, loadBanners]);
 
-    // Calcular stats cuando cambien los datos o filtros
     useEffect(() => {
         const getFilteredDataLocal = () => {
             let filtered = data;
@@ -146,11 +146,11 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
     }, [totalPages, page]);
 
     const handleView = (row: Banner) => {
-        router.replace(`/banners/${row.banner_id}`);
+        router.replace(`/marketing/banners/${row.banner_id}`);
     };
 
     const handleEdit = (row: Banner) => {
-        router.replace(`/banners/${row.banner_id}/edit`);
+        router.replace(`/marketing/banners/${row.banner_id}/edit`);
     };
 
     const handleToggleActive = async (banner: Banner) => {

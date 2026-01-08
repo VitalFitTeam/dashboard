@@ -10,9 +10,10 @@ import { Download, Eye, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { InstructorDataList } from "@vitalfit/sdk";
-import { useRouter } from "next/navigation";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { toast } from "sonner"; 
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface InstructorsTableProps {
   data: InstructorDataList[];
@@ -21,7 +22,7 @@ interface InstructorsTableProps {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  filters: { search: string; sort: string }; // Actualizado según tu API
+  filters: { search: string; sort: string };
   onFilterChange: (filters: { search?: string; sort?: string }) => void;
 }
 
@@ -39,6 +40,8 @@ export default function InstructorsTable({
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
   const { token } = useAuth();
   const router = useRouter();
+  
+  const t = useTranslations("catalog.instructor.table");
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -52,16 +55,16 @@ export default function InstructorsTable({
   const handleDeleteInstructor = async (instructor: InstructorDataList) => {
     if (!token) {
       return;
-    }
 
-    const toastId = toast.loading("Eliminando instructor...");
+    }
+    const toastId = toast.loading(t("messages.deleting"));
     try {
       await api.instructor.deleteInstructor(instructor.instructor_id, token);
-      toast.success("Instructor eliminado", { id: toastId });
+      toast.success(t("messages.deleted_success"), { id: toastId });
       onReload();
     } catch (error) {
       console.error("Error al eliminar:", error);
-      toast.error("Error al borrar el registro", { id: toastId });
+      toast.error(t("messages.delete_error"), { id: toastId });
     } finally {
       setDeleteRowId(null);
     }
@@ -69,7 +72,7 @@ export default function InstructorsTable({
 
   const columns: Column<InstructorDataList>[] = [
     {
-      header: "Nombre",
+      header: t("columns.name"),
       accessor: "first_name",
       render: (value, row) => (
         <div className="font-medium text-slate-900">
@@ -78,7 +81,7 @@ export default function InstructorsTable({
       ),
     },
     {
-      header: "Email",
+      header: t("columns.email"),
       accessor: "email",
       render: (email) => (
         <div className="text-slate-500 hover:text-orange-400 transition-colors cursor-default">
@@ -87,11 +90,11 @@ export default function InstructorsTable({
       ),
     },
     {
-      header: "Documento",
+      header: t("columns.document"),
       accessor: "identity_document",
     },
     {
-      header: "Teléfono",
+      header: t("columns.phone"),
       accessor: "phone",
     },
   ];
@@ -102,7 +105,7 @@ export default function InstructorsTable({
         <div className="relative w-full sm:w-[350px]">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nombre, apellido o email..."
+            placeholder={t("search_placeholder")}
             className="pl-9"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -110,9 +113,9 @@ export default function InstructorsTable({
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => toast.info("Exportación iniciada...")}>
+          <Button variant="outline" onClick={() => toast.info(t("messages.export_start"))}>
             <Download className="mr-2 h-4 w-4" />
-            Descargar CSV
+            {t("download_csv")}
           </Button>
         </div>
       </div>
@@ -131,17 +134,17 @@ export default function InstructorsTable({
             <RowActions
               actions={[
                 { 
-                  label: "Ver Detalles", 
+                  label: t("actions.view"), 
                   icon: Eye, 
-                  onClick: () => router.push(`/instructors/${row.instructor_id}`) 
+                  onClick: () => router.push(`/catalog/instructors/${row.instructor_id}`) 
                 },
                 {
-                  label: "Modificar",
+                  label: t("actions.edit"),
                   icon: Pencil,
-                  onClick: () => router.push(`/instructors/${row.instructor_id}/edit`),
+                  onClick: () => router.push(`/catalog/instructors/${row.instructor_id}/edit`),
                 },
                 {
-                  label: "Eliminar",
+                  label: t("actions.delete"),
                   icon: Trash2,
                   onClick: () => setDeleteRowId(row.instructor_id),
                   variant: "danger",
@@ -152,9 +155,9 @@ export default function InstructorsTable({
             <GeneralAlertDialog
               open={deleteRowId === row.instructor_id}
               onOpenChange={(open) => !open && setDeleteRowId(null)}
-              title="¿Estás seguro?"
-              description={`Se eliminará permanentemente al instructor ${row.first_name} ${row.last_name}.`}
-              actionText="Eliminar"
+              title={t("delete_dialog.title")}
+              description={t("delete_dialog.description", { name: `${row.first_name} ${row.last_name}` })}
+              actionText={t("delete_dialog.action")}
               onAction={() => handleDeleteInstructor(row)}
               actionVariant="destructive"
             />

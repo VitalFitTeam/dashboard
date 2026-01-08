@@ -342,7 +342,15 @@
         "heatmap": {
           "title": "Mapa de calor de actividad",
           "description": "Horarios de mayor afluencia en la sede",
-          "days": ["L", "M", "M", "J", "V", "S", "D"],
+          "days": [
+            "L",
+            "M",
+            "M",
+            "J",
+            "V",
+            "S",
+            "D"
+          ],
           "legend_low": "Menos flujo",
           "legend_high": "Más flujo",
           "tooltip": "Ocupación: {val}%"
@@ -610,7 +618,7 @@
         "update_button": "Actualizar",
         "delete_dialog": {
           "title": "¿Estás completamente seguro?",
-          "description": "Esta acción no se puede deshacer. Se eliminará permanentemente el método de pago:",
+          "description": "Esta acción no se puede deshacer. Se eliminará permanentemente el método de pago: {name}",
           "action_delete": "Sí, eliminar"
         }
       },
@@ -696,6 +704,22 @@
       "title": "EQUIPAMIENTO",
       "addButton": "Agregar Equipamiento",
       "loading": "Cargando equipamiento...",
+      "create": {
+        "title": "AGREGAR EQUIPAMIENTO",
+        "subtitle": "Complete la información para registrar el nuevo equipo",
+        "button": "Guardar Equipo",
+        "loading": "Guardando...",
+        "success": "¡Equipo registrado exitosamente!",
+        "error_create": "No se pudo crear el equipo. Intenta nuevamente."
+      },
+      "details": {
+        "title": "DETALLES DEL EQUIPO",
+        "subtitle": "Información detallada de: {name}",
+        "loading": "Cargando información del equipo...",
+        "not_found": "Equipo no encontrado",
+        "back": "Volver",
+        "edit": "Modificar"
+      },
       "categories": {
         "Cardio": "Cardio",
         "Strength": "Fuerza",
@@ -715,7 +739,9 @@
           "brand": "Marca"
         },
         "actions": {
-          "delete": "Eliminar"
+          "delete": "Eliminar",
+          "view": "Ver detalle",
+          "edit": "Editar"
         },
         "delete_dialog": {
           "title": "Confirmar eliminación",
@@ -727,6 +753,44 @@
       "notifications": {
         "delete_success": "Equipo eliminado exitosamente",
         "delete_error": "Error al eliminar el equipo."
+      },
+      "form": {
+        "labels": {
+          "name": "Nombre del Equipo*",
+          "category": "Categoría*",
+          "brand": "Marca",
+          "model": "Modelo",
+          "description": "Descripción",
+          "serial_number": "Número de Serie",
+          "purchase_date": "Fecha de Compra",
+          "status": "Estado"
+        },
+        "placeholders": {
+          "name": "Ej: Caminadora X1",
+          "category": "Selecciona una categoría",
+          "brand": "Ej: LifeFitness",
+          "model": "Ej: Serie 500",
+          "description": "Describe el estado del equipo o especificaciones..."
+        },
+        "errors": {
+          "name_required": "El nombre del equipo es obligatorio",
+          "description_required": "La descripción es obligatoria",
+          "model_required": "El modelo es obligatorio",
+          "brand_required": "La marca es obligatoria"
+        }
+      },
+      "edit": {
+        "title": "EDITAR EQUIPO",
+        "subtitle": "Modifica los datos del equipo: {name}",
+        "loading_data": "Cargando datos del equipo...",
+        "save": "Guardar cambios",
+        "saving": "Guardando...",
+        "cancel": "Cancelar",
+        "messages": {
+          "success": "¡Equipo actualizado exitosamente!",
+          "error_fetch": "No se pudo cargar el equipo.",
+          "error_update": "Error al actualizar el equipo"
+        }
       }
     },
     "memberships": {
@@ -858,237 +922,47 @@
       },
       "form": {
         "labels": {
-          "name": "Nombre",
-          "price": "Precio ($)",
-          "description": "Descripción",
-          "start_at": "Fecha inicio",
-          "end_at": "Fecha fin",
-          "status": "Estado",
-          "add_service": "Agregar servicio",
-          "service_placeholder": "Selecciona un servicio",
-          "sessions": "{count} sesiones",
-          "remove": "Quitar"
-        }
-      },
-      "create": {
-        "title": "CREAR PAQUETE",
-        "subtitle": "Complete la información del nuevo paquete",
-        "button_create": "Crear paquete",
-        "button_creating": "Creando...",
-        "success": "¡Paquete creado exitosamente!",
-        "error_create": "No se pudo crear el paquete. Intenta nuevamente."
-      },
-      "edit": {
-        "title": "EDITAR PAQUETE",
-        "subtitle": "Modifica los datos del paquete: {name}",
-        "button_save": "Guardar cambios",
-        "button_cancel": "Cancelar",
-        "button_saving": "Guardando...",
-        "success": "¡Paquete actualizado exitosamente!",
-        "error_update": "Error al actualizar el paquete",
-        "error_load": "No se pudo cargar el paquete."
-      },
-      "view": {
-        "title": "DETALLES DEL PAQUETE",
-        "button_edit": "Modificar",
-        "loading": "Cargando Paquetes...",
-        "error_load": "No se pudo cargar la información del paquete."
-      },
-      "notifications": {
-        "delete_success": "Paquete eliminado correctamente",
-        "delete_error": "Error al eliminar el paquete. Intenta nuevamente.",
-        "auth_error": "No estás autenticado para realizar esta acción.",
-        "invalid_id": "ID de paquete no válido",
-        "services_load_error": "No se pudieron cargar los servicios.",
-        "success_title": "Éxito",
-        "error_title": "Error"
-      }
-    },
-    "equipment": {
-      "title": "EQUIPAMIENTO",
-      "addButton": "Agregar Equipamiento",
-      "loading": "Cargando equipamiento...",
-      "categories": {
-        "Cardio": "Cardio",
-        "Strength": "Fuerza",
-        "FreeWeight": "Peso Libre",
-        "Functional": "Funcional",
-        "Accessory": "Accesorio"
-      },
-      "table": {
-        "filter_placeholder": "Filtrar por nombre",
-        "category_placeholder": "Categoría",
-        "all_categories": "Todas las Categorías",
-        "download": "Descarga",
-        "columns": {
-          "name": "Equipamiento",
-          "category": "Categoría",
-          "model": "Modelo",
-          "brand": "Marca"
-        },
-        "actions": {
-          "delete": "Eliminar"
-        },
-        "delete_dialog": {
-          "title": "Confirmar eliminación",
-          "description": "¿Estás seguro de que deseas eliminar este equipo? Esta acción no se puede deshacer.",
-          "confirm": "Eliminar",
-          "cancel": "Cancelar"
-        }
-      },
-      "notifications": {
-        "delete_success": "Equipo eliminado exitosamente",
-        "delete_error": "Error al eliminar el equipo."
-      }
-    },
-    "memberships": {
-      "title": "MEMBRESÍAS",
-      "add_button": "Agregar una membresía",
-      "loading": "Cargando Membresías...",
-      "table": {
-        "placeholder": "Buscar membresía por nombre",
-        "download": "Descargar",
-        "columns": {
-          "name": "Nombre",
-          "description": "Descripción",
-          "duration": "Duración (días)",
+          "name": "Nombre del Paquete",
           "price": "Precio",
-          "status": "Estado"
-        },
-        "status": {
-          "active": "Activa",
-          "inactive": "Inactiva"
-        },
-        "actions": {
-          "view": "Ver Detalles",
-          "edit": "Modificar",
-          "delete": "Eliminar"
-        },
-        "delete_dialog": {
-          "title": "Confirmar eliminación",
-          "description": "¿Estás seguro de que deseas eliminar la membresía \"{name}\"? Esta acción no se puede deshacer.",
-          "confirm": "Eliminar",
-          "cancel": "Cancelar"
-        }
-      },
-      "form": {
-        "labels": {
-          "name": "Nombre*",
-          "description": "Descripción*",
-          "duration_days": "Duración (Días)*",
-          "price": "Precio ($)*",
-          "status": "Estado"
+          "description": "Descripción",
+          "start_at": "Fecha de Inicio",
+          "end_at": "Fecha de Fin",
+          "services_included": "Servicios Incluidos",
+          "sessions_count": "Sesiones",
+          "status": "Estado",
+          "remove": "Quitar",
+          "add_service": "Agregar Servicio"
         },
         "placeholders": {
-          "name": "Ej: Membresía Premium",
-          "description": "Ej: Acceso ilimitado a todas las instalaciones",
-          "duration_days": "Ej: 30",
-          "price": "Ej: 99.99"
+          "select_service": "-- Seleccione un servicio --"
+        },
+        "buttons": {
+          "cancel": "Cancelar",
+          "save": "Guardar Paquete"
+        },
+        "messages": {
+          "validation_error": "Por favor, complete los campos obligatorios correctamente"
+        },
+        "errors": {
+          "name_required": "El nombre del paquete es obligatorio",
+          "description_required": "La descripción es obligatoria",
+          "price_min": "El precio debe ser mayor a 0",
+          "start_date_required": "La fecha de inicio es obligatoria",
+          "end_date_required": "La fecha de fin es obligatoria",
+          "at_least_one_service": "Debes agregar al menos un servicio al paquete",
+          "sessions_min": "Las sesiones deben ser al menos 1",
+          "invalid_date_range": "La fecha de fin debe ser posterior a la de inicio"
         }
       },
       "create": {
-        "title": "CREAR MEMBRESÍA",
-        "subtitle": "Agrega la información de la membresía",
-        "button_create": "Crear",
-        "button_saving": "Guardando...",
-        "success": "¡Membresía creada exitosamente!",
-        "error_connection": "Error de conexión",
-        "error_connection_description": "No se pudo conectar con el servidor. Intenta más tarde.",
-        "error_create": "Error al crear membresía",
-        "error_auth": "Token de autenticación no encontrado."
-      },
-      "edit": {
-        "title": "MODIFICAR MEMBRESÍA",
-        "subtitle": "Modifica la información de la membresía {name}",
-        "button_cancel": "Cancelar",
-        "button_save": "Guardar Cambios",
-        "button_saving": "Guardando...",
-        "success": "¡Membresía actualizada exitosamente!",
-        "error_connection": "Error de conexión",
-        "error_connection_description": "No se pudo conectar con el servidor. Intenta más tarde.",
-        "error_update": "Error al actualizar membresía",
-        "error_load": "No se pudo cargar la información de la membresía.",
-        "error_auth": "Token de autenticación no encontrado."
-      },
-      "view": {
-        "title": "DETALLES DE MEMBRESÍA",
-        "button_edit": "Modificar",
-        "loading": "Cargando Membresía...",
-        "error_load": "No se pudo cargar la información de la membresía.",
-        "error_auth": "Sesión expirada o no autorizada. Intenta ingresar de nuevo.",
-        "not_found": "Membresía no encontrada o no disponible."
-      },
-      "notifications": {
-        "delete_success": "Membresía eliminada correctamente",
-        "delete_error": "Error al eliminar la membresía. Intenta nuevamente.",
-        "delete_auth_error": "No estás autenticado para realizar esta acción."
-      },
-      "validations": {
-        "name_required": "El nombre es requerido",
-        "name_max": "El nombre no puede tener más de 100 caracteres",
-        "description_required": "La descripción es requerida",
-        "description_max": "La descripción no puede tener más de 500 caracteres",
-        "duration_int": "La duración debe ser un número entero",
-        "duration_min": "La duración no puede ser cero (0) o negativa",
-        "duration_max": "La duración máxima es 3650 días (10 años)",
-        "price_min": "El precio no puede ser cero (0) o negativo",
-        "price_max": "El precio máximo es 999,999.99",
-        "validation_error": "Error de validación inesperado"
-      }
-    },
-    "packages": {
-      "title": "PAQUETES DE SERVICIOS",
-      "add_button": "Agregar un paquete",
-      "loading": "Cargando paquetes...",
-      "error_loading": "Error al cargar los paquetes",
-      "table": {
-        "placeholder": "Buscar paquete por nombre",
-        "download": "Descargar",
-        "downloading": "Descargando...",
-        "columns": {
-          "name": "Nombre",
-          "description": "Descripción",
-          "duration": "Duración (días)",
-          "price": "Precio",
-          "status": "Estado"
-        },
-        "status": {
-          "active": "Activa",
-          "inactive": "Inactiva"
-        },
-        "actions": {
-          "view": "Ver Detalles",
-          "edit": "Modificar",
-          "delete": "Eliminar"
-        },
-        "delete_dialog": {
-          "title": "Confirmar eliminación",
-          "description": "¿Estás seguro de que deseas eliminar el paquete \"{name}\"? Esta acción no se puede deshacer.",
-          "confirm": "Eliminar",
-          "cancel": "Cancelar"
-        }
-      },
-      "form": {
-        "labels": {
-          "name": "Nombre",
-          "price": "Precio ($)",
-          "description": "Descripción",
-          "start_at": "Fecha inicio",
-          "end_at": "Fecha fin",
-          "status": "Estado",
-          "add_service": "Agregar servicio",
-          "service_placeholder": "Selecciona un servicio",
-          "sessions": "{count} sesiones",
-          "remove": "Quitar"
-        }
-      },
-      "create": {
-        "title": "CREAR PAQUETE",
-        "subtitle": "Complete la información del nuevo paquete",
-        "button_create": "Crear paquete",
-        "button_creating": "Creando...",
-        "success": "¡Paquete creado exitosamente!",
-        "error_create": "No se pudo crear el paquete. Intenta nuevamente."
+        "title": "Crear Paquete",
+        "subtitle": "Define los servicios y precios para el nuevo paquete",
+        "loading_services": "Cargando servicios disponibles...",
+        "loading_create": "Creando paquete...",
+        "button_create": "Crear Paquete",
+        "button_creating": "Guardando...",
+        "success": "Paquete creado con éxito",
+        "error_create": "Error al crear el paquete"
       },
       "edit": {
         "title": "EDITAR PAQUETE",
@@ -1115,42 +989,42 @@
         "success_title": "Éxito",
         "error_title": "Error"
       }
-    }
-  },
-  "cancellationReason": {
-    "title": "CANCELLATION REASONS",
-    "addButton": "Add Reason",
-    "loading": "Loading reasons...",
-    "error": "An error occurred while loading the data.",
-    "retry": "Retry",
-    "CausesTable": {
-      "searchPlaceholder": "Filter by description...",
-      "download": "Download",
-      "columns": {
-        "description": "Description",
-        "status": "Status",
-        "descriptionPlaceholder": "Ej: Cambio de domicilio, motivos financieros..."
-      },
-      "status": {
-        "active": "Active",
-        "inactive": "Inactive"
-      },
-      "createModeHelp": "* New cancellation reasons are created as active by default.",
-      "descriptionHelp": "Clearly describe the reason why the customer is canceling their subscription.",
-      "actions": {
-        "view": "View",
-        "edit": "Edit",
-        "delete": "Delete",
-        "save": "Save",
-        "cancel": "Cancel"
-      },
-      "deleteModal": {
-        "title": "Confirm Deletion",
-        "description": "Are you sure you want to delete this reason? This action cannot be undone.",
-        "confirm": "Delete",
-        "cancel": "Cancel",
-        "success": "Reason deleted successfully",
-        "error": "Could not delete the reason"
+    },
+    "cancellationReason": {
+      "title": "MOTIVOS DE CANCELACIÓN",
+      "addButton": "Agregar Motivo",
+      "loading": "Cargando motivos...",
+      "error": "Ocurrió un error al cargar los datos.",
+      "retry": "Reintentar",
+      "CausesTable": {
+        "searchPlaceholder": "Filtrar por descripción...",
+        "download": "Descargar",
+        "columns": {
+          "description": "Descripción",
+          "status": "Estado",
+          "descriptionPlaceholder": "Ej: Cambio de domicilio, motivos financieros..."
+        },
+        "status": {
+          "active": "Activo",
+          "inactive": "Inactivo"
+        },
+        "createModeHelp": "* Los nuevos motivos de cancelación se crean como activos por defecto.",
+        "descriptionHelp": "Describa claramente la razón por la cual el cliente cancela su suscripción.",
+        "actions": {
+          "view": "Ver",
+          "edit": "Editar",
+          "delete": "Eliminar",
+          "save": "Guardar",
+          "cancel": "Cancelar"
+        },
+        "deleteModal": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar este motivo? Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar",
+          "success": "Motivo eliminado exitosamente",
+          "error": "No se pudo eliminar el motivo"
+        }
       }
     },
     "Promotions": {
@@ -1246,6 +1120,210 @@
         "button_back": "Volver",
         "button_edit": "Modificar",
         "button_list": "Volver al listado"
+      }
+    },
+    "instructor": {
+      "title": "Instructores",
+      "add_button": "Agregar Instructor",
+      "stats": {
+        "total": "Total Instructores",
+        "active": "Activos",
+        "blocked": "Bloqueados"
+      },
+      "table": {
+        "search_placeholder": "Buscar por nombre, apellido o email...",
+        "download_csv": "Descargar CSV",
+        "columns": {
+          "name": "Nombre",
+          "email": "Email",
+          "document": "Documento",
+          "phone": "Teléfono"
+        },
+        "actions": {
+          "view": "Ver Detalles",
+          "edit": "Modificar",
+          "delete": "Eliminar"
+        },
+        "messages": {
+          "deleting": "Eliminando instructor...",
+          "deleted_success": "Instructor eliminado",
+          "delete_error": "Error al borrar el registro",
+          "export_start": "Exportación iniciada..."
+        },
+        "delete_dialog": {
+          "title": "¿Estás seguro?",
+          "description": "Se eliminará permanentemente al instructor {name}.",
+          "action": "Eliminar"
+        }
+      },
+      "create": {
+        "title": "Crear Instructor",
+        "subtitle": "Complete la información del nuevo instructor"
+      },
+      "detail": {
+        "title": "Detalles del Instructor",
+        "edit_button": "Modificar",
+        "loading": "Cargando información del instructor...",
+        "errors": {
+          "fetch_error": "No se pudo cargar la información del instructor.",
+          "not_found": "Instructor no encontrado."
+        }
+      },
+      "edit": {
+        "title": "Editar Instructor",
+        "subtitle": "Modifica los datos del Instructor: {name}",
+        "cancel": "Cancelar",
+        "save": "Guardar cambios",
+        "saving": "Guardando...",
+        "loading": "Cargando Instructor...",
+        "messages": {
+          "success": "¡Instructor actualizado exitosamente!",
+          "error_fetch": "No se pudo cargar el instructor.",
+          "error_update": "Error al actualizar instructor",
+          "conflict_error": "Ya existe un instructor registrado con estas credenciales."
+        }
+      },
+      "form": {
+        "loading": "Cargando Instructor...",
+        "edit_title": "Editar Instructor",
+        "edit_subtitle": "Modificando los datos de",
+        "labels": {
+          "first_name": "Nombre*",
+          "last_name": "Apellido*",
+          "identity_document": "Documento de identidad*",
+          "specialties": "Especialidad",
+          "biography": "Biografía",
+          "email": "Correo Electrónico*",
+          "phone": "Número de teléfono*",
+          "birth_date": "Fecha de Nacimiento*",
+          "gender": "Género*"
+        },
+        "placeholders": {
+          "first_name": "Nombre",
+          "last_name": "Apellido",
+          "identity_document": "Documento",
+          "email": "correo@ejemplo.com",
+          "select_specialty": "-- Seleccionar --"
+        },
+        "gender_options": {
+          "male": "Masculino",
+          "female": "Femenino",
+          "other": "Prefiero no decirlo"
+        },
+        "errors": {
+          "check_fields": "Por favor, revisa los campos del formulario",
+          "auth_required": "No estás autenticado. Por favor, inicia sesión nuevamente.",
+          "conflict": "Ya existe un instructor registrado con estas credenciales.",
+          "server_error": "Error desconocido al crear instructor",
+          "first_name_required": "El nombre es requerido",
+          "first_name_max": "El nombre no puede tener más de 50 caracteres",
+          "first_name_invalid": "El nombre solo puede contener letras y espacios",
+          "last_name_required": "El apellido es requerido",
+          "last_name_max": "El apellido no puede tener más de 50 caracteres",
+          "last_name_invalid": "El apellido solo puede contener letras y espacios",
+          "email_required": "El email es requerido",
+          "email_invalid": "El formato del email es inválido",
+          "email_max": "El email no puede tener más de 100 caracteres",
+          "document_required": "El documento de identidad es requerido",
+          "document_max": "El documento no puede tener más de 20 caracteres",
+          "phone_required": "El teléfono es requerido",
+          "phone_max": "El teléfono no puede tener más de 20 caracteres",
+          "birth_date_required": "La fecha de nacimiento es requerida",
+          "birth_date_age": "El instructor debe ser mayor de 18 años",
+          "birth_date_future": "La fecha de nacimiento no puede ser futura",
+          "gender_required": "El género es requerido",
+          "gender_invalid": "Selección de género inválida",
+          "biography_max": "La biografía no puede tener más de 500 caracteres",
+          "url_invalid": "La URL de la foto debe ser válida"
+        },
+        "create": {
+          "title": "Crear Instructor",
+          "subtitle": "Complete la información del nuevo instructor",
+          "success": "¡Instructor creado exitosamente!",
+          "success_update": "¡Instructor actualizado exitosamente!",
+          "loading": "Creando..."
+        },
+        "buttons": {
+          "create": "Crear",
+          "cancel": "Cancelar",
+          "save_changes": "Guardar cambios",
+          "creating": "Guardando..."
+        },
+        "messages": {
+          "validation_error": "Por favor, revise los errores en el formulario",
+          "success": "Instructor creado exitosamente",
+          "generic_error": "Ha ocurrido un error inesperado",
+          "conflict_error": "El correo o documento ya está registrado",
+          "auth_error": "Sesión expirada, por favor inicie sesión de nuevo"
+        }
+      }
+    },
+    "fiscal_documents": {
+      "title": "DOCUMENTOS FISCALES",
+      "subtitle": "Listado del catálogo de documentos Fiscales",
+      "add_button": "Agregar Documento",
+      "create": {
+        "title": "NUEVO DOCUMENTO FISCAL"
+      },
+      "edit": {
+        "title": "EDITAR DOCUMENTO FISCAL"
+      },
+      "view": {
+        "title": "DETALLES DEL DOCUMENTO"
+      },
+      "table": {
+        "search_placeholder": "Buscar documento...",
+        "download": "Descargar",
+        "downloading": "Generando descarga...",
+        "columns": {
+          "name": "Nombre del Documento",
+          "prefix": "Prefijo o Serie",
+          "created_at": "Fecha de Creación"
+        },
+        "actions": {
+          "view": "Ver",
+          "edit": "Modificar",
+          "delete": "Eliminar"
+        },
+        "delete_dialog": {
+          "title": "Confirmar eliminación",
+          "description": "¿Estás seguro de que deseas eliminar el documento \"{name}\"? Esta acción no se puede deshacer.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        },
+        "notifications": {
+          "deleting": "Eliminando documento...",
+          "delete_success": "Documento eliminado correctamente",
+          "delete_error": "Error al eliminar el documento"
+        }
+      },
+      "form": {
+        "description_helper": "Ingrese los datos básicos para la identificación de la serie fiscal.",
+        "labels": {
+          "name": "Nombre del Documento*",
+          "prefix": "Prefijo o Serie*"
+        },
+        "placeholders": {
+          "name": "Ej: Factura de Venta",
+          "prefix": "Ej: F001"
+        },
+        "buttons": {
+          "save": "Guardar",
+          "saving": "Procesando...",
+          "cancel": "Cancelar"
+        },
+        "notifications": {
+          "create_success": "Documento creado exitosamente",
+          "update_success": "Documento actualizado exitosamente",
+          "error": "Ha ocurrido un error al procesar la solicitud"
+        }
+      },
+      "errors": {
+        "name_min": "El nombre debe tener al menos 3 caracteres",
+        "name_max": "El nombre es demasiado largo",
+        "prefix_required": "El prefijo es obligatorio",
+        "prefix_max": "El prefijo no debe exceder los 10 caracteres",
+        "prefix_invalid": "Solo se permiten letras, números y guiones"
       }
     }
   },
@@ -2247,14 +2325,14 @@
           }
         },
         "confirm": {
-        "title": "Confirmación de políticas",
-        "subtitle": "Antes de continuar, confirma que conoces las reglas y políticas del sistema.",
-        "checkbox_label": "Por favor confirma:",
-        "acceptPolicies": "Acepto las políticas del sistema.",
-        "linkText": "Ver políticas completas",
-        "footer_hint": "Tu aceptación es obligatoria para continuar.",
-        "toastTitle": "Políticas aceptadas",
-        "toastDescription": "Has confirmado que conoces y aceptas las políticas del sistema."
+          "title": "Confirmación de políticas",
+          "subtitle": "Antes de continuar, confirma que conoces las reglas y políticas del sistema.",
+          "checkbox_label": "Por favor confirma:",
+          "acceptPolicies": "Acepto las políticas del sistema.",
+          "linkText": "Ver políticas completas",
+          "footer_hint": "Tu aceptación es obligatoria para continuar.",
+          "toastTitle": "Políticas aceptadas",
+          "toastDescription": "Has confirmado que conoces y aceptas las políticas del sistema."
         },
         "buttons": {
           "back": "Anterior",
@@ -2502,5 +2580,35 @@
         }
       }
     }
+  },
+  "auth": {
+  "activate": {
+    "title": "CONFIRMA TU CONTRASEÑA",
+    "description": "Ingrese su nueva contraseña para activar su cuenta.",
+    "password_label": "Contraseña",
+    "password_placeholder": "Ingrese su contraseña",
+    "confirm_password_label": "Confirmar Contraseña",
+    "confirm_password_placeholder": "Confirme su contraseña",
+    "button_confirm": "Confirmar",
+    "button_loading": "Procesando...",
+    "success_message": "¡Cuenta activada exitosamente!",
+    "footer_text": "Sistema de Dashboard",
+    "login_link": "Iniciar Sesión",
+    "remember_password": "¿Recuerdas tu contraseña?",
+    "errors": {
+      "invalid_token": "Token inválido o expirado.",
+      "check_password": "La contraseña no cumple con los requisitos.",
+      "confirm_required": "Debe confirmar la contraseña",
+      "passwords_dont_match": "Las contraseñas no coinciden",
+      "password_requirements": "La contraseña debe incluir mayúsculas, números y caracteres especiales.",
+      "server_error": "Error al activar la cuenta.",
+      "password_min": "Mínimo 8 caracteres.",
+      "password_uppercase": "Falta una mayúscula.",
+      "password_lowercase": "Falta una minúscula.",
+      "password_number": "Falta un número.",
+      "password_special": "Falta un carácter especial."
+      
+    }
   }
+}
 }

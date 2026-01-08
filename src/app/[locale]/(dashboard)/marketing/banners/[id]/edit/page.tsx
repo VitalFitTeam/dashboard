@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/Label";
 import { Notification } from "@/components/ui/Notification";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { useRouter, useParams } from "next/navigation";
+import {  useParams } from "next/navigation";
 import type { Banner } from "@vitalfit/sdk";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { useRouter } from "@/i18n/navigation";
 
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB;
 
@@ -68,11 +69,11 @@ export default function EditBannerPage() {
                     });
                     setBannerImage(foundBanner.image_url || "");
                 } else {
-                    router.replace("/banners");
+                    router.replace("/marketing/banners");
                 }
             } catch (error) {
                 console.error("Error cargando banner:", error);
-                router.replace("/banners");
+                router.replace("/marketing/banners");
             } finally {
                 setLoading(false);
             }
@@ -175,7 +176,7 @@ export default function EditBannerPage() {
 
             setShowSuccess(true);
             setTimeout(() => {
-                router.replace("/banners");
+                router.replace("/marketing/banners");
             }, 1500);
         } catch (error) {
             console.error("Error al actualizar banner:", error);
@@ -389,7 +390,7 @@ export default function EditBannerPage() {
                         type="button"
                         variant="secondary"
                         onClick={() => {
-                            router.replace("/banners");
+                            router.replace("/marketing/banners");
                         }}
 
                     >

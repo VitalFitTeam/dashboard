@@ -205,7 +205,7 @@ export default function PaymentTable({
         open={Boolean(deleteRow)}
         onOpenChange={(open) => !open && setDeleteRow(null)}
         title={t("table.delete_dialog.title")}
-        description={`${t("table.delete_dialog.description")} ${deleteRow?.name ?? ""}`}
+        description={t("table.delete_dialog.description", { name: deleteRow?.name ?? "" })}
         actionText={t("table.delete_dialog.action_delete")}
         onAction={handleDelete}
         actionVariant="destructive"

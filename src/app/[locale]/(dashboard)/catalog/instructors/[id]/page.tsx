@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import InstructorForm from "../InstructorForm";
-import { useParams, useRouter } from "next/navigation";
+
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
 import {
@@ -12,6 +12,8 @@ import {
 } from "@vitalfit/sdk";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
+import InstructorForm from "@/components/modules/instructor/InstructorForm";
 
 export default function InstructorDetailPage() {
   const params = useParams();
@@ -28,7 +30,7 @@ export default function InstructorDetailPage() {
 
   useEffect(() => {
     if (!id) {
-      router.replace("/instructors");
+      router.replace("/catalog/instructors");
       return;
     }
     if (!token) {
@@ -48,6 +50,7 @@ export default function InstructorDetailPage() {
         }
 
         const data = instructorRes.data;
+
         if (
           data?.specialties &&
           Array.isArray(data.specialties) &&
@@ -64,7 +67,7 @@ export default function InstructorDetailPage() {
         }
         const status = err?.response?.status ?? err?.status ?? null;
         if (status === 404) {
-          router.replace("/instructors");
+          router.replace("/catalog/instructors");
         } else {
           console.error("Error cargando instructor:", err);
           setError("No se pudo cargar la información del instructor.");
@@ -121,7 +124,7 @@ export default function InstructorDetailPage() {
         <Button
           variant="default"
           onClick={() => {
-            router.push(`/instructors/${id}/edit`);
+            router.push(`/catalog/instructors/${id}/edit`);
           }}
         >
           Modificar

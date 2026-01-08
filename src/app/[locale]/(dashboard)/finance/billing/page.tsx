@@ -55,7 +55,11 @@ export default function BillingPage() {
     return null;
   }
 
-  const canSwitchBranch = hasRole(["branch_admin", "super_admin", "accountant"] as any);
+  const canSwitchBranch = hasRole([
+    "branch_admin",
+    "super_admin",
+    "accountant",
+  ] as any);
   const canCreateInvoice = hasRole(["branch_admin", "super_admin"] as any);
 
   const filteredBranches = user?.activeBranch?.id
@@ -88,36 +92,43 @@ export default function BillingPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 items-center bg-white p-4 rounded-xl border shadow-sm">
-        <div className="relative w-full lg:flex-1">
+        <div className="relative w-full lg:flex-[1.5]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder={t("searchPlaceholder")}
-            className="pl-10 focus-visible:ring-primary"
+            className="pl-10 focus-visible:ring-primary w-full"
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto">
+        <div className="flex flex-col md:flex-row gap-4 w-full lg:flex-1">
           <Select
             value={selectedBranch || "all"}
-            onValueChange={(v) => setSelectedBranch(v === "all" ? undefined : v)}
-            disabled={loadingBranches || !canSwitchBranch || filteredBranches.length <= 1}
+            onValueChange={(v) =>
+              setSelectedBranch(v === "all" ? undefined : v)
+            }
+            disabled={
+              loadingBranches ||
+              !canSwitchBranch ||
+              filteredBranches.length <= 1
+            }
           >
-            <SelectTrigger className="w-full md:w-[220px]">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-gray-400" />
-                <SelectValue placeholder={t("branchPlaceholder")} />
+            <SelectTrigger className="w-full overflow-hidden">
+              <div className="flex items-center gap-2 w-full min-w-0">
+                <Building2 className="h-4 w-4 shrink-0 text-gray-400" />
+                <div className="flex-1 truncate text-left">
+                  <SelectValue placeholder={t("branchPlaceholder")} />
+                </div>
               </div>
             </SelectTrigger>
 
-            <SelectContent className="max-h-[300px]">
+            <SelectContent className="max-h-[300px] w-[var(--radix-select-trigger-width)]">
               {!user?.activeBranch?.id && canSwitchBranch && (
                 <SelectItem value="all">{t("allBranches")}</SelectItem>
               )}
-              
               {filteredBranches.map((branch) => (
                 <SelectItem key={branch.branch_id} value={branch.branch_id}>
-                  {branch.name}
+                  <span className="block truncate">{branch.name}</span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -125,14 +136,16 @@ export default function BillingPage() {
 
           <Select
             onValueChange={(v) =>
-              updateFilters({ 
+              updateFilters({
                 status: v === "all" ? undefined : (v as any),
-                page: 1 
+                page: 1,
               })
             }
           >
-            <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder={t("statusPlaceholder")} />
+            <SelectTrigger className="w-full md:w-[160px] shrink-0 overflow-hidden">
+              <div className="truncate text-left">
+                <SelectValue placeholder={t("statusPlaceholder")} />
+              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("status.all")}</SelectItem>
