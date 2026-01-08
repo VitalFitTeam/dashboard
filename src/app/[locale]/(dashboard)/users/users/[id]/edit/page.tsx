@@ -1,5 +1,5 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Users } from "@/models/users";
 import { api } from "@/lib/sdk-config";
 import { GetUserResponse, UpdateUserStaffRequest } from "@vitalfit/sdk";
+import { useRouter } from "@/i18n/navigation";
 
 type UserRole = Users["rol"];
 
@@ -180,7 +181,7 @@ export default function EditUserPage() {
             setSuccess("Usuario actualizado correctamente");
 
             setTimeout(() => {
-                router.replace(`/users/${id}`);
+                router.replace(`/users/users/${id}`);
             }, 1500);
 
 
@@ -233,7 +234,7 @@ export default function EditUserPage() {
                     <Button
                         type="button"
                         variant="secondary"
-                        onClick={() => router.replace(`/users/${id}`)}
+                        onClick={() => router.replace(`/users/users/${id}`)}
                         className="flex-1"
                         disabled={isSaving}
                     >

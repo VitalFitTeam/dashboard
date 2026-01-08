@@ -1,5 +1,5 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -12,6 +12,7 @@ import {
     PencilIcon,
     ComputerDesktopIcon,
 } from "@heroicons/react/24/outline";
+import { useRouter } from "@/i18n/navigation";
 
 // Tipo para los valores válidos de rol
 type UserRole = Users["rol"];
@@ -117,7 +118,7 @@ export default function ViewUserPage() {
     }, [id, token]);
 
     const handleEdit = () => {
-        router.replace(`/users/${id}/edit`);
+        router.replace(`/users/users/${id}/edit`);
     };
 
     if (isLoading) {
@@ -135,7 +136,7 @@ export default function ViewUserPage() {
             <div className="flex-1 space-y-6 p-8 pt-6">
                 <div className="text-red-500 text-center p-4">{error || "Usuario no encontrado"}</div>
                 <div className="flex justify-center">
-                    <Button variant="default" onClick={() => router.replace("/users")}>
+                    <Button variant="default" onClick={() => router.replace("/users/users")}>
                         Volver a la lista
                     </Button>
                 </div>

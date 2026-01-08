@@ -18,9 +18,9 @@ import { Eye, Pencil, Trash2 } from "lucide-react";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { toast } from "sonner";
 import { User } from "@vitalfit/sdk";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
+import { useRouter } from "@/i18n/navigation";
 
 
 const ROLE_LABELS: Record<string, string> = {
@@ -172,8 +172,8 @@ export default function UsersTable({
         actions={(row) => (
           <RowActions
             actions={[
-              { label: "Ver Detalles", icon: Eye, onClick: () => router.push(`/users/${row.user_id}`) },
-              { label: "Modificar", icon: Pencil, onClick: () => router.push(`/users/${row.user_id}/edit`) },
+              { label: "Ver Detalles", icon: Eye, onClick: () => router.push(`/users/users/${row.user_id}`) },
+              { label: "Modificar", icon: Pencil, onClick: () => router.push(`/users/users/${row.user_id}/edit`) },
               {
                 label: "Eliminar",
                 icon: Trash2,

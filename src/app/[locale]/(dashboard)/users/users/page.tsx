@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
@@ -9,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 
 import UsersTable from "./UsersTable";
 import { useStaffUsers } from "@/hooks/staff/useStaffUsers";
+import { useRouter } from "@/i18n/navigation";
 
 export default function UsersPage() {
   const { token } = useAuth();
@@ -49,7 +49,7 @@ export default function UsersPage() {
       <PageHeader title="USUARIOS">
         <Button
           className="bg-transparent text-black border border-gray-100"
-          onClick={() => router.replace("/users/new")}
+          onClick={() => router.replace("/users/users/new")}
         >
           <PlusIcon className="h-5 w-5" />
           Agregar Usuario
