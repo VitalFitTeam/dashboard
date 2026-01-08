@@ -23,16 +23,25 @@ export const FranchisePerformanceCard = ({ token }: FranchisePerformanceCardProp
 
   const t = useTranslations("analytics.Sales.charts.top_branches");
   const { data: response, isLoading } = useSalesReports.useTopBranches(token);
+
   
   const branches = response;
 
-  const normalizeTrend = (trend: string): "up" | "down" | "neutral" => {
-    const val = Number(trend);
-    if (isNaN(val) || val === 0) {
-        return "neutral";
-    }
-    return val > 0 ? "up" : "down";
-  };
+  const normalizeTrend = (trend: string | number): "up" | "down" | "neutral" => {
+
+  if (trend === "up") {
+    return "up";
+  }
+  if (trend === "down"){
+     return "down";
+  }
+
+  const val = Number(trend);
+  if (isNaN(val) || val === 0) {
+    return "neutral";
+  }
+  return val > 0 ? "up" : "down";
+};
 
   return (
     <Card className="h-full border-none shadow-sm">

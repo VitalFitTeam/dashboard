@@ -10,7 +10,7 @@ import { Eye, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation"; // Usar el router de i18n
 import { MembershipType } from "@vitalfit/sdk";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { useTranslations } from "next-intl";
@@ -39,7 +39,10 @@ export default function MembershipTable({
 }: MembershipTableProps) {
   const t = useTranslations("catalog.memberships");
   const [searchInput, setSearchInput] = useState(filters.search);
-  const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
+
+  // Estado para manejar qué fila se va a eliminar
+  const [selectedMembership, setSelectedMembership] =
+    useState<MembershipType | null>(null);
 
   const { token } = useAuth();
   const router = useRouter();
@@ -57,32 +60,27 @@ export default function MembershipTable({
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  const handleView = (row: MembershipType) => {
-    router.replace(`/catalog/memberships/${row.membership_type_id}`);
-  };
-
-  const handleEdit = (row: MembershipType) => {
-    router.replace(`/catalog/memberships/${row.membership_type_id}/edit`);
-  };
-
-  const handleDelete = async (membership: MembershipType) => {
-    const membershipId = membership.membership_type_id;
-
-    if (!token) {
-      toast.error(t("notifications.delete_auth_error"));
-      setDeleteRowId(null);
+  const handleDelete = async () => {
+    if (!selectedMembership || !token) {
+      if (!token) {
+        toast.error(t("notifications.delete_auth_error"));
+      }
       return;
     }
 
+    const toastId = toast.loading(t("loading"));
     try {
-      await api.membership.deleteMembershipType(membershipId, token);
-      toast.success(t("notifications.delete_success"));
+      await api.membership.deleteMembershipType(
+        selectedMembership.membership_type_id,
+        token
+      );
+      toast.success(t("notifications.delete_success"), { id: toastId });
       onReload();
     } catch (error) {
       console.error("Error al eliminar la membresía:", error);
-      toast.error(t("notifications.delete_error"));
+      toast.error(t("notifications.delete_error"), { id: toastId });
     } finally {
-      setDeleteRowId(null);
+      setSelectedMembership(null);
     }
   };
 
@@ -96,8 +94,14 @@ export default function MembershipTable({
       accessor: "is_active",
       render: (value) => {
         const config = value
-          ? { text: t("table.status.active"), color: "text-green-700 border-green-300" }
-          : { text: t("table.status.inactive"), color: "text-yellow-700 border-yellow-300" };
+          ? {
+              text: t("table.status.active"),
+              color: "text-green-700 border-green-300",
+            }
+          : {
+              text: t("table.status.inactive"),
+              color: "text-yellow-700 border-yellow-300",
+            };
         return (
           <Badge variant="outline" className={`border ${config.color}`}>
             {config.text}
@@ -121,7 +125,10 @@ export default function MembershipTable({
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => toast.info(t("table.downloading") || "Exporting...")}
+          >
             <ArrowDownTray className="mr-2 h-4 w-4" />
             {t("table.download")}
           </Button>
@@ -138,43 +145,44 @@ export default function MembershipTable({
         totalPages={totalPages}
         rowIdKey="membership_type_id"
         actions={(row) => (
-          <div className="flex flex-col items-center justify-center w-full">
-            <RowActions
-              actions={[
-                {
-                  label: t("table.actions.view"),
-                  icon: Eye,
-                  onClick: () => handleView(row),
-                },
-                {
-                  label: t("table.actions.edit"),
-                  icon: Pencil,
-                  onClick: () => handleEdit(row),
-                },
-                {
-                  label: t("table.actions.delete"),
-                  icon: Trash2,
-                  onClick: () => setDeleteRowId(row.membership_type_id),
-                  variant: "danger",
-                  separatorBefore: true,
-                },
-              ]}
-            />
-            {deleteRowId === row.membership_type_id && (
-              <GeneralAlertDialog
-                open={deleteRowId === row.membership_type_id}
-                onOpenChange={(open) => !open && setDeleteRowId(null)}
-                trigger={null}
-                title={t("table.delete_dialog.title")}
-                description={t("table.delete_dialog.description")}
-                actionText={t("table.delete_dialog.confirm")}
-                cancelText={t("table.delete_dialog.cancel")}
-                onAction={() => handleDelete(row)}
-                actionVariant="destructive"
-              />
-            )}
-          </div>
+          <RowActions
+            actions={[
+              {
+                label: t("table.actions.view"),
+                icon: Eye,
+                onClick: () =>
+                  router.push(`/catalog/memberships/${row.membership_type_id}`),
+              },
+              {
+                label: t("table.actions.edit"),
+                icon: Pencil,
+                onClick: () =>
+                  router.push(
+                    `/catalog/memberships/${row.membership_type_id}/edit`
+                  ),
+              },
+              {
+                label: t("table.actions.delete"),
+                icon: Trash2,
+                onClick: () => setSelectedMembership(row),
+                variant: "danger",
+                separatorBefore: true,
+              },
+            ]}
+          />
         )}
+      />
+      <GeneralAlertDialog
+        open={!!selectedMembership}
+        onOpenChange={(open) => !open && setSelectedMembership(null)}
+        title={t("table.delete_dialog.title")}
+        description={t("table.delete_dialog.description", {
+          name: selectedMembership?.name ?? "",
+        })}
+        actionText={t("table.delete_dialog.confirm")}
+        cancelText={t("table.delete_dialog.cancel")}
+        onAction={handleDelete}
+        actionVariant="destructive"
       />
     </>
   );

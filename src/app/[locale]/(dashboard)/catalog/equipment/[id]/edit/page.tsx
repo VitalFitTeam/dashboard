@@ -19,6 +19,7 @@ export default function EditEquipmentPage() {
   const [equipment, setEquipment] = useState<EquipmentInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!id || !token) {
@@ -32,7 +33,7 @@ export default function EditEquipmentPage() {
         setEquipment(response.data ?? response);
       } catch (err) {
         console.error("Error cargando equipo:", err);
-        setError(t("error_loading"));
+        setError(t("messages.error_fetch"));
       } finally {
         setLoading(false);
       }
@@ -43,21 +44,25 @@ export default function EditEquipmentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!equipment || !token) {
-      return;
+    if (!equipment || !token){
+       return;
     }
 
+    setIsSaving(true);
+    const toastId = toast.loading(t("saving"));
     try {
       await api.equipment.updateEquipment(
         equipment.equipment_id,
         equipment,
         token,
       );
-      toast.success(t("success"));
-      router.replace("/catalog/equipment");
+      toast.success(t("messages.success"), { id: toastId });
+      router.push("/catalog/equipment");
     } catch (err) {
       console.error("Error al guardar cambios:", err);
-      toast.error(t("error_loading")); // Using error_loading as generic error or I should have added 'save_error'
+      toast.error(t("messages.error_update"), { id: toastId });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -76,18 +81,19 @@ export default function EditEquipmentPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <PageHeader
           title={t("title")}
-          subtitle={t("subtitle")}
+          subtitle={t("subtitle", { name: equipment.name })}
           actionButton={
             <div className="flex gap-2">
               <Button
                 variant="secondary"
                 type="button"
+                disabled={isSaving}
                 onClick={() => router.push("/catalog/equipment")}
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" variant="default">
-                {t("button")}
+              <Button type="submit" variant="default" disabled={isSaving}>
+                {isSaving ? t("saving") : t("save")}
               </Button>
             </div>
           }

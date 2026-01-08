@@ -2,11 +2,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import InstructorForm from "../InstructorForm";
 import { api } from "@/lib/sdk-config";
-import { Notification } from "@/components/ui/Notification";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner"; 
+import { useTranslations } from "next-intl"; 
 import {
   InstructorDataList,
   UserGender,
@@ -17,7 +16,8 @@ import {
   validateInstructorField,
   InstructorFormData,
 } from "@/lib/validation/instructorSchema";
-import { ZodError } from "zod";
+import InstructorForm from "@/components/modules/instructor/InstructorForm";
+import { useRouter } from "@/i18n/navigation";
 
 interface CreateInstructorProps {
   onBack: () => void;
@@ -26,6 +26,7 @@ interface CreateInstructorProps {
 export default function CreateInstructor({ onBack }: CreateInstructorProps) {
   const router = useRouter();
   const { token } = useAuth();
+  const t = useTranslations("catalog.instructor.form");
 
   const [formData, setFormData] = useState<InstructorDataList>({
     instructor_id: "",
@@ -41,31 +42,20 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
     profile_picture_url: "",
   });
 
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof InstructorFormData, string>>
-  >({});
+  const [errors, setErrors] = useState<Partial<Record<keyof InstructorFormData, string>>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
-  const [showConnectionError, setShowConnectionError] = useState(false);
-  const [categoriesOptions, setCategoriesOptions] = useState<
-    Array<{ category_id: string; name: string }>
-  >([]);
+  const [categoriesOptions, setCategoriesOptions] = useState<Array<{ category_id: string; name: string }>>([]);
 
   const handleChange = (field: keyof InstructorDataList, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Limpiar error del campo cuando el usuario escribe
     if (errors[field as keyof InstructorFormData]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleFieldBlur = (field: keyof InstructorDataList, value: string) => {
-    // Validación en tiempo real al perder el foco
-    const result = validateInstructorField(field, value);
+
+    const result = validateInstructorField(field, value, t);
     if (!result.success && result.error) {
       setErrors((prev) => ({ ...prev, [field]: result.error }));
     } else {
@@ -74,14 +64,13 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
   };
 
   useEffect(() => {
-    if (!token) {
-      return;
+    if (!token){
+       return;
     }
     let mounted = true;
     const loadCategories = async () => {
       try {
         const res = await api.products.getCategories(token);
-        // Según el SDK, getCategories retorna DataResponse<ServiceCategoryInfo[]>
         const categories = (res?.data ?? []) as ServiceCategoryInfo[];
         if (!mounted) {
           return;
@@ -90,151 +79,86 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
           categories.map((cat) => ({
             category_id: cat.category_id,
             name: cat.name,
-          })),
+          }))
         );
       } catch (err) {
-        console.warn(
-          "No se pudieron cargar las categorías para especialidades:",
-          err,
-        );
-        // Opcional: setear opciones por defecto o manejar error
-        setCategoriesOptions([]);
+        console.warn("No se pudieron cargar las categorías:", err);
       }
     };
     loadCategories();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowServerError({ visible: false, message: "" });
-    setShowConnectionError(false);
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
 
-    // Validar token usando el contexto
     if (!token) {
-      setShowServerError({
-        visible: true,
-        message: "No estás autenticado. Por favor, inicia sesión nuevamente.",
-      });
+      toast.error(t("errors.auth_required") || "No estás autenticado");
       return;
     }
-    // Validar formulario completo con Zod
-    const validationResult = validateInstructor(formData);
+
+    const validationResult = validateInstructor(formData, t);
+    
     if (!validationResult.success) {
       const newErrors: Partial<Record<keyof InstructorFormData, string>> = {};
       validationResult.error.issues.forEach((issue) => {
-        if (issue.path.length > 0 && typeof issue.path[0] === "string") {
-          const field = issue.path[0] as keyof InstructorFormData;
-          newErrors[field] = issue.message;
-        }
+        const field = issue.path[0] as keyof InstructorFormData;
+        newErrors[field] = issue.message;
       });
       setErrors(newErrors);
+      toast.error(t("errors.check_fields") || "Revisa los campos del formulario");
       return;
     }
 
-    // Si pasa la validación, limpiar errores
     setErrors({});
+    setIsLoading(true);
 
     const mapGenderToEnum = (gender: string): UserGender => {
       switch (gender) {
-        case "male":
-          return UserGender.male;
-        case "female":
-          return UserGender.female;
-        case "prefer-not-to-say":
-          return UserGender.preferNotToSay;
-        default:
-          return UserGender.preferNotToSay;
+        case "male": return UserGender.male;
+        case "female": return UserGender.female;
+        default: return UserGender.preferNotToSay;
       }
     };
 
     const payload = {
-      first_name: formData.first_name,
-      last_name: formData.last_name,
-      email: formData.email,
-      identity_document: formData.identity_document,
-      phone: formData.phone,
-      birth_date: formData.birth_date,
+      ...formData,
       gender: mapGenderToEnum(formData.gender),
       biography: formData.biography || "",
       profile_picture_url: formData.profile_picture_url || "",
     };
 
-    setIsLoading(true);
     try {
       await api.instructor.createInstructor(payload, token);
 
       try {
-        const searchKey =
-          formData.email || formData.identity_document || formData.first_name;
-        const list = await api.instructor.getInstructors(
-          { limit: 10, page: 1, search: searchKey },
-          token,
-        );
-        const created = (list.data || []).find(
-          (i: any) =>
-            i.email === formData.email ||
-            i.identity_document === formData.identity_document,
-        );
-        if (created) {
-          const specialtyVal = (formData as any).specialties;
-          if (specialtyVal) {
-            const specialtiesArray = Array.isArray(specialtyVal)
-              ? specialtyVal
-              : [specialtyVal];
-            // Ahora se espera que las especialidades sean category_id de las categorías cargadas
-            const idsArray = specialtiesArray
-              .map((s: any) =>
-                typeof s === "string"
-                  ? s
-                  : (s?.specialty_id ?? s?.category_id ?? String(s)),
-              )
-              .filter(Boolean);
-            try {
-              await api.instructor.addSpecialty(
-                created.instructor_id,
-                idsArray as any,
-                token,
-              );
-            } catch (err) {
-              console.error(
-                "No se pudo agregar especialidad automáticamente:",
-                err,
-              );
-            }
-          }
+        const searchKey = formData.email || formData.identity_document;
+        const list = await api.instructor.getInstructors({ limit: 5, page: 1, search: searchKey }, token);
+        const created = (list.data || []).find(i => i.email === formData.email);
+        
+        if (created && (formData as any).specialties) {
+          const spec = (formData as any).specialties;
+          const ids = Array.isArray(spec) ? spec.map(s => s.category_id || s) : [spec];
+          await api.instructor.addSpecialty(created.instructor_id, ids, token);
         }
       } catch (err) {
-        console.warn("No se pudo buscar instructor recién creado:", err);
+        console.warn("Error vinculando especialidad:", err);
       }
 
-      setShowSuccess(true);
+      toast.success(t("create.success") || "¡Instructor creado exitosamente!");
+      
       setTimeout(() => {
-        router.push("/instructors");
+        router.push("/catalog/instructors");
       }, 1500);
-    } catch (err: unknown) {
-      console.error("Error al crear instructor:", err);
-      if (err && typeof err === "object" && "messages" in err) {
-        const error = err as { messages: string[]; error?: string };
-        if (error.messages[0] === "conflict") {
-          setShowServerError({
-            visible: true,
-            message:
-              "Ya existe un instructor registrado con estas credenciales. Verifica los datos ingresados.",
-          });
-        } else {
-          setShowServerError({
-            visible: true,
-            message: error.error || "Error desconocido al crear instructor",
-          });
-        }
+
+    } catch (err: any) {
+      console.error(err);
+      if (err?.messages?.[0] === "conflict") {
+        toast.error(t("errors.conflict") || "El instructor ya existe");
       } else {
-        setShowServerError({
-          visible: true,
-          message: "Error desconocido al crear instructor",
-        });
+        toast.error(err?.error || t("errors.server_error") || "Error al crear instructor");
       }
     } finally {
       setIsLoading(false);
@@ -245,8 +169,8 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <form onSubmit={handleSubmit} className="space-y-6">
         <PageHeader
-          title="Crear Instructor"
-          subtitle="Complete la información del nuevo instructor"
+          title={t("create.title") || "Crear Instructor"}
+          subtitle={t("create.subtitle") || "Complete la información"}
         />
 
         <InstructorForm
@@ -258,43 +182,15 @@ export default function CreateInstructor({ onBack }: CreateInstructorProps) {
           categories={categoriesOptions}
         />
 
-        <Button
-          type="button"
-          variant="default"
-          disabled={isLoading}
-          className="flex-1 relative w-full"
-          style={{ position: "relative" }}
-          onClick={() => {
-            handleSubmit({ preventDefault: () => {} } as React.FormEvent);
-          }}
-        >
-          {isLoading ? "Creando..." : "Crear"}
-        </Button>
+        <div className="flex justify-end gap-4">
+          <Button type="button" variant="outline" onClick={onBack} disabled={isLoading}>
+            {t("buttons.cancel") || "Cancelar"}
+          </Button>
+          <Button type="submit" disabled={isLoading} className="min-w-[120px]">
+            {isLoading ? t("buttons.creating") || "Creando..." : t("buttons.create") || "Crear"}
+          </Button>
+        </div>
       </form>
-
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="¡Instructor creado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-      {showConnectionError && (
-        <Notification
-          variant="destructive"
-          title="Error de conexión"
-          description="No se pudo conectar con el servidor. Intenta más tarde."
-          onClose={() => setShowConnectionError(false)}
-        />
-      )}
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al crear instructor"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

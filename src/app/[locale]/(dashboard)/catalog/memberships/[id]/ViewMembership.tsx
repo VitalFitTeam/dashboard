@@ -31,7 +31,7 @@ export default function ViewMembership({ membership }: ViewMembershipProps) {
         <Button
           variant="default"
           onClick={() => {
-            router.push(`/memberships/${id}/edit`);
+            router.push(`/catalog/memberships/${id}/edit`);
           }}
         >
           {t("view.button_edit")}

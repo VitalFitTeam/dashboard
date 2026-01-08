@@ -1,10 +1,9 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/sdk-config";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import InstructorForm from "../../InstructorForm";
 import {
   UserGender,
   InstructorDataList,
@@ -17,28 +16,22 @@ import {
   validateInstructorField,
   InstructorFormData,
 } from "@/lib/validation/instructorSchema";
-import { Notification } from "@/components/ui/Notification";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import InstructorForm from "@/components/modules/instructor/InstructorForm";
+import { useRouter } from "@/i18n/navigation";
 
 export default function EditInstructorPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { token } = useAuth();
+  const t = useTranslations("catalog.instructor.form");
 
   const [instructor, setInstructor] = useState<InstructorDataList | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof InstructorFormData, string>>
-  >({});
+  const [errors, setErrors] = useState<Partial<Record<keyof InstructorFormData, string>>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showServerError, setShowServerError] = useState({
-    visible: false,
-    message: "",
-  });
-  const [categoriesOptions, setCategoriesOptions] = useState<
-    Array<{ category_id: string; name: string }>
-  >([]);
+  const [categoriesOptions, setCategoriesOptions] = useState<Array<{ category_id: string; name: string }>>([]);
 
   useEffect(() => {
     if (!id || !token) {
@@ -50,30 +43,25 @@ export default function EditInstructorPage() {
         const response = await api.instructor.getInstructorById(id, token);
         let data = response.data ?? response;
 
-        // Tomar solo la última especialidad
-        if (
-          data?.specialties &&
-          Array.isArray(data.specialties) &&
-          data.specialties.length > 0
-        ) {
+        if (data?.specialties && Array.isArray(data.specialties) && data.specialties.length > 0) {
           const lastSpecialty = data.specialties[data.specialties.length - 1];
           data.specialties = [lastSpecialty];
         }
 
         setInstructor(data);
       } catch (err) {
-        console.error("Error cargando instructor:", err);
-        setError("No se pudo cargar el instructor.");
+        console.error(err);
+        toast.error(t("errors.load_error") || "No se pudo cargar el instructor.");
       } finally {
         setLoading(false);
       }
     };
     loadInstructor();
-  }, [id, token]);
+  }, [id, token, t]);
 
   useEffect(() => {
-    if (!token) {
-      return;
+    if (!token){
+       return;
     }
     let mounted = true;
     const loadCategories = async () => {
@@ -87,20 +75,14 @@ export default function EditInstructorPage() {
           categories.map((cat) => ({
             category_id: cat.category_id,
             name: cat.name,
-          })),
+          }))
         );
       } catch (err) {
-        console.warn(
-          "No se pudieron cargar las categorías para especialidades:",
-          err,
-        );
-        setCategoriesOptions([]);
+        console.warn(err);
       }
     };
     loadCategories();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [token]);
 
   const formatDateForBackend = (dateString: string): string => {
@@ -111,36 +93,28 @@ export default function EditInstructorPage() {
       return dateString;
     }
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      return dateString;
-    }
-    return date.toISOString().split("T")[0];
+    return isNaN(date.getTime()) ? dateString : date.toISOString().split("T")[0];
   };
 
   const mapGenderToEnum = (gender: string): UserGender => {
     switch (gender) {
-      case "male":
-        return UserGender.male;
-      case "female":
-        return UserGender.female;
-      case "prefer-not-to-say":
-        return UserGender.preferNotToSay;
-      default:
-        return UserGender.preferNotToSay;
+      case "male": return UserGender.male;
+      case "female": return UserGender.female;
+      case "prefer-not-to-say": return UserGender.preferNotToSay;
+      default: return UserGender.preferNotToSay;
     }
   };
 
   const handleChange = (field: keyof InstructorDataList, value: any) => {
-    if (instructor) {
-      setInstructor((prev) => (prev ? { ...prev, [field]: value } : prev));
-      if (errors[field as keyof InstructorFormData]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }));
-      }
+    setInstructor((prev) => (prev ? { ...prev, [field]: value } : prev));
+    if (errors[field as keyof InstructorFormData]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const handleFieldBlur = (field: keyof InstructorDataList, value: string) => {
-    const result = validateInstructorField(field, value);
+
+    const result = validateInstructorField(field, value, t);
     if (!result.success && result.error) {
       setErrors((prev) => ({ ...prev, [field]: result.error }));
     } else {
@@ -154,113 +128,60 @@ export default function EditInstructorPage() {
       return;
     }
 
-    setShowServerError({ visible: false, message: "" });
 
-    const validationResult = validateInstructor(instructor);
+    const validationResult = validateInstructor(instructor, t);
     if (!validationResult.success) {
       const newErrors: Partial<Record<keyof InstructorFormData, string>> = {};
       validationResult.error.issues.forEach((issue) => {
-        if (issue.path.length > 0 && typeof issue.path[0] === "string") {
-          const field = issue.path[0] as keyof InstructorFormData;
-          newErrors[field] = issue.message;
-        }
+        const field = issue.path[0] as keyof InstructorFormData;
+        newErrors[field] = issue.message;
       });
       setErrors(newErrors);
+      toast.error(t("errors.check_fields"));
       return;
     }
 
     setErrors({});
+    setIsLoading(true);
 
     const payload: Instructor = {
-      biography: instructor.biography,
+      ...instructor,
       birth_date: formatDateForBackend(instructor.birth_date),
-      email: instructor.email,
-      first_name: instructor.first_name,
       gender: mapGenderToEnum(instructor.gender),
-      identity_document: instructor.identity_document,
-      instructor_id: instructor.instructor_id,
-      last_name: instructor.last_name,
-      phone: instructor.phone,
-      profile_picture_url: instructor.profile_picture_url,
-    };
+      biography: instructor.biography || "",
+      profile_picture_url: instructor.profile_picture_url || "",
+    } as Instructor;
 
-    setIsLoading(true);
     try {
-      await api.instructor.updateInstructor(
-        instructor.instructor_id,
-        payload,
-        token,
-      );
+      await api.instructor.updateInstructor(instructor.instructor_id, payload, token);
 
-      // Solo agregar la última especialidad
       const specialtyVal = (instructor as any).specialties;
       if (specialtyVal) {
-        const selected = Array.isArray(specialtyVal)
-          ? specialtyVal[0]
-          : specialtyVal;
-        const selectedId =
-          typeof selected === "string"
-            ? selected
-            : (selected?.specialty_id ??
-              selected?.category_id ??
-              String(selected));
+        const selected = Array.isArray(specialtyVal) ? specialtyVal[0] : specialtyVal;
+        const selectedId = typeof selected === "string" ? selected : (selected?.category_id || selected?.specialty_id);
+        
         if (selectedId) {
-          await api.instructor.addSpecialty(
-            instructor.instructor_id,
-            [selectedId],
-            token,
-          );
+          await api.instructor.addSpecialty(instructor.instructor_id, [selectedId], token);
         }
       }
 
-      setShowSuccess(true);
-      setTimeout(() => {
-        router.push("/instructors");
-      }, 1500);
-    } catch (err: unknown) {
-      console.error("Error al guardar cambios:", err);
-      if (err && typeof err === "object" && "messages" in err) {
-        const error = err as { messages: string[]; error?: string };
-        if (error.messages[0] === "conflict") {
-          setShowServerError({
-            visible: true,
-            message:
-              "Ya existe un instructor registrado con estas credenciales. Verifica los datos ingresados.",
-          });
-        } else {
-          setShowServerError({
-            visible: true,
-            message:
-              error.error || "Error desconocido al actualizar instructor",
-          });
-        }
+      toast.success(t("create.success_update") || "¡Instructor actualizado!");
+      setTimeout(() => router.push("/catalog/instructors"), 1500);
+      
+    } catch (err: any) {
+      console.error(err);
+      if (err?.messages?.[0] === "conflict") {
+        toast.error(t("errors.conflict"));
       } else {
-        setShowServerError({
-          visible: true,
-          message: "Error desconocido al actualizar instructor",
-        });
+        toast.error(err?.error || t("errors.server_error"));
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (instructor && instructor.birth_date) {
-      const formattedDate = formatDateForBackend(instructor.birth_date);
-      if (formattedDate !== instructor.birth_date) {
-        setInstructor((prev) =>
-          prev ? { ...prev, birth_date: formattedDate } : null,
-        );
-      }
-    }
-  }, [instructor]);
-
   if (loading) {
-    return <div className="p-6">Cargando Instructor...</div>;
-  }
-  if (error) {
-    return <div className="p-6 text-red-500">{error}</div>;
+    return <div className="p-8 text-center text-gray-500">{t("loading") || "Cargando..."}</div>;
   }
   if (!instructor) {
     return null;
@@ -270,19 +191,20 @@ export default function EditInstructorPage() {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
       <form onSubmit={handleSubmit} className="space-y-4">
         <PageHeader
-          title="Editar Instructor"
-          subtitle={`Modifica los datos del Instructor: ${instructor.first_name} ${instructor.last_name}`}
+          title={t("edit_title") || "Editar Instructor"}
+          subtitle={`${t("edit_subtitle") || "Modificando a"}: ${instructor.first_name} ${instructor.last_name}`}
           actionButton={
             <div className="flex gap-2">
               <Button
                 variant="secondary"
                 type="button"
-                onClick={() => router.push("/instructors")}
+                onClick={() => router.push("/catalog/instructors")}
+                disabled={isLoading}
               >
-                Cancelar
+                {t("buttons.cancel")}
               </Button>
               <Button type="submit" variant="default" disabled={isLoading}>
-                {isLoading ? "Guardando..." : "Guardar cambios"}
+                {isLoading ? t("buttons.creating") : t("buttons.save_changes") || "Guardar cambios"}
               </Button>
             </div>
           }
@@ -296,21 +218,6 @@ export default function EditInstructorPage() {
           categories={categoriesOptions}
         />
       </form>
-      {showSuccess && (
-        <Notification
-          variant="success"
-          description="¡Instructor actualizado exitosamente!"
-          onClose={() => setShowSuccess(false)}
-        />
-      )}
-      {showServerError.visible && (
-        <Notification
-          variant="destructive"
-          title="Error al actualizar instructor"
-          description={showServerError.message}
-          onClose={() => setShowServerError({ visible: false, message: "" })}
-        />
-      )}
     </div>
   );
 }

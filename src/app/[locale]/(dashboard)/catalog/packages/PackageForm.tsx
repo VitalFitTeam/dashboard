@@ -6,11 +6,6 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Badge } from "@/components/ui/badge";
 import { Calendar24 } from "@/components/layout/Calendar24";
 import { Button } from "@/components/ui/button";
-import {
-  PackageDetail,
-  PackageItemDetail,
-  CreatePackagePayload,
-} from "@vitalfit/sdk";
 import EntityItem from "@/components/layout/EntityItem";
 import { useTranslations } from "next-intl";
 
@@ -35,6 +30,7 @@ interface PackageFormProps {
   onChange?: (data: Partial<PackageFormState>) => void;
   mode?: "view" | "edit";
   services?: { id: string; name: string }[];
+  errors?: Record<string, string>; 
 }
 
 export default function PackageForm({
@@ -42,6 +38,7 @@ export default function PackageForm({
   onChange,
   mode = "view",
   services = [],
+  errors = {},
 }: PackageFormProps) {
   const isEditable = mode !== "view";
   const t = useTranslations("catalog.packages");
@@ -60,13 +57,11 @@ export default function PackageForm({
     if (!isEditable) {
       return;
     }
-
     const updatedItems = formData.packageItems.map((item) =>
       item.serviceId === serviceId
         ? { ...item, sessionsIncluded: value }
         : item,
     );
-
     onChange?.({ packageItems: updatedItems });
   };
 
@@ -81,12 +76,13 @@ export default function PackageForm({
   };
 
   const handleAddService = (serviceId: string) => {
-    if (!isEditable) {
+    if (!isEditable || !serviceId) {
       return;
     }
     if (formData.packageItems.some((i) => i.serviceId === serviceId)) {
       return;
     }
+    
     const service = services.find((s) => s.id === serviceId);
     if (!service) {
       return;
@@ -103,128 +99,146 @@ export default function PackageForm({
   const dateStart = formData.startAt ? new Date(formData.startAt) : undefined;
   const dateEnd = formData.endAt ? new Date(formData.endAt) : undefined;
 
+
+  const labelClass = "text-[11px] font-bold text-[#1e3a5f] uppercase tracking-tight mb-2 block";
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium">{t("form.labels.name")}</label>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div className="flex flex-col">
+          <label className={labelClass}>{t("form.labels.name")}</label>
           <Input
             disabled={!isEditable}
             value={formData.name || ""}
             onChange={(e) => handleFieldChange("name", e.target.value)}
+            className={`h-11 ${errors.name ? "border-red-500 bg-red-50/10" : "border-slate-200"}`}
           />
+          {errors.name && <p className="text-[10px] text-red-500 font-medium italic mt-1.5 ml-1">{errors.name}</p>}
         </div>
 
-        <div>
-          <label className="text-sm font-medium">{t("form.labels.price")}</label>
+
+        <div className="flex flex-col">
+          <label className={labelClass}>{t("form.labels.price")}</label>
           <Input
             type="number"
             disabled={!isEditable}
             value={formData.price || 0}
             onChange={(e) => handleFieldChange("price", Number(e.target.value))}
+            className={`h-11 ${errors.price ? "border-red-500 bg-red-50/10" : "border-slate-200"}`}
           />
+          {errors.price && <p className="text-[10px] text-red-500 font-medium italic mt-1.5 ml-1">{errors.price}</p>}
         </div>
       </div>
 
-      <div>
-        <label className="text-sm font-medium">{t("form.labels.description")}</label>
+
+      <div className="flex flex-col">
+        <label className={labelClass}>{t("form.labels.description")}</label>
         <Textarea
           disabled={!isEditable}
           value={formData.description || ""}
           onChange={(e) => handleFieldChange("description", e.target.value)}
+          className={`min-h-[100px] ${errors.description ? "border-red-500 bg-red-50/10" : "border-slate-200"}`}
         />
+        {errors.description && <p className="text-[10px] text-red-500 font-medium italic mt-1.5 ml-1">{errors.description}</p>}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium">{t("form.labels.start_at")}</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div className="flex flex-col">
+          <label className={labelClass}>{t("form.labels.start_at")}</label>
           <Calendar24
             date={dateStart}
             disabled={!isEditable}
             onChange={(d) => d && handleFieldChange("startAt", d.toISOString())}
           />
+          {errors.startAt && <p className="text-[10px] text-red-500 font-medium italic mt-1.5 ml-1">{errors.startAt}</p>}
         </div>
-        <div>
-          <label className="text-sm font-medium">{t("form.labels.end_at")}</label>
+
+        <div className="flex flex-col">
+          <label className={labelClass}>{t("form.labels.end_at")}</label>
           <Calendar24
             date={dateEnd}
             disabled={!isEditable}
             onChange={(d) => d && handleFieldChange("endAt", d.toISOString())}
           />
+          {errors.endAt && <p className="text-[10px] text-red-500 font-medium italic mt-1.5 ml-1">{errors.endAt}</p>}
         </div>
       </div>
 
-      {isEditable && services.length > 0 && (
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            {t("form.labels.add_service")}
-          </label>
-          <select
-            className="border p-2 w-full"
-            onChange={(e) => handleAddService(e.target.value)}
-          >
-            <option value="">{t("form.labels.service_placeholder")}</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="pt-4 border-t border-slate-100">
+        <label className={labelClass}>{t("form.labels.services_included")}</label>
 
-      <div className="space-y-2">
-        {formData.packageItems.map((item) => {
-          const serviceName =
-            services.find((s) => s.id === item.serviceId)?.name || item.name;
-          return (
-            <EntityItem
-              key={item.serviceId}
-              title={`${serviceName} — ${t("form.labels.sessions", { count: item.sessionsIncluded })}`}
-              initials={(serviceName || "?")
-                .split(" ")
-                .map((w) => w[0])
-                .join("")
-                .toUpperCase()}
-              action={
-                isEditable && (
-                  <Button
-                    variant="ghost"
-                    className="text-red-500"
-                    onClick={() => handleRemoveService(item.serviceId)}
-                  >
-                    {t("form.labels.remove")}
-                  </Button>
-                )
-              }
+        {isEditable && services.length > 0 && (
+          <div className="mb-4">
+            <select
+              className="w-full h-11 px-4 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#ff6b00] transition-all"
+              onChange={(e) => handleAddService(e.target.value)}
+              value=""
             >
-              {isEditable && (
-                <Input
-                  type="number"
-                  min={1}
-                  value={item.sessionsIncluded}
-                  onChange={(e) =>
-                    handleUpdateSessions(item.serviceId, Number(e.target.value))
-                  }
-                  className="mt-2"
-                />
-              )}
-            </EntityItem>
-          );
-        })}
+              <option value="" disabled>{t("form.placeholders.select_service")}</option>
+              {services.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+            {errors.packageItems && <p className="text-[10px] text-red-500 font-medium italic mt-1.5 ml-1">{errors.packageItems}</p>}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-3">
+          {formData.packageItems.map((item) => {
+            const serviceName = services.find((s) => s.id === item.serviceId)?.name || item.name;
+            return (
+              <EntityItem
+                key={item.serviceId}
+                title={serviceName}
+                initials={serviceName.substring(0, 2).toUpperCase()}
+                action={
+                  isEditable && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleRemoveService(item.serviceId)}
+                    >
+                      {t("form.labels.remove")}
+                    </Button>
+                  )
+                }
+              >
+                <div className="flex items-center gap-4 mt-2">
+                   <div className="flex flex-col flex-1">
+                      <span className="text-[10px] text-slate-500 uppercase font-bold mb-1">
+                        {t("form.labels.sessions_count")}
+                      </span>
+                      <Input
+                        type="number"
+                        min={1}
+                        disabled={!isEditable}
+                        value={item.sessionsIncluded}
+                        onChange={(e) => handleUpdateSessions(item.serviceId, Number(e.target.value))}
+                        className="h-9 w-24 border-slate-200"
+                      />
+                   </div>
+                </div>
+              </EntityItem>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Estado */}
       {"isActive" in formData && (
-        <div>
-          <label className="text-sm font-medium">{t("form.labels.status")}</label>
+        <div className="pt-4 flex items-center gap-3">
+          <label className="text-[11px] font-bold text-[#1e3a5f] uppercase">{t("form.labels.status")}:</label>
           <Badge
             variant="outline"
-            className={
+            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
               formData.isActive
-                ? "border-green-300 text-green-700"
-                : "border-yellow-300 text-yellow-700"
-            }
+                ? "bg-green-50 border-green-200 text-green-700"
+                : "bg-yellow-50 border-yellow-200 text-yellow-700"
+            }`}
           >
             {formData.isActive ? t("table.status.active") : t("table.status.inactive")}
           </Badge>

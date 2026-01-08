@@ -52,9 +52,9 @@ export default function EquipmentDetailPage() {
       <PageHeader
         title={t("title")}
         subtitle={
-          <p className="text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             {t("subtitle", { name: equipment.name })}
-          </p>
+          </span>
         }
         actionButton={
           <div className="flex gap-2">

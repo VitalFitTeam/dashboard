@@ -1,18 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/context/AuthContext";
-import InstructorsTable from "./InstructorTable";
 import { useInstructors } from "@/hooks/instructor/useInstructors";
+import { useRouter } from "@/i18n/navigation";
+
+import { useTranslations } from "next-intl";
+import InstructorsTable from "@/components/modules/instructor/InstructorTable";
 
 export default function InstructorPage() {
   const router = useRouter();
   const { token } = useAuth();
+  
+
+  const t = useTranslations("catalog.instructor");
 
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({ 
@@ -38,23 +43,20 @@ export default function InstructorPage() {
     <div className="flex-1 space-y-8 p-8 pt-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
-          title="Total Instructores"
+          title={t("stats.total")}
           value={<h3 className="ml-1.5 font-bold">{summary?.total ?? 0}</h3>}
         />
         <StatCard
-          title="Activos"
+          title={t("stats.active")}
           value={<h3 className="ml-1.5 font-bold text-green-600">{summary?.actives ?? 0}</h3>}
         />
-        <StatCard
-          title="Bloqueados"
-          value={<h3 className="ml-1.5 font-bold text-red-600">{summary?.blocked ?? 0}</h3>}
-        />
+
       </div>
 
-      <PageHeader title="Instructores">
-        <Button onClick={() => router.push("/instructors/new")}>
+      <PageHeader title={t("title")}>
+        <Button onClick={() => router.push("/catalog/instructors/new")}>
           <PlusIcon className="mr-2 h-4 w-4" />
-          Agregar Instructor
+          {t("add_button")}
         </Button>
       </PageHeader>
 
