@@ -9,9 +9,10 @@ import { Notification } from "@/components/ui/Notification";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { useRouter } from "next/navigation";
+
 import type { CreateBanner } from "@vitalfit/sdk";
 import { Switch } from "@/components/ui/switch";
+import { useRouter } from "@/i18n/navigation";
 
 const IMGBB_API_KEY = process.env.NEXT_PUBLIC_IMGBB;
 
@@ -137,7 +138,7 @@ export default function CreateBannerPage() {
 
             setShowSuccess(true);
             setTimeout(() => {
-                router.replace("/banners");
+                router.replace("/marketing/banners");
             }, 1500);
         } catch (error) {
             console.error("Error al crear banner:", error);
@@ -314,7 +315,7 @@ export default function CreateBannerPage() {
                         type="button"
                         variant="secondary"
                         onClick={() => {
-                            router.replace("/banners");
+                            router.replace("/marketing/banners");
                         }}
                     >
                         Cancelar

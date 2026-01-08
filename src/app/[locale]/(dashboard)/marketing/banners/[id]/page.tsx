@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/Input";
+
 import { Label } from "@/components/ui/Label";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { useRouter, useParams } from "next/navigation";
+import {  useParams } from "next/navigation";
 import { Banner } from "@vitalfit/sdk";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { useRouter } from "@/i18n/navigation";
 
 export default function ViewBannerPage() {
     const router = useRouter();
@@ -35,11 +36,11 @@ export default function ViewBannerPage() {
                 if (foundBanner) {
                     setBanner(foundBanner);
                 } else {
-                    router.replace("/banners");
+                    router.replace("/marketing/banners");
                 }
             } catch (error) {
                 console.error("Error cargando banner:", error);
-                router.replace("/banners");
+                router.replace("/marketing/banners");
             } finally {
                 setLoading(false);
             }
@@ -119,7 +120,7 @@ export default function ViewBannerPage() {
                 <div className="flex justify-end pt-4">
                     <Button
                         onClick={() => {
-                            router.replace("/banners");
+                            router.replace("/marketing/banners");
                         }}
                         className="bg-orange-500 hover:bg-orange-600 text-white"
                     >
