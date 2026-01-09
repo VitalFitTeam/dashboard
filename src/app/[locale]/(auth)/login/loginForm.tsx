@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { colors, montserrat } from "@/styles/styles";
 import InputField from "@/components/ui/InputField";
-import { api } from "@/lib/sdk-config"; // <--- VOLVEMOS A USAR EL SDK
+import { api } from "@/lib/sdk-config"; 
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -21,8 +21,7 @@ import LocaleSwitcher from "@/components/layout/localeSwitcher/LocaleSwitcher";
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
-  // Login ahora acepta (access, refresh)
+
   const { login } = useAuth();
   const router = useRouter();
 
@@ -46,18 +45,7 @@ export default function LoginForm() {
     };
 
     try {
-      // 1. USAMOS EL SDK
-      // Truco: Usamos 'as any' temporalmente. 
-      // ¿Por qué? Porque si el SDK no han actualizado sus archivos de definición (.d.ts),
-      // TypeScript gritará que "refresh_token" no existe en la respuesta.
-      // Pero sabemos que el backend SÍ lo envía (runtime).
       const response = await api.auth.login(payload) as any;
-
-      console.log("Respuesta del SDK:", response); // Para depurar
-
-      // 2. EXTRAEMOS LOS TOKENS
-      // Buscamos 'access_token' (lo que dice Swagger) O 'token' (lo que usaba antes el SDK)
-      // para ser compatibles con ambos casos.
       const accessToken = response.access_token || response.token;
       const refreshToken = response.refresh_token;
 
@@ -65,17 +53,13 @@ export default function LoginForm() {
         throw new Error("Faltan tokens en la respuesta del servidor");
       }
 
-      // 3. ENVIAMOS AL CONTEXTO
       await login(accessToken, refreshToken);
       
       router.replace("/");
 
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
-      // El manejo de errores del SDK suele venir encapsulado,
-      // así que mantenemos tu lógica original para leer el status.
       if (err instanceof Error) {
-        // A veces Axios/SDK guarda el status dentro de response
         const status = (err as any).response?.status || (err as any).status;
         
         if (status === 401) {
@@ -93,7 +77,6 @@ export default function LoginForm() {
 
   return (
     <div className={`relative bg-white border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl p-8 md:p-12 w-full max-w-md ${montserrat.className}`}>
-      {/* ... (Todo el JSX visual sigue igual) ... */}
       <div className="absolute top-4 right-4">
         <LocaleSwitcher />
       </div>
