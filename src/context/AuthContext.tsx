@@ -46,6 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     authService.setTokens(token, refresh);
     setAccessToken(token);
     setRefreshToken(refresh);
+    api.client.setTokens(token, refresh);
   }, []);
 
   const clearSession = useCallback(() => {
@@ -53,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAccessToken(null);
     setRefreshToken(null);
     setUser(null);
+    api.client.removeTokens();
   }, []);
 
   const logout = useCallback(() => {
@@ -175,6 +177,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [user]
   );
 
+  useEffect(() => {
+    api.client.setCallbacks(
+      (access, refresh) => {
+        authService.setTokens(access, refresh);
+        setAccessToken(access);
+        setRefreshToken(refresh);
+      },
+      () => {
+        logout();
+      }
+    );
+  }, [logout]);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -187,6 +201,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
         return;
       }
+
+      api.client.setTokens(storedAccess, storedRefresh);
 
       setAccessToken(storedAccess);
       setRefreshToken(storedRefresh);
