@@ -67,26 +67,26 @@ export function DataTable<T extends object>({
   const columnDefs = React.useMemo<ColumnDef<T>[]>(() => {
     const cols: ColumnDef<T>[] = [];
 
-    if (enableRowSelection) {
-      cols.push({
-        id: "select",
-        header: ({ table }) => (
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Seleccionar todos"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Seleccionar fila"
-          />
-        ),
-        enableSorting: false,
-      });
-    }
+    // if (enableRowSelection) {
+    //   cols.push({
+    //     id: "select",
+    //     header: ({ table }) => (
+    //       <Checkbox
+    //         checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+    //         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+    //         aria-label="Seleccionar todos"
+    //       />
+    //     ),
+    //     cell: ({ row }) => (
+    //       <Checkbox
+    //         checked={row.getIsSelected()}
+    //         onCheckedChange={(value) => row.toggleSelected(!!value)}
+    //         aria-label="Seleccionar fila"
+    //       />
+    //     ),
+    //     enableSorting: false,
+    //   });
+    // }
 
     cols.push(
       ...columns.map((col) => ({

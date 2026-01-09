@@ -122,8 +122,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
-  /* ───────────── RELOAD USER ───────────── */
-
   const reloadUser = useCallback(async () => {
     if (!accessToken){
        return;
@@ -219,8 +217,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     initAuth();
   }, [getUserProfile, clearSession]);
-
-  /* ───────────── PROVIDER ───────────── */
 
   return (
     <AuthContext.Provider

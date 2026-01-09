@@ -2629,5 +2629,72 @@
       
     }
   }
-}
+},
+"user": {
+    "audit": {
+      "title": "Logs de Auditoría",
+      "subtitle": "Inspección de peticiones, métodos y rutas del sistema.",
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Ej: POST o /v1/user...",
+        "sort": "Orden",
+        "sortDesc": "Descendente",
+        "sortAsc": "Ascendente",
+        "limit": "Resultados",
+        "limitRows": "{count} filas"
+      },
+      "status": {
+        "results": "Resultados de actividad",
+        "loading": "Cargando registros..."
+      },
+      "table": {
+        "event": "Evento",
+        "method": "Método",
+        "resource": "Recurso",
+        "status": "Estado",
+        "origin": "Origen",
+        "viewDetails": "Ver detalles"
+      },
+      "methods": {
+        "get": "GET",
+        "post": "POST",
+        "put": "PUT",
+        "delete": "DELETE"
+      },
+      "details": {
+        "title": "Análisis de Operación",
+        "traceId": "ID de Seguimiento",
+        "author": "Autor de la acción",
+        "systemProcess": "PROCESO_SISTEMA",
+        "viewSessions": "Ver Sesiones",
+        "payload": {
+          "label": "Cuerpo de la Petición",
+          "empty": "// No hay datos enviados en esta operación",
+          "copied": "Log copiado al portapapeles"
+        },
+        "metadata": {
+          "endpoint": "Endpoint / Ruta",
+          "dateTime": "Fecha y Hora",
+          "ipAddress": "Dirección IP"
+        },
+        "client": {
+          "userAgent": "User Agent del Cliente",
+          "unknown": "Desconocido"
+        }
+      },
+      "sessions": {
+        "title": "Acciones de Seguridad",
+        "description": "Revocar todas las sesiones cerrará el acceso en todos los dispositivos activos.",
+        "btnRevokeAll": "Revocar Todo",
+        "statusActive": "Activa",
+        "expires": "Expira",
+        "empty": "No hay sesiones activas adicionales.",
+        "confirmRevokeAll": "¿Estás seguro de que deseas cerrar todas las sesiones? Esta acción no se puede deshacer.",
+        "confirmRevokeOne": "¿Cerrar esta sesión específica?",
+        "revokeSuccess": "Sesión(es) revocada(s) con éxito",
+        "errorRevoke": "Hubo un problema al intentar cerrar la sesión"
+      }
+    }
+  }
+
 }

@@ -2630,5 +2630,71 @@
       
     }
   }
-}
+},"user": {
+    "audit": {
+      "title": "Audit Logs",
+      "subtitle": "Inspection of system requests, methods, and routes.",
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "E.g.: POST or /v1/user...",
+        "sort": "Sort",
+        "sortDesc": "Descending",
+        "sortAsc": "Ascending",
+        "limit": "Results",
+        "limitRows": "{count} rows"
+      },
+      "status": {
+        "results": "Activity results",
+        "loading": "Loading records..."
+      },
+      "table": {
+        "event": "Event",
+        "method": "Method",
+        "resource": "Resource",
+        "status": "Status",
+        "origin": "Origin",
+        "viewDetails": "View details"
+      },
+      "methods": {
+        "get": "GET",
+        "post": "POST",
+        "put": "PUT",
+        "delete": "DELETE"
+      },
+      "details": {
+        "title": "Operation Analysis",
+        "traceId": "Trace ID",
+        "author": "Action Author",
+        "systemProcess": "SYSTEM_PROCESS",
+        "viewSessions": "View Sessions",
+        "payload": {
+          "label": "Request Body",
+          "empty": "// No data sent in this operation",
+          "copied": "Log copied to clipboard"
+        },
+        "metadata": {
+          "endpoint": "Endpoint / Path",
+          "dateTime": "Date & Time",
+          "ipAddress": "IP Address"
+        },
+        "client": {
+          "userAgent": "Client User Agent",
+          "unknown": "Unknown"
+        }
+      },
+      "sessions": {
+        "title": "Security Actions",
+        "description": "Revoking all sessions will terminate access across all active devices.",
+        "btnRevokeAll": "Revoke All",
+        "statusActive": "Active",
+        "expires": "Expires",
+        "empty": "No additional active sessions found.",
+        "confirmRevokeAll": "Are you sure you want to close all sessions? This action cannot be undone.",
+        "confirmRevokeOne": "Close this specific session?",
+        "revokeSuccess": "Session(s) successfully revoked",
+        "errorRevoke": "There was a problem trying to close the session"
+      }
+    }
+  }
+
 }
