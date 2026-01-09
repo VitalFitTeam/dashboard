@@ -1,25 +1,11 @@
 "use client";
 
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import { jwtDecode } from "jwt-decode";
 import { api } from "@/lib/sdk-config";
 import { BranchStaff, User as SdkUser } from "@vitalfit/sdk";
 import { UserRole, ROLE_LABELS } from "@/lib/roles";
-
-interface JwtPayload {
-  exp?: number;
-  sub: string;
-  role?: string | string[];
-  roles?: string[];
-}
+import { authService } from "@/lib/auth-service";
 
 export interface SessionUser extends Omit<SdkUser, "role"> {
   role: UserRole;
@@ -28,184 +14,155 @@ export interface SessionUser extends Omit<SdkUser, "role"> {
   assignedBranches: BranchStaff[];
   managedBranches: BranchStaff[];
   instructorBranches: BranchStaff[];
-  activeBranch?: BranchStaff; 
+  activeBranch?: BranchStaff;
 }
 
-const VALID_ROLES = Object.values(UserRole);
-
 interface AuthContextType {
-  token: string | null;
+  token: string | null;     
+  refreshToken: string | null;
   user: SessionUser | null;
   loading: boolean;
   isAuthenticated: boolean;
-  login: (token: string, remember?: boolean) => Promise<void>;
-  logout: () => Promise<void>;
-  hasRole: (roles: UserRole | UserRole[]) => boolean;
+
+  login: (token: string, refresh: string) => Promise<void>;
+  logout: () => void;
+  reloadUser: () => Promise<void>;
+  setTokens: (token: string, refresh: string) => void;
   switchBranch: (branch: BranchStaff) => void;
+  hasRole: (roles: UserRole | UserRole[]) => boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  token: null,
-  user: null,
-  loading: true,
-  isAuthenticated: false,
-  login: async () => {},
-  logout: async () => {},
-  hasRole: () => false,
-  switchBranch: () => {},
-});
-
-const decodeToken = (token: string): JwtPayload | null => {
-  try {
-    const decoded = jwtDecode<JwtPayload>(token);
-    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-      return null;
-    }
-    return decoded;
-  } catch (err) {
-    console.warn("decodeToken error", err);
-    return null;
-  }
-};
+const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+
   const router = useRouter();
+
+  const setTokens = useCallback((token: string, refresh: string) => {
+    authService.setTokens(token, refresh);
+    setAccessToken(token);
+    setRefreshToken(refresh);
+    api.client.setTokens(token, refresh);
+  }, []);
+
+  const clearSession = useCallback(() => {
+    authService.clearSession();
+    setAccessToken(null);
+    setRefreshToken(null);
+    setUser(null);
+    api.client.removeTokens();
+  }, []);
+
+  const logout = useCallback(() => {
+    clearSession();
+    router.push("/login");
+  }, [clearSession, router]);
+
 
   const getUserProfile = useCallback(
     async (token: string): Promise<SessionUser | null> => {
-      const decoded = decodeToken(token);
-      if (!decoded) {
-        return null;
-      }
-
       try {
-        const [profileResponse, branchesRes, managedRes, instructorRes] = await Promise.all([
+        const [
+          profileResponse,
+          branchesRes,
+          managedRes,
+          instructorRes,
+        ] = await Promise.all([
           api.user.WhoAmI(token),
           api.staff.getStaffBranches(token),
           api.staff.getManagedBranches(token),
-          api.staff.getInstructorBranches(token)
+          api.staff.getInstructorBranches(token),
         ]);
-      
-        const sdkData = profileResponse.user;
-        if (!sdkData) {
+
+        const sdkUser: SdkUser | null = profileResponse.user;
+        if (!sdkUser) {
           return null;
         }
 
-        const rawRoleName = (sdkData.role as any)?.name?.toLowerCase();
-        const userRole = rawRoleName as UserRole;
+        const rawRoleName = (sdkUser.role as any)?.name?.toLowerCase();
+        const role = rawRoleName as UserRole;
 
-        if (!VALID_ROLES.includes(userRole)){
-           return null;
+        if (!Object.values(UserRole).includes(role)) {
+          return null;
         }
 
-        const assignedBranches = branchesRes.data || [];
-        const managedBranches = managedRes.data || [];
-        const instructorBranches = instructorRes.data || [];
-        console.log("sucursales asignadas",instructorBranches);  
-        
-        
-        const allAvailableBranches = [
-        ...assignedBranches, 
-        ...managedBranches, 
-        ...instructorBranches
-      ];
+        const assignedBranches = branchesRes.data ?? [];
+        const managedBranches = managedRes.data ?? [];
+        const instructorBranches = instructorRes.data ?? [];
+
+        const allBranches = [...assignedBranches, ...managedBranches, ...instructorBranches];
 
         const savedBranchId = localStorage.getItem("active_branch_id");
-        const activeBranch = 
-          allAvailableBranches.find(b => b.id === savedBranchId) || 
-          allAvailableBranches[0] || 
-          undefined;
+        const activeBranch =
+          allBranches.find(b => b.id === savedBranchId) || allBranches[0];
 
-        if (activeBranch && !savedBranchId) {
-          localStorage.setItem("active_branch_id", activeBranch.id);
+        if (activeBranch){
+           localStorage.setItem("active_branch_id", activeBranch.id);
         }
 
         return {
-          ...sdkData,
-          role: userRole,
-          role_label: ROLE_LABELS[userRole] ?? rawRoleName,
+          ...sdkUser,
+          role,
+          role_label: ROLE_LABELS[role] ?? rawRoleName,
           assignedBranches,
           managedBranches,
           instructorBranches,
           activeBranch,
-          branch_id: activeBranch?.id || (sdkData as any).branch_id,
+          branch_id: activeBranch?.id,
         };
-      } catch (error) {
-        console.error("Error al obtener perfil completo:", error);
+      } catch (err) {
+        console.error("Error construyendo SessionUser:", err);
         return null;
       }
     },
     []
   );
 
-  const switchBranch = useCallback((branch: BranchStaff) => {
-    setUser((prev) => {
-      if (!prev) {
-        return null;
-      }
-      return { ...prev, activeBranch: branch, branch_id: branch.id };
-    });
-    localStorage.setItem("active_branch_id", branch.id);
-  }, []);
+  const reloadUser = useCallback(async () => {
+    if (!accessToken){
+       return;
+    }
 
-  useEffect(() => {
-    const initAuth = async () => {
-      setIsLoading(true);
-      try {
-        const storedToken = localStorage.getItem("access_token");
-        if (storedToken) {
-          const userProfile = await getUserProfile(storedToken);
-          if (userProfile) {
-            setToken(storedToken);
-            setUser(userProfile);
-          } else {
-            localStorage.removeItem("access_token");
-          }
-        }
-      } catch (error) {
-        console.error("AuthContext: init error:", error);
-        localStorage.removeItem("access_token");
-      } finally {
-        setIsLoading(false);
+    try {
+      const sessionUser = await getUserProfile(accessToken);
+      if (!sessionUser) {
+        logout();
+        return;
       }
-    };
-    initAuth();
-  }, [getUserProfile]);
+      setUser(sessionUser);
+    } catch {
+      logout();
+    }
+  }, [accessToken, getUserProfile, logout]);
 
   const login = useCallback(
-    async (newToken: string) => {
-      setIsLoading(true);
+    async (token: string, refresh: string) => {
+      setLoading(true);
       try {
-        const userProfile = await getUserProfile(newToken);
-        if (userProfile) {
-          localStorage.setItem("access_token", newToken);
-          setToken(newToken);
-          setUser(userProfile);
-        } else {
-          throw new Error("Credenciales inválidas o sin permisos");
+        const sessionUser = await getUserProfile(token);
+        if (!sessionUser){
+           throw new Error("Usuario sin permisos");
         }
-      } catch (err) {
-        localStorage.removeItem("access_token");
-        setToken(null);
-        setUser(null);
-        throw err;
+
+        setTokens(token, refresh);
+        setUser(sessionUser);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     },
-    [getUserProfile]
+    [getUserProfile, setTokens]
   );
 
-  const logout = useCallback(async () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("active_branch_id");
-    setToken(null);
-    setUser(null);
-    router.push("/login");
-  }, [router]);
+  const switchBranch = useCallback((branch: BranchStaff) => {
+    setUser(prev =>
+      prev ? { ...prev, activeBranch: branch, branch_id: branch.id } : prev
+    );
+    localStorage.setItem("active_branch_id", branch.id);
+  }, []);
 
   const hasRole = useCallback(
     (roles: UserRole | UserRole[]) => {
@@ -218,17 +175,63 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     [user]
   );
 
+  useEffect(() => {
+    api.client.setCallbacks(
+      (access, refresh) => {
+        authService.setTokens(access, refresh);
+        setAccessToken(access);
+        setRefreshToken(refresh);
+      },
+      () => {
+        logout();
+      }
+    );
+  }, [logout]);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      setLoading(true);
+      const storedAccess = authService.getAccessToken();
+      const storedRefresh = authService.getRefreshToken();
+
+      if (!storedAccess || !storedRefresh) {
+        clearSession();
+        setLoading(false);
+        return;
+      }
+
+      api.client.setTokens(storedAccess, storedRefresh);
+
+      setAccessToken(storedAccess);
+      setRefreshToken(storedRefresh);
+
+      const sessionUser = await getUserProfile(storedAccess);
+      if (!sessionUser) {
+        clearSession();
+      } else {
+        setUser(sessionUser);
+      }
+
+      setLoading(false);
+    };
+
+    initAuth();
+  }, [getUserProfile, clearSession]);
+
   return (
     <AuthContext.Provider
       value={{
-        token,
+        token: accessToken,         
+        refreshToken,
         user,
-        loading: isLoading,
-        isAuthenticated: !!token && !!user,
+        loading,
+        isAuthenticated: !!accessToken && !!user,
         login,
         logout,
-        hasRole,
+        reloadUser,
         switchBranch,
+        hasRole,
+        setTokens,
       }}
     >
       {children}
@@ -236,10 +239,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth debe ser usado dentro de un AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
