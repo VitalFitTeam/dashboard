@@ -1,32 +1,78 @@
+import { authService } from "@/lib/auth-service";
+
+const API_URL = "https://api-rm8x.onrender.com/v1";
+
+let isRefreshing = false;
+let queue: ((token: string) => void)[] = [];
+
+async function refreshAccessToken(): Promise<string> {
+  const refresh = authService.getRefreshToken();
+  if (!refresh) {
+    throw new Error("No refresh token");
+  }
+
+  const res = await fetch(`${API_URL}/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh_token: refresh }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Refresh inválido");
+  }
+
+  const { token, refresh_token } = await res.json(); 
+  authService.setTokens(token, refresh_token);
+  return token;
+}
+
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
-  try {
-    const token = localStorage.getItem("access_token");
-
+  const makeRequest = async (token?: string) => {
     const headers = new Headers(options.headers);
-
     headers.set("Content-Type", "application/json");
-
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
 
-    const res = await fetch(`https://api-rm8x.onrender.com/v1${endpoint}`, {
-      ...options,
-      headers: headers,
-    });
+    return fetch(`${API_URL}${endpoint}`, { ...options, headers });
+  };
 
+  let token: string | null = authService.getAccessToken();
+  const res = await makeRequest(token ?? undefined);
+
+  if (res.status !== 401) {
     if (!res.ok) {
-      const errorText = await res.text();
-      if (res.status === 401) {
-        localStorage.removeItem("access_token");
-        window.location.href = "/login";
-      }
-      throw new Error(`Error ${res.status}: ${errorText}`);
+      throw new Error(await res.text());
     }
+    return res.json();
+  }
 
-    return await res.json();
-  } catch (error) {
-    console.error("API error:", error);
-    throw error;
+  if (isRefreshing) {
+    return new Promise(resolve => {
+      queue.push(async (newToken) => {
+        const retry = await makeRequest(newToken);
+        resolve(await retry.json());
+      });
+    });
+  }
+
+  isRefreshing = true;
+
+  try {
+
+    const newToken = await refreshAccessToken();
+
+
+    queue.forEach(fn => fn(newToken));
+    queue = [];
+
+    const retry = await makeRequest(newToken);
+    return retry.json();
+  } catch (err) {
+    authService.clearSession();
+    window.location.href = "/login";
+    throw err;
+  } finally {
+    isRefreshing = false;
   }
 }
