@@ -2695,6 +2695,102 @@
         "errorRevoke": "There was a problem trying to close the session"
       }
     }
+  },
+  "calendar": {
+    "toolbar": {
+      "week": "Week",
+      "month": "Month",
+      "branch": "Branch",
+      "createClass": "Create Class",
+      "today": "Today",
+      "loading": "Loading...",
+      "syncing": "Syncing branch..."
+    },
+    "display": {
+      "no_instructor": "Unassigned",
+      "default_title": "Class"
+    },
+    "create_sheet": {
+      "title": "New Class",
+      "description": "Configure the technical details and availability for the session in your active branch.",
+      "syncing": "Syncing resources...",
+      "cancel": "Cancel",
+      "confirm": "Confirm Class",
+      "submitting": "Scheduling...",
+      "success": "Class scheduled successfully",
+      "errors": {
+        "missing_data": "Session or branch data is missing",
+        "check_fields": "Please check the fields marked in red",
+        "server_error": "Error connecting to the server"
+      }
+    },
+    "edit_popover": {
+      "title": "Edit Session",
+      "loading": "Loading...",
+      "delete_button": "Delete",
+      "cancel": "Cancel",
+      "save_changes": "Save Changes",
+      "saving": "Saving...",
+      "success_update": "Session updated",
+      "error_save": "Error while saving",
+      "delete_confirm": {
+        "title": "Delete session?",
+        "description": "This action cannot be undone. All data for this session will be permanently deleted.",
+        "action": "Delete permanently"
+      }
+    },
+    "form": {
+      "sections": {
+        "general": "General Information",
+        "schedule": "Schedule",
+        "capacity": "Capacity & Recurrence",
+        "notes": "Notes"
+      },
+      "fields": {
+        "visible": "Visible",
+        "branch": "Branch",
+        "service": "Discipline",
+        "instructor": "Instructor",
+        "date": "Date",
+        "start_time": "Start Time",
+        "end_time": "End Time",
+        "max_capacity": "Max Capacity",
+        "recurrence": "Recurrence",
+        "recurrence_until": "Repeat until"
+      },
+      "placeholders": {
+        "branch": "Select branch",
+        "service": "Select discipline",
+        "instructor": "Assign instructor",
+        "date": "Pick a date",
+        "capacity": "Number of slots",
+        "notes": "Add notes here...",
+        "until": "Pick end date"
+      },
+      "recurrence_options": {
+        "none": "Do not repeat",
+        "daily": "Daily",
+        "weekly": "Weekly"
+      },
+      "suffix": {
+        "slots": "slots"
+      },
+      "errors": {
+        "branch_required": "Branch is required",
+        "service_required": "Discipline is required",
+        "instructor_required": "Instructor is required",
+        "date_required": "Date is required",
+        "start_time_required": "Start time is required",
+        "end_time_required": "End time is required",
+        "capacity_min": "Capacity must be at least 1",
+        "end_time_after": "End time must be after start time",
+        "recurrence_until_after": "Repeat date must be after class date",
+        "recurrence_until_required": "You must choose an end date for the recurrence"
+      }
+    },
+    "resources": {
+      "error": "Error loading branch services or instructors."
+    }
   }
 
 }

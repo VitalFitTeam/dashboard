@@ -2695,6 +2695,102 @@
         "errorRevoke": "Hubo un problema al intentar cerrar la sesión"
       }
     }
+  },
+  "calendar": {
+    "toolbar": {
+      "week": "Semana",
+      "month": "Mes",
+      "branch": "Sucursal",
+      "createClass": "Crear Clase",
+      "today": "Hoy",
+      "loading": "Cargando...",
+      "syncing": "Sincronizando sucursal..."
+    },
+    "display": {
+      "no_instructor": "Sin asignar",
+      "default_title": "Clase"
+    },
+    "create_sheet": {
+      "title": "Nueva Clase",
+      "description": "Configura los detalles técnicos y la disponibilidad de la sesión en tu sucursal activa.",
+      "syncing": "Sincronizando recursos...",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar Clase",
+      "submitting": "Programando...",
+      "success": "Clase programada exitosamente",
+      "errors": {
+        "missing_data": "Faltan datos de sesión o sucursal",
+        "check_fields": "Revisa los campos marcados en rojo",
+        "server_error": "Error al conectar con el servidor"
+      }
+    },
+    "edit_popover": {
+      "title": "Editar Sesión",
+      "loading": "Cargando...",
+      "delete_button": "Eliminar",
+      "cancel": "Cancelar",
+      "save_changes": "Guardar cambios",
+      "saving": "Guardando...",
+      "success_update": "Sesión actualizada",
+      "error_save": "Error al guardar",
+      "delete_confirm": {
+        "title": "¿Eliminar sesión?",
+        "description": "Esta acción no se puede deshacer. Se eliminarán permanentemente los datos de esta sesión.",
+        "action": "Eliminar permanentemente"
+      }
+    },
+    "form": {
+      "sections": {
+        "general": "Información General",
+        "schedule": "Cronograma",
+        "capacity": "Capacidad y Recurrencia",
+        "notes": "Notas"
+      },
+      "fields": {
+        "visible": "Visible",
+        "branch": "Sucursal",
+        "service": "Disciplina",
+        "instructor": "Instructor",
+        "date": "Fecha",
+        "start_time": "Hora Inicio",
+        "end_time": "Hora Fin",
+        "max_capacity": "Aforo Máximo",
+        "recurrence": "Recurrencia",
+        "recurrence_until": "Repetir hasta"
+      },
+      "placeholders": {
+        "branch": "Seleccionar sucursal",
+        "service": "Seleccionar disciplina",
+        "instructor": "Asignar instructor",
+        "date": "Elegir fecha",
+        "capacity": "Cantidad de cupos",
+        "notes": "Añade notas aquí...",
+        "until": "Elegir fecha final"
+      },
+      "recurrence_options": {
+        "none": "No repetir",
+        "daily": "Diaria",
+        "weekly": "Semanal"
+      },
+      "suffix": {
+        "slots": "cupos"
+      },
+      "errors": {
+        "branch_required": "La sucursal es obligatoria",
+        "service_required": "La disciplina es obligatoria",
+        "instructor_required": "El instructor es obligatorio",
+        "date_required": "La fecha es obligatoria",
+        "start_time_required": "La hora de inicio es obligatoria",
+        "end_time_required": "La hora de fin es obligatoria",
+        "capacity_min": "El aforo debe ser al menos 1",
+        "end_time_after": "La hora de finalización debe ser posterior a la de inicio",
+        "recurrence_until_after": "La fecha de repetición debe ser posterior a la de la clase",
+        "recurrence_until_required": "Debes elegir una fecha de fin para la repetición"
+      }
+    },
+    "resources": {
+      "error": "Error al cargar los servicios o instructores de la sucursal."
+    }
   }
 
 }
