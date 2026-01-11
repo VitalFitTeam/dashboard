@@ -7,7 +7,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import BannersTable from "./BannersTable";
 import { StatCard } from "@/components/ui/StatCard";
 import { useRouter } from "@/i18n/navigation";
-
+import { useTranslations } from "next-intl";
 
 interface StatsData {
     total: number;
@@ -34,6 +34,8 @@ const statCardsConfig = [
 
 export default function BannersPage() {
     const router = useRouter();
+    const t = useTranslations("banners");
+
     const [statsData, setStatsData] = useState<StatsData>(initialStatsData);
 
     const handleBannerUpdate = useCallback((stats: StatsData) => {
@@ -42,18 +44,17 @@ export default function BannersPage() {
 
     return (
         <div className="flex-1 space-y-8 p-8 pt-6">
-
             <div className="grid gap-4 md:grid-cols-2">
                 {statCardsConfig.map((card) => {
                     return (
                         <StatCard
                             key={card.title}
-                            title={card.title}
+                            title={t(`stats.${card.valueKey}`)}
                             value={
                                 <>
                                     {statsData[card.valueKey] ?? 0}
                                     <span className={`ml-1.5 font-normal ${card.fontColor}`}>
-                                        BANNERS
+                                        {t("stats.unit")}
                                     </span>
                                 </>
                             }
@@ -62,7 +63,7 @@ export default function BannersPage() {
                 })}
             </div>
 
-            <PageHeader title="GESTIÓN GLOBAL DE BANNERS" subtitle="Administra,ordena y activa los banners del sitio">
+            <PageHeader title={t("list.title")} subtitle={t("list.subtitle")}>
                 <Button
                     className="bg-transparent text-black border border-gray-100"
                     onClick={() => {
@@ -70,7 +71,7 @@ export default function BannersPage() {
                     }}
                 >
                     <PlusIcon className="h-5 w-5 mr-2" />
-                    Agregar
+                    {t("actions.add")}
                 </Button>
             </PageHeader>
 

@@ -1,4 +1,113 @@
 {
+  "banners": {
+    "stats": {
+      "total": "Total",
+      "active": "Active",
+      "unit": "banners"
+    },
+    "list": {
+      "title": "Banners",
+      "subtitle": "Manage advertising banners"
+    },
+    "actions": {
+      "add": "Add Banner",
+      "remove": "Remove",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "save": "Save",
+      "saving": "Saving...",
+      "change": "Change",
+      "view": "View",
+      "modify": "Modify",
+      "delete": "Delete"
+    },
+    "errors": {
+      "imgUploadFailed": "Could not upload image",
+      "imgUploadUnknown": "Unknown error uploading image",
+      "nameRequired": "Name is required",
+      "urlRequired": "URL is required",
+      "notAuthenticated": "Not authenticated",
+      "fixForm": "Please fix form errors",
+      "noImage": "Image is required",
+      "createUnknown": "Unknown error creating banner",
+      "updateUnknown": "Unknown error updating banner",
+      "uploadDefault": "Error uploading banner. Using default image.",
+      "cropProcessing": "Error processing image crop.",
+      "load": "Error loading banners"
+    },
+    "create": {
+      "title": "Create Banner",
+      "subtitle": "Add a new banner"
+    },
+    "edit": {
+      "title": "Edit Banner"
+    },
+    "labels": {
+      "name": "Name",
+      "linkUrl": "Link URL",
+      "status": "Active Status",
+      "uploadUrl": "Banner Image"
+    },
+    "placeholders": {
+      "name": "Banner name",
+      "linkUrl": "https://example.com"
+    },
+    "upload": {
+      "loading": "Loading...",
+      "uploading": "Uploading...",
+      "callToAction": "Upload Image",
+      "format": "PNG, JPG up to 5MB"
+    },
+    "notifications": {
+      "created": "Banner created successfully",
+      "updated": "Banner updated successfully",
+      "errorTitle": "Error",
+      "successTitle": "Success",
+      "activateSuccess": "Banner activated successfully",
+      "deactivateSuccess": "Banner deactivated successfully",
+      "updateStatusError": "Error updating banner status",
+      "deleteSuccess": "Banner deleted successfully",
+      "deleteError": "Error deleting banner"
+    },
+    "crop": {
+      "title": "Crop Image",
+      "zoom": "Zoom",
+      "rotation": "Rotation",
+      "rotateLeft": "Rotate Left",
+      "rotateRight": "Rotate Right",
+      "adjustText": "Adjust crop area",
+      "zoomValue": "Zoom: {value}x",
+      "rotationValue": "Rotation: {value}°",
+      "apply": "Apply Crop",
+      "edit": "Edit Crop"
+    },
+    "loadingData": "Loading data...",
+    "notFound": "Banner not found",
+    "table": {
+      "headers": {
+        "image": "Image",
+        "name": "Name",
+        "link": "Link",
+        "status": "Status"
+      },
+      "searchPlaceholder": "Search",
+      "download": "Download",
+      "downloading": "Downloading...",
+      "loading": "Loading banners...",
+      "actions": {
+        "view": "View",
+        "modify": "Modify",
+        "delete": "Delete"
+      },
+      "deleteDialog": {
+        "title": "Confirm Deletion",
+        "description": "Are you sure you want to delete this banner? This action cannot be undone.",
+        "action": "Delete",
+        "cancel": "Cancel"
+      }
+    }
+  },
   "LoginPage": {
     "title": "Administrative Access",
     "subtitle": "Authorized personnel only. Please enter your credentials.",
@@ -235,7 +344,6 @@
         "all_branches": "All branches",
         "required_title": "Selection Required",
         "required_description": "Please select a date range to view sales distribution.",
-        
         "ranges": {
           "this_month": "This month",
           "last_month": "Last month",
@@ -293,7 +401,6 @@
             "tooltip_sales": "Sales"
           }
         }
-       
       }
     },
     "clients": {
@@ -2602,35 +2709,35 @@
     }
   },
   "auth": {
-  "activate": {
-    "title": "CONFIRM YOUR PASSWORD",
-    "description": "Please enter your new password to activate your account.",
-    "password_label": "Password",
-    "password_placeholder": "Enter your password",
-    "confirm_password_label": "Confirm Password",
-    "confirm_password_placeholder": "Confirm your password",
-    "button_confirm": "Confirm",
-    "button_loading": "Processing...",
-    "success_message": "Account activated successfully!",
-    "footer_text": "Dashboard System",
-    "login_link": "Login",
-    "remember_password": "Do you remember your password?",
-    "errors": {
-      "invalid_token": "Invalid or expired token.",
-      "check_password": "The password does not meet the requirements.",
-      "confirm_required": "You must confirm your password",
-      "passwords_dont_match": "Passwords do not match",
-      "password_requirements": "Password must include uppercase, numbers, and special characters.",
-      "server_error": "Error activating the account.",
-      "password_min": "Minimum 8 characters.",
-      "password_uppercase": "Uppercase letter missing.",
-      "password_lowercase": "Lowercase letter missing.",
-      "password_number": "Number missing.",
-      "password_special": "Special character missing."
-      
+    "activate": {
+      "title": "CONFIRM YOUR PASSWORD",
+      "description": "Please enter your new password to activate your account.",
+      "password_label": "Password",
+      "password_placeholder": "Enter your password",
+      "confirm_password_label": "Confirm Password",
+      "confirm_password_placeholder": "Confirm your password",
+      "button_confirm": "Confirm",
+      "button_loading": "Processing...",
+      "success_message": "Account activated successfully!",
+      "footer_text": "Dashboard System",
+      "login_link": "Login",
+      "remember_password": "Do you remember your password?",
+      "errors": {
+        "invalid_token": "Invalid or expired token.",
+        "check_password": "The password does not meet the requirements.",
+        "confirm_required": "You must confirm your password",
+        "passwords_dont_match": "Passwords do not match",
+        "password_requirements": "Password must include uppercase, numbers, and special characters.",
+        "server_error": "Error activating the account.",
+        "password_min": "Minimum 8 characters.",
+        "password_uppercase": "Uppercase letter missing.",
+        "password_lowercase": "Lowercase letter missing.",
+        "password_number": "Number missing.",
+        "password_special": "Special character missing."
+      }
     }
-  }
-},"user": {
+  },
+  "user": {
     "audit": {
       "title": "Audit Logs",
       "subtitle": "Inspection of system requests, methods, and routes.",
@@ -2695,6 +2802,92 @@
         "errorRevoke": "There was a problem trying to close the session"
       }
     }
+  },
+  "marketing": {
+    "banners": {
+      "title": "Banners",
+      "list": {
+        "title": "Banners",
+        "empty": "No banners found.",
+        "createButton": "New Banner",
+        "table": {
+          "id": "ID",
+          "name": "Name",
+          "image": "Image",
+          "link": "Link",
+          "status": "Status",
+          "startDate": "Start Date",
+          "endDate": "End Date",
+          "actions": "Actions"
+        }
+      },
+      "form": {
+        "createTitle": "Create Banner",
+        "editTitle": "Edit Banner",
+        "nameLabel": "Name",
+        "imageLabel": "Image",
+        "linkLabel": "Link",
+        "openInNewTab": "Open in new tab",
+        "activeLabel": "Active",
+        "startDateLabel": "Start date",
+        "endDateLabel": "End date",
+        "saveButton": "Save",
+        "cancelButton": "Cancel",
+        "deleteButton": "Delete",
+        "deleteConfirm": "Are you sure you want to delete this banner? This action cannot be undone.",
+        "savedSuccess": "Banner saved successfully",
+        "deletedSuccess": "Banner deleted successfully",
+        "validation": {
+          "nameRequired": "Name is required",
+          "imageRequired": "Image is required",
+          "linkInvalid": "Invalid URL"
+        }
+      },
+      "loading": "Loading banners..."
+    },
+    "promotions": {
+      "title": "Promotions",
+      "list": {
+        "title": "Promotions",
+        "empty": "No promotions found.",
+        "createButton": "New Promotion",
+        "table": {
+          "id": "ID",
+          "code": "Code",
+          "name": "Name",
+          "discount": "Discount",
+          "startDate": "Start Date",
+          "endDate": "End Date",
+          "status": "Status",
+          "actions": "Actions"
+        }
+      },
+      "form": {
+        "createTitle": "Create Promotion",
+        "editTitle": "Edit Promotion",
+        "codeLabel": "Code",
+        "nameLabel": "Name",
+        "descriptionLabel": "Description",
+        "discountLabel": "Discount",
+        "discountType": "Discount type",
+        "percentage": "Percentage",
+        "amount": "Amount",
+        "startDateLabel": "Start date",
+        "endDateLabel": "End date",
+        "activeLabel": "Active",
+        "saveButton": "Save",
+        "cancelButton": "Cancel",
+        "deleteButton": "Delete",
+        "deleteConfirm": "Are you sure you want to delete this promotion? This action cannot be undone.",
+        "savedSuccess": "Promotion saved successfully",
+        "deletedSuccess": "Promotion deleted successfully",
+        "validation": {
+          "codeRequired": "Code is required",
+          "nameRequired": "Name is required",
+          "discountRequired": "Discount is required"
+        }
+      },
+      "loading": "Loading promotions..."
+    }
   }
-
 }

@@ -1,4 +1,113 @@
 {
+  "banners": {
+    "stats": {
+      "total": "Total",
+      "active": "Activos",
+      "unit": "banners"
+    },
+    "list": {
+      "title": "Banners",
+      "subtitle": "Gestiona los banners publicitarios"
+    },
+    "actions": {
+      "add": "Agregar Banner",
+      "remove": "Quitar",
+      "edit": "Editar",
+      "cancel": "Cancelar",
+      "creating": "Creando...",
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "change": "Cambiar",
+      "view": "Ver",
+      "modify": "Modificar",
+      "delete": "Eliminar"
+    },
+    "errors": {
+      "imgUploadFailed": "No se pudo subir la imagen",
+      "imgUploadUnknown": "Error desconocido al subir imagen",
+      "nameRequired": "El nombre es obligatorio",
+      "urlRequired": "La URL es obligatoria",
+      "notAuthenticated": "No autenticado",
+      "fixForm": "Por favor corrige los errores del formulario",
+      "noImage": "La imagen es obligatoria",
+      "createUnknown": "Error desconocido al crear el banner",
+      "updateUnknown": "Error desconocido al actualizar el banner",
+      "uploadDefault": "Error al subir el banner. Se usará una imagen por defecto.",
+      "cropProcessing": "Error al procesar el recorte de la imagen.",
+      "load": "Error cargando banners"
+    },
+    "create": {
+      "title": "Crear Banner",
+      "subtitle": "Agrega un nuevo banner"
+    },
+    "edit": {
+      "title": "Editar Banner"
+    },
+    "labels": {
+      "name": "Nombre",
+      "linkUrl": "URL del enlace",
+      "status": "Estado Activo",
+      "uploadUrl": "Imagen del Banner"
+    },
+    "placeholders": {
+      "name": "Nombre del banner",
+      "linkUrl": "https://ejemplo.com"
+    },
+    "upload": {
+      "loading": "Cargando...",
+      "uploading": "Subiendo...",
+      "callToAction": "Subir Imagen",
+      "format": "PNG, JPG hasta 5MB"
+    },
+    "notifications": {
+      "created": "Banner creado exitosamente",
+      "updated": "Banner actualizado exitosamente",
+      "errorTitle": "Error",
+      "successTitle": "Éxito",
+      "activateSuccess": "Banner activado exitosamente",
+      "deactivateSuccess": "Banner desactivado exitosamente",
+      "updateStatusError": "Error al actualizar el estado del banner",
+      "deleteSuccess": "Banner borrado exitosamente",
+      "deleteError": "Error al borrar el banner"
+    },
+    "crop": {
+      "title": "Recortar Imagen",
+      "zoom": "Zoom",
+      "rotation": "Rotación",
+      "rotateLeft": "Girar Izquierda",
+      "rotateRight": "Girar Derecha",
+      "adjustText": "Ajusta el área de recorte",
+      "zoomValue": "Zoom: {value}x",
+      "rotationValue": "Rotación: {value}°",
+      "apply": "Aplicar Recorte",
+      "edit": "Editar Recorte"
+    },
+    "loadingData": "Cargando datos...",
+    "notFound": "Banner no encontrado",
+    "table": {
+      "headers": {
+        "image": "Imagen",
+        "name": "Nombre",
+        "link": "Enlace",
+        "status": "Estado"
+      },
+      "searchPlaceholder": "Buscar",
+      "download": "Descargar",
+      "downloading": "Descargando...",
+      "loading": "Cargando banners...",
+      "actions": {
+        "view": "Ver",
+        "modify": "Modificar",
+        "delete": "Eliminar"
+      },
+      "deleteDialog": {
+        "title": "Confirmar eliminación",
+        "description": "¿Estás seguro de que deseas eliminar este banner? Esta acción no se puede deshacer.",
+        "action": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    }
+  },
   "LoginPage": {
     "title": "Acceso Administrativo",
     "subtitle": "Solo personal autorizado. Ingrese sus credenciales.",
@@ -291,7 +400,6 @@
             "no_data": "No hay datos disponibles",
             "tooltip_sales": "Ventas"
           }
-          
         }
       }
     },
@@ -2601,36 +2709,35 @@
     }
   },
   "auth": {
-  "activate": {
-    "title": "CONFIRMA TU CONTRASEÑA",
-    "description": "Ingrese su nueva contraseña para activar su cuenta.",
-    "password_label": "Contraseña",
-    "password_placeholder": "Ingrese su contraseña",
-    "confirm_password_label": "Confirmar Contraseña",
-    "confirm_password_placeholder": "Confirme su contraseña",
-    "button_confirm": "Confirmar",
-    "button_loading": "Procesando...",
-    "success_message": "¡Cuenta activada exitosamente!",
-    "footer_text": "Sistema de Dashboard",
-    "login_link": "Iniciar Sesión",
-    "remember_password": "¿Recuerdas tu contraseña?",
-    "errors": {
-      "invalid_token": "Token inválido o expirado.",
-      "check_password": "La contraseña no cumple con los requisitos.",
-      "confirm_required": "Debe confirmar la contraseña",
-      "passwords_dont_match": "Las contraseñas no coinciden",
-      "password_requirements": "La contraseña debe incluir mayúsculas, números y caracteres especiales.",
-      "server_error": "Error al activar la cuenta.",
-      "password_min": "Mínimo 8 caracteres.",
-      "password_uppercase": "Falta una mayúscula.",
-      "password_lowercase": "Falta una minúscula.",
-      "password_number": "Falta un número.",
-      "password_special": "Falta un carácter especial."
-      
+    "activate": {
+      "title": "CONFIRMA TU CONTRASEÑA",
+      "description": "Ingrese su nueva contraseña para activar su cuenta.",
+      "password_label": "Contraseña",
+      "password_placeholder": "Ingrese su contraseña",
+      "confirm_password_label": "Confirmar Contraseña",
+      "confirm_password_placeholder": "Confirme su contraseña",
+      "button_confirm": "Confirmar",
+      "button_loading": "Procesando...",
+      "success_message": "¡Cuenta activada exitosamente!",
+      "footer_text": "Sistema de Dashboard",
+      "login_link": "Iniciar Sesión",
+      "remember_password": "¿Recuerdas tu contraseña?",
+      "errors": {
+        "invalid_token": "Token inválido o expirado.",
+        "check_password": "La contraseña no cumple con los requisitos.",
+        "confirm_required": "Debe confirmar la contraseña",
+        "passwords_dont_match": "Las contraseñas no coinciden",
+        "password_requirements": "La contraseña debe incluir mayúsculas, números y caracteres especiales.",
+        "server_error": "Error al activar la cuenta.",
+        "password_min": "Mínimo 8 caracteres.",
+        "password_uppercase": "Falta una mayúscula.",
+        "password_lowercase": "Falta una minúscula.",
+        "password_number": "Falta un número.",
+        "password_special": "Falta un carácter especial."
+      }
     }
-  }
-},
-"user": {
+  },
+  "user": {
     "audit": {
       "title": "Logs de Auditoría",
       "subtitle": "Inspección de peticiones, métodos y rutas del sistema.",
@@ -2695,6 +2802,92 @@
         "errorRevoke": "Hubo un problema al intentar cerrar la sesión"
       }
     }
+  },
+  "marketing": {
+    "banners": {
+      "title": "Banners",
+      "list": {
+        "title": "Banners",
+        "empty": "No se encontraron banners.",
+        "createButton": "Nuevo Banner",
+        "table": {
+          "id": "ID",
+          "name": "Nombre",
+          "image": "Imagen",
+          "link": "Enlace",
+          "status": "Estado",
+          "startDate": "Fecha inicio",
+          "endDate": "Fecha fin",
+          "actions": "Acciones"
+        }
+      },
+      "form": {
+        "createTitle": "Crear Banner",
+        "editTitle": "Editar Banner",
+        "nameLabel": "Nombre",
+        "imageLabel": "Imagen",
+        "linkLabel": "Enlace",
+        "openInNewTab": "Abrir en nueva pestaña",
+        "activeLabel": "Activo",
+        "startDateLabel": "Fecha inicio",
+        "endDateLabel": "Fecha fin",
+        "saveButton": "Guardar",
+        "cancelButton": "Cancelar",
+        "deleteButton": "Eliminar",
+        "deleteConfirm": "¿Estás seguro de eliminar este banner? Esta acción no se puede deshacer.",
+        "savedSuccess": "Banner guardado correctamente",
+        "deletedSuccess": "Banner eliminado correctamente",
+        "validation": {
+          "nameRequired": "El nombre es obligatorio",
+          "imageRequired": "La imagen es obligatoria",
+          "linkInvalid": "URL inválida"
+        }
+      },
+      "loading": "Cargando banners..."
+    },
+    "promotions": {
+      "title": "Promociones",
+      "list": {
+        "title": "Promociones",
+        "empty": "No se encontraron promociones.",
+        "createButton": "Nueva Promoción",
+        "table": {
+          "id": "ID",
+          "code": "Código",
+          "name": "Nombre",
+          "discount": "Descuento",
+          "startDate": "Fecha inicio",
+          "endDate": "Fecha fin",
+          "status": "Estado",
+          "actions": "Acciones"
+        }
+      },
+      "form": {
+        "createTitle": "Crear Promoción",
+        "editTitle": "Editar Promoción",
+        "codeLabel": "Código",
+        "nameLabel": "Nombre",
+        "descriptionLabel": "Descripción",
+        "discountLabel": "Descuento",
+        "discountType": "Tipo de descuento",
+        "percentage": "Porcentaje",
+        "amount": "Monto",
+        "startDateLabel": "Fecha inicio",
+        "endDateLabel": "Fecha fin",
+        "activeLabel": "Activo",
+        "saveButton": "Guardar",
+        "cancelButton": "Cancelar",
+        "deleteButton": "Eliminar",
+        "deleteConfirm": "¿Estás seguro de eliminar esta promoción? Esta acción no se puede deshacer.",
+        "savedSuccess": "Promoción guardada correctamente",
+        "deletedSuccess": "Promoción eliminada correctamente",
+        "validation": {
+          "codeRequired": "El código es obligatorio",
+          "nameRequired": "El nombre es obligatorio",
+          "discountRequired": "El descuento es obligatorio"
+        }
+      },
+      "loading": "Cargando promociones..."
+    }
   }
-
 }
