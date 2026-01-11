@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import ScheduleClassForm from "./ScheduleClassForm";
 import { useAuth } from "@/context/AuthContext";
@@ -13,22 +20,51 @@ import { format } from "date-fns";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { getScheduleClassSchema } from "@/lib/validation/scheduleClassSchema";
+import { MapPinIcon } from "lucide-react";
 
-export function CreateClassSheet({ isOpen, onOpenChange, onSuccess }: { isOpen: boolean, onOpenChange: (o: boolean) => void, onSuccess: () => void }) {
+interface CreateClassSheetProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+}
+
+export function CreateClassSheet({
+  isOpen,
+  onOpenChange,
+  onSuccess,
+}: CreateClassSheetProps) {
   const t = useTranslations("calendar.create_sheet");
   const tForm = useTranslations("calendar.form");
   const { token, user } = useAuth();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const managedBranchIds = useMemo(() => {
-    if (user?.role === "super_admin") {
-      return []; // Super Admin ve todas
+
+    if (user?.role === "super_admin"){
+       return [];
     }
-    const activeId = typeof user?.activeBranch === "string" ? user.activeBranch : user?.activeBranch?.id;
-    return activeId ? [activeId] : [];
+    const activeId =
+      typeof user?.activeBranch === "string"
+        ? user.activeBranch
+        : user?.activeBranch?.id;
+
+    if (!activeId) {
+      return ["no-access"];
+    }
+
+    return [activeId];
   }, [user]);
 
-  const { formData, handleChange, isLoading: isResourcesLoading, isSubmitting, setIsSubmitting, resources } = useCreateScheduleClassForm(token || "", managedBranchIds);
+  const { 
+    formData, 
+    handleChange, 
+    isLoading: isResourcesLoading, 
+    isSubmitting, 
+    setIsSubmitting, 
+    resources 
+  } = useCreateScheduleClassForm(token || "", managedBranchIds);
+
+  const hasAccess = user?.role === "super_admin" || (managedBranchIds.length > 0 && managedBranchIds[0] !== "no-access");
 
   const handleSave = async () => {
     if (!token || !formData.branch_id) {
@@ -66,7 +102,10 @@ export function CreateClassSheet({ isOpen, onOpenChange, onSuccess }: { isOpen: 
         is_visible: !!data.is_visible,
         notes: data.notes || "",
         recurrence: hasRecurrence ? (data.recurrence as any) : undefined,
-        recurrence_until: hasRecurrence && data.recurrence_until ? `${data.recurrence_until}T23:59:59${localOffset}` : undefined,
+        recurrence_until:
+          hasRecurrence && data.recurrence_until
+            ? `${data.recurrence_until}T23:59:59${localOffset}`
+            : undefined,
       };
 
       await api.schedule.CreateClass(data.branch_id, payload, token);
@@ -81,47 +120,96 @@ export function CreateClassSheet({ isOpen, onOpenChange, onSuccess }: { isOpen: 
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={(o) => { if (!o) {
-      setFormErrors({}); onOpenChange(o);
-    } }}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(o) => {
+        if (!o) {
+          setFormErrors({});
+        }
+        onOpenChange(o);
+      }}
+    >
       <SheetContent className="sm:max-w-[500px] overflow-y-auto border-l border-slate-100 p-0 bg-white">
-        <div className="p-6 border-b border-slate-50 bg-slate-50/30 sticky top-0 z-20 backdrop-blur-sm">
-          <SheetHeader>
-            <SheetTitle className="text-2xl font-black text-slate-900 tracking-tighter uppercase">
-              <span className="text-orange-500 font-mono">/</span> {t("title")}
-            </SheetTitle>
-            <SheetDescription className="text-slate-500 font-medium text-sm">{t("description")}</SheetDescription>
-          </SheetHeader>
-        </div>
+        {!hasAccess ? (
 
-        <div className="p-6">
-          {isResourcesLoading ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-4">
-              <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-100 border-t-orange-500" />
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t("syncing")}</p>
+          <div className="flex flex-col items-center justify-center h-full p-10 text-center gap-4">
+            <div className="bg-slate-50 p-6 rounded-full">
+              <MapPinIcon className="h-10 w-10 text-slate-300" />
             </div>
-          ) : (
-            <ScheduleClassForm
-              formData={formData}
-              errors={formErrors}
-              onChange={handleChange}
-              branches={resources.branches}
-              instructors={resources.instructors}
-              services={resources.services}
-              disabled={isSubmitting}
-              isCreateMode={true}
-            />
-          )}
-        </div>
-
-        <div className="p-6 border-t border-slate-50 bg-white sticky bottom-0 z-10">
-          <SheetFooter className="flex flex-col sm:flex-row gap-3">
-            <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="w-full sm:w-auto text-slate-400 font-bold rounded-xl">{t("cancel")}</Button>
-            <Button onClick={handleSave} disabled={isSubmitting || isResourcesLoading || !formData.branch_id} className="w-full sm:flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl">
-              {isSubmitting ? t("submitting") : t("confirm")}
+            <h2 className="text-xl font-bold text-slate-900">Acceso Restringido</h2>
+            <p className="text-sm text-slate-500">
+              No tienes una sucursal activa asignada. Contacta a tu administrador para gestionar clases.
+            </p>
+            <Button onClick={() => onOpenChange(false)} variant="outline" className="mt-4 rounded-xl">
+              Cerrar
             </Button>
-          </SheetFooter>
-        </div>
+          </div>
+        ) : (
+
+          <>
+            <div className="p-6 border-b border-slate-50 bg-slate-50/30 sticky top-0 z-20 backdrop-blur-sm">
+              <SheetHeader>
+                <SheetTitle className="text-2xl font-black text-slate-900 tracking-tighter uppercase">
+                  <span className="text-orange-500 font-mono">/</span> {t("title")}
+                </SheetTitle>
+                <SheetDescription className="text-slate-500 font-medium text-sm">
+                  {t("description")}
+                </SheetDescription>
+              </SheetHeader>
+            </div>
+
+            <div className="p-6">
+              {isResourcesLoading ? (
+                <div className="flex flex-col items-center justify-center py-24 gap-4">
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-100 border-t-orange-500" />
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+                    {t("syncing")}
+                  </p>
+                </div>
+              ) : (
+                <ScheduleClassForm
+                  formData={formData}
+                  errors={formErrors}
+                  onChange={handleChange}
+                  branches={resources.branches}
+                  instructors={resources.instructors}
+                  services={resources.services}
+                  disabled={isSubmitting}
+                  isCreateMode={true}
+                />
+              )}
+            </div>
+
+            <div className="p-6 border-t border-slate-50 bg-white sticky bottom-0 z-10">
+              <SheetFooter className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto text-slate-400 font-bold rounded-xl"
+                >
+                  {t("cancel")}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSubmitting || isResourcesLoading || !formData.branch_id}
+                  className="w-full sm:flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl"
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      <span>{t("submitting")}</span>
+                    </div>
+                  ) : (
+                    t("confirm")
+                  )}
+                </Button>
+              </SheetFooter>
+            </div>
+          </>
+        )}
       </SheetContent>
     </Sheet>
   );

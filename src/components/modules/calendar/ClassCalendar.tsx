@@ -12,6 +12,7 @@ import { CalendarDisplay } from "./CalendarDisplay";
 import { CreateClassSheet } from "./CreateClassSheet";
 import { EditClassPopover } from "./EditClassPopover";
 import { useTranslations } from "next-intl";
+import { MapPinIcon } from "lucide-react"; // Importamos icono para el estado vacío
 
 export function ClassCalendar() {
   const { token, user } = useAuth();
@@ -20,13 +21,14 @@ export function ClassCalendar() {
 
   const tToolbar = useTranslations("calendar.toolbar");
   const tDisplay = useTranslations("calendar.display");
+  const tGeneral = useTranslations("calendar"); // Para las llaves de "no_branch"
 
   const isSuperAdmin = useMemo(() => user?.role === "super_admin", [user]);
 
   const activeBranchId = useMemo(() => {
     const val = user?.activeBranch || user?.branch_id;
-    if (!val) {
-      return "";
+    if (!val){
+       return "";
     }
     return typeof val === "string" ? val : val.id;
   }, [user?.activeBranch, user?.branch_id]);
@@ -37,15 +39,18 @@ export function ClassCalendar() {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const { branches, services, instructors, isLoadingResources } =
     useCalendarResources(token, selectedBranchId);
 
   const filteredBranches = useMemo(() => {
-    if (isSuperAdmin) {
-      return branches;
+    if (isSuperAdmin){
+       return branches;
     }
     return branches.filter(b => b.branch_id === activeBranchId);
   }, [branches, isSuperAdmin, activeBranchId]);
+
+  const hasBranchAccess = isSuperAdmin || (activeBranchId !== "" && filteredBranches.length > 0);
 
   useEffect(() => {
     if (activeBranchId && !isSuperAdmin && activeBranchId !== selectedBranchId) {
@@ -118,6 +123,20 @@ export function ClassCalendar() {
   const refreshData = () => {
     mutate((key) => Array.isArray(key) && key.includes("schedule") && key.includes(selectedBranchId));
   };
+
+  if (!hasBranchAccess && !isLoadingResources) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[70vh] bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 m-4">
+        <div className="bg-white p-6 rounded-full shadow-sm mb-4">
+          <MapPinIcon className="h-10 w-10 text-slate-300" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-900">{tGeneral("no_branch_title")}</h3>
+        <p className="text-slate-500 text-sm max-w-xs text-center px-4">
+          {tGeneral("no_branch_description")}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[85vh] bg-white rounded-xl overflow-hidden border shadow-sm">

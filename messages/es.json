@@ -2697,6 +2697,8 @@
     }
   },
   "calendar": {
+    "no_branch_title": "Sin sucursal asignada",
+    "no_branch_description": "No tienes una sucursal activa asignada. Por favor, selecciona una sucursal o contacta a tu administrador para obtener permisos de acceso.",
     "toolbar": {
       "week": "Semana",
       "month": "Mes",
@@ -2791,6 +2793,12 @@
     "resources": {
       "error": "Error al cargar los servicios o instructores de la sucursal."
     }
+  },
+  "ProtectedRoute": {
+    "noBranchTitle": "Sede no configurada",
+    "noBranchDescription": "Tu cuenta de <role>{role}</role> está activa, pero no tienes una sede válida asignada para operar.",
+    "retry": "Reintentar",
+    "logout": "Cerrar Sesión"
   }
 
 }

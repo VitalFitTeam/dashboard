@@ -2697,6 +2697,8 @@
     }
   },
   "calendar": {
+    "no_branch_title": "No branch assigned",
+    "no_branch_description": "You don't have an active branch assigned. Please select a branch or contact your administrator to get access permissions.",
     "toolbar": {
       "week": "Week",
       "month": "Month",
@@ -2791,6 +2793,12 @@
     "resources": {
       "error": "Error loading branch services or instructors."
     }
+  },
+  "ProtectedRoute": {
+    "noBranchTitle": "Branch not configured",
+    "noBranchDescription": "Your <role>{role}</role> account is active, but you do not have a valid branch assigned to operate.",
+    "retry": "Retry",
+    "logout": "Log Out"
   }
 
 }
