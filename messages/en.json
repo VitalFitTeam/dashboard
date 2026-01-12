@@ -2631,6 +2631,21 @@
     }
   }
 },"user": {
+  "UserSelectionCard": {
+      "roles": {
+        "client": "Client",
+        "instructor": "Instructor",
+        "admin": "Administrator"
+      },
+      "actions": {
+        "enroll": "Enroll",
+        "focus": "Focus",
+        "waiting": "Wait"
+      },
+      "labels": {
+        "found": "Student found:"
+      }
+    },
     "audit": {
       "title": "Audit Logs",
       "subtitle": "Inspection of system requests, methods, and routes.",
@@ -2697,48 +2712,100 @@
     }
   },
   "calendar": {
-    "no_branch_title": "No branch assigned",
-    "no_branch_description": "You don't have an active branch assigned. Please select a branch or contact your administrator to get access permissions.",
+    "no_branch_title": "No branch selected",
+    "no_branch_description": "Please select a branch to view the class schedule.",
     "toolbar": {
       "week": "Week",
       "month": "Month",
-      "branch": "Branch",
-      "createClass": "Create Class",
       "today": "Today",
+      "branch": "Branch",
       "loading": "Loading...",
-      "syncing": "Syncing branch..."
+      "createClass": "Create Class",
+      "syncing": "Syncing...",
+      "search_placeholder": "Focus student schedule..."
     },
     "display": {
-      "no_instructor": "Unassigned",
-      "default_title": "Class"
+      "default_title": "Class",
+      "no_instructor": "No instructor"
     },
     "create_sheet": {
-      "title": "New Class",
-      "description": "Configure the technical details and availability for the session in your active branch.",
+      "title": "Schedule Class",
+      "description": "Define the details for the new session, instructor, and capacity.",
       "syncing": "Syncing resources...",
       "cancel": "Cancel",
-      "confirm": "Confirm Class",
-      "submitting": "Scheduling...",
-      "success": "Class scheduled successfully",
+      "confirm": "Create Class",
+      "submitting": "Saving...",
+      "success": "Class successfully scheduled",
+      "restricted_title": "Restricted Access",
+      "restricted_description": "You do not have an active branch assigned. Contact your administrator to manage classes.",
+      "close": "Close",
       "errors": {
-        "missing_data": "Session or branch data is missing",
-        "check_fields": "Please check the fields marked in red",
-        "server_error": "Error connecting to the server"
+        "missing_data": "Missing required data or session expired",
+        "check_fields": "Please check the fields with errors",
+        "server_error": "There was an error processing the request"
       }
     },
     "edit_popover": {
       "title": "Edit Session",
-      "loading": "Loading...",
-      "delete_button": "Delete",
-      "cancel": "Cancel",
-      "save_changes": "Save Changes",
+      "details_title": "Session Details",
+      "loading": "Loading information...",
       "saving": "Saving...",
-      "success_update": "Session updated",
-      "error_save": "Error while saving",
+      "save_changes": "Save Changes",
+      "cancel": "Cancel",
+      "close": "Close",
+      "delete_button": "Delete Class",
+      "success_update": "Class updated successfully",
+      "error_save": "Error saving changes",
+      "readonly_notice": "You can only manage attendance. Configuration is read-only.",
+      "attendance": {
+        "button_title": "Manage Students",
+        "button_description": "Take attendance or add bookings"
+      },
       "delete_confirm": {
-        "title": "Delete session?",
-        "description": "This action cannot be undone. All data for this session will be permanently deleted.",
-        "action": "Delete permanently"
+        "title": "Delete this class?",
+        "description": "This action cannot be undone and will cancel all existing bookings.",
+        "action": "Permanently delete"
+      }
+    },
+    "attendance_sheet": {
+      "title": "Attendance Control",
+      "desc_admin": "Manage capacity and register manual enrollments.",
+      "desc_instructor": "View the student list and confirm their attendance.",
+      "section_inscribe": "Client Enrollment",
+      "search_placeholder": "Search by exact email...",
+      "search_button": "SEARCH",
+      "instructor_mode": "Instructor Mode: You have access to mark attendance for students present.",
+      "list_title": "Students in Class",
+      "loading_list": "Updating list...",
+      "error_server": "Error connecting to server"
+    },
+    "attendance_manager": {
+      "columns": {
+        "student": "Student",
+        "check_in": "Check-in",
+        "status": "Status"
+      },
+      "status": {
+        "confirmed": "Confirmed",
+        "attended": "Attended",
+        "missed": "Missed",
+        "cancelled": "Cancelled"
+      },
+      "tabs": {
+        "bookings": "Active Bookings",
+        "attendance": "History / Attendance"
+      },
+      "labels": {
+        "total_students": "Total Students: {count}",
+        "processed": "Processed",
+        "active_booking": "Active Booking",
+        "cancel_tooltip": "Cancel booking"
+      },
+      "info_panel": {
+        "admin_title": "Administrative Management Panel",
+        "admin_desc": "You can cancel bookings and make manual enrollments. Check-in is registered automatically at the branch.",
+        "instructor_title": "Instructor Attendance Panel",
+        "instructor_desc": "The list is synced with access control. Instructors cannot modify active bookings."
       }
     },
     "form": {
@@ -2789,9 +2856,6 @@
         "recurrence_until_after": "Repeat date must be after class date",
         "recurrence_until_required": "You must choose an end date for the recurrence"
       }
-    },
-    "resources": {
-      "error": "Error loading branch services or instructors."
     }
   },
   "ProtectedRoute": {
@@ -2799,6 +2863,22 @@
     "noBranchDescription": "Your <role>{role}</role> account is active, but you do not have a valid branch assigned to operate.",
     "retry": "Retry",
     "logout": "Log Out"
+  },"booking": {
+  "errors": {
+    "payment_required": "Active payment or valid membership is required.",
+    "forbidden": "You do not have permission to perform this action.",
+    "unauthorized": "Session expired, please log in again.",
+    "not_found": "Booking not found.",
+    "past_class": "You cannot enroll in a past class.",
+    "full": "Class is full.",
+    "already_booked": "Customer is already enrolled.",
+    "insufficient_credits": "Insufficient credits.",
+    "expired": "Membership has expired.",
+    "unexpected": "An unexpected error occurred."
+  },
+  "success": {
+    "booked": "Booking successful",
+    "cancelled": "Cancelled successfully"
   }
-
+}
 }

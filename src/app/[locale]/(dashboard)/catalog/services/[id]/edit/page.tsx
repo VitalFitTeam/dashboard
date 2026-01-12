@@ -27,7 +27,8 @@ export default function EditService() {
   const { service, categories, banners, isLoading } = useEditServiceData(serviceId, token);
   const imgHook = useServiceImages();
 
-  const formHook = useEditServiceForm(serviceId, token, () => {
+ const formHook = useEditServiceForm(serviceId, token, () => {
+    router.refresh(); 
     setTimeout(() => router.replace("/catalog/services"), 1500);
   });
 
@@ -43,8 +44,7 @@ useEffect(() => {
         
         duration: service.duration_minutes?.toString() || "",
         priority: service.priority_score?.toString() || "",
-        is_featured: service.is_featured ? "true" : "false",
-        
+       is_featured: service.is_featured ? "true" : "false",
         banner_id: rawService.banner_id || ""
       };
 

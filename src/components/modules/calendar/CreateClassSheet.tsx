@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Sheet,
   SheetContent,
@@ -20,7 +20,7 @@ import { format } from "date-fns";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { getScheduleClassSchema } from "@/lib/validation/scheduleClassSchema";
-import { MapPinIcon } from "lucide-react";
+import { Loader2, MapPinIcon } from "lucide-react";
 
 interface CreateClassSheetProps {
   isOpen: boolean;
@@ -33,26 +33,24 @@ export function CreateClassSheet({
   onOpenChange,
   onSuccess,
 }: CreateClassSheetProps) {
+
   const t = useTranslations("calendar.create_sheet");
   const tForm = useTranslations("calendar.form");
+  
   const { token, user } = useAuth();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const managedBranchIds = useMemo(() => {
-
     if (user?.role === "super_admin"){
        return [];
     }
+    
     const activeId =
       typeof user?.activeBranch === "string"
         ? user.activeBranch
         : user?.activeBranch?.id;
 
-    if (!activeId) {
-      return ["no-access"];
-    }
-
-    return [activeId];
+    return activeId ? [activeId] : ["no-access"];
   }, [user]);
 
   const { 
@@ -131,22 +129,20 @@ export function CreateClassSheet({
     >
       <SheetContent className="sm:max-w-[500px] overflow-y-auto border-l border-slate-100 p-0 bg-white">
         {!hasAccess ? (
-
           <div className="flex flex-col items-center justify-center h-full p-10 text-center gap-4">
-            <div className="bg-slate-50 p-6 rounded-full">
+            <div className="bg-slate-50 p-6 rounded-full shadow-inner">
               <MapPinIcon className="h-10 w-10 text-slate-300" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Acceso Restringido</h2>
-            <p className="text-sm text-slate-500">
-              No tienes una sucursal activa asignada. Contacta a tu administrador para gestionar clases.
+            <h2 className="text-xl font-bold text-slate-900">{t("restricted_title")}</h2>
+            <p className="text-sm text-slate-500 max-w-[280px]">
+              {t("restricted_description")}
             </p>
-            <Button onClick={() => onOpenChange(false)} variant="outline" className="mt-4 rounded-xl">
-              Cerrar
+            <Button onClick={() => onOpenChange(false)} variant="outline" className="mt-4 rounded-xl px-8">
+              {t("close")}
             </Button>
           </div>
         ) : (
-
-          <>
+          <div className="flex flex-col h-full">
             <div className="p-6 border-b border-slate-50 bg-slate-50/30 sticky top-0 z-20 backdrop-blur-sm">
               <SheetHeader>
                 <SheetTitle className="text-2xl font-black text-slate-900 tracking-tighter uppercase">
@@ -157,8 +153,7 @@ export function CreateClassSheet({
                 </SheetDescription>
               </SheetHeader>
             </div>
-
-            <div className="p-6">
+            <div className="flex-1 p-6">
               {isResourcesLoading ? (
                 <div className="flex flex-col items-center justify-center py-24 gap-4">
                   <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-100 border-t-orange-500" />
@@ -179,8 +174,7 @@ export function CreateClassSheet({
                 />
               )}
             </div>
-
-            <div className="p-6 border-t border-slate-50 bg-white sticky bottom-0 z-10">
+            <div className="p-6 border-t border-slate-50 bg-white sticky bottom-0 z-10 shadow-[0_-10px_20px_-15px_rgba(0,0,0,0.1)]">
               <SheetFooter className="flex flex-col sm:flex-row gap-3">
                 <Button
                   variant="ghost"
@@ -195,11 +189,11 @@ export function CreateClassSheet({
                   type="button"
                   onClick={handleSave}
                   disabled={isSubmitting || isResourcesLoading || !formData.branch_id}
-                  className="w-full sm:flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl"
+                  className="w-full sm:flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl transition-all active:scale-[0.98]"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                       <span>{t("submitting")}</span>
                     </div>
                   ) : (
@@ -208,7 +202,7 @@ export function CreateClassSheet({
                 </Button>
               </SheetFooter>
             </div>
-          </>
+          </div>
         )}
       </SheetContent>
     </Sheet>

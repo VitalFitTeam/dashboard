@@ -197,15 +197,14 @@ export function ServiceForm({
             <div className="space-y-2">
               <Label>{t("fields.featured") || "Destacado"}</Label>
               <Select
-                key={formData.is_featured}
-                value={formData.is_featured?.toString() || "false"}
+                key={`featured-${formData.is_featured}`}
+                value={String(formData.is_featured)}
                 onValueChange={(v) => handleChange("is_featured", v)}
-                disabled={isView}
               >
-                <SelectTrigger className={isView ? "bg-gray-50" : ""}>
-                  <SelectValue />
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar..." />
                 </SelectTrigger>
-                <SelectContent className="max-h-[300px] overflow-y-auto">
+                <SelectContent>
                   <SelectItem value="true">Sí</SelectItem>
                   <SelectItem value="false">No</SelectItem>
                 </SelectContent>

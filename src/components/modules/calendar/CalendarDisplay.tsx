@@ -6,7 +6,9 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
-import { User, Lock } from "lucide-react";
+import { User, Lock, CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl"; // Importamos el hook
+import { cn } from "@/lib/utils";
 
 interface CalendarDisplayProps {
   events: any[];
@@ -27,7 +29,7 @@ export const CalendarDisplay = forwardRef<FullCalendar, CalendarDisplayProps>(
     },
     ref
   ) => {
-
+    const t = useTranslations("calendar.display");
     const memoizedEvents = useMemo(() => events, [events]);
 
     return (
@@ -58,47 +60,58 @@ export const CalendarDisplay = forwardRef<FullCalendar, CalendarDisplayProps>(
           }}
 
           eventContent={(eventInfo) => {
-            const { instructor_name, is_visible } =
+            const { instructorName, is_visible, isBookedByClient } =
               eventInfo.event.extendedProps || {};
 
-            const isWeekView =
-              eventInfo.view.type.includes("timeGrid");
+            const isWeekView = eventInfo.view.type.includes("timeGrid");
+            
+            const isAnyFocused = eventInfo.event.classNames.includes("event-dimmed") || 
+                                 eventInfo.event.classNames.includes("event-highlighted");
 
             return (
               <div
                 className={cn(
-                  "flex flex-col h-full w-full p-1.5 rounded-md border-l-[3px] shadow-sm transition-all",
-                  "bg-orange-50 border-orange-400 text-orange-900",
-                  !is_visible
-                    ? "opacity-40 grayscale"
-                    : "hover:brightness-95 cursor-pointer",
-                  !isWeekView && "py-0.5 px-1 border-l-[2px]"
+                  "flex flex-col h-full w-full p-1.5 rounded-md border transition-all duration-300 shadow-sm",
+                  "border-l-[4px]",
+                  isBookedByClient 
+                    ? "bg-green-50 border-green-200 border-l-green-500 text-green-900 ring-1 ring-green-600/10 scale-[1.02] z-10 shadow-md" 
+                    : "bg-orange-50 border-orange-100 border-l-orange-400 text-orange-900",
+
+                  isAnyFocused && !isBookedByClient && "bg-slate-50 border-slate-200 border-l-slate-300 text-slate-400 shadow-none opacity-60",
+                  
+                  !is_visible && "opacity-30 grayscale",
+                  "hover:brightness-95 cursor-pointer",
+                  !isWeekView && "py-0.5 px-1"
                 )}
               >
-
-                <div
-                  className={cn(
-                    "font-semibold truncate flex items-center gap-1",
-                    isWeekView
-                      ? "text-[11px] leading-tight"
-                      : "text-[10px] font-bold leading-none"
+                <div className="flex items-center justify-between gap-1 overflow-hidden">
+                  <div
+                    className={cn(
+                      "font-bold truncate flex items-center gap-1",
+                      isWeekView ? "text-[11px] leading-tight" : "text-[10px] leading-none",
+                      isAnyFocused && !isBookedByClient && "text-slate-500 font-medium"
+                    )}
+                  >
+                    {!is_visible && <Lock className="w-2.5 h-2.5" />}
+                    {eventInfo.event.title || t("default_title")}
+                  </div>
+                  
+                  {isBookedByClient && (
+                    <div className="bg-green-600 rounded-full p-0.5 shrink-0 shadow-sm animate-in zoom-in-50">
+                       <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                    </div>
                   )}
-                >
-                  {!is_visible && <Lock className="w-2.5 h-2.5" />}
-                  {eventInfo.event.title}
                 </div>
 
                 {isWeekView && (
-                  <div className="text-[9px] opacity-75 mt-0.5 flex flex-col">
-                    <span className="font-medium">
+                  <div className={cn(
+                    "text-[9px] mt-1 flex flex-col font-medium",
+                    isBookedByClient ? "text-green-700/80" : "text-orange-800/70",
+                    isAnyFocused && !isBookedByClient && "text-slate-400/80"
+                  )}>
+                    <span className="flex items-center gap-1">
                       {eventInfo.timeText}
                     </span>
-                    {instructor_name && (
-                      <span className="truncate italic flex items-center gap-1 mt-0.5">
-                        <User className="w-2.5 h-2.5" />
-                        {instructor_name}
-                      </span>
-                    )}
                   </div>
                 )}
               </div>
@@ -109,43 +122,51 @@ export const CalendarDisplay = forwardRef<FullCalendar, CalendarDisplayProps>(
         />
 
         <style jsx global>{`
-          .fc-scroller::-webkit-scrollbar {
-            width: 4px;
-          }
-          .fc-scroller::-webkit-scrollbar-thumb {
-            background: #e5e7eb;
-            border-radius: 10px;
-          }
+          .fc-scroller::-webkit-scrollbar { width: 4px; }
+          .fc-scroller::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+          
           .fc {
-            --fc-border-color: #f1f1f1;
-            --fc-today-bg-color: transparent;
+            --fc-border-color: #f3f4f6;
+            --fc-today-bg-color: #f9fafb;
             font-family: inherit !important;
           }
-          .fc .fc-timegrid-slot {
-            height: 4rem !important;
-            border-bottom: 1px solid #f9f9f9 !important;
-          }
+
           .fc .fc-col-header-cell-cushion {
             text-decoration: none !important;
-            color: #91918e !important;
-            font-weight: 500;
-            font-size: 13px;
-            padding: 10px 0 !important;
+            color: #6b7280 !important;
+            font-weight: 600;
+            font-size: 12px;
+            padding: 12px 0 !important;
           }
-          .fc .fc-timegrid-now-indicator-line {
-            border-color: #eb5757 !important;
-            border-width: 2px 0 0 !important;
+
+          .fc .fc-timegrid-slot {
+            height: 4.5rem !important;
+            border-bottom: 1px solid #f9fafb !important;
           }
-          .fc .fc-day-today .fc-daygrid-day-number {
-            background-color: #eb5757;
-            color: white !important;
-            border-radius: 4px;
-            padding: 2px 6px !important;
+          
+          .fc .fc-timegrid-slot-label-cushion {
+            font-size: 10px !important;
+            color: #9ca3af !important;
           }
-          .fc-timegrid-event,
-          .fc-daygrid-event {
+
+          .fc-timegrid-event, .fc-daygrid-event {
             background: none !important;
             border: none !important;
+            padding: 2px 4px !important;
+          }
+
+          .event-dimmed {
+            z-index: 1 !important;
+            transition: all 0.4s ease;
+          }
+
+          .event-highlighted {
+            z-index: 100 !important;
+          }
+
+          .fc .fc-timegrid-now-indicator-line {
+            border-color: #ef4444 !important;
+            border-width: 2px 0 0 !important;
           }
         `}</style>
       </div>
@@ -154,7 +175,3 @@ export const CalendarDisplay = forwardRef<FullCalendar, CalendarDisplayProps>(
 );
 
 CalendarDisplay.displayName = "CalendarDisplay";
-
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}

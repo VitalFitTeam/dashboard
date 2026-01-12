@@ -25,7 +25,6 @@ export function useEditServiceData(serviceId: string, token: string | null) {
         ]);
         
         const serviceData = srvRes.data || srvRes.data; 
-        console.log(serviceData);
         setData({
           service: serviceData,
           categories: catsRes.data || [],

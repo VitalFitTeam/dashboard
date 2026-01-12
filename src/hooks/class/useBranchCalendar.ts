@@ -1,9 +1,13 @@
+"use client";
+
 import { api } from "@/lib/sdk-config";
 import { mapClassesToDateKey } from "@/utils/calendar-mappers";
 import { useMemo } from "react";
 import useSWR from "swr";
 
 export function useBranchCalendar(branchID: string | null, jwt: string) {
+  const swrKey = branchID ? ["branches", branchID, "schedule"] : null;
+
   const fetcher = async () => {
     if (!branchID){
        return null;
@@ -12,11 +16,14 @@ export function useBranchCalendar(branchID: string | null, jwt: string) {
     return response.data;
   };
 
-  const { data, error, isValidating } = useSWR(
-    branchID ? ["branches", branchID, "schedule"] : null,
-    fetcher
+  const { data, error, isValidating, mutate } = useSWR(
+    swrKey,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 3000, 
+    }
   );
-
 
   const scheduleMap = useMemo(() => {
     return data ? mapClassesToDateKey(data) : {};
@@ -24,7 +31,9 @@ export function useBranchCalendar(branchID: string | null, jwt: string) {
 
   return {
     scheduleMap,
-    isLoading: isValidating,
+    isLoading: !data && isValidating,
+    isSyncing: isValidating,         
     isError: error,
+    mutate,                          
   };
 }
