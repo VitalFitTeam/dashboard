@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import MembershipForm from "../MembershipForm";
 import { api } from "@/lib/sdk-config";
 import { z } from "zod";
+import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import { createMembershipSchema } from "@/lib/validation/membershipSchema";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ type MembershipFormData = Omit<MembershipType, "duration_days" | "price"> & {
 export default function CreateMembership() {
   const t = useTranslations("catalog.memberships");
   const router = useRouter();
+  const { token } = useAuth();
 
   const [formData, setFormData] = useState<MembershipFormData>({
     membership_type_id: "",
@@ -112,7 +114,6 @@ export default function CreateMembership() {
       return;
     }
 
-    const token = localStorage.getItem("access_token");
     if (!token || typeof token !== "string" || token.length < 10) {
       toast.error(t("create.error_auth"));
       return;
