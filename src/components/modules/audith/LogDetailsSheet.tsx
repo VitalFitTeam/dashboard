@@ -106,8 +106,6 @@ export function LogDetailsSheet({
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          
-          {/* SECCIÓN DE USUARIO DINÁMICA */}
           <Card className="border-none bg-zinc-50 dark:bg-zinc-900 shadow-none ring-1 ring-zinc-200 dark:ring-zinc-800">
             <CardContent className="p-4">
               <div className="flex items-start justify-between gap-4">

@@ -54,6 +54,7 @@ interface CreateInvoiceFormProps {
   isSearchingUser: boolean;
   canSelectBranch: boolean;
   onSearchUser: (email: string) => void;
+  onClearUser: () => void; // Añadida prop para limpiar
   onBranchChange?: (branchId: string) => void;
   onSubmit: (
     branchId: string,
@@ -81,6 +82,7 @@ export function CreateInvoiceForm({
   isSearchingUser,
   canSelectBranch,
   onSearchUser,
+  onClearUser,
   onBranchChange,
   onSubmit,
   onCancel,
@@ -107,7 +109,8 @@ export function CreateInvoiceForm({
     token
   );
 
-  const client = userData?.data;
+  // CORRECCIÓN: Acceso seguro al objeto del cliente
+  const client = userData?.data || userData;
 
   const { subtotal, taxAmount, totalUSD } = useMemo(() => {
     const sub = items.reduce((acc, item) => {
@@ -144,6 +147,7 @@ export function CreateInvoiceForm({
     <div className="grid gap-6 lg:grid-cols-12 items-start">
       <div className="lg:col-span-4 space-y-6">
         <div className="rounded-lg border bg-card p-5 space-y-6 shadow-sm">
+          {/* SECCIÓN SEDE */}
           <div className="space-y-3">
             <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
               <Building2 className="h-3.5 w-3.5 text-primary" />{" "}
@@ -180,72 +184,73 @@ export function CreateInvoiceForm({
           </div>
 
           <Separator className="opacity-50" />
+          
+          {/* SECCIÓN CLIENTE */}
           <div className="space-y-4">
             <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
               <User className="h-3.5 w-3.5 text-primary" /> {t("form.client")}
             </label>
-            <div className="flex gap-2">
-              <Input
-                placeholder={t("form.emailPlaceholder")}
-                value={emailSearch}
-                onChange={(e) => setEmailSearch(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" &&
-                  (e.preventDefault(), onSearchUser(emailSearch))
-                }
-                className="h-9 text-xs"
-              />
-              <Button
-                size="icon"
-                variant="secondary"
-                className="h-9 w-9 shrink-0"
-                onClick={() => onSearchUser(emailSearch)}
-                disabled={isSearchingUser}
-              >
-                {isSearchingUser ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Search className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-
-            {client ? (
-              <div className="rounded-lg border bg-muted/10 p-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            
+            {!client ? (
+              <div className="flex gap-2">
+                <Input
+                  placeholder={t("form.emailPlaceholder")}
+                  value={emailSearch}
+                  onChange={(e) => setEmailSearch(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    (e.preventDefault(), onSearchUser(emailSearch))
+                  }
+                  className="h-9 text-xs"
+                />
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-9 w-9 shrink-0"
+                  onClick={() => onSearchUser(emailSearch)}
+                  disabled={isSearchingUser || !emailSearch}
+                >
+                  {isSearchingUser ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            ) : (
+               <div className="rounded-lg border bg-muted/10 p-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300 relative group">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={onClearUser}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border shadow-sm">
                     <AvatarImage src={client.profile_picture_url} />
                     <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
-                      {client.first_name?.[0]}
-                      {client.last_name?.[0]}
+                      {client.first_name?.[0]}{client.last_name?.[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
                     <p className="text-sm font-bold truncate leading-none mb-1">
                       {client.first_name} {client.last_name}
                     </p>
-                    <Badge
-                      variant="outline"
-                      className="text-[9px] h-4 font-bold uppercase tracking-tighter bg-background"
-                    >
-                      {client.role_name}
+                    <Badge variant="outline" className="text-[9px] h-4 font-bold uppercase tracking-tighter">
+                      {client.role_name || "Cliente"}
                     </Badge>
                   </div>
                 </div>
                 <div className="space-y-1.5 pt-2 border-t border-dashed">
-                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground truncate">
                     <Mail className="h-3 w-3" /> {client.email}
                   </div>
                   <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <IdCard className="h-3 w-3" /> {client.identity_document}
+                    <IdCard className="h-3 w-3" /> {client.identity_document || "N/A"}
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="h-20 border border-dashed rounded-lg flex flex-col items-center justify-center grayscale opacity-40">
-                <p className="text-[10px] font-medium uppercase tracking-tighter">
-                  {t("form.waitingClient")}
-                </p>
               </div>
             )}
           </div>
@@ -253,6 +258,7 @@ export function CreateInvoiceForm({
       </div>
 
       <div className="lg:col-span-8 space-y-6">
+        {/* SECCIÓN CONCEPTOS (ITEMS) */}
         <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
           <div className="px-5 py-3 border-b bg-muted/20 flex justify-between items-center">
             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -274,10 +280,7 @@ export function CreateInvoiceForm({
           </div>
           <div className="p-5 space-y-2">
             {items.map((item, index) => (
-              <div
-                key={index}
-                className="flex gap-2 items-center animate-in fade-in duration-300"
-              >
+              <div key={index} className="flex gap-2 items-center animate-in fade-in duration-300">
                 <div className="flex-1 grid grid-cols-12 gap-2 p-1 bg-muted/10 rounded-md border border-transparent hover:border-muted-foreground/10 transition-all">
                   <Select
                     value={item.item_type}
@@ -288,31 +291,23 @@ export function CreateInvoiceForm({
                     <SelectTrigger className="col-span-3 h-8 border-none bg-transparent shadow-none text-xs font-medium">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
-                      <SelectItem value="membership">
-                        {t("form.membership")}
-                      </SelectItem>
-                      <SelectItem value="package">
-                        {t("form.package")}
-                      </SelectItem>
+                    <SelectContent>
+                      <SelectItem value="membership">{t("form.membership")}</SelectItem>
+                      <SelectItem value="package">{t("form.package")}</SelectItem>
                     </SelectContent>
                   </Select>
+
                   <Select
                     value={item.item_id}
-                    onValueChange={(v: string) =>
-                      updateItem(index, { item_id: v })
-                    }
+                    onValueChange={(v: string) => updateItem(index, { item_id: v })}
                   >
                     <SelectTrigger className="col-span-7 h-8 border-none bg-transparent shadow-none text-xs">
                       <SelectValue placeholder={t("form.selectProduct")} />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
+                    <SelectContent>
                       {item.item_type === "membership"
                         ? memberships.map((m: any) => (
-                            <SelectItem
-                              key={m.membership_type_id}
-                              value={m.membership_type_id}
-                            >
+                            <SelectItem key={m.membership_type_id} value={m.membership_type_id}>
                               {m.name}
                             </SelectItem>
                           ))
@@ -323,14 +318,13 @@ export function CreateInvoiceForm({
                           ))}
                     </SelectContent>
                   </Select>
+
                   <Input
                     type="number"
                     min={1}
                     value={item.quantity}
                     onChange={(e) =>
-                      updateItem(index, {
-                        quantity: Number(e.target.value) || 1,
-                      })
+                      updateItem(index, { quantity: Number(e.target.value) || 1 })
                     }
                     className="col-span-2 h-8 border-none bg-background/50 text-center text-xs font-bold"
                   />
@@ -349,6 +343,7 @@ export function CreateInvoiceForm({
           </div>
         </div>
 
+        {/* SECCIÓN PAGO Y TOTALES */}
         <div className="rounded-lg border bg-card p-6 shadow-sm space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-end gap-8">
             <div className="w-full md:w-1/2 space-y-4">
@@ -357,18 +352,13 @@ export function CreateInvoiceForm({
                   <span className="text-[10px] font-bold uppercase text-muted-foreground ml-1">
                     {t("form.currency")}
                   </span>
-                  <Select
-                    value={displayCurrency}
-                    onValueChange={setDisplayCurrency}
-                  >
+                  <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
                     <SelectTrigger className="h-9 bg-muted/20 border-none font-bold text-xs">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
+                    <SelectContent>
                       {mainCurrencies.map((c: any) => (
-                        <SelectItem key={c.code} value={c.code}>
-                          {c.code}
-                        </SelectItem>
+                        <SelectItem key={c.code} value={c.code}>{c.code}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -385,12 +375,9 @@ export function CreateInvoiceForm({
                     <SelectTrigger className="h-9 bg-muted/20 border-none font-bold text-xs">
                       <SelectValue placeholder={t("form.choose")} />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
+                    <SelectContent>
                       {paymentMethods.map((m: any) => (
-                        <SelectItem
-                          key={m.method_id || m.payment_method_id}
-                          value={m.method_id || m.payment_method_id}
-                        >
+                        <SelectItem key={m.method_id || m.payment_method_id} value={m.method_id || m.payment_method_id}>
                           {m.name}
                         </SelectItem>
                       ))}
@@ -401,9 +388,7 @@ export function CreateInvoiceForm({
 
               {displayCurrency !== "USD" && (
                 <div className="flex items-center gap-2 p-2.5 rounded-md border border-primary/10 bg-muted/30 text-[10px] font-bold text-primary italic">
-                  <RefreshCcw
-                    className={`h-3 w-3 ${loadingRate ? "animate-spin" : ""}`}
-                  />
+                  <RefreshCcw className={`h-3 w-3 ${loadingRate ? "animate-spin" : ""}`} />
                   {t("form.exchangeRate", {
                     rate: exchangeRate?.toFixed(4) || "...",
                     currency: displayCurrency,
@@ -420,9 +405,7 @@ export function CreateInvoiceForm({
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground px-1">
                   <span>{taxRate?.name || t("form.taxes")}</span>
-                  <span className="font-medium text-destructive">
-                    +${taxAmount.toFixed(2)}
-                  </span>
+                  <span className="font-medium text-destructive">+${taxAmount.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -433,16 +416,13 @@ export function CreateInvoiceForm({
                 <h2 className="text-5xl font-bold tracking-tighter tabular-nums leading-none">
                   ${totalUSD.toFixed(2)}
                 </h2>
-
                 {displayCurrency !== "USD" && (
-                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full border bg-primary/5 text-primary animate-in slide-in-from-right-2">
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-full border bg-primary/5 text-primary">
                     <span className="text-[10px] font-bold uppercase tracking-tighter opacity-70">
                       {t("form.equivalentTo")}
                     </span>
                     <span className="text-sm font-black tracking-tight">
-                      {loadingRate
-                        ? "..."
-                        : `${currencyInfo?.symbol} ${totalConverted.toLocaleString(undefined, { minimumFractionDigits: 2 })} ${displayCurrency}`}
+                      {loadingRate ? "..." : `${currencyInfo?.symbol} ${totalConverted.toLocaleString(undefined, { minimumFractionDigits: 2 })} ${displayCurrency}`}
                     </span>
                   </div>
                 )}
@@ -451,12 +431,7 @@ export function CreateInvoiceForm({
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t">
-            <Button
-              variant="ghost"
-              onClick={onCancel}
-              disabled={isSubmitting}
-              className="text-xs h-10 px-6 font-bold uppercase tracking-tight"
-            >
+            <Button variant="ghost" onClick={onCancel} disabled={isSubmitting} className="text-xs h-10 px-6 font-bold uppercase">
               {t("form.cancel")}
             </Button>
             <Button
@@ -466,7 +441,8 @@ export function CreateInvoiceForm({
                 !client ||
                 totalUSD === 0 ||
                 (loadingRate && displayCurrency !== "USD") ||
-                !selectedPaymentMethodId
+                !selectedPaymentMethodId ||
+                items.some(i => !i.item_id)
               }
               onClick={() =>
                 onSubmit(
@@ -480,11 +456,7 @@ export function CreateInvoiceForm({
               }
               className="px-10 h-10 text-xs font-black uppercase tracking-widest shadow-sm"
             >
-              {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               {t("form.finishSale")}
             </Button>
           </div>

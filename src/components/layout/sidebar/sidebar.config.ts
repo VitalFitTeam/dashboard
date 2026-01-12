@@ -166,7 +166,7 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
       title: "Instructor",
       items: [
         { label: "Dashboard", icon: HomeIcon, href: "/" },
-        { label: "MiCalendario", icon: Calendar, href: "/instructor/calendar" },
+        { label: "MiCalendario", icon: Calendar, href:  "/operations/calendar" },
         { label: "RegistroAsistencia", icon: UsersIcon, href: "/instructor/attendance" },
         { label: "MisReportes", icon: ChartBarIcon, href: "/instructor/reports" },
       ],
