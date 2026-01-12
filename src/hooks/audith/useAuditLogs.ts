@@ -1,4 +1,4 @@
-import { AuditLog, PaginationRequest } from "@vitalfit/sdk";
+import { AuditLog, PaginationRequest, PaginatedTotal } from "@vitalfit/sdk"; //
 import { api } from "@/lib/sdk-config";
 import { usePaginatedSWR } from "../usePaginatedSWR";
 
@@ -15,14 +15,14 @@ export function useAuditLogs(
 
   const key = jwt ? ["audit-logs", userId, activeFilters, isAllLogs] : null;
 
-  const { data, error, isLoading } = usePaginatedSWR<AuditLog>(
+  const { data, error, isLoading } = usePaginatedSWR<AuditLog[]>(
     key,
     () => isAllLogs 
       ? api.audit.getAllLogs(jwt, userId, activeFilters)
       : api.audit.getUserLogs(jwt, userId, activeFilters)
   );
 
-  const logs = data?.data ?? [];
+  const logs = data?.data ?? []; 
   const totalItems = data?.total ?? 0;
   const limit = filters.limit ?? 10;
 

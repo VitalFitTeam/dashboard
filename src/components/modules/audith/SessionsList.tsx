@@ -38,7 +38,7 @@ export function SessionsList({
 
   return (
     <div className="space-y-6">
-      {/* Banner de Acciones Críticas */}
+
       <div className="flex items-center justify-between p-4 rounded-xl border border-destructive/20 bg-destructive/5 dark:bg-destructive/10 transition-all">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-destructive/10 rounded-full text-destructive">
@@ -63,7 +63,7 @@ export function SessionsList({
         </Button>
       </div>
 
-      {/* Lista de Sesiones */}
+
       <div className="grid gap-3">
         {sessions.map((session) => {
           const isMobile = /mobile|android|iphone/i.test(session.user_agent);

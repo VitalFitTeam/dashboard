@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/sdk-config";
 import { BranchStaff, User as SdkUser } from "@vitalfit/sdk";
@@ -18,7 +25,7 @@ export interface SessionUser extends Omit<SdkUser, "role"> {
 }
 
 interface AuthContextType {
-  token: string | null;     
+  token: string | null;
   refreshToken: string | null;
   user: SessionUser | null;
   loading: boolean;
@@ -30,6 +37,7 @@ interface AuthContextType {
   setTokens: (token: string, refresh: string) => void;
   switchBranch: (branch: BranchStaff) => void;
   hasRole: (roles: UserRole | UserRole[]) => boolean;
+  hasAccess: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -62,21 +70,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/login");
   }, [clearSession, router]);
 
-
   const getUserProfile = useCallback(
     async (token: string): Promise<SessionUser | null> => {
       try {
-        const [
-          profileResponse,
-          branchesRes,
-          managedRes,
-          instructorRes,
-        ] = await Promise.all([
-          api.user.WhoAmI(token),
-          api.staff.getStaffBranches(token),
-          api.staff.getManagedBranches(token),
-          api.staff.getInstructorBranches(token),
-        ]);
+        const [profileResponse, branchesRes, managedRes, instructorRes] =
+          await Promise.all([
+            api.user.WhoAmI(token),
+            api.staff.getStaffBranches(token),
+            api.staff.getManagedBranches(token),
+            api.staff.getInstructorBranches(token),
+          ]);
 
         const sdkUser: SdkUser | null = profileResponse.user;
         if (!sdkUser) {
@@ -94,14 +97,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const managedBranches = managedRes.data ?? [];
         const instructorBranches = instructorRes.data ?? [];
 
-        const allBranches = [...assignedBranches, ...managedBranches, ...instructorBranches];
+        const allBranches = [
+          ...assignedBranches,
+          ...managedBranches,
+          ...instructorBranches,
+        ];
 
         const savedBranchId = localStorage.getItem("active_branch_id");
         const activeBranch =
-          allBranches.find(b => b.id === savedBranchId) || allBranches[0];
+          allBranches.find((b) => b.id === savedBranchId) || allBranches[0];
 
-        if (activeBranch){
-           localStorage.setItem("active_branch_id", activeBranch.id);
+        if (activeBranch) {
+          localStorage.setItem("active_branch_id", activeBranch.id);
         }
 
         return {
@@ -123,8 +130,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const reloadUser = useCallback(async () => {
-    if (!accessToken){
-       return;
+    if (!accessToken) {
+      return;
     }
 
     try {
@@ -144,8 +151,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       try {
         const sessionUser = await getUserProfile(token);
-        if (!sessionUser){
-           throw new Error("Usuario sin permisos");
+        if (!sessionUser) {
+          throw new Error("Usuario sin permisos");
         }
 
         setTokens(token, refresh);
@@ -158,7 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const switchBranch = useCallback((branch: BranchStaff) => {
-    setUser(prev =>
+    setUser((prev) =>
       prev ? { ...prev, activeBranch: branch, branch_id: branch.id } : prev
     );
     localStorage.setItem("active_branch_id", branch.id);
@@ -218,10 +225,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initAuth();
   }, [getUserProfile, clearSession]);
 
+  const isSuperAdmin = user?.role === "super_admin"; // Ajusta según tu enum
+  const hasBranch = !!user?.activeBranch;
+
+  const hasAccess = isSuperAdmin || hasBranch;
+
   return (
     <AuthContext.Provider
       value={{
-        token: accessToken,         
+        token: accessToken,
         refreshToken,
         user,
         loading,
@@ -232,6 +244,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         switchBranch,
         hasRole,
         setTokens,
+        hasAccess
       }}
     >
       {children}

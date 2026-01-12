@@ -141,7 +141,6 @@ export default function AudithPage() {
         </CardContent>
       </Card>
 
-      {/* Contenedor de Tabla */}
       <div className="rounded-xl border bg-card shadow-sm">
         <div className="p-4 border-b flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -169,7 +168,6 @@ export default function AudithPage() {
         />
       </div>
 
-      {/* Nivel 3: Lateral Sheet para detalles del Log */}
       <LogDetailsSheet
         log={selectedLog}
         open={isSheetOpen}
@@ -177,7 +175,6 @@ export default function AudithPage() {
         onViewSessions={handleViewSessions}
       />
 
-      {/* Nivel 4: Dialog para gestión de sesiones críticas */}
       <SecuritySessionsDialog
         userId={sessionTargetUserId}
         open={isSessionsDialogOpen}
