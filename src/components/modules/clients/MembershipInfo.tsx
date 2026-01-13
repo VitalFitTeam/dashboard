@@ -1,10 +1,12 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ClientMembership } from "@vitalfit/sdk";
 
 interface Props {
   membership: ClientMembership;
-  t: any;
+  t: any; 
   formatDate: (date: string) => string;
 }
 
@@ -18,20 +20,22 @@ export const MembershipInfo = ({ membership, t, formatDate }: Props) => {
   };
 
   return (
-    <Card className="overflow-hidden border-t-4 border-t-primary">
+    <Card className="overflow-hidden border-t-4 border-t-primary text-left">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center justify-between">
           {t("sections.membership")}
           <Badge variant={statusVariants[membership.status] || "default"} className="capitalize">
-            {membership.status}
+
+            {t(`status.${membership.status}`) || membership.status}
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {t("fields.membership_type") || "Tipo de Membresía"}
+              {t("fields.membership_type")}
             </p>
             <p className="font-semibold text-foreground uppercase">
               {membership.membership_type_id}
@@ -40,7 +44,7 @@ export const MembershipInfo = ({ membership, t, formatDate }: Props) => {
 
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {t("fields.start_date") || "Fecha Inicio"}
+              {t("fields.start_date")}
             </p>
             <p className="font-medium">
               {formatDate(membership.start_date)}
@@ -49,7 +53,7 @@ export const MembershipInfo = ({ membership, t, formatDate }: Props) => {
 
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {t("fields.end_date") || "Fecha Fin"}
+              {t("fields.end_date")}
             </p>
             <p className="font-medium text-destructive">
               {formatDate(membership.end_date)}
@@ -58,7 +62,7 @@ export const MembershipInfo = ({ membership, t, formatDate }: Props) => {
 
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              ID Membresía
+              {t("fields.membership_id")}
             </p>
             <p className="text-xs font-mono text-muted-foreground truncate" title={membership.client_membership_id}>
               {membership.client_membership_id}

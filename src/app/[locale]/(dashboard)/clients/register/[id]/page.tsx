@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { toast } from "sonner";
-
 import { ClientPersonalInfo } from "@/components/modules/clients/ClientPersonalInfo";
 import { ClientActions } from "@/components/modules/clients/ClientActions";
 import { MembershipInfo } from "@/components/modules/clients/MembershipInfo";
@@ -28,7 +27,8 @@ const formatDate = (date: string, locale: string) => {
 };
 
 export default function ClientDetails() {
-  const t = useTranslations("clients.view");
+  const t = useTranslations("clients.view"); 
+  const tCommon = useTranslations("common"); 
   const locale = useLocale();
   const { id } = useParams();
   const router = useRouter();
@@ -41,18 +41,18 @@ export default function ClientDetails() {
 
   const handleSave = async (updatedData: any) => {
     if (!token || !id) {
-        return;
+      return;
     }
     setIsUpdating(true);
     try {
       await api.user.updateUserClient(id as string, updatedData, token);
-      toast.success(t("notifications.update_success") || "Cliente actualizado");
+      toast.success(t("notifications.update_success"));
       setIsEditing(false);
-      if (reload) {
-        reload();
+      if (reload){
+         reload();
       }
     } catch (err) {
-      toast.error(t("notifications.update_error") || "Error al actualizar");
+      toast.error(t("notifications.update_error"));
     } finally {
       setIsUpdating(false);
     }
@@ -71,26 +71,27 @@ export default function ClientDetails() {
 
   if (error || !user) {
     if (error === 401) {
-        router.replace("/login");
+      router.replace("/login");
     }
-   return (
+    
+    return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
         <div className="p-4 bg-red-50 rounded-full">
           <AlertCircle className="h-12 w-12 text-red-500" />
         </div>
         <div className="space-y-2">
           <h2 className="text-xl font-black uppercase italic tracking-tighter">
-            {error === 404 ? "Cliente no encontrado" : "Error de conexión"}
+            {error === 404 ? t("errors.not_found") : t("errors.connection")}
           </h2>
           <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-            No pudimos obtener la información del perfil. Verifica tu conexión o intenta nuevamente.
+            {t("errors.description")}
           </p>
         </div>
         <button 
           onClick={() => window.location.reload()}
           className="text-xs font-bold uppercase underline tracking-widest text-primary"
         >
-          Reintentar cargar
+          {t("errors.retry")}
         </button>
       </div>
     );
@@ -99,9 +100,9 @@ export default function ClientDetails() {
   return (
     <div className="flex-1 space-y-8 p-8 pt-6 animate-in fade-in duration-500">
       <PageHeader
-        title={isEditing ? "EDITANDO PERFIL" : t("title")}
+        title={isEditing ? t("editing_title") : t("title")}
         subtitle={isEditing 
-          ? "Modifica la información personal y de contacto del cliente." 
+          ? t("editing_subtitle") 
           : t("subtitle", { name: `${user.first_name} ${user.last_name}` })
         }
       />
@@ -109,10 +110,10 @@ export default function ClientDetails() {
       <Tabs defaultValue="general" className="w-full space-y-6">
         <TabsList className="bg-muted/50 p-1 border">
           <TabsTrigger value="general" className="px-8 font-bold italic uppercase tracking-tighter">
-            General
+            {t("tabs.general")}
           </TabsTrigger>
           <TabsTrigger value="medical" className="px-8 font-bold italic uppercase tracking-tighter">
-            Ficha Médica
+            {t("tabs.medical")}
           </TabsTrigger>
         </TabsList>
 
@@ -150,6 +151,7 @@ export default function ClientDetails() {
             />
           )}
         </TabsContent>
+        
         <TabsContent value="medical" className="outline-none">
           <div className="p-2 border-2 border-dashed border-muted rounded-xl bg-muted/20 text-center">
              <ClientMedicalSection userId={user.user_id} token={token} />

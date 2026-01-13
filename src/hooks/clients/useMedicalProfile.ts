@@ -16,8 +16,6 @@ export function useMedicalProfile(userId: string, token: string | null) {
     try {
       setIsLoading(true);
       const response = await api.user.getMedicalProfile(userId, token);
-      
-      console.log("Datos reales del perfil:", response);
 
       if (response) {
         const data = response as unknown as MedicalProfile;

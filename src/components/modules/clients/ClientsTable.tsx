@@ -130,28 +130,25 @@ export default function ClientsTable({
         isLoading={isLoading}
         rowIdKey="user_id" 
         actions={(row) => (
-          <div className="flex items-center justify-center">
-            <RowActions
-              actions={[
-                { 
-                  label: t("table.actions.view"), 
-                  icon: Eye, 
-                  onClick: () => handleView(row.user_id) 
-                },
-                { 
-                  label: t("table.actions.edit"), 
-                  icon: Pencil, 
-                  onClick: () => handleEdit(row.user_id) 
-                },
-                {
-                  label: t("table.actions.delete"),
-                  icon: Trash2,
-                  onClick: () => setDeleteRowId(row.user_id),
-                  variant: "danger",
-                  separatorBefore: true,
-                },
-              ]}
-            />
+         <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-primary"
+              onClick={() => handleView(row.user_id)}
+            >
+              <Eye className="h-4 w-4" />
+              <span className="sr-only">{t("table.actions.view")}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              onClick={() => setDeleteRowId(row.user_id)}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">{t("table.actions.delete")}</span>
+            </Button>
 
             <GeneralAlertDialog
               open={deleteRowId === row.user_id}
