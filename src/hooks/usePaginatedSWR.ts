@@ -8,14 +8,13 @@ import useSWR, { SWRConfiguration } from "swr";
  */
 export function usePaginatedSWR<T>(
   key: any[] | null, 
-  fetcherFn: () => Promise<PaginatedTotal<T[]>>,
+  fetcherFn: () => Promise<PaginatedTotal<T>>, 
   config?: SWRConfiguration
 ) {
-  return useSWR<PaginatedTotal<T[]>>(
+  return useSWR<PaginatedTotal<T>>(
     key, 
     async () => {
-      const res = await fetcherFn();
-      return res;
+      return await fetcherFn();
     }, 
     {
       revalidateOnFocus: false,

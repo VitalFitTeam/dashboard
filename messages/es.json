@@ -2631,6 +2631,21 @@
   }
 },
 "user": {
+  "UserSelectionCard": {
+      "roles": {
+        "client": "Cliente",
+        "instructor": "Instructor",
+        "admin": "Administrador"
+      },
+      "actions": {
+        "enroll": "Inscribir",
+        "focus": "Enfocar",
+        "waiting": "Espere"
+      },
+      "labels": {
+        "found": "Alumno encontrado:"
+      }
+    },
     "audit": {
       "title": "Logs de Auditoría",
       "subtitle": "Inspección de peticiones, métodos y rutas del sistema.",
@@ -2695,6 +2710,176 @@
         "errorRevoke": "Hubo un problema al intentar cerrar la sesión"
       }
     }
+  },
+  "calendar": {
+    "no_branch_title": "No se seleccionó ninguna sede",
+    "no_branch_description": "Por favor, selecciona una sede para visualizar la programación de clases.",
+    "toolbar": {
+      "week": "Semana",
+      "month": "Mes",
+      "today": "Hoy",
+      "branch": "Sede",
+      "loading": "Cargando...",
+      "createClass": "Crear Clase",
+      "syncing": "Sincronizando...",
+      "search_placeholder": "Enfocar agenda de alumno..."
+    },
+    "display": {
+      "default_title": "Clase",
+      "no_instructor": "Sin instructor"
+    },
+    "create_sheet": {
+      "title": "Programar Clase",
+      "description": "Define los detalles de la nueva sesión, instructor y aforo.",
+      "syncing": "Sincronizando recursos...",
+      "cancel": "Cancelar",
+      "confirm": "Crear Clase",
+      "submitting": "Guardando...",
+      "success": "Clase programada exitosamente",
+      "restricted_title": "Acceso Restringido",
+      "restricted_description": "No tienes una sucursal activa asignada. Contacta a tu administrador para gestionar clases.",
+      "close": "Cerrar",
+      "errors": {
+        "missing_data": "Faltan datos obligatorios o sesión expirada",
+        "check_fields": "Por favor, revisa los campos con errores",
+        "server_error": "Hubo un error al procesar la solicitud"
+      }
+    },
+    "edit_popover": {
+      "title": "Editar Sesión",
+      "details_title": "Detalles de la Sesión",
+      "loading": "Cargando información...",
+      "saving": "Guardando...",
+      "save_changes": "Guardar Cambios",
+      "cancel": "Cancelar",
+      "close": "Cerrar",
+      "delete_button": "Eliminar Clase",
+      "success_update": "Clase actualizada correctamente",
+      "error_save": "Error al guardar los cambios",
+      "readonly_notice": "Solo puedes gestionar asistencia. La configuración es de solo lectura.",
+      "attendance": {
+        "button_title": "Gestionar Alumnos",
+        "button_description": "Pasar asistencia o añadir reservas"
+      },
+      "delete_confirm": {
+        "title": "¿Eliminar esta clase?",
+        "description": "Esta acción no se puede deshacer y cancelará todas las reservas existentes.",
+        "action": "Eliminar permanentemente"
+      }
+    },
+    "attendance_sheet": {
+      "title": "Control de Asistencia",
+      "desc_admin": "Gestiona el aforo y registra inscripciones manuales.",
+      "desc_instructor": "Visualiza la lista de alumnos y confirma su asistencia.",
+      "section_inscribe": "Inscripción de Cliente",
+      "search_placeholder": "Buscar por email exacto...",
+      "search_button": "BUSCAR",
+      "instructor_mode": "Modo Instructor: Tienes acceso para marcar asistencia de los alumnos presentes.",
+      "list_title": "Alumnos en Clase",
+      "loading_list": "Actualizando lista...",
+      "error_server": "Error al conectar con el servidor"
+    },
+    "attendance_manager": {
+      "columns": {
+        "student": "Alumno",
+        "check_in": "Check-in",
+        "status": "Estado"
+      },
+      "status": {
+        "confirmed": "Confirmado",
+        "attended": "Asistió",
+        "missed": "Faltó",
+        "cancelled": "Cancelado"
+      },
+      "tabs": {
+        "bookings": "Reservas Activas",
+        "attendance": "Historial / Asistencia"
+      },
+      "labels": {
+        "total_students": "Total Alumnos: {count}",
+        "processed": "Procesado",
+        "active_booking": "Reserva Activa",
+        "cancel_tooltip": "Cancelar reserva"
+      },
+      "info_panel": {
+        "admin_title": "Panel de Gestión Administrativa",
+        "admin_desc": "Puedes cancelar reservas y realizar inscripciones manuales. El check-in se registra automáticamente en la sucursal.",
+        "instructor_title": "Panel de Asistencia de Instructor",
+        "instructor_desc": "La lista se sincroniza con el control de acceso. Los instructores no pueden modificar reservas activas."
+      }
+    },
+     "form": {
+      "sections": {
+        "general": "Información General",
+        "schedule": "Cronograma",
+        "capacity": "Capacidad y Recurrencia",
+        "notes": "Notas"
+      },
+      "fields": {
+        "visible": "Visible",
+        "branch": "Sucursal",
+        "service": "Disciplina",
+        "instructor": "Instructor",
+        "date": "Fecha",
+        "start_time": "Hora Inicio",
+        "end_time": "Hora Fin",
+        "max_capacity": "Aforo Máximo",
+        "recurrence": "Recurrencia",
+        "recurrence_until": "Repetir hasta"
+      },
+      "placeholders": {
+        "branch": "Seleccionar sucursal",
+        "service": "Seleccionar disciplina",
+        "instructor": "Asignar instructor",
+        "date": "Elegir fecha",
+        "capacity": "Cantidad de cupos",
+        "notes": "Añade notas aquí...",
+        "until": "Elegir fecha final"
+      },
+      "recurrence_options": {
+        "none": "No repetir",
+        "daily": "Diaria",
+        "weekly": "Semanal"
+      },
+      "suffix": {
+        "slots": "cupos"
+      },
+      "errors": {
+        "branch_required": "La sucursal es obligatoria",
+        "service_required": "La disciplina es obligatoria",
+        "instructor_required": "El instructor es obligatorio",
+        "date_required": "La fecha es obligatoria",
+        "start_time_required": "La hora de inicio es obligatoria",
+        "end_time_required": "La hora de fin es obligatoria",
+        "capacity_min": "El aforo debe ser al menos 1",
+        "end_time_after": "La hora de finalización debe ser posterior a la de inicio",
+        "recurrence_until_after": "La fecha de repetición debe ser posterior a la de la clase",
+        "recurrence_until_required": "Debes elegir una fecha de fin para la repetición"
+      }
+    }
+  },"booking": {
+  "errors": {
+    "payment_required": "El alumno no tiene un pago activo o créditos suficientes.",
+    "forbidden": "No tienes permisos para realizar esta acción.",
+    "unauthorized": "Tu sesión ha expirado, por favor vuelve a entrar.",
+    "not_found": "La reserva no fue encontrada.",
+    "past_class": "No puedes inscribir en una clase que ya pasó.",
+    "full": "La clase ya no tiene cupos disponibles.",
+    "already_booked": "Este cliente ya está inscrito en esta clase.",
+    "insufficient_credits": "El cliente no tiene créditos suficientes.",
+    "expired": "La membresía del cliente ha expirado.",
+    "unexpected": "Ocurrió un error inesperado en el sistema."
+  },
+  "success": {
+    "booked": "Reserva realizada con éxito",
+    "cancelled": "Reserva cancelada correctamente"
+  }
+},
+  "ProtectedRoute": {
+    "noBranchTitle": "Sede no configurada",
+    "noBranchDescription": "Tu cuenta de <role>{role}</role> está activa, pero no tienes una sede válida asignada para operar.",
+    "retry": "Reintentar",
+    "logout": "Cerrar Sesión"
   }
 
 }
