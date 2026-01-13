@@ -1,309 +1,161 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Pencil, CreditCard, Eye, FileText, Activity, BarChart } from "lucide-react";
-import { api } from "@/lib/sdk-config";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; 
 import { useAuth } from "@/context/AuthContext";
-import { GetUserResponse, User, APIError, isAPIError } from "@vitalfit/sdk";
+import { api } from "@/lib/sdk-config";
+import { toast } from "sonner";
 
-function formatDate(dateString: string, locale: string): string {
-    if (!dateString) { return "N/A"; }
-    try {
-        return new Date(dateString).toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        });
-    } catch {
-        return dateString;
-    }
-}
+import { ClientPersonalInfo } from "@/components/modules/clients/ClientPersonalInfo";
+import { ClientActions } from "@/components/modules/clients/ClientActions";
+import { MembershipInfo } from "@/components/modules/clients/MembershipInfo";
+import { ClientEditForm } from "@/components/modules/clients/ClientEditForm";
+import { useGetUser } from "@/hooks/users/useGetUser";
+import { ClientMedicalSection } from "@/components/modules/clients/ClientMedicalSection";
+import { AlertCircle } from "lucide-react";
 
-function formatPhoneForDisplay(phone: string): string {
-    if (!phone) { return "N/A"; }
-
-    if (phone.startsWith("+58")) {
-        const number = phone.substring(3);
-        if (number.length === 10) {
-            return `+58 ${number.substring(0, 4)}-${number.substring(4, 7)}-${number.substring(7)}`;
-        }
-    }
-
-    return phone;
-}
+const formatDate = (date: string, locale: string) => {
+  if (!date) {
+    return "N/A";
+  }
+  return new Date(date).toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
+    year: "numeric", month: "long", day: "numeric"
+  });
+};
 
 export default function ClientDetails() {
-    const t = useTranslations("clients.view");
-    const tStatus = useTranslations("clients.table.status");
-    const tNotifications = useTranslations("clients.notifications");
-    const locale = useLocale();
-    const params = useParams();
-    const router = useRouter();
-    const { token } = useAuth();
-    const [client, setClient] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("clients.view");
+  const locale = useLocale();
+  const { id } = useParams();
+  const router = useRouter();
+  const { token } = useAuth();
 
-    useEffect(() => {
-        const loadClient = async () => {
-            if (!params.id || !token) {
-                setIsLoading(false);
-                return;
-            }
+  const [isEditing, setIsEditing] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-            setIsLoading(true);
-            setError(null);
+  const { user, loading, error, reload } = useGetUser(id as string, token);
 
-            try {
-                const response = await api.user.GetUserByID(params.id as string, token);
-                const userData: GetUserResponse = response.data;
-
-                const clientData: Partial<User> = {
-                    user_id: userData.user_id,
-                    first_name: userData.first_name,
-                    last_name: userData.last_name,
-                    email: userData.email,
-                    birth_date: userData.birth_date,
-                    gender: userData.gender,
-                    identity_document: userData.identity_document,
-                    phone: userData.phone,
-                    profile_picture_url: userData.profile_picture_url,
-                    role_id: userData.role_id,
-                    status: (userData as any).status,
-                    ClientProfile: (userData as any).ClientProfile,
-                    client_membership: (userData as any).client_membership,
-                    created_at: (userData as any).created_at,
-                };
-
-                setClient(clientData as User);
-
-            } catch (error) {
-                console.error("Error loading client:", error);
-
-                if (isAPIError(error)) {
-                    let errorMessage = `Error: ${error.messages.join(", ")}`;
-                    if (error.status === 400) {
-                        errorMessage = t("invalid_data");
-                    } else if (error.status === 401) {
-                        errorMessage = tNotifications("session_expired");
-                        router.replace("/login");
-                    } else if (error.status === 403) {
-                        errorMessage = tNotifications("permission_error");
-                    } else if (error.status === 404) {
-                        errorMessage = t("not_found");
-                    }
-                    setError(errorMessage);
-                } else {
-                    setError(t("loading_message"));
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadClient();
-    }, [params.id, token, router, t, tNotifications]);
-
-    const getClientCategory = () => {
-        if (client?.ClientProfile?.category) {
-            return client.ClientProfile.category;
-        }
-        if (client?.client_membership) {
-            return t("category_active_membership");
-        }
-
-        return t("category_regular");
-    };
-
-    const getScoring = () => {
-        if (client?.ClientProfile?.scoring) {
-            return client.ClientProfile.scoring.toString();
-        }
-        return "N/A";
-    };
-
-    const getCreatedAt = () => {
-        if (client?.created_at) {
-            return formatDate(client.created_at, locale);
-        }
-        return "N/A";
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex-1 space-y-8 p-8 pt-6">
-                <PageHeader title={t("loading")} subtitle={t("loading_subtitle")} />
-                <div className="flex items-center justify-center h-64">
-                    <div className="text-lg">{t("loading_message")}</div>
-                </div>
-            </div>
-        );
+  const handleSave = async (updatedData: any) => {
+    if (!token || !id) {
+        return;
     }
-
-    if (error || !client) {
-        return (
-            <div className="flex-1 space-y-8 p-8 pt-6">
-                <PageHeader title={t("error_title")} subtitle={t("error_subtitle")} />
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                            <p className="text-red-700">{error || t("not_found")}</p>
-                            <Button
-                                variant="outline"
-                                className="mt-4"
-                                onClick={() => router.replace("/clients/register")}
-                            >
-                                {t("back_button")}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
+    setIsUpdating(true);
+    try {
+      await api.user.updateUserClient(id as string, updatedData, token);
+      toast.success(t("notifications.update_success") || "Cliente actualizado");
+      setIsEditing(false);
+      if (reload) {
+        reload();
+      }
+    } catch (err) {
+      toast.error(t("notifications.update_error") || "Error al actualizar");
+    } finally {
+      setIsUpdating(false);
     }
+  };
 
+  if (loading) {
     return (
-        <div className="flex-1 space-y-8 p-8 pt-6">
-            <PageHeader
-                title={t("title")}
-                subtitle={t("subtitle", { name: `${client.first_name} ${client.last_name}` })}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="md:col-span-2">
-                    <CardHeader>
-                        <CardTitle>{t("sections.personal")}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-6">
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.id")}</p>
-                            <p className="font-medium">{client.user_id}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.category")}</p>
-                            <Badge className="bg-white border-2 border-yellow-500 text-yellow-500">
-                                {getClientCategory()}
-                            </Badge>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.full_name")}</p>
-                            <p className="font-medium">{client.first_name} {client.last_name}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.phone")}</p>
-                            <p className="font-medium">{formatPhoneForDisplay(client.phone)}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.email")}</p>
-                            <p className="font-medium">{client.email}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.identity")}</p>
-                            <p className="font-medium">{client.identity_document}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.birth_date")}</p>
-                            <p className="font-medium">{formatDate(client.birth_date, locale)}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.gender")}</p>
-                            <p className="font-medium">{client.gender}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.role")}</p>
-                            <p className="font-medium">{client.role?.name || client.role_id || "Cliente"}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.scoring")}</p>
-                            <p className="font-medium">{getScoring()}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">{t("fields.created_at")}</p>
-                            <p className="font-medium">{getCreatedAt()}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Estado</p>
-                            <Badge variant={client.status === "active" ? "success" : "error"}>
-                                {client.status === "active" ? "Activo" : "Inactivo"}
-                            </Badge>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t("sections.actions")}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 p-2">
-                        <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => router.push(`/clients/register/${client.user_id}/edit`)}
-                        >
-                            <Pencil className="mr-2 h-4 w-4" /> {t("actions.edit")}
-                        </Button>
-
-                        {/* BOTÓN ACTUALIZADO PARA REDIRIGIR AL HISTORIAL DE PAGOS */}
-                        <Button 
-                            variant="outline" 
-                            className="w-full justify-start text-sm"
-                            onClick={() => router.push(`/clients/register/${client.user_id}/payments`)}
-                        >
-                            <CreditCard className="mr-2 h-4 w-4" /> {t("actions.membership_history")}
-                        </Button>
-
-                        <Button variant="outline" className="w-full justify-start text-sm">
-                            <Eye className="mr-2 h-4 w-4" /> {t("actions.attendance_history")}
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start">
-                            <FileText className="mr-2 h-4 w-4" /> {t("actions.complaints")}
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start">
-                            <Activity className="mr-2 h-4 w-4" /> {t("actions.activity")}
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start">
-                            <BarChart className="mr-2 h-4 w-4" /> {t("actions.rfm")}
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Sección adicional de membresía si está disponible */}
-            {client.client_membership && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t("sections.membership")}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <p className="text-sm text-muted-foreground">Tipo de Membresía</p>
-                                <p className="font-medium">{client.client_membership.membership_type_id}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Fecha Inicio</p>
-                                <p className="font-medium">{formatDate(client.client_membership.start_date, locale)}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Fecha Fin</p>
-                                <p className="font-medium">{formatDate(client.client_membership.end_date, locale)}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Estado</p>
-                                <Badge variant={client.client_membership.status === "active" ? "success" : "error"}>
-                                    {client.client_membership.status}
-                                </Badge>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+      <div className="flex-1 space-y-8 p-8 pt-6">
+        <PageHeader title={t("loading")} subtitle={t("loading_subtitle")} />
+        <div className="flex items-center justify-center h-64 animate-pulse text-lg text-muted-foreground italic font-black">
+          {t("loading_message")}...
         </div>
+      </div>
     );
+  }
+
+  if (error || !user) {
+    if (error === 401) {
+        router.replace("/login");
+    }
+   return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
+        <div className="p-4 bg-red-50 rounded-full">
+          <AlertCircle className="h-12 w-12 text-red-500" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-black uppercase italic tracking-tighter">
+            {error === 404 ? "Cliente no encontrado" : "Error de conexión"}
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+            No pudimos obtener la información del perfil. Verifica tu conexión o intenta nuevamente.
+          </p>
+        </div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="text-xs font-bold uppercase underline tracking-widest text-primary"
+        >
+          Reintentar cargar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 space-y-8 p-8 pt-6 animate-in fade-in duration-500">
+      <PageHeader
+        title={isEditing ? "EDITANDO PERFIL" : t("title")}
+        subtitle={isEditing 
+          ? "Modifica la información personal y de contacto del cliente." 
+          : t("subtitle", { name: `${user.first_name} ${user.last_name}` })
+        }
+      />
+
+      <Tabs defaultValue="general" className="w-full space-y-6">
+        <TabsList className="bg-muted/50 p-1 border">
+          <TabsTrigger value="general" className="px-8 font-bold italic uppercase tracking-tighter">
+            General
+          </TabsTrigger>
+          <TabsTrigger value="medical" className="px-8 font-bold italic uppercase tracking-tighter">
+            Ficha Médica
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="space-y-6 outline-none">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {isEditing ? (
+              <ClientEditForm
+                client={user}
+                onSave={handleSave}
+                onCancel={() => setIsEditing(false)}
+                isSubmitting={isUpdating}
+              />
+            ) : (
+              <ClientPersonalInfo 
+                client={user} 
+                t={t} 
+                formatDate={(d) => formatDate(d, locale)} 
+                formatPhone={(p) => p || "N/A"} 
+              />
+            )}
+
+            <ClientActions 
+              userId={user.user_id} 
+              t={t} 
+              onNavigate={(path) => router.push(path)} 
+              onEditClick={() => setIsEditing(true)} 
+            />
+          </div>
+
+          {!isEditing && user.client_membership && (
+            <MembershipInfo 
+              membership={user.client_membership} 
+              t={t} 
+              formatDate={(d) => formatDate(d, locale)} 
+            />
+          )}
+        </TabsContent>
+        <TabsContent value="medical" className="outline-none">
+          <div className="p-2 border-2 border-dashed border-muted rounded-xl bg-muted/20 text-center">
+             <ClientMedicalSection userId={user.user_id} token={token} />
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }

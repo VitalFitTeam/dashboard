@@ -20,7 +20,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div className="flex items-start justify-between pb-4 ">
       <div>
-        <h2 className={cn(typography.heading, "text-4xl")}>{title}</h2>
+        <h1 >{title}</h1>
         {subtitle && <p className="mt-1 text-base text-gray-600">{subtitle}</p>}
       </div>
       <div className="flex items-center space-x-2">

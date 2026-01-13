@@ -1445,7 +1445,8 @@
   },
   "clients": {
     "title": "CLIENTS",
-    "add_button": "Add a Client",
+    "description": "View, filter, and manage access for all users registered on the platform.",
+    "add_button": "New Client",
     "stats": {
       "total": "TOTAL",
       "active": "ACTIVE",
@@ -1472,7 +1473,7 @@
       }
     },
     "table": {
-      "filter_placeholder": "Filter name or email",
+      "filter_placeholder": "Filter first name or last name",
       "filter_role": "Filter by Role",
       "all_roles": "All Roles",
       "all_categories": "All categories",
@@ -1604,7 +1605,7 @@
       },
       "actions": {
         "edit": "Edit Client",
-        "membership_history": "Membership & Payment History",
+        "membership_history": "invoices & Payment History",
         "attendance_history": "Attendance History",
         "complaints": "View Complaints & Suggestions",
         "activity": "View Activity & Scoring",

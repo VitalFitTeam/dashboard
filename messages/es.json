@@ -1444,7 +1444,8 @@
   },
   "clients": {
     "title": "CLIENTES",
-    "add_button": "Agregar un Cliente",
+    "description": "Visualiza, filtra y administra el acceso de los usuarios registrados en la plataforma.",
+    "add_button": "Nuevo Cliente",
     "stats": {
       "total": "TOTAL",
       "active": "ACTIVOS",
@@ -1471,7 +1472,7 @@
       }
     },
     "table": {
-      "filter_placeholder": "Filtrar nombre o email",
+      "filter_placeholder": "Filtrar por nombre o apellido",
       "filter_role": "Filtrar por Rol",
       "all_roles": "Todos los Roles",
       "all_categories": "Todas las categorías",
@@ -1603,7 +1604,7 @@
       },
       "actions": {
         "edit": "Editar Cliente",
-        "membership_history": "Historial de Membresías y Pago",
+        "membership_history": "Historial de Facturas y Pago",
         "attendance_history": "Historial de asistencia",
         "complaints": "Ver Quejas y Sugerencias",
         "activity": "Ver Actividad y Scoring",
