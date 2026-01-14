@@ -2,6 +2,7 @@
 
 import { 
   UserIcon,
+  UserMinus,
   UsersIcon
 } from "lucide-react"; 
 import { ReportStatItem } from "../ReportStatItem";
@@ -68,6 +69,21 @@ export function RetentionRate({ token, branchId }: StatProps) {
       isLoading={isLoading} 
       defaultTitle={t("retention_rate")}
       icon={UserIcon}
+      formatType="percentage" 
+    />
+  );
+}
+
+export function ChurnRateKPI({ token, branchId }: StatProps) {
+  const t = useTranslations("analytics.clients.stats");
+  const { data, isLoading } = useClientReport.useChurnRateKPI(token, branchId);
+  
+  return (
+    <ReportStatItem
+      data={data} 
+      isLoading={isLoading} 
+      defaultTitle={t("churn_rate")} 
+      icon={UserMinus} 
       formatType="percentage" 
     />
   );

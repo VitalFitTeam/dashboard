@@ -6,14 +6,14 @@ import {
   Pencil, 
   CreditCard, 
   Eye, 
-  FileText, 
-  Activity, 
-  BarChart 
+  FileText,  
+  BarChart,
+  ClipboardList 
 } from "lucide-react";
 
 interface Props {
   userId: string;
-  t: any; // Objeto de traducción pasado desde el padre
+  t: any; 
   onNavigate: (path: string) => void;
   onEditClick: () => void;
 }
@@ -34,16 +34,16 @@ export const ClientActions = ({ userId, t, onNavigate, onEditClick }: Props) => 
     { 
       label: t("actions.attendance_history"), 
       icon: Eye, 
-      onClick: null 
+      onClick: () => onNavigate(`/clients/register/${userId}/attendance`) 
+    },
+    { 
+      label: t("actions.service_usage"), 
+      icon: ClipboardList, 
+      onClick: () => onNavigate(`/clients/register/${userId}/service-usage`) 
     },
     { 
       label: t("actions.complaints"), 
       icon: FileText, 
-      onClick: null 
-    },
-    { 
-      label: t("actions.activity"), 
-      icon: Activity, 
       onClick: null 
     },
     { 

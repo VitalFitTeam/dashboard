@@ -19,6 +19,7 @@ import { UserRole } from "@/lib/roles";
 
 import { 
   ActiveMember, 
+  ChurnRateKPI, 
   NewClients, 
   RetentionRate, 
   TotalClients 
@@ -134,7 +135,6 @@ export default function ClientReportPage() {
           onRangeChange={setRange}
           startDate={startDate}
           endDate={endDate}
-          // ✅ Pasamos handlers
           onStartDateChange={handleStartDateChange}
           onEndDateChange={handleEndDateChange}
           loadingBranches={loadingBranches}
@@ -145,11 +145,12 @@ export default function ClientReportPage() {
         />
       </div>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <TotalClients token={token} />
         <ActiveMember token={token} branchId={selectedBranch} />
         <NewClients token={token} branchId={selectedBranch} />
-        <RetentionRate token={token} />
+        <RetentionRate token={token} branchId={selectedBranch}/>
+        <ChurnRateKPI token={token}  branchId={selectedBranch}/>
       </section>
 
       <div className="space-y-8">

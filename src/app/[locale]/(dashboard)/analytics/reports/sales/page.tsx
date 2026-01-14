@@ -17,7 +17,7 @@ import { ReportFilters } from "@/components/modules/analytics/ReportFilter";
 import { EmptyChartPlaceholder } from "@/components/modules/analytics/sales/EmptyChartPlaceholder";
 
 import {
-  AverageTicsketStat,
+  AverageTicketStat,
   GlobalStats,
   TotalSales,
   TotalTransactionsStat,
@@ -152,7 +152,7 @@ export default function SalesPage() {
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <TotalSales token={token} />
         <GlobalStats token={token} />
-        <AverageTicsketStat token={token} branchId={selectedBranch} />
+        <AverageTicketStat token={token} branchId={selectedBranch} />
         <TotalTransactionsStat token={token} branchId={selectedBranch} />
       </section>
 

@@ -225,9 +225,10 @@
       "subtitle": "Rendimiento comercial, métodos de pago y productividad de sucursales",
       "export": "Exportar Reporte",
       "stats": {
-        "total_sales": "Ventas Totales",
-        "membership_sales": "Ventas de Membresías",
-        "transactions": "Transacciones Totales",
+        "total_sales": "Ventas Totales Históricas",
+        "average_ticket": "KPI Ticket Promedio (Mensual)",
+        "total_transactions": "Estadísticas de Volumen de Transacciones",
+        "global_sales": "Desempeño de Ventas Global",
         "comparison": "vs. mes anterior",
         "monthly_sales": "Ventas del Mes"
       },
@@ -302,9 +303,10 @@
       },
       "stats": {
         "total_clients": "Total de clientes",
-        "active_members": "Clientes activos",
+        "active_members": "Miembros de sucursal activos",
         "new_clients": "Nuevos clientes",
-        "retention_rate": "Tasa de retención"
+        "retention_rate": "Tasa de retención",
+        "churn_rate": "Tasa de Deserción Mensual"
       },
       "filters": {
         "all_branches": "Todas las sucursales",
@@ -1451,6 +1453,19 @@
     "title": "CLIENTES",
     "description": "Visualiza, filtra y administra el acceso de los usuarios registrados en la plataforma.",
     "add_button": "Nuevo Cliente",
+    "create": {
+      "title": "Registrar Nuevo Cliente",
+      "subtitle": "Complete los datos para dar de alta a un nuevo miembro en el sistema.",
+      "cancel_button": "Cancelar",
+      "create_button": "Crear Cliente",
+      "creating": "Creando...",
+      "success": "Cliente creado exitosamente",
+      "error": "Ocurrió un error al crear el cliente",
+      "validation_error": "Por favor corrija los siguientes errores: {errors}",
+      "auth_error": "Error de autenticación. Inicie sesión de nuevo.",
+      "invalid_data": "Los datos proporcionados son inválidos.",
+      "email_in_use": "Este correo electrónico ya está registrado."
+    },
     "stats": {
       "total": "TOTAL",
       "active": "ACTIVOS",
@@ -1500,28 +1515,30 @@
     "form": {
       "sections": {
         "basic": "Información Básica",
-        "identity": "Identificación y Contacto"
+        "identity": "Documentación y Contacto"
       },
       "labels": {
-        "first_name": "Nombre",
-        "last_name": "Apellido",
-        "email": "Correo electrónico",
-        "birth_date": "Fecha de nacimiento*",
-        "gender": "Género*",
-        "identity_document": "Documento de identidad*",
-        "phone": "Teléfono",
-        "category": "Categoría del cliente",
-        "status": "Estado",
-        "image_url": "URL de Imagen",
-        "image_hint": "Haz clic en la foto para cambiarla"
+        "profile_picture": "Foto de Perfil",
+        "optional": "(Opcional)",
+        "first_name": "Nombres",
+        "last_name": "Apellidos",
+        "email": "Correo Electrónico",
+        "birth_date": "Fecha de Nacimiento",
+        "gender": "Género",
+        "identity_document": "Documento de Identidad",
+        "phone": "Teléfono Móvil"
       },
-      "gender_options": {
+      "gender": {
         "female": "Femenino",
         "male": "Masculino",
-        "other": "Otro"
+        "prefer-not-to-say": "Prefiero no especificarlo"
       },
-      "placeholder": {
-        "select": "Selecciona un elemento"
+     "placeholders": {
+        "first_name": "Ej. Juan Alberto",
+        "last_name": "Ej. Pérez García",
+        "select_date": "Seleccionar fecha",
+        "month": "Mes",
+        "year": "Año"
       },
       "validations": {
         "first_name_required": "El nombre es requerido",
@@ -1535,6 +1552,11 @@
         "min_2": "Mínimo 2 caracteres",
         "min_10": "Mínimo 10 dígitos",
         "invalid_url": "URL inválida"
+      },
+      "notifications": {
+        "invalid_image": "El archivo no es una imagen válida",
+        "image_success": "Foto cargada correctamente",
+        "image_error": "Error al subir la imagen"
       }
     },
     "view": {
@@ -1567,7 +1589,8 @@
         "image_hint": "Haz clic en la foto para cambiarla",
         "image_url": "URL de Imagen",
         "role": "Rol de Usuario",
-       "default_role": "Cliente"
+        "default_role": "Cliente",
+        "status": "Estado del Cliente"
       },
       "status": {
         "active": "Activa",
@@ -1581,6 +1604,7 @@
         "edit": "Editar Perfil",
         "membership_history": "Historial de Pagos",
         "attendance_history": "Registro de Asistencia",
+        "service_usage": "Uso de Servicios",
         "complaints": "Quejas y Sugerencias",
         "activity": "Log de Actividad",
         "rfm": "Análisis RFM"
@@ -1681,6 +1705,60 @@
       "image_error": "Error al subir la imagen",
       "email_in_use": "El correo electrónico ya está en uso",
       "session_expired": "Sesión expirada. Por favor inicia sesión nuevamente"
+    },
+    "AttendanceHistory": {
+    "title": "Historial de Asistencias",
+    "subtitle": "Visualiza y filtra los registros de acceso y clases del cliente.",
+    "filters": {
+      "from": "Desde",
+      "until": "Hasta",
+      "placeholder": "Seleccionar fecha",
+      "clear": "Limpiar"
+    },
+    "states": {
+      "loading": "Actualizando datos...",
+      "errorTitle": "Error de conexión",
+      "errorSubtitle": "No pudimos obtener el historial en este momento.",
+      "retry": "Reintentar"
+    },
+   "AttendanceTable": {
+    "columns": {
+      "classService": "Clase / Servicio",
+      "classTime": "Horario Clase",
+      "checkIn": "Check-in",
+      "status": "Estado"
+    },
+    "placeholders": {
+      "facilityUse": "Uso de Instalaciones",
+      "generalService": "Servicio General",
+      "notApplicable": "No aplica"
+    },
+    "status": {
+      "Attended": "Asistió",
+      "NoShow": "No asistió",
+      "Late": "Tarde"
+    }
+  }
+  },
+  "ServiceUsage": {
+      "title": "Uso de Servicios",
+      "subtitle": "Análisis de servicios consumidos por el cliente en todas las sucursales.",
+      "Table": {
+        "columns": {
+          "service": "Servicio",
+          "branch": "Sucursal",
+          "date": "Fecha y Hora",
+          "status": "Estado"
+        },
+        "placeholders": {
+          "unknownBranch": "Sucursal Principal"
+        },
+        "status": {
+          "Attended": "Asistió",
+          "NoShow": "No asistió",
+          "Late": "Tarde"
+        }
+      }
     }
   },
   "branches": {
@@ -2745,7 +2823,8 @@
         "get": "GET",
         "post": "POST",
         "put": "PUT",
-        "delete": "DELETE"
+        "delete": "DELETE",
+        "patch": "PATCH"
       },
       "details": {
         "title": "Análisis de Operación",

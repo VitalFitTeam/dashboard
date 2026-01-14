@@ -7,9 +7,9 @@ import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { SignUpRequest, UserGender, isAPIError } from "@vitalfit/sdk";
 import { toast } from "sonner";
-import ClientsForm, { ClientData } from "../ClientsForm";
 import { getClientSchema } from "@/lib/validation/clientSchema";
 import { useTranslations } from "next-intl";
+import ClientsForm, { ClientData } from "@/components/modules/clients/ClientsForm";
 
 function normalizeGenderForAPI(gender: string): UserGender | null {
     const genderMap: Record<string, UserGender> = {
@@ -35,11 +35,11 @@ export default function NewClient() {
         last_name: "",
         email: "",
         birth_date: "",
-        gender: "",
+        gender: "prefer-not-to-say", 
         identity_document: "",
         phone: "",
-        category: "",
-        status: "active",
+        profile_picture_url: "",
+        role_name: "client" 
     });
 
     const [isSaving, setIsSaving] = useState(false);
@@ -57,16 +57,11 @@ export default function NewClient() {
 
         if (!result.success) {
             const formattedErrors: Partial<Record<keyof ClientData, string>> = {};
-            const errorMessages: string[] = [];
-
             result.error.issues.forEach(issue => {
                 const path = issue.path[0] as keyof ClientData;
                 formattedErrors[path] = issue.message;
-                errorMessages.push(issue.message);
             });
-
             setFormErrors(formattedErrors);
-            setError(t("validation_error", { errors: errorMessages.join(", ") }));
             return;
         }
 
@@ -75,22 +70,18 @@ export default function NewClient() {
         setError(null);
 
         try {
-            const defaultPassword = `Vital.${client.identity_document.trim()}!`;
-
-            const createData: SignUpRequest = {
-                first_name: client.first_name,
-                last_name: client.last_name,
-                email: client.email,
-                password: defaultPassword,
-                identity_document: client.identity_document,
-                phone: client.phone || null,
-                birth_date: client.birth_date,
+            const createData = {
+                first_name: client.first_name.trim(),
+                last_name: client.last_name.trim(),
+                email: client.email.toLowerCase().trim(),
+                birth_date: client.birth_date, 
                 gender: normalizeGenderForAPI(client.gender),
-                role_name: "client",
-                profile_picture_url: null
+                identity_document: client.identity_document.trim(),
+                phone: client.phone || "",
+                profile_picture_url: client.profile_picture_url || "",
+                role_name: "client" 
             };
-
-            await api.auth.signUpStaff(createData, token);
+            await api.auth.signUpStaff(createData as SignUpRequest, token);
 
             toast.success(t("success"));
 
@@ -100,24 +91,16 @@ export default function NewClient() {
 
         } catch (error: any) {
             console.error("Error creating client:", error);
-
             let errorMessage = t("error");
 
             if (isAPIError(error)) {
-                errorMessage = `Error: ${error.messages.join(", ")}`;
-
-                if (error.status === 400) {
-                    errorMessage = t("invalid_data");
-                } else if (error.status === 409) {
-                    errorMessage = t("email_in_use");
-                }
+                errorMessage = error.messages.join(", ");
             } else if (error.message) {
                 errorMessage = error.message;
             }
 
             setError(errorMessage);
             toast.error(errorMessage);
-
         } finally {
             setIsSaving(false);
         }
@@ -128,7 +111,7 @@ export default function NewClient() {
     };
 
     return (
-        <div className="flex-1 space-y-8 p-8 pt-6">
+        <div className="flex-1 space-y-8 p-8 pt-6 max-w-4xl mx-auto">
             <PageHeader
                 title={t("title")}
                 subtitle={t("subtitle")}
@@ -138,35 +121,40 @@ export default function NewClient() {
                 </Button>
             </PageHeader>
 
-            {error && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-red-700">{error}</p>
-                </div>
-            )}
+            <div className="grid gap-6">
+                <ClientsForm
+                    client={client}
+                    onChange={(field, value) => {
+                        setClient(prev => ({ ...prev, [field]: value }));
+                        if (formErrors[field]) {
+                            setFormErrors(prev => ({ ...prev, [field]: undefined }));
+                        }
+                    }}
+                    errors={formErrors}
+                    mode="create"
+                />
 
-            <ClientsForm
-                client={client}
-                onChange={(field, value) => {
-                    setClient(prev => ({ ...prev, [field]: value }));
-                    if (formErrors[field]) {
-                        setFormErrors(prev => ({ ...prev, [field]: undefined }));
-                    }
-                }}
-                errors={formErrors}
-                mode="create"
-                onSave={handleCreate}
-                onCancel={handleCancel}
-            />
-            <Button className="mt-4 w-full" onClick={handleCreate} disabled={isSaving}>
-                {isSaving ? (
-                    <>
-                        <span className="mr-2">{t("creating")}</span>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    </>
-                ) : (
-                    t("create_button")
+                <Button 
+                    className="w-full h-12 text-base font-bold uppercase tracking-wider shadow-lg transition-all hover:scale-[1.01]" 
+                    onClick={handleCreate} 
+                    disabled={isSaving}
+                >
+                    {isSaving ? (
+                        <div className="flex items-center gap-3">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            <span>{t("creating")}</span>
+                        </div>
+                    ) : (
+                        t("create_button")
+                    )}
+                </Button>
+
+                {error && (
+                    <p className="text-sm font-medium text-destructive text-center animate-bounce">
+                        {error}
+                    </p>
                 )}
-            </Button>
+            </div>
         </div>
     );
 }

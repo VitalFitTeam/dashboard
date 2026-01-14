@@ -225,9 +225,10 @@
       "subtitle": "Commercial performance, payment methods, and branch productivity",
       "export": "Export Report",
       "stats": {
-        "total_sales": "Total Sales",
-        "membership_sales": "Membership Sales",
-        "transactions": "Total Transactions",
+        "total_sales": "Total Sales Lifetime",
+        "average_ticket": "Average Ticket KPI (MoM)",
+        "total_transactions": "Transaction Volume Stats",
+        "global_sales": "Global Sales Performance",
         "comparison": "vs. previous month",
         "monthly_sales": "Monthly Sales"
       },
@@ -235,7 +236,6 @@
         "all_branches": "All branches",
         "required_title": "Selection Required",
         "required_description": "Please select a date range to view sales distribution.",
-        
         "ranges": {
           "this_month": "This month",
           "last_month": "Last month",
@@ -293,7 +293,6 @@
             "tooltip_sales": "Sales"
           }
         }
-       
       }
     },
     "clients": {
@@ -304,9 +303,10 @@
       },
       "stats": {
         "total_clients": "Total clients",
-        "active_members": "Active clients",
+        "active_members": "Active Branch Members",
         "new_clients": "New clients",
-        "retention_rate": "Retention rate"
+        "retention_rate": "Retention rate",
+        "churn_rate": "Monthly Churn Rate"
       },
       "filters": {
         "all_branches": "All branches",
@@ -1455,6 +1455,19 @@
     "title": "CLIENTS",
     "description": "View, filter, and manage access for users registered on the platform.",
     "add_button": "New Client",
+    "create": {
+      "title": "Register New Client",
+      "subtitle": "Fill in the details to register a new member in the system.",
+      "cancel_button": "Cancel",
+      "create_button": "Create Client",
+      "creating": "Creating...",
+      "success": "Client created successfully",
+      "error": "An error occurred while creating the client",
+      "validation_error": "Please fix the following errors: {errors}",
+      "auth_error": "Authentication error. Please log in again.",
+      "invalid_data": "The provided data is invalid.",
+      "email_in_use": "This email address is already registered."
+    },
     "stats": {
       "total": "TOTAL",
       "active": "ACTIVE",
@@ -1507,27 +1520,27 @@
         "identity": "Identification & Contact"
       },
       "labels": {
+       "profile_picture": "Profile Picture",
+        "optional": "(Optional)",
         "first_name": "First Name",
         "last_name": "Last Name",
         "email": "Email Address",
-        "birth_date": "Date of Birth*",
-        "gender": "Gender*",
-        "identity_document": "Identity Document*",
-        "phone": "Phone Number",
-        "category": "Client Category",
-        "status": "Status",
-        "image_url": "Image URL",
-        "image_hint": "Click on the photo to change it",
-        "role": "User Role",
-        "default_role": "Client"
+        "birth_date": "Date of Birth",
+        "gender": "Gender",
+        "identity_document": "Identity Document",
+        "phone": "Mobile Phone"
       },
-      "gender_options": {
+      "gender": {
         "female": "Female",
         "male": "Male",
-        "other": "Other"
+        "prefer-not-to-say": "Prefer not to say"
       },
-      "placeholder": {
-        "select": "Select an item"
+      "placeholders": {
+        "first_name": "e.g. John Albert",
+        "last_name": "e.g. Doe Smith",
+        "select_date": "Select date",
+        "month": "Month",
+        "year": "Year"
       },
       "validations": {
         "first_name_required": "First name is required",
@@ -1541,6 +1554,11 @@
         "min_2": "Minimum 2 characters",
         "min_10": "Minimum 10 digits",
         "invalid_url": "Invalid URL"
+      },
+      "notifications": {
+        "invalid_image": "The file is not a valid image",
+        "image_success": "Photo uploaded successfully",
+        "image_error": "Error uploading the image"
       }
     },
     "view": {
@@ -1551,7 +1569,7 @@
       "loading": "Loading...",
       "loading_subtitle": "Fetching data from server",
       "loading_message": "We are preparing the information",
-       "validation": {
+      "validation": {
         "min_2": "Minimum 2 characters",
         "min_10": "Minimum 10 digits",
         "invalid_email": "Invalid email address",
@@ -1583,7 +1601,6 @@
         "image_url": "Image URL",
         "role": "User Role",
         "status": "System Status",
-        "role": "User Role",
         "default_role": "Client"
       },
       "status": {
@@ -1598,6 +1615,7 @@
         "edit": "Edit Profile",
         "membership_history": "Payment History",
         "attendance_history": "Attendance Record",
+        "service_usage": "Service Usage",
         "complaints": "Complaints & Suggestions",
         "activity": "Activity Log",
         "rfm": "RFM Analysis"
@@ -1609,7 +1627,7 @@
       },
       "errors": {
         "not_found": "Client not found",
-        "connection": "Connection error", 
+        "connection": "Connection error",
         "description": "We couldn't fetch the profile information. Please check your connection or try again.",
         "retry": "Retry loading"
       },
@@ -1678,9 +1696,7 @@
         "pending": "Pending",
         "error": "Error"
       }
-     
     },
-    
     "notifications": {
       "update_success": "Client updated successfully",
       "update_error": "Error updating information",
@@ -1692,6 +1708,60 @@
       "image_error": "Error uploading image",
       "email_in_use": "Email address already in use",
       "session_expired": "Session expired. Please log in again"
+    },
+    "AttendanceHistory": {
+      "title": "Attendance History",
+      "subtitle": "View and filter client access logs and class attendance.",
+      "filters": {
+        "from": "From",
+        "until": "Until",
+        "placeholder": "Select date",
+        "clear": "Clear"
+      },
+      "states": {
+        "loading": "Updating data...",
+        "errorTitle": "Connection Error",
+        "errorSubtitle": "We could not fetch the history at this time.",
+        "retry": "Retry"
+      },
+      "AttendanceTable": {
+        "columns": {
+          "classService": "Class / Service",
+          "classTime": "Class Time",
+          "checkIn": "Check-in",
+          "status": "Status"
+        },
+        "placeholders": {
+          "facilityUse": "Facility Use",
+          "generalService": "General Service",
+          "notApplicable": "N/A"
+        },
+        "status": {
+          "Attended": "Attended",
+          "NoShow": "No Show",
+          "Late": "Late"
+        }
+      }
+    },
+    "ServiceUsage": {
+      "title": "Service Usage",
+      "subtitle": "Analysis of services consumed by the client across all branches.",
+      "Table": {
+        "columns": {
+          "service": "Service",
+          "branch": "Branch",
+          "date": "Date & Time",
+          "status": "Status"
+        },
+        "placeholders": {
+          "unknownBranch": "Main Branch"
+        },
+        "status": {
+          "Attended": "Attended",
+          "NoShow": "No Show",
+          "Late": "Late"
+        }
+      }
     }
   },
   "branches": {
@@ -2287,27 +2357,27 @@
         "notAvailable": "N/A"
       },
       "quickView": {
-      "loading": "Loading invoice...",
-      "accessibleTitle": "Invoice",
-      "accessibleDescription": "Detailed view of invoice charges and payments.",
-      "badgeLabel": "Financial Summary",
-      "conceptsTitle": "Acquired Concepts",
-      "defaultItemName": "Service / Membership",
-      "quantity": "Qty",
-      "totalAmountLabel": "Invoice Amount",
-      "subtotal": "Subtotal",
-      "taxes": "Taxes",
-      "totalPaidLabel": "Total Received",
-      "fullManagementBtn": "FULL MANAGEMENT",
-      "readOnlyMode": "Read-Only Mode",
-      "printTitle": "Print",
-      "status": {
-        "paid": "Paid",
-        "unpaid": "Unpaid",
-        "pending": "Pending",
-        "canceled": "Canceled"
+        "loading": "Loading invoice...",
+        "accessibleTitle": "Invoice",
+        "accessibleDescription": "Detailed view of invoice charges and payments.",
+        "badgeLabel": "Financial Summary",
+        "conceptsTitle": "Acquired Concepts",
+        "defaultItemName": "Service / Membership",
+        "quantity": "Qty",
+        "totalAmountLabel": "Invoice Amount",
+        "subtotal": "Subtotal",
+        "taxes": "Taxes",
+        "totalPaidLabel": "Total Received",
+        "fullManagementBtn": "FULL MANAGEMENT",
+        "readOnlyMode": "Read-Only Mode",
+        "printTitle": "Print",
+        "status": {
+          "paid": "Paid",
+          "unpaid": "Unpaid",
+          "pending": "Pending",
+          "canceled": "Canceled"
+        }
       }
-    }
     }
   },
   "branches": {
@@ -2684,36 +2754,36 @@
     }
   },
   "auth": {
-  "activate": {
-    "title": "CONFIRM YOUR PASSWORD",
-    "description": "Please enter your new password to activate your account.",
-    "password_label": "Password",
-    "password_placeholder": "Enter your password",
-    "confirm_password_label": "Confirm Password",
-    "confirm_password_placeholder": "Confirm your password",
-    "button_confirm": "Confirm",
-    "button_loading": "Processing...",
-    "success_message": "Account activated successfully!",
-    "footer_text": "Dashboard System",
-    "login_link": "Login",
-    "remember_password": "Do you remember your password?",
-    "errors": {
-      "invalid_token": "Invalid or expired token.",
-      "check_password": "The password does not meet the requirements.",
-      "confirm_required": "You must confirm your password",
-      "passwords_dont_match": "Passwords do not match",
-      "password_requirements": "Password must include uppercase, numbers, and special characters.",
-      "server_error": "Error activating the account.",
-      "password_min": "Minimum 8 characters.",
-      "password_uppercase": "Uppercase letter missing.",
-      "password_lowercase": "Lowercase letter missing.",
-      "password_number": "Number missing.",
-      "password_special": "Special character missing."
-      
+    "activate": {
+      "title": "CONFIRM YOUR PASSWORD",
+      "description": "Please enter your new password to activate your account.",
+      "password_label": "Password",
+      "password_placeholder": "Enter your password",
+      "confirm_password_label": "Confirm Password",
+      "confirm_password_placeholder": "Confirm your password",
+      "button_confirm": "Confirm",
+      "button_loading": "Processing...",
+      "success_message": "Account activated successfully!",
+      "footer_text": "Dashboard System",
+      "login_link": "Login",
+      "remember_password": "Do you remember your password?",
+      "errors": {
+        "invalid_token": "Invalid or expired token.",
+        "check_password": "The password does not meet the requirements.",
+        "confirm_required": "You must confirm your password",
+        "passwords_dont_match": "Passwords do not match",
+        "password_requirements": "Password must include uppercase, numbers, and special characters.",
+        "server_error": "Error activating the account.",
+        "password_min": "Minimum 8 characters.",
+        "password_uppercase": "Uppercase letter missing.",
+        "password_lowercase": "Lowercase letter missing.",
+        "password_number": "Number missing.",
+        "password_special": "Special character missing."
+      }
     }
-  }
-},"user": {
-  "UserSelectionCard": {
+  },
+  "user": {
+    "UserSelectionCard": {
       "roles": {
         "client": "Client",
         "instructor": "Instructor",
@@ -2756,7 +2826,8 @@
         "get": "GET",
         "post": "POST",
         "put": "PUT",
-        "delete": "DELETE"
+        "delete": "DELETE",
+        "patch": "PATCH"
       },
       "details": {
         "title": "Operation Analysis",
@@ -2945,22 +3016,23 @@
     "noBranchDescription": "Your <role>{role}</role> account is active, but you do not have a valid branch assigned to operate.",
     "retry": "Retry",
     "logout": "Log Out"
-  },"booking": {
-  "errors": {
-    "payment_required": "Active payment or valid membership is required.",
-    "forbidden": "You do not have permission to perform this action.",
-    "unauthorized": "Session expired, please log in again.",
-    "not_found": "Booking not found.",
-    "past_class": "You cannot enroll in a past class.",
-    "full": "Class is full.",
-    "already_booked": "Customer is already enrolled.",
-    "insufficient_credits": "Insufficient credits.",
-    "expired": "Membership has expired.",
-    "unexpected": "An unexpected error occurred."
   },
-  "success": {
-    "booked": "Booking successful",
-    "cancelled": "Cancelled successfully"
+  "booking": {
+    "errors": {
+      "payment_required": "Active payment or valid membership is required.",
+      "forbidden": "You do not have permission to perform this action.",
+      "unauthorized": "Session expired, please log in again.",
+      "not_found": "Booking not found.",
+      "past_class": "You cannot enroll in a past class.",
+      "full": "Class is full.",
+      "already_booked": "Customer is already enrolled.",
+      "insufficient_credits": "Insufficient credits.",
+      "expired": "Membership has expired.",
+      "unexpected": "An unexpected error occurred."
+    },
+    "success": {
+      "booked": "Booking successful",
+      "cancelled": "Cancelled successfully"
+    }
   }
-}
 }
