@@ -1,88 +1,99 @@
 "use client";
 
 import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import InputField from "@/components/ui/InputField";
+import { toast } from "sonner";
+import { api } from "@/lib/sdk-config";
+import { useAuth } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
+import { createPasswordSchema } from "@/lib/validation/passwordSchema";
 
 export const PasswordForm: React.FC = () => {
-  const [form, setForm] = React.useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const { token } = useAuth();
+  const t = useTranslations("ChangePasswordPage");
 
-  const [errors, setErrors] = React.useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const schema = z
+    .object({
+      currentPassword: z.string().min(1, { message: t("passwordRequired") }),
+    })
+    .and(createPasswordSchema(t));
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  type FormData = z.infer<typeof schema>;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const newErrors = {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
       currentPassword: "",
-      newPassword: "",
+      password: "",
       confirmPassword: "",
-    };
-    if (!form.currentPassword) {
-      newErrors.currentPassword = "La contraseña actual es requerida.";
-    }
-    if (!form.newPassword) {
-      newErrors.newPassword = "La nueva contraseña es requerida.";
-    }
-    if (form.newPassword !== form.confirmPassword) {
-      newErrors.confirmPassword = "Las contraseñas no coinciden.";
-    }
+    },
+  });
 
-    setErrors(newErrors);
+  if (!token) {
+    return null;
+  }
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      await api.user.UpgradePassword(
+        token,
+        data.currentPassword,
+        data.password,
+        data.confirmPassword
+      );
+      toast.success(t("successDescription")); // "Password reset successfully!"
+      reset();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || t("genericError"));
+    }
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="p-6 bg-white space-y-6 rounded-xl shadow-sm"
     >
       <div className="space-y-4">
         <InputField
           label="Contraseña Actual*"
           type="password"
-          name="currentPassword"
           placeholder="Ingresa tu contraseña actual"
-          value={form.currentPassword}
-          onChange={handleChange}
-          error={errors.currentPassword}
+          {...register("currentPassword")}
+          error={errors.currentPassword?.message}
         />
 
         <InputField
-          label="Nueva Contraseña*"
+          label={t("newPasswordLabel")}
           type="password"
-          name="newPassword"
-          placeholder="Ingresa una nueva contraseña"
-          value={form.newPassword}
-          onChange={handleChange}
-          error={errors.newPassword}
+          placeholder={t("newPasswordPlaceholder")}
+          {...register("password")}
+          error={errors.password?.message}
         />
 
         <InputField
-          label="Confirmar Nueva Contraseña*"
+          label={t("confirmPasswordLabel")}
           type="password"
-          name="confirmPassword"
-          placeholder="Confirma la nueva contraseña"
-          value={form.confirmPassword}
-          onChange={handleChange}
-          error={errors.confirmPassword}
+          placeholder={t("confirmPasswordPlaceholder")}
+          {...register("confirmPassword")}
+          error={errors.confirmPassword?.message}
         />
       </div>
 
       <div className="pt-4">
-        <Button  variant="default" type="submit">
-          Actualizar Contraseña
+        <Button variant="default" type="submit" disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {t("submitButtonDefault")}
         </Button>
       </div>
     </form>
