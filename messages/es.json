@@ -291,7 +291,6 @@
             "no_data": "No hay datos disponibles",
             "tooltip_sales": "Ventas"
           }
-          
         }
       }
     },
@@ -2601,41 +2600,48 @@
     }
   },
   "auth": {
-  "activate": {
-    "title": "CONFIRMA TU CONTRASEÑA",
-    "description": "Ingrese su nueva contraseña para activar su cuenta.",
-    "password_label": "Contraseña",
-    "password_placeholder": "Ingrese su contraseña",
-    "confirm_password_label": "Confirmar Contraseña",
-    "confirm_password_placeholder": "Confirme su contraseña",
-    "button_confirm": "Confirmar",
-    "button_loading": "Procesando...",
-    "success_message": "¡Cuenta activada exitosamente!",
-    "footer_text": "Sistema de Dashboard",
-    "login_link": "Iniciar Sesión",
-    "remember_password": "¿Recuerdas tu contraseña?",
-    "errors": {
-      "invalid_token": "Token inválido o expirado.",
-      "check_password": "La contraseña no cumple con los requisitos.",
-      "confirm_required": "Debe confirmar la contraseña",
-      "passwords_dont_match": "Las contraseñas no coinciden",
-      "password_requirements": "La contraseña debe incluir mayúsculas, números y caracteres especiales.",
-      "server_error": "Error al activar la cuenta.",
-      "password_min": "Mínimo 8 caracteres.",
-      "password_uppercase": "Falta una mayúscula.",
-      "password_lowercase": "Falta una minúscula.",
-      "password_number": "Falta un número.",
-      "password_special": "Falta un carácter especial."
-      
+    "activate": {
+      "title": "CONFIRMA TU CONTRASEÑA",
+      "description": "Ingrese su nueva contraseña para activar su cuenta.",
+      "password_label": "Contraseña",
+      "password_placeholder": "Ingrese su contraseña",
+      "confirm_password_label": "Confirmar Contraseña",
+      "confirm_password_placeholder": "Confirme su contraseña",
+      "button_confirm": "Confirmar",
+      "button_loading": "Procesando...",
+      "success_message": "¡Cuenta activada exitosamente!",
+      "footer_text": "Sistema de Dashboard",
+      "login_link": "Iniciar Sesión",
+      "remember_password": "¿Recuerdas tu contraseña?",
+      "errors": {
+        "invalid_token": "Token inválido o expirado.",
+        "check_password": "La contraseña no cumple con los requisitos.",
+        "confirm_required": "Debe confirmar la contraseña",
+        "passwords_dont_match": "Las contraseñas no coinciden",
+        "password_requirements": "La contraseña debe incluir mayúsculas, números y caracteres especiales.",
+        "server_error": "Error al activar la cuenta.",
+        "password_min": "Mínimo 8 caracteres.",
+        "password_uppercase": "Falta una mayúscula.",
+        "password_lowercase": "Falta una minúscula.",
+        "password_number": "Falta un número.",
+        "password_special": "Falta un carácter especial."
+      }
     }
-  }
-},
-"user": {
-  "UserSelectionCard": {
+  },
+  "user": {
+    "UserSelectionCard": {
       "roles": {
         "client": "Cliente",
         "instructor": "Instructor",
-        "admin": "Administrador"
+        "admin": "Administrador",
+        "superadmin": "Súper Administrador",
+        "super_admin": "Súper Administrador",
+        "branch_admin": "Admin de Sede",
+        "staff": "Personal",
+        "accountant": "Contador",
+        "data_analyst": "Analista de Datos",
+        "recepcionist": "Recepcionista",
+        "ventas": "Ventas"
       },
       "actions": {
         "enroll": "Inscribir",
@@ -2708,6 +2714,115 @@
         "confirmRevokeOne": "¿Cerrar esta sesión específica?",
         "revokeSuccess": "Sesión(es) revocada(s) con éxito",
         "errorRevoke": "Hubo un problema al intentar cerrar la sesión"
+      }
+    },
+    "management": {
+      "title": "USUARIOS",
+      "add_button": "Agregar Usuario",
+      "edit_title": "MODIFICAR USUARIO",
+      "edit_subtitle": "Editar información del usuario: {name} {lastname}",
+      "create_title": "CREAR NUEVO USUARIO",
+      "create_subtitle": "Complete la información del nuevo usuario",
+      "view_title": "DETALLES DE USUARIO",
+      "view_subtitle": "Información completa del usuario: {name} {lastname}",
+      "personal_info": "Información Personal",
+      "user_id": "ID Usuario",
+      "sessions_info": "Información de sesiones",
+      "stats": {
+        "active_sessions": "Sesiones Activas",
+        "total_logins": "Total inicio de sesión",
+        "daily_average": "Promedio Diario"
+      },
+      "table": {
+        "columns": {
+          "name": "Nombre",
+          "email": "Email",
+          "role": "Rol",
+          "status": "Estado",
+          "status_active": "Activo",
+          "status_inactive": "Inactivo"
+        },
+        "filters": {
+          "search_placeholder": "Buscar por nombre, apellido o email...",
+          "role_placeholder": "Filtrar por Rol",
+          "all_roles": "Todos los Roles"
+        },
+        "actions": {
+          "view": "Ver Detalles",
+          "edit": "Modificar",
+          "delete": "Eliminar",
+          "export": "Exportar CSV",
+          "export_toast": "Función de exportación en desarrollo"
+        },
+        "delete_dialog": {
+          "title": "¿Estás seguro?",
+          "description": "Esta acción eliminará al usuario permanentemente.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "form": {
+        "name": "Nombre*",
+        "lastname": "Apellido*",
+        "email": "Correo Electrónico*",
+        "email_placeholder": "correo@ejemplo.com",
+        "phone": "Número de teléfono*",
+        "document": "Documento de identidad*",
+        "birth_date": "Fecha de Nacimiento*",
+        "gender": "Género*",
+        "role": "Rol del Usuario*",
+        "genders": {
+          "male": "Masculino",
+          "female": "Femenino",
+          "other": "Prefiero no especificarlo"
+        },
+        "next_steps": {
+          "title": "Próximos Pasos",
+          "email_sent": "Se enviará un email de verificación a {email}",
+          "verify": "El usuario debe verificar su email para activar la cuenta",
+          "password": "Después podrá establecer su contraseña inicial",
+          "pending": "El estado será \"Pendiente\" hasta completar la verificación"
+        }
+      },
+      "sessions_modal": {
+        "title": "Sesiones Activas de {name} {lastname}",
+        "empty": "No hay sesiones activas registradas.",
+        "ip_address": "Dirección IP",
+        "started": "Iniciada",
+        "expires": "Expira",
+        "status": {
+          "active": "Activa",
+          "blocked": "Bloqueada"
+        }
+      },
+      "quick_actions": {
+        "title": "Acciones Rápidas",
+        "view_activity": "Ver Registros de Actividades",
+        "view_sessions": "Ver Sesiones",
+        "edit_user": "Editar Usuario"
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "save": "Guardar Cambios",
+        "create": "Crear Usuario"
+      },
+      "notifications": {
+        "creating": "Creando...",
+        "saving": "Guardando...",
+        "create_success": "Usuario creado exitosamente. Se ha enviado un correo de verificación.",
+        "update_success": "Usuario actualizado correctamente",
+        "delete_loading": "Eliminando usuario...",
+        "delete_success": "Usuario eliminado correctamente.",
+        "refresh_loading": "Actualizando lista de usuarios...",
+        "refresh_success": "Lista actualizada",
+        "error_loading": "Error al cargar la información",
+        "error_load_title": "Error de carga",
+        "error_list_load": "No se pudo cargar la lista de usuarios",
+        "error_unauthorized": "No estás autenticado",
+        "error_create": "No se pudo crear el usuario",
+        "error_update": "No se pudo actualizar el usuario",
+        "error_delete": "No se pudo eliminar el usuario",
+        "error_not_found": "No se encontró el usuario solicitado"
       }
     }
   },
@@ -2808,7 +2923,7 @@
         "instructor_desc": "La lista se sincroniza con el control de acceso. Los instructores no pueden modificar reservas activas."
       }
     },
-     "form": {
+    "form": {
       "sections": {
         "general": "Información General",
         "schedule": "Cronograma",
@@ -2857,29 +2972,29 @@
         "recurrence_until_required": "Debes elegir una fecha de fin para la repetición"
       }
     }
-  },"booking": {
-  "errors": {
-    "payment_required": "El alumno no tiene un pago activo o créditos suficientes.",
-    "forbidden": "No tienes permisos para realizar esta acción.",
-    "unauthorized": "Tu sesión ha expirado, por favor vuelve a entrar.",
-    "not_found": "La reserva no fue encontrada.",
-    "past_class": "No puedes inscribir en una clase que ya pasó.",
-    "full": "La clase ya no tiene cupos disponibles.",
-    "already_booked": "Este cliente ya está inscrito en esta clase.",
-    "insufficient_credits": "El cliente no tiene créditos suficientes.",
-    "expired": "La membresía del cliente ha expirado.",
-    "unexpected": "Ocurrió un error inesperado en el sistema."
   },
-  "success": {
-    "booked": "Reserva realizada con éxito",
-    "cancelled": "Reserva cancelada correctamente"
-  }
-},
+  "booking": {
+    "errors": {
+      "payment_required": "El alumno no tiene un pago activo o créditos suficientes.",
+      "forbidden": "No tienes permisos para realizar esta acción.",
+      "unauthorized": "Tu sesión ha expirado, por favor vuelve a entrar.",
+      "not_found": "La reserva no fue encontrada.",
+      "past_class": "No puedes inscribir en una clase que ya pasó.",
+      "full": "La clase ya no tiene cupos disponibles.",
+      "already_booked": "Este cliente ya está inscrito en esta clase.",
+      "insufficient_credits": "El cliente no tiene créditos suficientes.",
+      "expired": "La membresía del cliente ha expirado.",
+      "unexpected": "Ocurrió un error inesperado en el sistema."
+    },
+    "success": {
+      "booked": "Reserva realizada con éxito",
+      "cancelled": "Reserva cancelada correctamente"
+    }
+  },
   "ProtectedRoute": {
     "noBranchTitle": "Sede no configurada",
     "noBranchDescription": "Tu cuenta de <role>{role}</role> está activa, pero no tienes una sede válida asignada para operar.",
     "retry": "Reintentar",
     "logout": "Cerrar Sesión"
   }
-
 }

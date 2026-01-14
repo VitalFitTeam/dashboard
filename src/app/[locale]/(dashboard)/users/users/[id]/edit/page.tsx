@@ -9,6 +9,9 @@ import { Users } from "@/models/users";
 import { api } from "@/lib/sdk-config";
 import { GetUserResponse, UpdateUserStaffRequest } from "@vitalfit/sdk";
 import { useRouter } from "@/i18n/navigation";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+
 
 type UserRole = Users["rol"];
 
@@ -16,8 +19,10 @@ export default function EditUserPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
     const { token } = useAuth();
+    const t = useTranslations("user.management");
 
-    const normalizePhone = (phone: string) => phone.replace(/\s+/g, "");
+
+    const normalizePhone = (phone: string) => phone.replace(/[^\d+]/g, "");
 
     const mapGenderToBackend = (gender: string): "male" | "female" | "prefer-not-to-say" => {
         const backendMap: Record<string, "male" | "female" | "prefer-not-to-say"> = {
@@ -27,6 +32,7 @@ export default function EditUserPage() {
             "male": "male",
             "female": "female",
             "other": "prefer-not-to-say",
+            "prefer-not-to-say": "prefer-not-to-say",
         };
 
         return backendMap[gender] || "prefer-not-to-say";
@@ -54,11 +60,13 @@ export default function EditUserPage() {
     const mapRoleNameToValidRole = (roleName: string): UserRole => {
         const roleMapping: Record<string, UserRole> = {
             "super_admin": "super_admin",
+            "superadmin": "super_admin",
             "branch_admin": "branch_admin",
             "accountant": "accountant",
             "data_analyst": "data_analyst",
             "instructor": "instructor",
             "recepcionist": "recepcionist",
+            "staff": "staff",
             "client": "client",
             "Super Administrador": "super_admin",
             "Administrador de sede": "branch_admin",
@@ -76,14 +84,15 @@ export default function EditUserPage() {
         const loadUser = async () => {
             if (!id || !token) {
                 if (!token) {
-                    setError("No estás autenticado");
+                    setError(t("notifications.error_unauthorized"));
                     setIsLoading(false);
                     return;
                 }
-                setError("No se pudo cargar el usuario");
+                setError(t("notifications.error_loading"));
                 setIsLoading(false);
                 return;
             }
+
 
             setIsLoading(true);
             setError(null);
@@ -95,7 +104,7 @@ export default function EditUserPage() {
                     const roleName = userData.role_name || "";
                     const validRole = mapRoleNameToValidRole(roleName);
                     const normalizedGender = mapGenderToBackend(userData.gender);
-                     
+
                     setFormData({
                         id: userData.user_id || "",
                         name: userData.first_name || "",
@@ -110,11 +119,12 @@ export default function EditUserPage() {
                         uacceso: "",
                     });
                 } else {
-                    setError("No se encontró el usuario solicitado");
+                    setError(t("notifications.error_not_found"));
                 }
+
             } catch (err) {
-                console.error("Error cargando usuario:", err);
-                setError("No se pudo cargar la información del usuario.");
+                console.error("Error loading user:", err);
+                setError(t("notifications.error_loading"));
             } finally {
                 setIsLoading(false);
             }
@@ -125,7 +135,7 @@ export default function EditUserPage() {
 
     const handleChange = (field: keyof Users, value: string) => {
         if (field === "rol") {
-            const validRoles: UserRole[] = ["super_admin", "branch_admin", "accountant", "data_analyst", "instructor", "recepcionist", "client"];
+            const validRoles: UserRole[] = ["super_admin", "branch_admin", "accountant", "data_analyst", "instructor", "recepcionist", "client", "staff"];
             const isValidRole = validRoles.includes(value as UserRole);
 
             setFormData((prev) => ({
@@ -148,14 +158,15 @@ export default function EditUserPage() {
         e.preventDefault();
 
         if (!token) {
-            setError("No estás autenticado");
+            setError(t("notifications.error_update"));
             return;
         }
 
         if (!id) {
-            setError("ID de usuario no válido");
+            setError(t("notifications.error_update"));
             return;
         }
+
 
         setIsSaving(true);
         setError(null);
@@ -166,7 +177,7 @@ export default function EditUserPage() {
                 first_name: formData.name.trim() || undefined,
                 last_name: formData.lastname.trim() || undefined,
                 email: formData.email.trim() || undefined,
-                phone: formData.phone.trim() || undefined,
+                phone: formData.phone.replace(/\D/g, "") || undefined,
                 identity_document: formData.document.trim() || undefined,
                 birth_date: formData.date || undefined,
                 gender: mapGenderToBackend(formData.gender),
@@ -178,7 +189,8 @@ export default function EditUserPage() {
             // Llamar al API para actualizar el usuario
             const response = await api.user.updateUserStaff(id, updateData, token);
 
-            setSuccess("Usuario actualizado correctamente");
+            toast.success(t("notifications.update_success"));
+
 
             setTimeout(() => {
                 router.replace(`/users/users/${id}`);
@@ -187,8 +199,11 @@ export default function EditUserPage() {
 
         } catch (err: any) {
             console.error("Error al actualizar usuario:", err);
-            setError(err.message || "No se pudo actualizar el usuario. Por favor, inténtalo de nuevo.");
-        } finally {
+            const errorMessage = err.message || t("notifications.error_update");
+            setError(errorMessage);
+            toast.error(errorMessage);
+        }
+        finally {
             setIsSaving(false);
         }
     };
@@ -198,31 +213,21 @@ export default function EditUserPage() {
             <div className="flex justify-center items-center p-8">
                 <div className="flex flex-col items-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
-                    <div>Cargando usuario...</div>
+                    <div>{t("notifications.error_loading")}...</div>
                 </div>
             </div>
         );
     }
 
+
     return (
         <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
-            {success && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                    {success}
-                </div>
-            )}
-
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                    {error}
-                </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-6">
                 <PageHeader
-                    title="MODIFICAR USUARIO"
-                    subtitle={`Editar información del usuario: ${formData.name} ${formData.lastname}`}
+                    title={t("edit_title")}
+                    subtitle={t("edit_subtitle", { name: formData.name, lastname: formData.lastname })}
                 />
+
 
                 <UsersForm
                     formData={formData}
@@ -238,7 +243,7 @@ export default function EditUserPage() {
                         className="flex-1"
                         disabled={isSaving}
                     >
-                        Cancelar
+                        {t("actions.cancel")}
                     </Button>
                     <Button
                         type="submit"
@@ -248,10 +253,11 @@ export default function EditUserPage() {
                     >
                         {isSaving ? (
                             <span className="flex items-center justify-center">
-                                Guardando...
+                                {t("notifications.saving")}
                             </span>
-                        ) : "Guardar Cambios"}
+                        ) : t("actions.save")}
                     </Button>
+
                 </div>
             </form>
         </div>

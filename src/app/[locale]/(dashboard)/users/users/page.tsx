@@ -9,11 +9,15 @@ import { useAuth } from "@/context/AuthContext";
 import UsersTable from "./UsersTable";
 import { useStaffUsers } from "@/hooks/staff/useStaffUsers";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+
 
 export default function UsersPage() {
   const { token } = useAuth();
   const router = useRouter();
+  const t = useTranslations("user.management");
   const [page, setPage] = useState(1);
+
   const pageSize = 10;
 
   const [filters, setFilters] = useState({
@@ -37,7 +41,7 @@ export default function UsersPage() {
 
   const handleFilterChange = (newFilters: { search?: string; role?: string }) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
-    setPage(1); 
+    setPage(1);
   };
 
   if (!token) {
@@ -46,15 +50,16 @@ export default function UsersPage() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <PageHeader title="USUARIOS">
+      <PageHeader title={t("title")}>
         <Button
           className="bg-transparent text-black border border-gray-100"
           onClick={() => router.replace("/users/users/new")}
         >
           <PlusIcon className="h-5 w-5" />
-          Agregar Usuario
+          {t("add_button")}
         </Button>
       </PageHeader>
+
 
       {error && (
         <div className="p-4 text-red-700 bg-red-100 rounded-md">
@@ -62,9 +67,9 @@ export default function UsersPage() {
         </div>
       )}
 
-      <UsersTable 
+      <UsersTable
         data={paginatedUsers}
-        isLoading={isLoading} 
+        isLoading={isLoading}
         onReload={refresh}
         filters={filters}
         onFilterChange={handleFilterChange}

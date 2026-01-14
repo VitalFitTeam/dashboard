@@ -150,8 +150,8 @@ export default function Step3({
               placeholder={t("create.form.admin.capacity_placeholder")}
               min="1"
               className={`mt-1 block w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${formErrors?.["capacidadMiembros"]
-                  ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300 focus:ring-orange-500"
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-orange-500"
                 }`}
             />
             {formErrors?.["capacidadMiembros"] && (

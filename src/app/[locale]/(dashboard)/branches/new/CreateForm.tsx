@@ -117,9 +117,11 @@ export default function CreateForm({
       }
       if (!formData.countryId?.trim()) {
         errors.countryId = t("validations.country_required");
+        isValid = false;
       }
       if (!formData.stateId?.trim()) {
         errors.stateId = t("validations.state_required");
+        isValid = false;
       }
     } else if (stepToValidate === 3) {
       if (!formData.manager_id?.trim()) {
@@ -233,7 +235,7 @@ export default function CreateForm({
       name: formData.name?.trim() || "",
       tax_id: formData.taxId?.trim() || "",
       address: formData.address?.trim() || "",
-      phone: formData.phone?.trim() || "",
+      phone: (formData.phone || "").replace(/\D/g, ""),
       country: formData.countryId?.trim() || "",
       state: formData.stateId?.trim() || "",
       latitude:

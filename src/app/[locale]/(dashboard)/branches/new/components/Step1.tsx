@@ -8,10 +8,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import InputField from "@/components/ui/InputField";
+import { PhoneInput } from "@/components/ui/phone-input";
 import StepNotification from "../../StepNotification";
 
 type StepProps = {
-  formData: any; // Considera usar un tipo más específico
+  formData: any;
   handleChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => void;
@@ -62,16 +63,30 @@ export default function Step1({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <InputField
-          id="phone"
-          name="phone"
-          label={t("create.form.basic_info.phone")}
-          type="tel"
-          value={formData.phone || ""}
-          onChange={handleChange}
-          placeholder={t("create.form.basic_info.phone_placeholder")}
-          error={formErrors["phone"]}
-        />
+        <div className="flex w-full flex-col gap-1.5">
+          <label
+            htmlFor="phone"
+            className={`text-sm font-medium ${formErrors["phone"] ? "text-red-600" : "text-gray-800"
+              }`}
+          >
+            {t("create.form.basic_info.phone")}
+          </label>
+          <PhoneInput
+            id="phone"
+            name="phone"
+            value={formData.phone ? (formData.phone.startsWith("+") ? formData.phone : `+${formData.phone}`) : ""}
+            onChange={(value) => {
+              handleChange({
+                target: { name: "phone", value: value || "" },
+              } as any);
+            }}
+            defaultCountry="VE"
+            className={formErrors["phone"] ? "border-red-500" : "border-gray-300"}
+          />
+          {formErrors["phone"] && (
+            <p className="text-xs text-red-600">{formErrors["phone"]}</p>
+          )}
+        </div>
 
         <div>
           <label htmlFor="status">{t("create.form.basic_info.status")}</label>

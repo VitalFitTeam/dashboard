@@ -8,10 +8,16 @@ import { Users } from "@/models/users";
 import { api } from "@/lib/sdk-config";
 import { SignUpRequest, UserGender } from "@vitalfit/sdk";
 import { useRouter } from "@/i18n/navigation";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+
 
 export default function CreateUserPage() {
     const router = useRouter();
     const { token } = useAuth();
+    const t = useTranslations("user.management");
+    const tAuth = useTranslations("auth.activate.errors");
+
 
     const [formData, setFormData] = useState<Users>({
         id: "",
@@ -51,10 +57,11 @@ export default function CreateUserPage() {
             "O": UserGender.preferNotToSay,
             "male": UserGender.male,
             "female": UserGender.female,
+            "other": UserGender.preferNotToSay,
             "prefer-not-to-say": UserGender.preferNotToSay,
         };
 
-        return genderMap[gender] || null;
+        return genderMap[gender] || UserGender.preferNotToSay;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -62,37 +69,36 @@ export default function CreateUserPage() {
         setError(null);
         setSuccess(null);
 
-        // Validaciones básicas
         if (!formData.name.trim()) {
-            setError("El nombre es requerido");
+            setError(t("notifications.error_create"));
             return;
         }
 
         if (!formData.lastname.trim()) {
-            setError("El apellido es requerido");
+            setError(t("notifications.error_create"));
             return;
         }
 
         if (!formData.email.trim()) {
-            setError("El correo electrónico es requerido");
+            setError(t("notifications.error_create"));
             return;
         }
 
         if (!formData.document.trim()) {
-            setError("El documento de identidad es requerido");
+            setError(t("notifications.error_create"));
             return;
         }
 
         if (!formData.date) {
-            setError("La fecha de nacimiento es requerida");
+            setError(t("notifications.error_create"));
             return;
         }
 
-        // Validar token
         if (!token) {
-            setError("No estás autenticado");
+            setError(tAuth("check_password"));
             return;
         }
+
 
         setIsLoading(true);
 
@@ -106,7 +112,7 @@ export default function CreateUserPage() {
                 email: formData.email.trim(),
                 password: defaultPassword,
                 identity_document: formData.document.trim(),
-                phone: formData.phone.trim() || null,
+                phone: formData.phone.replace(/\D/g, "") || null,
                 birth_date: formData.date,
                 gender: normalizeGenderForAPI(formData.gender),
                 profile_picture_url: null,
@@ -117,7 +123,8 @@ export default function CreateUserPage() {
 
             const response = await api.auth.signUpStaff(signUpData, token);
 
-            setSuccess("Usuario creado exitosamente. Se ha enviado un correo de verificación.");
+            toast.success(t("notifications.create_success"));
+
 
             setTimeout(() => {
                 router.replace("/users/users");
@@ -125,8 +132,11 @@ export default function CreateUserPage() {
 
         } catch (err: any) {
             console.error("Error al crear usuario:", err);
-            setError(err.message || "No se pudo crear el usuario. Por favor, inténtalo de nuevo.");
-        } finally {
+            const errorMessage = err.message || t("notifications.error_create");
+            setError(errorMessage);
+            toast.error(errorMessage);
+        }
+        finally {
             setIsLoading(false);
         }
     };
@@ -135,21 +145,10 @@ export default function CreateUserPage() {
         <div className="flex-1 space-y-6 p-8 pt-6 bg-white rounded-xl shadow">
             <form onSubmit={handleSubmit} className="space-y-6">
                 <PageHeader
-                    title="CREAR NUEVO USUARIO"
-                    subtitle="Complete la información del nuevo usuario"
+                    title={t("create_title")}
+                    subtitle={t("create_subtitle")}
                 />
 
-                {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                        {error}
-                    </div>
-                )}
-
-                {success && (
-                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                        {success}
-                    </div>
-                )}
 
                 <UsersForm formData={formData} onChange={handleChange} edit={false} />
 
@@ -161,7 +160,7 @@ export default function CreateUserPage() {
                         className="flex-1"
                         disabled={isLoading}
                     >
-                        Cancelar
+                        {t("table.delete_dialog.cancel") || "Cancelar"}
                     </Button>
                     <Button
                         type="submit"
@@ -169,8 +168,9 @@ export default function CreateUserPage() {
                         disabled={isLoading}
                         className="flex-1"
                     >
-                        {isLoading ? "Creando..." : "Crear Usuario"}
+                        {isLoading ? t("notifications.creating") : t("add_button")}
                     </Button>
+
                 </div>
             </form>
         </div>

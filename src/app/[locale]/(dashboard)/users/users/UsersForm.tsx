@@ -1,7 +1,14 @@
 "use client";
+import { useState, useEffect } from "react";
 import { Users } from "@/models/users";
 import { Input } from "@/components/ui/Input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/sdk-config";
+import { RoleResponse } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
+
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface UsersFormProps {
   formData: Users;
@@ -16,71 +23,42 @@ export default function UsersForm({
   disabled = false,
   edit = false,
 }: UsersFormProps) {
-  const roles = [
-    {
-      id: "super_admin",
-      title: "Super Administrador",
-      description: [
-        "Acceso total al sistema con permisos de configuración",
-        "Gestión de todas las sedes",
-        "Configuración avanzada del sistema",
-      ],
-    },
-    {
-      id: "branch_admin",
-      title: "Administrador de sede",
-      description: [
-        "Gestión de una sede específica",
-        "Control de personal y operaciones locales",
-        "Acceso limitado a configuraciones generales",
-      ],
-    },
-    {
-      id: "accountant",
-      title: "Contador",
-      description: [
-        "Gestión financiera y contable del sistema",
-        "Control de pagos y facturación",
-        "Acceso a reportes contables",
-      ],
-    },
-    {
-      id: "data_analyst",
-      title: "Analista de datos",
-      description: [
-        "Acceso a dashboards y reportes",
-        "Análisis de métricas y KPIs",
-        "Generación de reportes estratégicos",
-      ],
-    },
-    {
-      id: "instructor",
-      title: "Instructor",
-      description: [
-        "Gestión de horarios de entrenamiento",
-        "Control de rutinas y asistencia",
-        "Seguimiento de progreso de miembros",
-      ],
-    },
-    {
-      id: "recepcionist",
-      title: "Recepcionista",
-      description: [
-        "Gestión de miembros y asistencia",
-        "Atención al cliente en sede",
-        "Acceso limitado a funciones administrativas",
-      ],
-    },
-    {
-      id: "client",
-      title: "Cliente",
-      description: [
-        "Acceso a su perfil personal",
-        "Consulta de rutinas y horarios",
-        "Gestión de pagos y asistencia",
-      ],
-    },
-  ];
+  const { token } = useAuth();
+  const t = useTranslations("user.management");
+  const tRoles = useTranslations("user.UserSelectionCard.roles");
+  const [roles, setRoles] = useState<RoleResponse[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+
+
+  useEffect(() => {
+    const loadRoles = async () => {
+      if (!token) {
+        return;
+      }
+      setIsLoadingRoles(true);
+
+
+
+      try {
+        const response = await api.RBAC.getRoles(
+          {
+            page: 1,
+            limit: 100,
+            search: undefined,
+            sort: "desc",
+          },
+          token,
+        );
+        setRoles(response.data || []);
+      } catch (error) {
+        console.error("Error loading roles:", error);
+      } finally {
+        setIsLoadingRoles(false);
+      }
+    };
+
+    loadRoles();
+  }, [token]);
 
   return (
     <>
@@ -91,17 +69,18 @@ export default function UsersForm({
               htmlFor="nombre"
               className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
             >
-              Nombre*
+              {t("form.name")}
             </label>
             <Input
               id="nombre"
               name="nombre"
-              placeholder="Nombre"
+              placeholder={t("form.name").replace("*", "")}
               value={formData.name}
               onChange={(e) => onChange("name", e.target.value)}
               className="bg-white w-full"
               disabled={disabled}
             />
+
           </div>
         </div>
         <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
@@ -110,17 +89,18 @@ export default function UsersForm({
               htmlFor="apellido"
               className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
             >
-              Apellido*
+              {t("form.lastname")}
             </label>
             <Input
               id="apellido"
               name="apellido"
-              placeholder="Apellido"
+              placeholder={t("form.lastname").replace("*", "")}
               value={formData.lastname}
               onChange={(e) => onChange("lastname", e.target.value)}
               className="bg-white w-full"
               disabled={disabled}
             />
+
           </div>
         </div>
       </div>
@@ -131,18 +111,19 @@ export default function UsersForm({
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Correo Electrónico*
+            {t("form.email")}
           </label>
           <Input
             id="email"
             name="email"
             type="email"
-            placeholder="correo@ejemplo.com"
+            placeholder={t("form.email_placeholder")}
             value={formData.email}
             onChange={(e) => onChange("email", e.target.value)}
             className="bg-white w-full"
             disabled={disabled}
           />
+
         </div>
       </div>
 
@@ -152,13 +133,13 @@ export default function UsersForm({
             htmlFor="telefono"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Número de teléfono*
+            {t("form.phone")}
           </label>
           <PhoneInput
             id="telefono"
-            value={formData.phone}
+            value={formData.phone ? (formData.phone.startsWith("+") ? formData.phone : `+${formData.phone}`) : ""}
             defaultCountry="VE"
-            onChange={(value) => onChange("phone", value)}
+            onChange={(value) => onChange("phone", value || "")}
             disabled={disabled}
           />
         </div>
@@ -167,18 +148,19 @@ export default function UsersForm({
             htmlFor="documento"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Documento de identidad*
+            {t("form.document")}
           </label>
           <Input
             id="documento"
             name="documento"
-            placeholder="Documento"
+            placeholder={t("form.document").replace("*", "")}
             value={formData.document}
             onChange={(e) => onChange("document", e.target.value)}
             className="bg-white w-full"
             disabled={disabled}
           />
         </div>
+
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -187,7 +169,7 @@ export default function UsersForm({
             htmlFor="nacimiento"
             className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
           >
-            Fecha de Nacimiento*
+            {t("form.birth_date")}
           </label>
           <Input
             id="nacimiento"
@@ -201,102 +183,107 @@ export default function UsersForm({
         </div>
         <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left">
-            Género*
+            {t("form.gender")}
           </label>
 
           <label className="flex items-center">
             <input
               type="radio"
               name="genero"
-              value="masculino"
-              checked={formData.gender === "masculino" || formData.gender === "male"}
+              value="male"
+              checked={formData.gender === "male" || formData.gender === "masculino"}
               onChange={() => onChange("gender", "male")}
               className="form-radio h-4 w-4 text-primary"
               disabled={disabled}
             />
-            <span className="ml-2">Masculino</span>
+            <span className="ml-2">{t("form.genders.male")}</span>
           </label>
 
           <label className="flex items-center">
             <input
               type="radio"
               name="genero"
-              value="femenino"
-              checked={formData.gender === "femenino" || formData.gender === "female"}
+              value="female"
+              checked={formData.gender === "female" || formData.gender === "femenino"}
               onChange={() => onChange("gender", "female")}
               className="form-radio h-4 w-4 text-primary"
               disabled={disabled}
             />
-            <span className="ml-2">Femenino</span>
+            <span className="ml-2">{t("form.genders.female")}</span>
           </label>
 
           <label className="flex items-center">
             <input
               type="radio"
               name="genero"
-              value="prefer-not-to-say"
-              checked={formData.gender === "prefer-not-to-say"}
-              onChange={() => onChange("gender", "prefer-not-to-say")}
+              value="other"
+              checked={formData.gender === "other" || formData.gender === "prefer-not-to-say"}
+              onChange={() => onChange("gender", "other")}
               className="form-radio h-4 w-4 text-primary"
               disabled={disabled}
             />
-            <span className="ml-2">Prefiero no especificarlo</span>
+            <span className="ml-2">{t("form.genders.other")}</span>
           </label>
         </div>
+
       </div>
 
       {/* Sección de Rol - Ahora visible tanto en creación como edición */}
       <div className="mt-6">
         <label className="block text-sm font-medium text-gray-700 mb-2 sm:text-base text-left">
-          Rol del Usuario*
+          {t("form.role")}
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {roles.map((role) => (
-            <div
-              key={role.id}
-              onClick={() => !disabled && onChange("rol", role.id)}
-              className={`cursor-pointer border rounded-lg p-4 shadow-sm transition-all ${formData.rol === role.id
-                ? "border-primary bg-primary/10"
-                : "border-gray-300 hover:border-primary"
-                } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
-            >
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                {role.title}
-                {formData.rol === role.id && (
-                  <span className="ml-2 text-xs bg-primary text-white px-2 py-1 rounded">
-                    Seleccionado
-                  </span>
-                )}
-              </h3>
-              <ul className="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                {role.description.map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+        {isLoadingRoles ? (
+          <div className="flex justify-center p-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {roles.map((role) => (
+              <div
+                key={role.role_id}
+                onClick={() => !disabled && onChange("rol", role.name)}
+                className={`cursor-pointer border rounded-lg p-4 shadow-sm transition-all ${formData.rol === role.name
+                  ? "border-primary bg-primary/10"
+                  : "border-gray-300 hover:border-primary"
+                  } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
+              >
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  {tRoles(role.name.toLowerCase()) || role.name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                  {formData.rol === role.name && (
+                    <span className="ml-2 text-xs bg-primary text-white px-2 py-1 rounded">
+                      ✓
+                    </span>
+                  )}
+                </h3>
+                <p className="text-sm text-gray-600 italic">
+                  {role.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
 
       {!edit && (
         <div className="my-4 cursor-pointer border rounded-lg p-4 shadow-sm transition-all border-primary bg-primary/10">
           <span className="block text-sm font-medium text-gray-700 mb-2 sm:text-base text-left">
-            Próximos Pasos
+            {t("form.next_steps.title")}
           </span>
           <ul className="list-disc pl-8 text-sm text-gray-600 space-y-1">
             <li>
-              Se enviará un email de verificación a {" "}
-              <strong>{formData.email}</strong>
+              {t("form.next_steps.email_sent", { email: formData.email })}
             </li>
-            <li>El usuario debe verificar su email para activar la cuenta</li>
-            <li>Después podrá establecer su contraseña inicial</li>
+            <li>{t("form.next_steps.verify")}</li>
+            <li>{t("form.next_steps.password")}</li>
             <li>
-              El estado será <em>"Pendiente"</em> hasta completar la
-              verificación
+              {t("form.next_steps.pending")}
             </li>
           </ul>
         </div>
       )}
+
     </>
   );
 }
