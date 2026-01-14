@@ -49,7 +49,7 @@ export const createMembershipSchema = (t: (key: string) => string) =>
       .union([z.boolean(), z.string()])
       .transform((val) => {
         if (typeof val === "string") {
-          return val === "active" || val === "true";
+          return val === "true";
         }
         return Boolean(val);
       })

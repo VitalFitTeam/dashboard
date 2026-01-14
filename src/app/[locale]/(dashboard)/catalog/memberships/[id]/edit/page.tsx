@@ -98,14 +98,19 @@ export default function EditMembership() {
   }, [membership]);
 
   const handleChange = (field: keyof MembershipType, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    let newValue: string | boolean = value;
+    if (field === "is_active") {
+      newValue = value === "true";
+    }
+
+    setFormData((prev) => ({ ...prev, [field]: newValue }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const validate = (
     formData: MembershipType,
     setErrors: (errors: Partial<Record<keyof MembershipType, string>>) => void
-  ): boolean => {
+  ) => {
     const schema = createMembershipSchema((key) =>
       t(`validations.${key.split(".").pop()}`)
     );
@@ -125,18 +130,18 @@ export default function EditMembership() {
       );
 
       setErrors(formattedErrors);
-      return false;
+      return null;
     }
 
     setErrors({});
-    return true;
+    return result.data;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isValid = validate(formData, setErrors);
-    if (!isValid) {
+    const validatedData = validate(formData, setErrors);
+    if (!validatedData) {
       return;
     }
 
@@ -147,11 +152,11 @@ export default function EditMembership() {
     }
 
     const payload: UpdateMembershipType = {
-      name: formData.name,
-      description: formData.description ?? "",
-      duration_days: formData.duration_days,
-      is_active: formData.is_active,
-      price: formData.price,
+      name: validatedData.name,
+      description: validatedData.description,
+      duration_days: validatedData.duration_days,
+      is_active: validatedData.is_active,
+      price: validatedData.price,
     };
 
     setIsLoading(true);

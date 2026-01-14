@@ -146,16 +146,18 @@ export default function MembershipForm({
           <Select
             name="is_active"
             onValueChange={(value) => onChange("is_active", value)}
-            value={formData.is_active ? "active" : "inactive"}
+            value={String(formData.is_active)}
           >
             <SelectTrigger className="w-full sm:w-[200px] border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <SelectValue>
-                {formData.is_active ? t("table.status.active") : t("table.status.inactive")}
+                {String(formData.is_active) === "true"
+                  ? t("table.status.active")
+                  : t("table.status.inactive")}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">{t("table.status.active")}</SelectItem>
-              <SelectItem value="inactive">{t("table.status.inactive")}</SelectItem>
+              <SelectItem value="true">{t("table.status.active")}</SelectItem>
+              <SelectItem value="false">{t("table.status.inactive")}</SelectItem>
             </SelectContent>
           </Select>
           {errors.is_active && (

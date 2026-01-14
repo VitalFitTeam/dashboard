@@ -11,9 +11,11 @@ import { api } from "@/lib/sdk-config";
 import { Banner } from "@vitalfit/sdk";
 
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
-import { Notification } from "@/components/ui/Notification";
+
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface StatsData {
     total: number;
@@ -31,6 +33,7 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
     const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
     const { token } = useAuth();
     const router = useRouter();
+    const t = useTranslations("banners");
 
     const [filters, setFilters] = useState({
         search: "",
@@ -40,11 +43,7 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
 
     const [stats, setStats] = useState<StatsData>({ total: 0, active: 0 });
 
-    const [notification, setNotification] = useState({
-        isVisible: false,
-        description: "",
-        title: "",
-    });
+
 
     const loadBanners = useCallback(async () => {
         if (!token) {
@@ -60,10 +59,8 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
 
         } catch (error) {
             console.error("Error cargando banners:", error);
-            setNotification({
-                isVisible: true,
-                description: "Error al cargar los banners",
-                title: "Error",
+            toast.error(t("notifications.errorTitle"), {
+                description: t("errors.load"),
             });
         } finally {
             setLoading(false);
@@ -170,10 +167,8 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
                 token
             );
 
-            setNotification({
-                isVisible: true,
-                description: `Banner ${!banner.is_active ? "activado" : "desactivado"} exitosamente`,
-                title: "Éxito",
+            toast.success(t("notifications.successTitle"), {
+                description: !banner.is_active ? t("notifications.activateSuccess") : t("notifications.deactivateSuccess"),
             });
 
             setTimeout(() => {
@@ -181,10 +176,8 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
             }, 1000);
         } catch (error) {
             console.error("Error al actualizar el banner:", error);
-            setNotification({
-                isVisible: true,
-                description: "Error al actualizar el estado del banner",
-                title: "Error",
+            toast.error(t("notifications.errorTitle"), {
+                description: t("notifications.updateStatusError"),
             });
         }
     };
@@ -197,10 +190,8 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
         try {
             await api.marketing.deleteBanner(banner.banner_id || "", token);
 
-            setNotification({
-                isVisible: true,
-                description: "Banner borrado exitosamente",
-                title: "Éxito",
+            toast.success(t("notifications.successTitle"), {
+                description: t("notifications.deleteSuccess"),
             });
 
             setDeleteRowId(null);
@@ -212,10 +203,8 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
             console.error("Error al eliminar el banner:", error);
             setDeleteRowId(null);
 
-            setNotification({
-                isVisible: true,
-                description: "Error al borrar el banner",
-                title: "Error",
+            toast.error(t("notifications.errorTitle"), {
+                description: t("notifications.deleteError"),
             });
         }
     };
@@ -224,15 +213,11 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
         setPage(newPage);
     };
 
-    const hideNotification = () => {
-        setNotification((prev) => {
-            return { ...prev, isVisible: false };
-        });
-    };
+
 
     const visibleColumns: Column<Banner>[] = [
         {
-            header: "Imagen",
+            header: t("table.headers.image"),
             accessor: "image_url",
             render: (imageUrl) => {
                 return (
@@ -247,12 +232,12 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
             },
         },
         {
-            header: "Nombre",
+            header: t("table.headers.name"),
             accessor: "name",
             filterType: "text",
         },
         {
-            header: "link",
+            header: t("table.headers.link"),
             accessor: "link_url",
             render: (linkUrl) => {
                 return (
@@ -263,7 +248,7 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
             },
         },
         {
-            header: "Estado",
+            header: t("table.headers.status"),
             accessor: "is_active",
             render: (isActive, row) => {
                 return (
@@ -283,7 +268,7 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
     if (loading && data.length === 0) {
         return (
             <div className="flex justify-center items-center h-64">
-                <div className="text-lg">Cargando banners...</div>
+                <div className="text-lg">{t("table.loading")}</div>
             </div>
         );
     }
@@ -295,7 +280,7 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
                     <div className="relative w-full sm:w-[250px]">
                         <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                            placeholder="Buscar"
+                            placeholder={t("table.searchPlaceholder")}
                             className="pl-9"
                             value={searchInput}
                             onChange={(e) => {
@@ -308,7 +293,7 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
                 <div className="flex items-center gap-4">
                     <Button variant="outline" onClick={loadBanners} disabled={loading}>
                         <Download className="mr-2 h-4 w-4" />
-                        {loading ? "Descargando..." : "Descargar"}
+                        {loading ? t("table.downloading") : t("table.download")}
                     </Button>
                 </div>
             </div>
@@ -327,19 +312,19 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
                             <RowActions
                                 actions={[
                                     {
-                                        label: "Ver", icon: Eye, onClick: () => {
+                                        label: t("table.actions.view"), icon: Eye, onClick: () => {
                                             handleView(row);
                                         }
                                     },
                                     {
-                                        label: "Modificar",
+                                        label: t("table.actions.modify"),
                                         icon: Pencil,
                                         onClick: () => {
                                             handleEdit(row);
                                         },
                                     },
                                     {
-                                        label: "Eliminar",
+                                        label: t("table.actions.delete"),
                                         icon: Trash2,
                                         onClick: () => {
                                             setDeleteRowId(row.banner_id || null);
@@ -358,10 +343,10 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
                                         }
                                     }}
                                     trigger={null}
-                                    title="Confirmar eliminación"
-                                    description="¿Estás seguro de que deseas eliminar este banner? Esta acción no se puede deshacer."
-                                    actionText="Eliminar"
-                                    cancelText="Cancelar"
+                                    title={t("table.deleteDialog.title")}
+                                    description={t("table.deleteDialog.description")}
+                                    actionText={t("table.deleteDialog.action")}
+                                    cancelText={t("table.deleteDialog.cancel")}
                                     onAction={() => {
                                         handleDeleteBanner(row);
                                     }}
@@ -373,15 +358,7 @@ export default function BannersTable({ onBannerUpdate }: BannersTableProps) {
                 }}
             />
 
-            {notification.isVisible && (
-                <Notification
-                    title={notification.title}
-                    description={notification.description}
-                    onClose={hideNotification}
-                    autoCloseDuration={3000}
-                    variant={notification.title === "Error" ? "destructive" : "success"}
-                />
-            )}
+
         </>
     );
 }
