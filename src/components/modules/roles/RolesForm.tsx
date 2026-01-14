@@ -22,6 +22,7 @@ interface RolesFormProps {
 interface PermissionOption {
   key: string;
   label: string;
+  description?: string; 
 }
 
 export default function RolesForm({
@@ -68,8 +69,10 @@ export default function RolesForm({
             (permission: Permission) => ({
               key: permission.permission_id,
               label: permission.name || permission.permission_id,
+              description: permission.description, 
             }),
           );
+
           setPermissions(mappedPermissions);
         } else {
           setPermissionsError(t("errors.load_permissions_failed"));
@@ -88,47 +91,45 @@ export default function RolesForm({
   }, [token]);
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-          <div className="flex-1">
-            <label
-              htmlFor="nombre"
-              className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
-            >
-              {t("fields.name")}
-            </label>
-            <Input
-              id="nombre"
-              name="nombre"
-              placeholder={t("fields.name_placeholder")}
-              disabled={disabled}
-              value={formData.name}
-              onChange={(e) => onChange("name", e.target.value)}
-              onBlur={(e) => handleBlur("name", e.target.value)}
-              className={`bg-white w-full ${getFieldError("name") ? "border-red-500" : ""}`}
-            />
-            {getFieldError("name") && (
-              <p className="text-red-500 text-sm mt-1">
-                {getFieldError("name")}
-              </p>
-            )}
-          </div>
+    <div className="space-y-6 mt-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div className="flex-1">
+          <label
+            htmlFor="nombre"
+            className="block text-sm font-bold text-gray-700 mb-1 text-left uppercase tracking-tighter italic"
+          >
+            {t("fields.name")}
+          </label>
+          <Input
+            id="nombre"
+            name="nombre"
+            placeholder={t("fields.name_placeholder")}
+            disabled={disabled}
+            value={formData.name}
+            onChange={(e) => onChange("name", e.target.value)}
+            onBlur={(e) => handleBlur("name", e.target.value)}
+            className={`bg-white w-full ${getFieldError("name") ? "border-red-500" : ""}`}
+          />
+          {getFieldError("name") && (
+            <p className="text-red-500 text-xs mt-1 font-bold italic uppercase">
+              {getFieldError("name")}
+            </p>
+          )}
         </div>
       </div>
-
-      <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-        <div className="flex-1 mb-3">
+      
+      <div className="grid grid-cols-1 gap-4">
+        <div className="flex-1">
           <label
             htmlFor="description"
-            className="block text-sm font-medium text-gray-700 mb-1 sm:text-base text-left"
+            className="block text-sm font-bold text-gray-700 mb-1 text-left uppercase tracking-tighter italic"
           >
             {t("fields.description")}
           </label>
           <Textarea
             id="description"
             name="description"
-            rows={2}
+            rows={3}
             placeholder={t("fields.description_placeholder")}
             disabled={disabled}
             value={formData.description}
@@ -137,78 +138,90 @@ export default function RolesForm({
             className={`bg-white w-full ${getFieldError("description") ? "border-red-500" : ""}`}
           />
           {getFieldError("description") && (
-            <p className="text-red-500 text-sm mt-1">
+            <p className="text-red-500 text-xs mt-1 font-bold italic uppercase">
               {getFieldError("description")}
             </p>
           )}
         </div>
       </div>
+      <div className="flex flex-col">
+        <span className="text-sm font-bold text-gray-700 mb-4 uppercase tracking-tighter italic">
+          {t("fields.permissions")}
+        </span>
 
-      <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-        <div className="mt-6 w-full">
-          <span className="font-semibold text-gray-700 mb-4">{t("fields.permissions")}</span>
+        {isLoadingPermissions && (
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground animate-pulse mb-4 italic">
+            <div className="h-2 w-2 bg-primary rounded-full animate-bounce" />
+            <span>{t("fields.loading_permissions")}...</span>
+          </div>
+        )}
 
-          {isLoadingPermissions && (
-            <div className="text-sm text-gray-500 mb-4">
-              {t("fields.loading_permissions")}
-            </div>
-          )}
+        {permissionsError && (
+          <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm mb-4">
+            {permissionsError}
+          </div>
+        )}
 
-          {permissionsError && (
-            <div className="text-red-500 text-sm mb-4">{permissionsError}</div>
-          )}
-
-          {!isLoadingPermissions &&
-            !permissionsError &&
-            permissions.length === 0 && (
-              <div className="text-sm text-gray-500 mb-4">
+        <div className="border border-gray-200 rounded-xl bg-gray-50/50 overflow-hidden">
+          <div className="max-h-80 overflow-y-auto p-2 space-y-1 scrollbar-thin scrollbar-thumb-gray-300">
+            {!isLoadingPermissions && permissions.length === 0 && !permissionsError && (
+              <div className="p-8 text-center text-sm text-muted-foreground italic">
                 {t("fields.no_permissions")}
               </div>
             )}
 
-          <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <div className="space-y-2">
-              {permissions.map(({ key, label }) => {
-                const isChecked = selectedPermissions.includes(key);
-                return (
-                  <label
-                    key={key}
-                    className="flex items-center space-x-2 p-2 rounded hover:bg-white transition-colors duration-200"
-                  >
+            {permissions.map(({ key, label, description }) => {
+              const isChecked = selectedPermissions.includes(key);
+              return (
+                <label
+                  key={key}
+                  className={`flex items-start space-x-3 p-3 rounded-lg transition-all duration-200 cursor-pointer border ${
+                    isChecked 
+                      ? "bg-white border-primary/20 shadow-sm" 
+                      : "hover:bg-white hover:border-gray-200 border-transparent"
+                  }`}
+                >
+                  <div className="flex items-center h-5 mt-0.5">
                     <input
                       type="checkbox"
                       checked={isChecked}
                       disabled={disabled}
-                      onChange={(e) =>
-                        onPermissionChange(key, e.target.checked)
-                      }
-                      className={`h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 ${getFieldError("permissionsID") ? "border-red-500" : ""
-                        }`}
+                      onChange={(e) => onPermissionChange(key, e.target.checked)}
+                      className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary transition-colors cursor-pointer"
                     />
-                    <span className="text-sm text-gray-800 flex-1">
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className={`text-sm font-bold leading-none mb-1.5 ${isChecked ? "text-primary" : "text-gray-900"}`}>
                       {label}
                     </span>
-                  </label>
-                );
-              })}
-            </div>
+                    {description && (
+                      <span className="text-xs text-gray-500 leading-normal font-medium">
+                        {description} 
+                      </span>
+                    )}
+                  </div>
+                </label>
+              );
+            })}
           </div>
-
-          {!isLoadingPermissions &&
-            !permissionsError &&
-            permissions.length > 0 && (
-              <div className="text-sm text-gray-600 mt-2">
-                {t("fields.permissions_selected", { selected: selectedPermissions.length, total: permissions.length })}
-              </div>
-            )}
-
-          {getFieldError("permissionsID") && (
-            <p className="text-red-500 text-sm mt-2">
-              {getFieldError("permissionsID")}
-            </p>
-          )}
         </div>
+
+        {!isLoadingPermissions && permissions.length > 0 && (
+          <div className="flex justify-between items-center mt-3 px-1">
+            <span className="text-[10px] font-black uppercase italic tracking-widest text-gray-400">
+              {t("fields.permissions_selected", { 
+                selected: selectedPermissions.length, 
+                total: permissions.length 
+              })}
+            </span>
+            {getFieldError("permissionsID") && (
+              <span className="text-red-500 text-[10px] font-bold uppercase italic animate-pulse">
+                {getFieldError("permissionsID")}
+              </span>
+            )}
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }
