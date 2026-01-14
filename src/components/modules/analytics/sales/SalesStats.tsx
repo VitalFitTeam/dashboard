@@ -1,12 +1,11 @@
 "use client";
 
-import { useFinanceReports } from "@/hooks/reports/useFinanceReports";
-import { DollarSign, TrendingUp, WalletCards, Building } from "lucide-react";
-import { ReportStatItem } from "../ReportStatItem";
-import { useTranslations } from "next-intl";
-import { StatCard } from "@/components/ui/StatCard";
-import { useSalesReports } from "@/hooks/reports/useSalesReports";
 import { useMemo } from "react";
+import { DollarSign, Hash, TrendingUp } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useSalesReports } from "@/hooks/reports/useSalesReports";
+import { ReportStatItem } from "../ReportStatItem";
+import { StatCard } from "@/components/ui/StatCard";
 
 interface StatProps {
   token: string | null;
@@ -28,7 +27,6 @@ export function TotalSales({ token }: StatProps) {
     if (!data) {
       return null;
     }
-
     return {
       value: data.total_sales || 0,
       percentage_change: data.percentage_change,
@@ -48,23 +46,23 @@ export function TotalSales({ token }: StatProps) {
   );
 }
 
-export function AverageTicsketStat({ token, branchId }: StatProps) {
-  const t = useTranslations("analytics.sales.stats");
+export function AverageTicketStat({ token, branchId }: StatProps) {
+  const t = useTranslations("analytics.Sales.stats");
   const { data, isLoading } = useSalesReports.useAverageTicket(token, branchId);
 
   return (
     <ReportStatItem
       data={data}
       isLoading={isLoading}
-      defaultTitle="Total de tickets vendidos"
-      icon={DollarSign}
-      formatType="number"
+      defaultTitle={t("average_ticket")}
+      icon={TrendingUp}
+      formatType="currency" 
     />
   );
 }
 
 export function TotalTransactionsStat({ token, branchId }: StatProps) {
-  const t = useTranslations("analytics.sales.stats");
+  const t = useTranslations("analytics.Sales.stats");
   const { data, isLoading } = useSalesReports.useTotalTransactionsKPI(
     token,
     branchId
@@ -74,8 +72,8 @@ export function TotalTransactionsStat({ token, branchId }: StatProps) {
     <ReportStatItem
       data={data}
       isLoading={isLoading}
-      defaultTitle="Total de Transacciones"
-      icon={DollarSign}
+      defaultTitle={t("total_transactions")} 
+      icon={Hash}
       formatType="number"
     />
   );
@@ -86,34 +84,31 @@ export function GlobalStats({ token }: { token: string }) {
   const { data, isLoading } = useSalesReports.useGlobalStats(token);
 
   const stats = useMemo(() => {
-  if (!data) {
-    return null;
-  }
-  
-  const raw = (data as unknown) as GlobalStatsData;
+    if (!data) {
+      return null;
+    }
+    
+    const raw = (data as unknown) as GlobalStatsData;
 
-  const formatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  });
+    const formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    });
 
-  const trendNumeric = typeof raw.percentage_change === "number" 
-    ? raw.percentage_change 
-    : parseFloat(raw.percentage_change || "0");
+    const trendNumeric = typeof raw.percentage_change === "number" 
+      ? raw.percentage_change 
+      : parseFloat(raw.percentage_change || "0");
 
-  const roundedTrend = trendNumeric.toFixed(1);
-
-  return {
-    displayValue: formatter.format(parseFloat(raw.total_current_month) || 0),
-    lastMonthFormatted: formatter.format(parseFloat(raw.total_last_month) || 0),
-    trendValue: `${roundedTrend}%`,
-    isPositive: raw.trend === "up",
-  };
-}, [data]);
+    return {
+      displayValue: formatter.format(parseFloat(raw.total_current_month) || 0),
+      trendValue: `${trendNumeric.toFixed(1)}%`,
+      isPositive: raw.trend === "up",
+    };
+  }, [data]);
 
   return (
     <StatCard
-      title={t("stats.total_sales")}
+      title={t("stats.monthly_sales")}
       isLoading={isLoading}
       value={isLoading ? "..." : stats?.displayValue || "$0.00"}
       icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
@@ -122,7 +117,7 @@ export function GlobalStats({ token }: { token: string }) {
           ? {
               value: stats.trendValue,
               isPositive: stats.isPositive,
-              label: "desde el mes pasado",
+              label: t("stats.comparison"), 
             }
           : undefined
       }

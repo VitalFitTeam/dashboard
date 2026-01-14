@@ -8,7 +8,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useTranslations } from "next-intl";
 import { AccountsReceivableStat } from "../analytics/finance/FinancialStats";
-import { AverageTicsketStat, TotalTransactionsStat } from "../analytics/sales/SalesStats";
+import {  AverageTicketStat, TotalTransactionsStat } from "../analytics/sales/SalesStats";
 import { ProjectedCashFlowReport } from "../analytics/finance/ProjectedCashFlow";
 import { MonthlyRevenueReport } from "../analytics/finance/MonthlyRevenueReport";
 import SalesByPaymentMethodSection from "../analytics/sales/SalesByPaymentMethodSection";
@@ -58,7 +58,7 @@ export default function AccountantDashboard({
             <div className="grid gap-4 md:grid-cols-3">
               <AccountsReceivableStat token={token} branchId={branchId} />
               <TotalTransactionsStat token={token} branchId={branchId} />
-              <AverageTicsketStat token={token} branchId={branchId} />
+              <AverageTicketStat token={token} branchId={branchId} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

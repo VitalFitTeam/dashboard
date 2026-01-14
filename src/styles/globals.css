@@ -170,8 +170,6 @@ body {
 @layer components {
   .admin-theme {
 
-    /* ---------------- HEADINGS ---------------- */
-
     h1, h2, h3 {
       font-family: var(--font-body), sans-serif;
       color: var(--foreground);

@@ -334,9 +334,10 @@
       "subtitle": "Commercial performance, payment methods, and branch productivity",
       "export": "Export Report",
       "stats": {
-        "total_sales": "Total Sales",
-        "membership_sales": "Membership Sales",
-        "transactions": "Total Transactions",
+        "total_sales": "Total Sales Lifetime",
+        "average_ticket": "Average Ticket KPI (MoM)",
+        "total_transactions": "Transaction Volume Stats",
+        "global_sales": "Global Sales Performance",
         "comparison": "vs. previous month",
         "monthly_sales": "Monthly Sales"
       },
@@ -411,9 +412,10 @@
       },
       "stats": {
         "total_clients": "Total clients",
-        "active_members": "Active clients",
+        "active_members": "Active Branch Members",
         "new_clients": "New clients",
-        "retention_rate": "Retention rate"
+        "retention_rate": "Retention rate",
+        "churn_rate": "Monthly Churn Rate"
       },
       "filters": {
         "all_branches": "All branches",
@@ -1455,6 +1457,14 @@
     }
   },
   "common": {
+    "loading": "Loading...",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "status": "Status",
+    "actions": "Actions",
     "Validations": {
       "required": "This field is required",
       "minChars": "Must be at least {min} characters",
@@ -1552,39 +1562,35 @@
   },
   "clients": {
     "title": "CLIENTS",
-    "add_button": "Add a Client",
+    "description": "View, filter, and manage access for users registered on the platform.",
+    "add_button": "New Client",
+    "create": {
+      "title": "Register New Client",
+      "subtitle": "Fill in the details to register a new member in the system.",
+      "cancel_button": "Cancel",
+      "create_button": "Create Client",
+      "creating": "Creating...",
+      "success": "Client created successfully",
+      "error": "An error occurred while creating the client",
+      "validation_error": "Please fix the following errors: {errors}",
+      "auth_error": "Authentication error. Please log in again.",
+      "invalid_data": "The provided data is invalid.",
+      "email_in_use": "This email address is already registered."
+    },
     "stats": {
       "total": "TOTAL",
       "active": "ACTIVE",
       "inactive": "INACTIVE/BLOCKED",
       "unit": "CLIENTS"
     },
-    "payments": {
-      "title": "Invoice and Payment History",
-      "subtitle": "View the historical record of payments and memberships for the client",
-      "table": {
-        "reference": "Reference",
-        "date": "Issue Date",
-        "amount": "Total Amount",
-        "status": "Status",
-        "search_placeholder": "Search by reference..."
-      },
-      "status": {
-        "paid": "Paid",
-        "pagado": "Paid",
-        "unpaid": "Unpaid",
-        "pendiente": "Unpaid",
-        "overdue": "Overdue",
-        "void": "Void"
-      }
-    },
     "table": {
-      "filter_placeholder": "Filter name or email",
+      "filter_placeholder": "Filter by first or last name",
       "filter_role": "Filter by Role",
       "all_roles": "All Roles",
-      "all_categories": "All categories",
+      "all_categories": "All Categories",
       "category": "Category",
       "categories": {
+        "vip": "VIP",
         "premium": "Premium",
         "regular": "Regular",
         "new": "New"
@@ -1610,24 +1616,12 @@
         "delete": "Delete"
       },
       "delete_dialog": {
-        "title": "Confirm deletion",
+        "title": "Confirm Deletion",
         "description": "Are you sure you want to delete this client? This action cannot be undone.",
         "action_delete": "Delete",
         "action_cancel": "Cancel",
         "action_deleting": "Deleting..."
       }
-    },
-    "notifications": {
-      "delete_success": "Client deleted successfully",
-      "delete_error": "Error deleting the client",
-      "no_token": "No authentication token",
-      "permission_error": "You do not have permissions to delete clients",
-      "not_found": "Client not found",
-      "session_expired": "Session expired. Please log in again",
-      "stats_error": "Error loading statistics",
-      "load_error": "Error loading clients",
-      "success_title": "Success",
-      "error_title": "Error"
     },
     "form": {
       "sections": {
@@ -1635,110 +1629,248 @@
         "identity": "Identification & Contact"
       },
       "labels": {
+       "profile_picture": "Profile Picture",
+        "optional": "(Optional)",
         "first_name": "First Name",
         "last_name": "Last Name",
         "email": "Email Address",
-        "birth_date": "Birth Date*",
-        "gender": "Gender*",
-        "identity_document": "Identity Document*",
-        "phone": "Phone",
-        "category": "Client Category",
-        "status": "Status"
+        "birth_date": "Date of Birth",
+        "gender": "Gender",
+        "identity_document": "Identity Document",
+        "phone": "Mobile Phone"
       },
       "gender": {
         "female": "Female",
         "male": "Male",
-        "other": "Prefer not to say"
+        "prefer-not-to-say": "Prefer not to say"
       },
-      "categories": {
-        "vip": "VIP",
-        "regular": "Regular",
-        "new": "New"
-      },
-      "placeholder": {
-        "select": "Select an item"
+      "placeholders": {
+        "first_name": "e.g. John Albert",
+        "last_name": "e.g. Doe Smith",
+        "select_date": "Select date",
+        "month": "Month",
+        "year": "Year"
       },
       "validations": {
         "first_name_required": "First name is required",
         "last_name_required": "Last name is required",
         "email_required": "Email address is required",
-        "email_invalid": "Email address is invalid",
+        "email_invalid": "Invalid email address",
         "identity_document_required": "Identity document is required",
-        "birth_date_required": "Birth date is required",
-        "birth_date_future": "Birth date cannot be in the future",
-        "gender_required": "Gender is required"
+        "birth_date_required": "Date of birth is required",
+        "birth_date_future": "Date of birth cannot be in the future",
+        "gender_required": "Gender is required",
+        "min_2": "Minimum 2 characters",
+        "min_10": "Minimum 10 digits",
+        "invalid_url": "Invalid URL"
+      },
+      "notifications": {
+        "invalid_image": "The file is not a valid image",
+        "image_success": "Photo uploaded successfully",
+        "image_error": "Error uploading the image"
       }
-    },
-    "edit": {
-      "title": "EDIT CLIENT",
-      "subtitle": "Modify client information for {name}",
-      "save_button": "Save Changes",
-      "saving": "Saving...",
-      "cancel_button": "Cancel",
-      "success": "Client updated successfully",
-      "load_error": "Error loading client data",
-      "save_error": "Error saving client changes",
-      "loading": "Loading client data...",
-      "error_title": "ERROR",
-      "error_subtitle": "An error occurred while loading client data",
-      "back_button": "Back",
-      "auth_error": "Token or User ID not available",
-      "validation_error": "Validation error: {errors}",
-      "invalid_data": "Invalid data. Please verify information.",
-      "email_in_use": "Email address is already in use."
     },
     "view": {
       "title": "CLIENT DETAILS",
-      "subtitle": "Detailed information for {name}",
+      "subtitle": "View and manage information for {name}",
+      "editing_title": "EDITING PROFILE",
+      "editing_subtitle": "Modify client's personal and contact information.",
+      "loading": "Loading...",
+      "loading_subtitle": "Fetching data from server",
+      "loading_message": "We are preparing the information",
+      "validation": {
+        "min_2": "Minimum 2 characters",
+        "min_10": "Minimum 10 digits",
+        "invalid_email": "Invalid email address",
+        "invalid_id": "Invalid document",
+        "invalid_url": "Invalid image URL",
+        "required": "This field is required"
+      },
+      "form_actions": {
+        "save": "Save Changes",
+        "cancel": "Cancel"
+      },
+      "tabs": {
+        "general": "General",
+        "medical": "Medical File"
+      },
       "sections": {
-        "personal": "Personal Information",
-        "actions": "Quick Actions",
+        "actions": "Management Actions",
         "membership": "Membership Information"
       },
       "fields": {
-        "id": "Client Code",
-        "category": "Category",
-        "full_name": "Full Name",
-        "phone": "Phone",
+        "first_name": "First Name",
+        "last_name": "Last Name",
         "email": "Email Address",
+        "phone": "Phone Number",
         "identity": "Identity Document",
-        "birth_date": "Birth Date",
+        "birth_date": "Date of Birth",
         "gender": "Gender",
-        "role": "Role",
-        "scoring": "Scoring",
-        "created_at": "Created At",
-        "status": "Status"
+        "image_hint": "Click on the photo to change it",
+        "image_url": "Image URL",
+        "role": "User Role",
+        "status": "System Status",
+        "default_role": "Client"
+      },
+      "status": {
+        "active": "Active",
+        "expired": "Expired",
+        "pending": "Pending",
+        "canceled": "Canceled",
+        "validated": "Validated / Active",
+        "blocked": "Not Validated / Blocked"
       },
       "actions": {
-        "edit": "Edit Client",
-        "membership_history": "Membership & Payment History",
-        "attendance_history": "Attendance History",
-        "complaints": "View Complaints & Suggestions",
-        "activity": "View Activity & Scoring",
-        "rfm": "View RFM Analysis"
+        "edit": "Edit Profile",
+        "membership_history": "Payment History",
+        "attendance_history": "Attendance Record",
+        "service_usage": "Service Usage",
+        "complaints": "Complaints & Suggestions",
+        "activity": "Activity Log",
+        "rfm": "RFM Analysis"
       },
-      "category_active_membership": "Active Membership",
-      "category_regular": "Regular Client",
-      "loading": "LOADING...",
-      "loading_subtitle": "Getting client information",
-      "loading_message": "Loading client data...",
-      "error_title": "ERROR",
-      "error_subtitle": "Could not load client information",
-      "not_found": "Client not found",
-      "back_button": "Back to list"
+      "gender_options": {
+        "female": "Female",
+        "male": "Male",
+        "other": "Other"
+      },
+      "errors": {
+        "not_found": "Client not found",
+        "connection": "Connection error",
+        "description": "We couldn't fetch the profile information. Please check your connection or try again.",
+        "retry": "Retry loading"
+      },
+      "notifications": {
+        "update_success": "Client updated successfully",
+        "update_error": "Error updating information",
+        "invalid_image": "Please select a valid image",
+        "image_success": "Image uploaded successfully",
+        "image_error": "Error uploading image"
+      }
     },
-    "create": {
-      "title": "CREATE CLIENT",
-      "subtitle": "Enter the new client information",
-      "create_button": "Create",
-      "creating": "Creating...",
-      "success": "Client created successfully",
-      "error": "Error creating client",
-      "cancel_button": "Cancel",
-      "save_error": "Error saving client",
-      "invalid_data": "Invalid data",
-      "email_in_use": "Email address is already in use",
-      "validation_error": "Please correct the following errors: {errors}"
+    "medical": {
+      "title": "Digital Medical File",
+      "loading": "Syncing Medical File...",
+      "no_data": "No data recorded",
+      "actions": {
+        "update": "Update File",
+        "create": "Create File"
+      },
+      "form_actions": {
+        "cancel": "Discard",
+        "save": "Save Medical File"
+      },
+      "sections": {
+        "alerts": "Critical Alerts",
+        "profile": "Athlete Clinical Profile"
+      },
+      "fields": {
+        "allergies": "Critical Allergies",
+        "warnings": "Training Warnings",
+        "blood_type": "Blood Type",
+        "emergency_contact": "Emergency Contact",
+        "conditions": "Medical Conditions",
+        "medications": "Current Medication"
+      },
+      "placeholders": {
+        "blood_type": "Ex: O+, A-",
+        "emergency_contact": "Name - Phone",
+        "allergies": "Describe food or drug allergies...",
+        "conditions": "Diabetes, Hypertension, etc.",
+        "medications": "Indicate dosage and frequency...",
+        "warnings": "Ex: Avoid jumps, knee issues..."
+      },
+      "notifications": {
+        "create_success": "Medical file created successfully",
+        "update_success": "Medical file updated successfully",
+        "save_error": "Error saving medical information"
+      }
+    },
+    "payments": {
+      "title": "PAYMENT HISTORY",
+      "subtitle": "View and manage all invoices and transactions for this client.",
+      "table": {
+        "reference": "Reference",
+        "date": "Date",
+        "amount": "Amount",
+        "status": "Status",
+        "search_placeholder": "Search by reference...",
+        "actions": {
+          "view": "View details"
+        }
+      },
+      "status": {
+        "paid": "Paid",
+        "unpaid": "Unpaid",
+        "pending": "Pending",
+        "error": "Error"
+      }
+    },
+    "notifications": {
+      "update_success": "Client updated successfully",
+      "update_error": "Error updating information",
+      "create_success": "Client created successfully",
+      "create_error": "Error creating client",
+      "delete_success": "Client deleted successfully",
+      "delete_error": "Error deleting client",
+      "image_success": "Image uploaded successfully",
+      "image_error": "Error uploading image",
+      "email_in_use": "Email address already in use",
+      "session_expired": "Session expired. Please log in again"
+    },
+    "AttendanceHistory": {
+      "title": "Attendance History",
+      "subtitle": "View and filter client access logs and class attendance.",
+      "filters": {
+        "from": "From",
+        "until": "Until",
+        "placeholder": "Select date",
+        "clear": "Clear"
+      },
+      "states": {
+        "loading": "Updating data...",
+        "errorTitle": "Connection Error",
+        "errorSubtitle": "We could not fetch the history at this time.",
+        "retry": "Retry"
+      },
+      "AttendanceTable": {
+        "columns": {
+          "classService": "Class / Service",
+          "classTime": "Class Time",
+          "checkIn": "Check-in",
+          "status": "Status"
+        },
+        "placeholders": {
+          "facilityUse": "Facility Use",
+          "generalService": "General Service",
+          "notApplicable": "N/A"
+        },
+        "status": {
+          "Attended": "Attended",
+          "NoShow": "No Show",
+          "Late": "Late"
+        }
+      }
+    },
+    "ServiceUsage": {
+      "title": "Service Usage",
+      "subtitle": "Analysis of services consumed by the client across all branches.",
+      "Table": {
+        "columns": {
+          "service": "Service",
+          "branch": "Branch",
+          "date": "Date & Time",
+          "status": "Status"
+        },
+        "placeholders": {
+          "unknownBranch": "Main Branch"
+        },
+        "status": {
+          "Attended": "Attended",
+          "NoShow": "No Show",
+          "Late": "Late"
+        }
+      }
     }
   },
   "branches": {
@@ -2332,6 +2464,28 @@
       "methodCell": {
         "loading": "Loading...",
         "notAvailable": "N/A"
+      },
+      "quickView": {
+        "loading": "Loading invoice...",
+        "accessibleTitle": "Invoice",
+        "accessibleDescription": "Detailed view of invoice charges and payments.",
+        "badgeLabel": "Financial Summary",
+        "conceptsTitle": "Acquired Concepts",
+        "defaultItemName": "Service / Membership",
+        "quantity": "Qty",
+        "totalAmountLabel": "Invoice Amount",
+        "subtotal": "Subtotal",
+        "taxes": "Taxes",
+        "totalPaidLabel": "Total Received",
+        "fullManagementBtn": "FULL MANAGEMENT",
+        "readOnlyMode": "Read-Only Mode",
+        "printTitle": "Print",
+        "status": {
+          "paid": "Paid",
+          "unpaid": "Unpaid",
+          "pending": "Pending",
+          "canceled": "Canceled"
+        }
       }
     }
   },
@@ -2462,7 +2616,8 @@
         "get": "GET",
         "post": "POST",
         "put": "PUT",
-        "delete": "DELETE"
+        "delete": "DELETE",
+        "patch": "PATCH"
       },
       "details": {
         "title": "Operation Analysis",

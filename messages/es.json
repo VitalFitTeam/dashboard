@@ -334,9 +334,10 @@
       "subtitle": "Rendimiento comercial, métodos de pago y productividad de sucursales",
       "export": "Exportar Reporte",
       "stats": {
-        "total_sales": "Ventas Totales",
-        "membership_sales": "Ventas de Membresías",
-        "transactions": "Transacciones Totales",
+        "total_sales": "Ventas Totales Históricas",
+        "average_ticket": "KPI Ticket Promedio (Mensual)",
+        "total_transactions": "Estadísticas de Volumen de Transacciones",
+        "global_sales": "Desempeño de Ventas Global",
         "comparison": "vs. mes anterior",
         "monthly_sales": "Ventas del Mes"
       },
@@ -411,9 +412,10 @@
       },
       "stats": {
         "total_clients": "Total de clientes",
-        "active_members": "Clientes activos",
+        "active_members": "Miembros de sucursal activos",
         "new_clients": "Nuevos clientes",
-        "retention_rate": "Tasa de retención"
+        "retention_rate": "Tasa de retención",
+        "churn_rate": "Tasa de Deserción Mensual"
       },
       "filters": {
         "all_branches": "Todas las sucursales",
@@ -1455,6 +1457,12 @@
     }
   },
   "common": {
+    "loading": "Cargando...",
+    "retry": "Reintentar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
     "Validations": {
       "required": "Este campo es requerido",
       "minChars": "Debe tener al menos {min} caracteres",
@@ -1552,39 +1560,35 @@
   },
   "clients": {
     "title": "CLIENTES",
-    "add_button": "Agregar un Cliente",
+    "description": "Visualiza, filtra y administra el acceso de los usuarios registrados en la plataforma.",
+    "add_button": "Nuevo Cliente",
+    "create": {
+      "title": "Registrar Nuevo Cliente",
+      "subtitle": "Complete los datos para dar de alta a un nuevo miembro en el sistema.",
+      "cancel_button": "Cancelar",
+      "create_button": "Crear Cliente",
+      "creating": "Creando...",
+      "success": "Cliente creado exitosamente",
+      "error": "Ocurrió un error al crear el cliente",
+      "validation_error": "Por favor corrija los siguientes errores: {errors}",
+      "auth_error": "Error de autenticación. Inicie sesión de nuevo.",
+      "invalid_data": "Los datos proporcionados son inválidos.",
+      "email_in_use": "Este correo electrónico ya está registrado."
+    },
     "stats": {
       "total": "TOTAL",
       "active": "ACTIVOS",
       "inactive": "INACTIVOS/BLOQUEADOS",
       "unit": "CLIENTES"
     },
-    "payments": {
-      "title": "Historial de Facturas y Pagos",
-      "subtitle": "Consulta el registro histórico de pagos y membresías del cliente",
-      "table": {
-        "reference": "Referencia",
-        "date": "Fecha de Emisión",
-        "amount": "Monto Total",
-        "status": "Estado",
-        "search_placeholder": "Buscar por referencia..."
-      },
-      "status": {
-        "paid": "Pagado",
-        "pagado": "Pagado",
-        "unpaid": "Pendiente",
-        "pendiente": "Pendiente",
-        "overdue": "Vencido",
-        "void": "Anulado"
-      }
-    },
     "table": {
-      "filter_placeholder": "Filtrar nombre o email",
+      "filter_placeholder": "Filtrar por nombre o apellido",
       "filter_role": "Filtrar por Rol",
       "all_roles": "Todos los Roles",
       "all_categories": "Todas las categorías",
       "category": "Categoría",
       "categories": {
+        "vip": "VIP",
         "premium": "Premium",
         "regular": "Regular",
         "new": "Nuevo"
@@ -1617,46 +1621,33 @@
         "action_deleting": "Eliminando..."
       }
     },
-    "notifications": {
-      "delete_success": "Cliente eliminado correctamente",
-      "delete_error": "Error al eliminar el cliente",
-      "no_token": "No hay token de autenticación",
-      "permission_error": "No tienes permisos para eliminar clientes",
-      "not_found": "Cliente no encontrado",
-      "session_expired": "Sesión expirada. Por favor inicia sesión nuevamente",
-      "stats_error": "Error al cargar estadísticas",
-      "load_error": "Error al cargar clientes",
-      "success_title": "Éxito",
-      "error_title": "Error"
-    },
     "form": {
       "sections": {
         "basic": "Información Básica",
-        "identity": "Identificación y Contacto"
+        "identity": "Documentación y Contacto"
       },
       "labels": {
-        "first_name": "Nombre",
-        "last_name": "Apellido",
-        "email": "Correo electrónico",
-        "birth_date": "Fecha de nacimiento*",
-        "gender": "Género*",
-        "identity_document": "Documento de identidad*",
-        "phone": "Teléfono",
-        "category": "Categoría del cliente",
-        "status": "Estado"
+        "profile_picture": "Foto de Perfil",
+        "optional": "(Opcional)",
+        "first_name": "Nombres",
+        "last_name": "Apellidos",
+        "email": "Correo Electrónico",
+        "birth_date": "Fecha de Nacimiento",
+        "gender": "Género",
+        "identity_document": "Documento de Identidad",
+        "phone": "Teléfono Móvil"
       },
       "gender": {
         "female": "Femenino",
         "male": "Masculino",
-        "other": "Prefiero no especificarlo"
+        "prefer-not-to-say": "Prefiero no especificarlo"
       },
-      "categories": {
-        "vip": "VIP",
-        "regular": "Regular",
-        "new": "Nuevo"
-      },
-      "placeholder": {
-        "select": "Selecciona un elemento"
+     "placeholders": {
+        "first_name": "Ej. Juan Alberto",
+        "last_name": "Ej. Pérez García",
+        "select_date": "Seleccionar fecha",
+        "month": "Mes",
+        "year": "Año"
       },
       "validations": {
         "first_name_required": "El nombre es requerido",
@@ -1666,79 +1657,217 @@
         "identity_document_required": "El documento de identidad es requerido",
         "birth_date_required": "La fecha de nacimiento es requerida",
         "birth_date_future": "La fecha de nacimiento no puede ser futura",
-        "gender_required": "El género es requerido"
+        "gender_required": "El género es requerido",
+        "min_2": "Mínimo 2 caracteres",
+        "min_10": "Mínimo 10 dígitos",
+        "invalid_url": "URL inválida"
+      },
+      "notifications": {
+        "invalid_image": "El archivo no es una imagen válida",
+        "image_success": "Foto cargada correctamente",
+        "image_error": "Error al subir la imagen"
       }
-    },
-    "edit": {
-      "title": "EDITAR CLIENTE",
-      "subtitle": "Modifica la información del cliente {name}",
-      "save_button": "Guardar Cambios",
-      "saving": "Guardando...",
-      "cancel_button": "Cancelar",
-      "success": "Cliente actualizado exitosamente",
-      "load_error": "Error al cargar los datos del cliente",
-      "save_error": "Error al guardar los cambios del cliente",
-      "loading": "Cargando datos del cliente...",
-      "error_title": "ERROR",
-      "error_subtitle": "Ocurrió un error al cargar los datos del cliente",
-      "back_button": "Volver",
-      "auth_error": "Token o ID de usuario no disponible",
-      "validation_error": "Error de validación: {errors}",
-      "invalid_data": "Datos inválidos. Por favor verifica la información.",
-      "email_in_use": "El correo electrónico ya está en uso."
     },
     "view": {
       "title": "DETALLES DEL CLIENTE",
-      "subtitle": "Información detallada de {name}",
+      "subtitle": "Visualiza y gestiona la información de {name}",
+      "editing_title": "EDITANDO PERFIL",
+      "editing_subtitle": "Modifica la información personal y de contacto del cliente.",
+      "loading": "Cargando...",
+      "loading_subtitle": "Obteniendo datos del servidor",
+      "loading_message": "Estamos preparando la información",
+      "form_actions": {
+        "save": "Guardar Cambios"
+      },
+      "tabs": {
+        "general": "General",
+        "medical": "Ficha Médica"
+      },
       "sections": {
-        "personal": "Información Personal",
-        "actions": "Acciones Rápidas",
+        "actions": "Acciones de Gestión",
         "membership": "Información de Membresía"
       },
       "fields": {
-        "id": "Código Cliente",
-        "category": "Categoría",
-        "full_name": "Nombre Completo",
-        "phone": "Teléfono",
+        "first_name": "Nombre",
+        "last_name": "Apellido",
         "email": "Correo electrónico",
-        "identity": "Documento de identidad",
+        "phone": "Teléfono",
+        "identity": "Documento de Identidad",
         "birth_date": "Fecha de Nacimiento",
         "gender": "Género",
-        "role": "Rol",
-        "scoring": "Scoring",
-        "created_at": "Fecha de creación",
-        "status": "Estado"
+        "image_hint": "Haz clic en la foto para cambiarla",
+        "image_url": "URL de Imagen",
+        "role": "Rol de Usuario",
+        "default_role": "Cliente",
+        "status": "Estado del Cliente"
+      },
+      "status": {
+        "active": "Activa",
+        "expired": "Expirada",
+        "pending": "Pendiente",
+        "canceled": "Cancelada",
+        "validated": "Validado / Activo",
+        "blocked": "No Validado / Bloqueado"
       },
       "actions": {
-        "edit": "Editar Cliente",
-        "membership_history": "Historial de Membresías y Pago",
-        "attendance_history": "Historial de asistencia",
-        "complaints": "Ver Quejas y Sugerencias",
-        "activity": "Ver Actividad y Scoring",
-        "rfm": "Ver Análisis RFM"
+        "edit": "Editar Perfil",
+        "membership_history": "Historial de Pagos",
+        "attendance_history": "Registro de Asistencia",
+        "service_usage": "Uso de Servicios",
+        "complaints": "Quejas y Sugerencias",
+        "activity": "Log de Actividad",
+        "rfm": "Análisis RFM"
       },
-      "category_active_membership": "Membresía Activa",
-      "category_regular": "Cliente Regular",
-      "loading": "CARGANDO...",
-      "loading_subtitle": "Obteniendo información del cliente",
-      "loading_message": "Cargando datos del cliente...",
-      "error_title": "ERROR",
-      "error_subtitle": "No se pudo cargar la información del cliente",
-      "not_found": "Cliente no encontrado",
-      "back_button": "Volver a la lista"
+      "gender_options": {
+        "female": "Femenino",
+        "male": "Masculino",
+        "other": "Otro"
+      },
+      "errors": {
+        "not_found": "Cliente no encontrado",
+        "connection": "Error de conexión",
+        "description": "No pudimos obtener la información del perfil. Verifica tu conexión o intenta nuevamente.",
+        "retry": "Reintentar cargar"
+      },
+      "validation": {
+        "min_2": "Mínimo 2 caracteres",
+        "min_10": "Mínimo 10 dígitos",
+        "invalid_email": "Email inválido",
+        "invalid_id": "Documento inválido",
+        "invalid_url": "URL inválida",
+        "required": "Este campo es requerido"
+      },
+      "notifications": {
+        "update_success": "Cliente actualizado correctamente",
+        "update_error": "Error al actualizar la información",
+        "invalid_image": "Por favor selecciona una imagen válida",
+        "image_success": "Imagen cargada correctamente",
+        "image_error": "Error al subir la imagen"
+      }
     },
-    "create": {
-      "title": "CREAR CLIENTE",
-      "subtitle": "Ingresa la información del nuevo cliente",
-      "create_button": "Crear",
-      "creating": "Creando...",
-      "success": "Cliente creado exitosamente",
-      "error": "Error al crear el cliente",
-      "cancel_button": "Cancelar",
-      "save_error": "Error al guardar el cliente",
-      "invalid_data": "Datos inválidos",
+    "medical": {
+      "title": "Ficha Médica Digital",
+      "loading": "Sincronizando Ficha Médica...",
+      "no_data": "No se han registrado datos",
+      "actions": {
+        "update": "Actualizar Ficha",
+        "create": "Crear Ficha"
+      },
+      "form_actions": {
+        "cancel": "Descartar",
+        "save": "Guardar Ficha Médica"
+      },
+      "sections": {
+        "alerts": "Alertas Críticas",
+        "profile": "Perfil Clínico del Atleta"
+      },
+      "fields": {
+        "allergies": "Alergias Críticas",
+        "warnings": "Advertencias de Entrenamiento",
+        "blood_type": "Grupo Sanguíneo",
+        "emergency_contact": "Contacto de Emergencia",
+        "conditions": "Condiciones Médicas",
+        "medications": "Medicamentación Actual"
+      },
+      "placeholders": {
+        "blood_type": "Ej: O+, A-",
+        "emergency_contact": "Nombre - Teléfono",
+        "allergies": "Describa alergias alimentarias o medicamentosas...",
+        "conditions": "Diabetes, Hipertensión, etc.",
+        "medications": "Indique dosis y frecuencia...",
+        "warnings": "Ej: Evitar saltos, problemas en rodilla..."
+      },
+      "notifications": {
+        "create_success": "Ficha médica creada correctamente",
+        "update_success": "Ficha médica actualizada correctamente",
+        "save_error": "Error al guardar la información médica"
+      }
+    },
+    "payments": {
+      "title": "HISTORIAL DE PAGOS",
+      "subtitle": "Consulta el estado de facturación y transacciones de este cliente",
+      "table": {
+        "reference": "Referencia",
+        "date": "Fecha",
+        "amount": "Monto",
+        "status": "Estado",
+        "search_placeholder": "Buscar por referencia...",
+        "actions": {
+          "view": "Ver detalles"
+        }
+      },
+      "status": {
+        "paid": "Pagado",
+        "unpaid": "Pendiente",
+        "pending": "Pendiente",
+        "error": "Error"
+      }
+    },
+    "notifications": {
+      "update_success": "Cliente actualizado correctamente",
+      "update_error": "Error al actualizar la información",
+      "create_success": "Cliente creado exitosamente",
+      "create_error": "Error al crear el cliente",
+      "delete_success": "Cliente eliminado correctamente",
+      "delete_error": "Error al eliminar el cliente",
+      "image_success": "Imagen cargada correctamente",
+      "image_error": "Error al subir la imagen",
       "email_in_use": "El correo electrónico ya está en uso",
-      "validation_error": "Por favor corrige los siguientes errores: {errors}"
+      "session_expired": "Sesión expirada. Por favor inicia sesión nuevamente"
+    },
+    "AttendanceHistory": {
+    "title": "Historial de Asistencias",
+    "subtitle": "Visualiza y filtra los registros de acceso y clases del cliente.",
+    "filters": {
+      "from": "Desde",
+      "until": "Hasta",
+      "placeholder": "Seleccionar fecha",
+      "clear": "Limpiar"
+    },
+    "states": {
+      "loading": "Actualizando datos...",
+      "errorTitle": "Error de conexión",
+      "errorSubtitle": "No pudimos obtener el historial en este momento.",
+      "retry": "Reintentar"
+    },
+   "AttendanceTable": {
+    "columns": {
+      "classService": "Clase / Servicio",
+      "classTime": "Horario Clase",
+      "checkIn": "Check-in",
+      "status": "Estado"
+    },
+    "placeholders": {
+      "facilityUse": "Uso de Instalaciones",
+      "generalService": "Servicio General",
+      "notApplicable": "No aplica"
+    },
+    "status": {
+      "Attended": "Asistió",
+      "NoShow": "No asistió",
+      "Late": "Tarde"
+    }
+  }
+  },
+  "ServiceUsage": {
+      "title": "Uso de Servicios",
+      "subtitle": "Análisis de servicios consumidos por el cliente en todas las sucursales.",
+      "Table": {
+        "columns": {
+          "service": "Servicio",
+          "branch": "Sucursal",
+          "date": "Fecha y Hora",
+          "status": "Estado"
+        },
+        "placeholders": {
+          "unknownBranch": "Sucursal Principal"
+        },
+        "status": {
+          "Attended": "Asistió",
+          "NoShow": "No asistió",
+          "Late": "Tarde"
+        }
+      }
     }
   },
   "branches": {
@@ -2332,6 +2461,28 @@
       "methodCell": {
         "loading": "Cargando...",
         "notAvailable": "N/A"
+      },
+      "quickView": {
+        "loading": "Cargando factura...",
+        "accessibleTitle": "Factura",
+        "accessibleDescription": "Vista detallada de los cobros y pagos de la factura.",
+        "badgeLabel": "Resumen Financiero",
+        "conceptsTitle": "Conceptos Adquiridos",
+        "defaultItemName": "Servicio / Membresía",
+        "quantity": "Cant",
+        "totalAmountLabel": "Monto de Factura",
+        "subtotal": "Subtotal",
+        "taxes": "Impuestos",
+        "totalPaidLabel": "Total Recibido",
+        "fullManagementBtn": "GESTIÓN COMPLETA",
+        "readOnlyMode": "Modo Lectura",
+        "printTitle": "Imprimir",
+        "status": {
+          "paid": "Pagado",
+          "unpaid": "Pendiente",
+          "pending": "Pendiente",
+          "canceled": "Cancelado"
+        }
       }
     }
   },
@@ -2462,7 +2613,8 @@
         "get": "GET",
         "post": "POST",
         "put": "PUT",
-        "delete": "DELETE"
+        "delete": "DELETE",
+        "patch": "PATCH"
       },
       "details": {
         "title": "Análisis de Operación",
