@@ -2350,10 +2350,14 @@
         "loading": "Loading records..."
       },
       "table": {
+        "created_at": "Date",
         "event": "Event",
         "method": "Method",
+        "path": "Path",
         "resource": "Resource",
+        "ip_address": "IP",
         "status": "Status",
+        "payload": "Payload",
         "origin": "Origin",
         "viewDetails": "View details"
       },
@@ -2468,7 +2472,10 @@
       "sessions_modal": {
         "title": "Active Sessions for {name} {lastname}",
         "empty": "No active sessions recorded.",
+        "security_label": "Security Actions",
+        "count": "{count} active sessions",
         "ip_address": "IP Address",
+        "security_description": "Revoke all sessions to log out the user from all devices.",
         "started": "Started",
         "expires": "Expires",
         "status": {
@@ -2496,14 +2503,31 @@
         "delete_success": "User deleted successfully.",
         "refresh_loading": "Updating user list...",
         "refresh_success": "List updated",
-        "error_loading": "Error loading information",
+        "error_loading": "loading information...",
         "error_load_title": "Loading Error",
         "error_list_load": "Could not load user list",
         "error_unauthorized": "You are not authenticated",
         "error_create": "Could not create user",
         "error_update": "Could not update user",
         "error_delete": "Could not delete user",
-        "error_not_found": "Requested user not found"
+        "error_not_found": "Requested user not found",
+        "sessions_revoked": "All sessions have been successfully revoked",
+        "sessions_revoked_error": "Error revoking sessions"
+      },
+      "activities_modal": {
+        "title": "Activity Log",
+        "description": "History of actions performed by the user in the system",
+        "placeholder": {
+          "title": "Functionality under development",
+          "description": "The activity log will be available soon"
+        },
+        "actions": {
+          "export": "Export CSV"
+        }
+      },
+      "sessions_actions": {
+        "revoke_all": "Revoke All",
+        "revoking": "Revoking..."
       }
     }
   },

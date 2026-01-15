@@ -13,6 +13,7 @@ import {
     ComputerDesktopIcon,
 } from "@heroicons/react/24/outline";
 import { UserSession } from "@vitalfit/sdk";
+
 import {
     Dialog,
     DialogContent,
@@ -23,7 +24,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-
+import { toast } from "sonner"; 
 
 type UserRole = Users["rol"];
 
@@ -34,11 +35,11 @@ export default function ViewUserPage() {
     const t = useTranslations("user.management");
     const tRoles = useTranslations("user.UserSelectionCard.roles");
 
-
     const [user, setUser] = useState<Users | null>(null);
     const [sessions, setSessions] = useState<UserSession[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false);
+    const [isRevoking, setIsRevoking] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const normalizePhone = (phone: string) => phone.replace(/\s+/g, "");
@@ -145,6 +146,38 @@ export default function ViewUserPage() {
         router.replace(`/users/users/${id}/edit`);
     };
 
+    const revokeAllSessions = async () => {
+        if (!token || !user) {
+            toast.error("Token de autenticación no disponible");
+            return;
+        }
+
+        setIsRevoking(true);
+        try {
+            await api.auth.revokeAllSessions(token);
+            
+            toast.success(t("notifications.sessions_revoked"), {
+                description: `Usuario: ${user.name} ${user.lastname}`,
+                duration: 5000,
+            });
+            
+            try {
+                const updatedSessions = await api.auth.getUserSessionByID(user.id, token);
+                setSessions(updatedSessions.data || []);
+            } catch (updateErr) {
+                setSessions([]);
+            }
+            
+        } catch (error) {
+            console.error("Error revocando sesiones:", error);
+            toast.error(t("notifications.sessions_revoked_error"), {
+                duration: 5000,
+            });
+        } finally {
+            setIsRevoking(false);
+        }
+    };
+
     const stats = useMemo(() => {
         if (!sessions.length) return { active: 0, total: 0, average: 0 };
 
@@ -160,6 +193,8 @@ export default function ViewUserPage() {
 
         return { active, total, average };
     }, [sessions]);
+
+    // Activities are now shown on a dedicated page (`/users/users/[id]/audit`)
 
     if (isLoading) {
         return (
@@ -206,7 +241,7 @@ export default function ViewUserPage() {
                         </div>
                         <div>
                             <strong>{t("table.columns.status")}:</strong>{" "}
-                            <span className="px-2 py-1 rounded-full border border-green-100 text-green-700 text-xs">
+                            <span className="px-2 py-1 rounded-full border border-green-100 text-green-700 text-xs font-bold">
                                 {user.status === "active" ? t("table.columns.status_active") : t("table.columns.status_inactive")}
                             </span>
                         </div>
@@ -218,7 +253,7 @@ export default function ViewUserPage() {
                         </div>
                         <div>
                             <strong>{t("form.role").replace("*", "")}:</strong>
-                            <span className="px-2 py-1 rounded-full border border-orange-100 text-orange-700 text-xs ml-1">
+                            <span className="px-2 py-1 rounded-full border border-orange-100 text-orange-700 text-xs font-bold ml-1">
                                 {tRoles(user.rol.toLowerCase()) ?? user.rol}
                             </span>
                         </div>
@@ -246,7 +281,11 @@ export default function ViewUserPage() {
                         {t("quick_actions.title")}
                     </h2>
                     <div className="border rounded-lg p-4 space-y-3">
-                        <Button variant="outline" className="w-full">
+                        <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => router.push(`/users/users/${id}/audit`)}
+                        >
                             <EyeIcon className="h-4 w-4" />
                             {t("quick_actions.view_activity")}
                         </Button>
@@ -283,12 +322,42 @@ export default function ViewUserPage() {
                 </div>
             </div>
 
-
             <Dialog open={isSessionsModalOpen} onOpenChange={setIsSessionsModalOpen}>
                 <DialogContent className="max-w-2xl overflow-hidden flex flex-col h-[80vh]">
                     <DialogHeader>
                         <DialogTitle>{t("sessions_modal.title", { name: user.name, lastname: user.lastname })}</DialogTitle>
                     </DialogHeader>
+
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="font-bold text-red-800">{t("sessions_modal.security_label")}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t text-sm">
+                            <div className="flex flex-col">
+                                <p className="text-red-700">
+                                    {t("sessions_modal.security_description")}
+                                </p>
+                            </div>
+                            
+                            <div className="flex flex-col items-end">
+                                <Button 
+                                    onClick={revokeAllSessions} 
+                                    className="w-full sm:w-1/2 bg-red-600 hover:bg-red-700 text-white"
+                                    disabled={isRevoking || sessions.length === 0}
+                                >
+                                    {isRevoking ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                            {t("sessions_actions.revoking")}
+                                        </>
+                                    ) : (
+                                        t("sessions_actions.revoke_all")
+                                    )}
+                                </Button>
+                                <p className="text-xs text-red-600 mt-1 text-right">
+                                    {t("sessions_modal.count", { count: sessions.length })}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                     <ScrollArea className="flex-1 pr-4">
                         <div className="space-y-4 py-4">

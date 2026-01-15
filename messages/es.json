@@ -2669,10 +2669,14 @@
         "loading": "Cargando registros..."
       },
       "table": {
+        "created_at": "Fecha",
         "event": "Evento",
         "method": "Método",
+        "path": "Ruta",
         "resource": "Recurso",
+        "ip_address": "IP",
         "status": "Estado",
+        "payload": "Cuerpo",
         "origin": "Origen",
         "viewDetails": "Ver detalles"
       },
@@ -2787,7 +2791,10 @@
       "sessions_modal": {
         "title": "Sesiones Activas de {name} {lastname}",
         "empty": "No hay sesiones activas registradas.",
+        "security_label": "Acciones de Seguridad",
+        "count": "{count} sesiones activas",
         "ip_address": "Dirección IP",
+        "security_description": "Revocar todas las sesiones cerrará el acceso en todos los dispositivos activos.",
         "started": "Iniciada",
         "expires": "Expira",
         "status": {
@@ -2815,14 +2822,31 @@
         "delete_success": "Usuario eliminado correctamente.",
         "refresh_loading": "Actualizando lista de usuarios...",
         "refresh_success": "Lista actualizada",
-        "error_loading": "Error al cargar la información",
+        "error_loading": "Cargando información del usuario...",
         "error_load_title": "Error de carga",
         "error_list_load": "No se pudo cargar la lista de usuarios",
         "error_unauthorized": "No estás autenticado",
         "error_create": "No se pudo crear el usuario",
         "error_update": "No se pudo actualizar el usuario",
         "error_delete": "No se pudo eliminar el usuario",
-        "error_not_found": "No se encontró el usuario solicitado"
+        "error_not_found": "No se encontró el usuario solicitado",
+        "sessions_revoked": "Todas las sesiones han sido revocadas exitosamente",
+        "sessions_revoked_error": "Error al revocar las sesiones"
+      },
+      "activities_modal": {
+        "title": "Registro de actividades",
+        "description": "Historial de acciones realizadas por el usuario en el sistema",
+        "placeholder": {
+          "title": "Funcionalidad en desarrollo",
+          "description": "El registro de actividades estará disponible próximamente"
+        },
+        "actions": {
+          "export": "Exportar registro"
+        }
+      },
+      "sessions_actions": {
+        "revoke_all": "Revocar Todo",
+        "revoking": "Revocando..."
       }
     }
   },

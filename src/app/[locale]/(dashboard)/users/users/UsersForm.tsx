@@ -7,8 +7,13 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { RoleResponse } from "@vitalfit/sdk";
 import { useTranslations } from "next-intl";
-
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UsersFormProps {
   formData: Users;
@@ -29,15 +34,12 @@ export default function UsersForm({
   const [roles, setRoles] = useState<RoleResponse[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
 
-
   useEffect(() => {
     const loadRoles = async () => {
       if (!token) {
         return;
       }
       setIsLoadingRoles(true);
-
-
 
       try {
         const response = await api.RBAC.getRoles(
@@ -60,6 +62,12 @@ export default function UsersForm({
     loadRoles();
   }, [token]);
 
+  // Función para formatear el nombre del rol
+  const formatRoleName = (roleName: string) => {
+    return tRoles(roleName.toLowerCase()) || 
+           roleName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -80,7 +88,6 @@ export default function UsersForm({
               className="bg-white w-full"
               disabled={disabled}
             />
-
           </div>
         </div>
         <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
@@ -100,7 +107,6 @@ export default function UsersForm({
               className="bg-white w-full"
               disabled={disabled}
             />
-
           </div>
         </div>
       </div>
@@ -123,7 +129,6 @@ export default function UsersForm({
             className="bg-white w-full"
             disabled={disabled}
           />
-
         </div>
       </div>
 
@@ -160,7 +165,6 @@ export default function UsersForm({
             disabled={disabled}
           />
         </div>
-
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -225,10 +229,8 @@ export default function UsersForm({
             <span className="ml-2">{t("form.genders.other")}</span>
           </label>
         </div>
-
       </div>
 
-      {/* Sección de Rol - Ahora visible tanto en creación como edición */}
       <div className="mt-6">
         <label className="block text-sm font-medium text-gray-700 mb-2 sm:text-base text-left">
           {t("form.role")}
@@ -238,33 +240,39 @@ export default function UsersForm({
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {roles.map((role) => (
-              <div
-                key={role.role_id}
-                onClick={() => !disabled && onChange("rol", role.name)}
-                className={`cursor-pointer border rounded-lg p-4 shadow-sm transition-all ${formData.rol === role.name
-                  ? "border-primary bg-primary/10"
-                  : "border-gray-300 hover:border-primary"
-                  } ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
-              >
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  {tRoles(role.name.toLowerCase()) || role.name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                  {formData.rol === role.name && (
-                    <span className="ml-2 text-xs bg-primary text-white px-2 py-1 rounded">
-                      ✓
-                    </span>
-                  )}
-                </h3>
-                <p className="text-sm text-gray-600 italic">
-                  {role.description}
-                </p>
-              </div>
-            ))}
+          <div className="w-full">
+            <Select
+              value={formData.rol}
+              onValueChange={(value) => !disabled && onChange("rol", value)}
+              disabled={disabled}
+            >
+              <SelectTrigger className="w-full bg-white">
+                <SelectValue placeholder="Selecciona un rol">
+                  {formData.rol ? formatRoleName(formData.rol) : "Selecciona un rol"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {roles.map((role) => (
+                  <SelectItem 
+                    key={role.role_id} 
+                    value={role.name}
+                    className="py-3"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-800">
+                        {formatRoleName(role.name)}
+                      </span>
+                      <span className="text-xs text-gray-500 italic truncate">
+                        {role.description}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>
-
 
       {!edit && (
         <div className="my-4 cursor-pointer border rounded-lg p-4 shadow-sm transition-all border-primary bg-primary/10">
@@ -283,7 +291,6 @@ export default function UsersForm({
           </ul>
         </div>
       )}
-
     </>
   );
 }
