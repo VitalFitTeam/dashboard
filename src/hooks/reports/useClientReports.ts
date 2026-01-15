@@ -91,5 +91,16 @@ export const useClientReport = {
                 }
                 return api.report.topInstructors(jwt, start, end);
             }
-        )
+        ),
+
+   useChurnRateKPI: (jwt: string | null, branchId?: string) =>
+    useReportBase<KPICard>(
+      jwt ? ["client", "churnRateKPI", jwt, branchId] : null,
+      () => {
+        if (!jwt) {
+            throw new Error("No JWT provided");
+        }
+        return api.report.churnRateKPI(jwt, branchId);
+      }
+    ),
 };
