@@ -2574,7 +2574,15 @@
       "roles": {
         "client": "Cliente",
         "instructor": "Instructor",
-        "admin": "Administrador"
+        "admin": "Administrador",
+        "superadmin": "Súper Administrador",
+        "super_admin": "Súper Administrador",
+        "branch_admin": "Admin de Sede",
+        "staff": "Personal",
+        "accountant": "Contador",
+        "data_analyst": "Analista de Datos",
+        "recepcionist": "Recepcionista",
+        "ventas": "Ventas"
       },
       "actions": {
         "enroll": "Inscribir",
@@ -2602,10 +2610,14 @@
         "loading": "Cargando registros..."
       },
       "table": {
+        "created_at": "Fecha",
         "event": "Evento",
         "method": "Método",
+        "path": "Ruta",
         "resource": "Recurso",
+        "ip_address": "IP",
         "status": "Estado",
+        "payload": "Cuerpo",
         "origin": "Origen",
         "viewDetails": "Ver detalles"
       },
@@ -2648,6 +2660,135 @@
         "confirmRevokeOne": "¿Cerrar esta sesión específica?",
         "revokeSuccess": "Sesión(es) revocada(s) con éxito",
         "errorRevoke": "Hubo un problema al intentar cerrar la sesión"
+      }
+    },
+    "management": {
+      "title": "USUARIOS",
+      "add_button": "Agregar Usuario",
+      "edit_title": "MODIFICAR USUARIO",
+      "edit_subtitle": "Editar información del usuario: {name} {lastname}",
+      "create_title": "CREAR NUEVO USUARIO",
+      "create_subtitle": "Complete la información del nuevo usuario",
+      "view_title": "DETALLES DE USUARIO",
+      "view_subtitle": "Información completa del usuario: {name} {lastname}",
+      "personal_info": "Información Personal",
+      "user_id": "ID Usuario",
+      "sessions_info": "Información de sesiones",
+      "stats": {
+        "active_sessions": "Sesiones Activas",
+        "total_logins": "Total inicio de sesión",
+        "daily_average": "Promedio Diario"
+      },
+      "table": {
+        "columns": {
+          "name": "Nombre",
+          "email": "Email",
+          "role": "Rol",
+          "status": "Estado",
+          "status_active": "Activo",
+          "status_inactive": "Inactivo"
+        },
+        "filters": {
+          "search_placeholder": "Buscar por nombre, apellido o email...",
+          "role_placeholder": "Filtrar por Rol",
+          "all_roles": "Todos los Roles"
+        },
+        "actions": {
+          "view": "Ver Detalles",
+          "edit": "Modificar",
+          "delete": "Eliminar",
+          "export": "Exportar CSV",
+          "export_toast": "Función de exportación en desarrollo"
+        },
+        "delete_dialog": {
+          "title": "¿Estás seguro?",
+          "description": "Esta acción eliminará al usuario permanentemente.",
+          "confirm": "Eliminar",
+          "cancel": "Cancelar"
+        }
+      },
+      "form": {
+        "name": "Nombre*",
+        "lastname": "Apellido*",
+        "email": "Correo Electrónico*",
+        "email_placeholder": "correo@ejemplo.com",
+        "phone": "Número de teléfono*",
+        "document": "Documento de identidad*",
+        "birth_date": "Fecha de Nacimiento*",
+        "gender": "Género*",
+        "role": "Rol del Usuario*",
+        "genders": {
+          "male": "Masculino",
+          "female": "Femenino",
+          "other": "Prefiero no especificarlo"
+        },
+        "next_steps": {
+          "title": "Próximos Pasos",
+          "email_sent": "Se enviará un email de verificación a {email}",
+          "verify": "El usuario debe verificar su email para activar la cuenta",
+          "password": "Después podrá establecer su contraseña inicial",
+          "pending": "El estado será \"Pendiente\" hasta completar la verificación"
+        }
+      },
+      "sessions_modal": {
+        "title": "Sesiones Activas de {name} {lastname}",
+        "empty": "No hay sesiones activas registradas.",
+        "security_label": "Acciones de Seguridad",
+        "count": "{count} sesiones activas",
+        "ip_address": "Dirección IP",
+        "security_description": "Revocar todas las sesiones cerrará el acceso en todos los dispositivos activos.",
+        "started": "Iniciada",
+        "expires": "Expira",
+        "status": {
+          "active": "Activa",
+          "blocked": "Bloqueada"
+        }
+      },
+      "quick_actions": {
+        "title": "Acciones Rápidas",
+        "view_activity": "Ver Registros de Actividades",
+        "view_sessions": "Ver Sesiones",
+        "edit_user": "Editar Usuario"
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "save": "Guardar Cambios",
+        "create": "Crear Usuario"
+      },
+      "notifications": {
+        "creating": "Creando...",
+        "saving": "Guardando...",
+        "create_success": "Usuario creado exitosamente. Se ha enviado un correo de verificación.",
+        "update_success": "Usuario actualizado correctamente",
+        "delete_loading": "Eliminando usuario...",
+        "delete_success": "Usuario eliminado correctamente.",
+        "refresh_loading": "Actualizando lista de usuarios...",
+        "refresh_success": "Lista actualizada",
+        "error_loading": "Cargando información del usuario...",
+        "error_load_title": "Error de carga",
+        "error_list_load": "No se pudo cargar la lista de usuarios",
+        "error_unauthorized": "No estás autenticado",
+        "error_create": "No se pudo crear el usuario",
+        "error_update": "No se pudo actualizar el usuario",
+        "error_delete": "No se pudo eliminar el usuario",
+        "error_not_found": "No se encontró el usuario solicitado",
+        "sessions_revoked": "Todas las sesiones han sido revocadas exitosamente",
+        "sessions_revoked_error": "Error al revocar las sesiones"
+      },
+      "activities_modal": {
+        "title": "Registro de actividades",
+        "description": "Historial de acciones realizadas por el usuario en el sistema",
+        "placeholder": {
+          "title": "Funcionalidad en desarrollo",
+          "description": "El registro de actividades estará disponible próximamente"
+        },
+        "actions": {
+          "export": "Exportar registro"
+        }
+      },
+      "sessions_actions": {
+        "revoke_all": "Revocar Todo",
+        "revoking": "Revocando..."
       }
     }
   },

@@ -15,6 +15,7 @@ import { UserRole } from "@/lib/roles";
 import BranchSchedule from "@/components/modules/branches/details/BranchSchedule";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import InputField from "@/components/ui/InputField";
+import { PhoneInput } from "@/components/ui/phone-input";
 import MapboxPicker from "@/components/ui/MapboxPicker";
 import { Button } from "@/components/ui/button";
 import {
@@ -91,7 +92,7 @@ export default function BranchBasicDataPanel({
       name: data.name,
       tax_id: data.tax_id,
       address: data.address,
-      phone: data.phone,
+      phone: (data.phone || "").replace(/\D/g, ""),
       status: data.status,
       state: data.state,
       country: data.country,
@@ -174,15 +175,22 @@ export default function BranchBasicDataPanel({
             }
             readOnly={isViewMode}
           />
-          <InputField
-            id="phone"
-            label={t("details.basic.phone")}
-            value={formData.phone ?? ""}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, phone: e.target.value }))
-            }
-            readOnly={isViewMode}
-          />
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-700">
+              {t("details.basic.phone")}
+            </label>
+            <PhoneInput
+              id="phone"
+              name="phone"
+              value={formData.phone ? (formData.phone.startsWith("+") ? formData.phone : `+${formData.phone}`) : ""}
+              onChange={(value) => {
+                setFormData((prev) => ({ ...prev, phone: value || "" }));
+              }}
+              disabled={isViewMode}
+              defaultCountry="VE"
+              className="w-full"
+            />
+          </div>
           <InputField
             id="maxCapacity"
             label={t("details.basic.capacity")}
@@ -231,7 +239,7 @@ export default function BranchBasicDataPanel({
             </label>
             <Select
               value={currentManagerId}
-              onValueChange={handleManagerChange} 
+              onValueChange={handleManagerChange}
               disabled={isViewMode || !isSuperAdmin}
             >
               <SelectTrigger

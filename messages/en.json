@@ -2577,7 +2577,15 @@
       "roles": {
         "client": "Client",
         "instructor": "Instructor",
-        "admin": "Administrator"
+        "admin": "Administrator",
+        "superadmin": "Super Administrator",
+        "super_admin": "Super Administrator",
+        "branch_admin": "Branch Admin",
+        "staff": "Staff",
+        "accountant": "Accountant",
+        "data_analyst": "Data Analyst",
+        "recepcionist": "Receptionist",
+        "ventas": "Sales"
       },
       "actions": {
         "enroll": "Enroll",
@@ -2605,10 +2613,14 @@
         "loading": "Loading records..."
       },
       "table": {
+        "created_at": "Date",
         "event": "Event",
         "method": "Method",
+        "path": "Path",
         "resource": "Resource",
+        "ip_address": "IP",
         "status": "Status",
+        "payload": "Payload",
         "origin": "Origin",
         "viewDetails": "View details"
       },
@@ -2651,6 +2663,135 @@
         "confirmRevokeOne": "Close this specific session?",
         "revokeSuccess": "Session(s) successfully revoked",
         "errorRevoke": "There was a problem trying to close the session"
+      }
+    },
+    "management": {
+      "title": "USERS",
+      "add_button": "Add User",
+      "edit_title": "MODIFY USER",
+      "edit_subtitle": "Edit user information: {name} {lastname}",
+      "create_title": "CREATE NEW USER",
+      "create_subtitle": "Fill in the information for the new user",
+      "view_title": "USER DETAILS",
+      "view_subtitle": "Complete user information: {name} {lastname}",
+      "personal_info": "Personal Information",
+      "user_id": "User ID",
+      "sessions_info": "Session Information",
+      "stats": {
+        "active_sessions": "Active Sessions",
+        "total_logins": "Total Logins",
+        "daily_average": "Daily Average"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "email": "Email",
+          "role": "Role",
+          "status": "Status",
+          "status_active": "Active",
+          "status_inactive": "Inactive"
+        },
+        "filters": {
+          "search_placeholder": "Search by name, last name or email...",
+          "role_placeholder": "Filter by Role",
+          "all_roles": "All Roles"
+        },
+        "actions": {
+          "view": "View Details",
+          "edit": "Modify",
+          "delete": "Delete",
+          "export": "Export CSV",
+          "export_toast": "Export function is under development"
+        },
+        "delete_dialog": {
+          "title": "Are you sure?",
+          "description": "This action will permanently delete the user.",
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "form": {
+        "name": "First Name*",
+        "lastname": "Last Name*",
+        "email": "Email Address*",
+        "email_placeholder": "email@example.com",
+        "phone": "Phone Number*",
+        "document": "Identity Document*",
+        "birth_date": "Birth Date*",
+        "gender": "Gender*",
+        "role": "User Role*",
+        "genders": {
+          "male": "Male",
+          "female": "Female",
+          "other": "I prefer not to specify"
+        },
+        "next_steps": {
+          "title": "Next Steps",
+          "email_sent": "A verification email will be sent to {email}",
+          "verify": "The user must verify their email to activate the account",
+          "password": "Then they can set their initial password",
+          "pending": "The status will be \"Pending\" until verification is complete"
+        }
+      },
+      "sessions_modal": {
+        "title": "Active Sessions for {name} {lastname}",
+        "empty": "No active sessions recorded.",
+        "security_label": "Security Actions",
+        "count": "{count} active sessions",
+        "ip_address": "IP Address",
+        "security_description": "Revoke all sessions to log out the user from all devices.",
+        "started": "Started",
+        "expires": "Expires",
+        "status": {
+          "active": "Active",
+          "blocked": "Blocked"
+        }
+      },
+      "quick_actions": {
+        "title": "Quick Actions",
+        "view_activity": "View Activity Logs",
+        "view_sessions": "View Sessions",
+        "edit_user": "Edit User"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "create": "Create User"
+      },
+      "notifications": {
+        "creating": "Creating...",
+        "saving": "Saving...",
+        "create_success": "User created successfully. A verification email has been sent.",
+        "update_success": "User updated successfully",
+        "delete_loading": "Deleting user...",
+        "delete_success": "User deleted successfully.",
+        "refresh_loading": "Updating user list...",
+        "refresh_success": "List updated",
+        "error_loading": "loading information...",
+        "error_load_title": "Loading Error",
+        "error_list_load": "Could not load user list",
+        "error_unauthorized": "You are not authenticated",
+        "error_create": "Could not create user",
+        "error_update": "Could not update user",
+        "error_delete": "Could not delete user",
+        "error_not_found": "Requested user not found",
+        "sessions_revoked": "All sessions have been successfully revoked",
+        "sessions_revoked_error": "Error revoking sessions"
+      },
+      "activities_modal": {
+        "title": "Activity Log",
+        "description": "History of actions performed by the user in the system",
+        "placeholder": {
+          "title": "Functionality under development",
+          "description": "The activity log will be available soon"
+        },
+        "actions": {
+          "export": "Export CSV"
+        }
+      },
+      "sessions_actions": {
+        "revoke_all": "Revoke All",
+        "revoking": "Revoking..."
       }
     }
   },

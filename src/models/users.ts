@@ -8,7 +8,7 @@ export interface Users {
   document: string;
   date: string;
   gender: string;
-  rol: "super_admin" | "branch_admin" | "accountant" | "data_analyst" | "instructor" | "recepcionist" | "client";
+  rol: "super_admin" | "branch_admin" | "accountant" | "data_analyst" | "instructor" | "recepcionist" | "client" | "staff";
   status: "active" | "inactive";
   uacceso: string;
 }
@@ -21,6 +21,7 @@ export const roleLabels: Record<Users["rol"], string> = {
   instructor: "Instructor",
   recepcionist: "Recepcionista",
   client: "Cliente",
+  staff: "Personal",
 };
 
 export interface BranchAdmin {

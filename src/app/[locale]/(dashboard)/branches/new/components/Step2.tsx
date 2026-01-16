@@ -71,10 +71,10 @@ export default function Step2({
         const [lng, lat] = f.center;
         const ctx = f.context || [];
 
-        const city = ctx.find((c: any) => c.id.includes("place"))?.text || 
-                     ctx.find((c: any) => c.id.includes("locality"))?.text || "";
-        const state = ctx.find((c: any) => c.id.includes("region"))?.text || 
-                      ctx.find((c: any) => c.id.includes("place"))?.text || "";
+        const city = ctx.find((c: any) => c.id.includes("place"))?.text ||
+          ctx.find((c: any) => c.id.includes("locality"))?.text || "";
+        const state = ctx.find((c: any) => c.id.includes("region"))?.text ||
+          ctx.find((c: any) => c.id.includes("place"))?.text || "";
         const country = ctx.find((c: any) => c.id.includes("country"))?.text || "";
 
         handleMapSelect({
@@ -113,13 +113,13 @@ export default function Step2({
             value={formData.address || ""}
             error={formErrors["address"]}
             onChange={handleChange}
-            onBlur={searchByAddress} 
-            onKeyDown={(e: any) => e.key === "Enter" && searchByAddress()} 
+            onBlur={searchByAddress}
+            onKeyDown={(e: any) => e.key === "Enter" && searchByAddress()}
             placeholder={t("create.form.location.address_placeholder")}
             className="focus:ring-orange-500 focus:border-transparent pr-10"
           />
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={searchByAddress}
             className="absolute right-3 top-[34px] text-orange-600 hover:text-orange-700 transition-colors"
           >

@@ -21,16 +21,12 @@ import { User } from "@vitalfit/sdk";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 
-const ROLE_LABELS: Record<string, string> = {
-  super_admin: "Super Admin",
-  branch_admin: "Admin de Sede",
-  instructor: "Instructor",
-  accountant: "Contador",
-  data_analyst: "Analista de Datos",
-  recepcionist: "Recepcionista",
-};
+
+
+
 
 export type UserTableProps = {
   data: User[];
@@ -55,6 +51,9 @@ export default function UsersTable({
 }: UserTableProps) {
   const router = useRouter();
   const { token } = useAuth();
+  const t = useTranslations("user.management");
+  const tRoles = useTranslations("user.UserSelectionCard.roles");
+
 
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const [deleteRowId, setDeleteRowId] = useState<string | null>(null);
@@ -72,52 +71,52 @@ export default function UsersTable({
     if (!token || !deleteRowId) {
       return;
     }
-    const toastId = toast.loading("Eliminando usuario...");
+    const toastId = toast.loading(t("notifications.delete_loading"));
 
     try {
       await api.user.deleteUser(deleteRowId, token);
-      toast.success("Usuario eliminado", {
+      toast.success(t("notifications.delete_success"), {
         id: toastId,
-        description: "El registro ha sido borrado correctamente.",
       });
       onReload();
     } catch (error) {
-      toast.error("Error", {
+      toast.error(t("notifications.error_delete"), {
         id: toastId,
-        description: "No se pudo eliminar el usuario.",
       });
     } finally {
       setDeleteRowId(null);
     }
+
   };
 
   const columns: Column<User>[] = [
     {
-      header: "Nombre",
+      header: t("table.columns.name"),
       accessor: "first_name",
       render: (_, row) => `${row.first_name} ${row.last_name}`,
     },
-    { header: "Email", accessor: "email" },
-    { 
-      header: "Rol", 
+    { header: t("table.columns.email"), accessor: "email" },
+    {
+      header: t("table.columns.role"),
       accessor: "role_name" as keyof User,
       render: (value) => (
-        <Badge variant="secondary" className="font-normal">
-          {ROLE_LABELS[String(value)] || String(value)}
+        <Badge variant="secondary" className="font-normal text-xs">
+          {tRoles(String(value).toLowerCase()) || String(value)}
         </Badge>
       )
     },
     {
-      header: "Status",
+      header: t("table.columns.status"),
       accessor: "is_validated",
       render: (value) =>
         value ? (
-          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">Activo</Badge>
+          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50 text-xs">{t("table.columns.status_active")}</Badge>
         ) : (
-          <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50">Inactivo</Badge>
+          <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50 text-xs">{t("table.columns.status_inactive")}</Badge>
         ),
     },
   ];
+
 
   return (
     <div className="space-y-4">
@@ -126,7 +125,7 @@ export default function UsersTable({
           <div className="relative w-full sm:w-[350px]">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nombre, apellido o email..."
+              placeholder={t("table.filters.search_placeholder")}
               className="pl-9"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -140,23 +139,23 @@ export default function UsersTable({
             }
           >
             <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Filtrar por Rol" />
+              <SelectValue placeholder={t("table.filters.role_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los Roles</SelectItem>
-              <SelectItem value="super_admin">Super Admin</SelectItem>
-              <SelectItem value="branch_admin">Admin de Sede</SelectItem>
-              <SelectItem value="instructor">Instructor</SelectItem>
-              <SelectItem value="accountant">Contador</SelectItem>
-              <SelectItem value="data_analyst">Analista de Datos</SelectItem>
-              <SelectItem value="recepcionist">Recepcionista</SelectItem>
+              <SelectItem value="all">{t("table.filters.all_roles")}</SelectItem>
+              <SelectItem value="super_admin">{tRoles("super_admin")}</SelectItem>
+              <SelectItem value="branch_admin">{tRoles("branch_admin")}</SelectItem>
+              <SelectItem value="instructor">{tRoles("instructor")}</SelectItem>
+              <SelectItem value="accountant">{tRoles("accountant")}</SelectItem>
+              <SelectItem value="data_analyst">{tRoles("data_analyst")}</SelectItem>
+              <SelectItem value="recepcionist">{tRoles("recepcionist")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <Button variant="outline" onClick={() => toast.info("Función de exportación en desarrollo")}>
+        <Button variant="outline" onClick={() => toast.info(t("table.actions.export_toast"))}>
           <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
-          Exportar CSV
+          {t("table.actions.export")}
         </Button>
       </div>
 
@@ -172,10 +171,10 @@ export default function UsersTable({
         actions={(row) => (
           <RowActions
             actions={[
-              { label: "Ver Detalles", icon: Eye, onClick: () => router.push(`/users/users/${row.user_id}`) },
-              { label: "Modificar", icon: Pencil, onClick: () => router.push(`/users/users/${row.user_id}/edit`) },
+              { label: t("table.actions.view"), icon: Eye, onClick: () => router.push(`/users/users/${row.user_id}`) },
+              { label: t("table.actions.edit"), icon: Pencil, onClick: () => router.push(`/users/users/${row.user_id}/edit`) },
               {
-                label: "Eliminar",
+                label: t("table.actions.delete"),
                 icon: Trash2,
                 onClick: () => setDeleteRowId(row.user_id),
                 variant: "danger",
@@ -184,17 +183,19 @@ export default function UsersTable({
             ]}
           />
         )}
+
       />
 
       <GeneralAlertDialog
         open={!!deleteRowId}
         onOpenChange={(open) => !open && setDeleteRowId(null)}
-        title="¿Estás seguro?"
-        description="Esta acción eliminará al usuario permanentemente."
-        actionText="Eliminar"
+        title={t("table.delete_dialog.title")}
+        description={t("table.delete_dialog.description")}
+        actionText={t("table.delete_dialog.confirm")}
         onAction={handleDeleteUser}
         actionVariant="destructive"
       />
+
     </div>
   );
 }
