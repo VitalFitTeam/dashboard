@@ -1,0 +1,7 @@
+{
+  "name": "VitalFit Dashboard",
+  "short_name": "VitalFit",
+  "start_url": ".",
+  "display": "standalone",
+  "gcm_sender_id": "103953800507" 
+}

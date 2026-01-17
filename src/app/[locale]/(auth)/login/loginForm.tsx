@@ -4,19 +4,18 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  LoginFormData,
-  LoginPayload,
-  loginSchema,
-} from "@/lib/validation/loginSchema";
+import { LoginFormData, loginSchema } from "@/lib/validation/loginSchema";
 import { Button } from "@/components/ui/button";
 import { colors, montserrat } from "@/styles/styles";
 import InputField from "@/components/ui/InputField";
-import { api } from "@/lib/sdk-config"; 
+import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import LocaleSwitcher from "@/components/layout/localeSwitcher/LocaleSwitcher";
+import { getDeviceToken } from "@/services/notifications";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +23,6 @@ export default function LoginForm() {
 
   const { login } = useAuth();
   const router = useRouter();
-
   const t = useTranslations("LoginPage");
 
   const {
@@ -39,47 +37,63 @@ export default function LoginForm() {
     setIsLoading(true);
     setErrorMessage(null);
 
-    const payload: LoginPayload = {
-      ...data,
-      context: "dashboard",
-    };
-
     try {
-      const response = await api.auth.login(payload) as any;
-      const accessToken = response.access_token || response.token;
-      const refreshToken = response.refresh_token;
 
-      if (!accessToken || !refreshToken) {
-        throw new Error("Faltan tokens en la respuesta del servidor");
+      const pushToken = await getDeviceToken();
+
+
+      const loginPayload = {
+        ...data,
+        context: "dashboard",
+        device_token: pushToken, 
+      };
+
+      const response = await (api.auth.login as any)(loginPayload);
+
+      const token = response.access_token || response.token;
+      
+      if (!token) {
+        throw new Error("No se recibió un token de acceso válido");
+      }
+      await login(token, response.refresh_token);
+
+      if (pushToken) {
+        toast.success(t("successTitle") || "¡Bienvenido!", {
+          description: "Sesión iniciada. Notificaciones Push activadas correctamente.",
+        });
+      } else {
+        toast.info(t("welcomeTitle") || "Bienvenido", {
+          description: "Entraste sin notificaciones. Puedes activarlas luego en tu perfil.",
+        });
       }
 
-      await login(accessToken, refreshToken);
-      
       router.replace("/");
 
-    } catch (err) {
-      console.error("Error al iniciar sesión:", err);
-      if (err instanceof Error) {
-        const status = (err as any).response?.status || (err as any).status;
-        
-        if (status === 401) {
-          setErrorMessage(t("errorCredentials"));
-        } else {
-          setErrorMessage(t("errorUnexpected"));
-        }
+    } catch (err: any) {
+      console.error("Error en el flujo de Login:", err);
+      const status = err.response?.status || err.status;
+      if (status === 401) {
+        setErrorMessage(t("errorCredentials"));
       } else {
-        setErrorMessage(t("errorGeneric"));
+        setErrorMessage(t("errorUnexpected") || "Ocurrió un error inesperado al conectar con el servidor.");
       }
+      
+      toast.error("Error de autenticación", {
+        description: "Verifica tus datos e intenta nuevamente."
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className={`relative bg-white border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl p-8 md:p-12 w-full max-w-md ${montserrat.className}`}>
+    <div
+      className={`relative bg-white border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-3xl p-8 md:p-12 w-full max-w-md ${montserrat.className}`}
+    >
       <div className="absolute top-4 right-4">
         <LocaleSwitcher />
       </div>
+      
       <div className="flex flex-col items-center mb-10">
         <div className="bg-gray-50 p-2 rounded-full mb-6 ring-8 ring-gray-50/50">
           <Image
@@ -91,7 +105,7 @@ export default function LoginForm() {
             priority
           />
         </div>
-        
+
         <h2 className="text-center text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
           {t("title")}
         </h2>
@@ -137,11 +151,19 @@ export default function LoginForm() {
           disabled={isLoading}
           variant="default"
           size="lg"
-          className="py-4 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-[0.98]"
+          className="w-full py-4 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-[0.98]"
         >
-          {t("accessButton")}
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>{t("loading") || "Cargando..."}</span>
+            </div>
+          ) : (
+            t("accessButton")
+          )}
         </Button>
       </form>
+
       {errorMessage && (
         <div
           className="mt-6 p-4 text-center text-red-600 bg-red-50 border border-red-100 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-2"

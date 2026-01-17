@@ -30,7 +30,6 @@ interface AuthContextType {
   user: SessionUser | null;
   loading: boolean;
   isAuthenticated: boolean;
-
   login: (token: string, refresh: string) => Promise<void>;
   logout: () => void;
   reloadUser: () => Promise<void>;
@@ -47,7 +46,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
-
   const router = useRouter();
 
   const setTokens = useCallback((token: string, refresh: string) => {
@@ -82,30 +80,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           ]);
 
         const sdkUser: SdkUser | null = profileResponse.user;
-        if (!sdkUser) {
-          return null;
-        }
+        if (!sdkUser) return null;
 
         const rawRoleName = (sdkUser.role as any)?.name?.toLowerCase();
         const role = rawRoleName as UserRole;
-
-        if (!Object.values(UserRole).includes(role)) {
-          return null;
-        }
+        if (!Object.values(UserRole).includes(role)) return null;
 
         const assignedBranches = branchesRes.data ?? [];
         const managedBranches = managedRes.data ?? [];
         const instructorBranches = instructorRes.data ?? [];
-
-        const allBranches = [
-          ...assignedBranches,
-          ...managedBranches,
-          ...instructorBranches,
-        ];
+        const allBranches = [...assignedBranches, ...managedBranches, ...instructorBranches];
 
         const savedBranchId = localStorage.getItem("active_branch_id");
-        const activeBranch =
-          allBranches.find((b) => b.id === savedBranchId) || allBranches[0];
+        const activeBranch = allBranches.find((b) => b.id === savedBranchId) || allBranches[0];
 
         if (activeBranch) {
           localStorage.setItem("active_branch_id", activeBranch.id);
@@ -130,10 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const reloadUser = useCallback(async () => {
-    if (!accessToken) {
-      return;
-    }
-
+    if (!accessToken) return;
     try {
       const sessionUser = await getUserProfile(accessToken);
       if (!sessionUser) {
@@ -151,9 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       try {
         const sessionUser = await getUserProfile(token);
-        if (!sessionUser) {
-          throw new Error("Usuario sin permisos");
-        }
+        if (!sessionUser) throw new Error("Usuario sin permisos");
 
         setTokens(token, refresh);
         setUser(sessionUser);
@@ -173,9 +155,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const hasRole = useCallback(
     (roles: UserRole | UserRole[]) => {
-      if (!user?.role) {
-        return false;
-      }
+      if (!user?.role) return false;
       const allowed = Array.isArray(roles) ? roles : [roles];
       return allowed.includes(user.role);
     },
@@ -189,9 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAccessToken(access);
         setRefreshToken(refresh);
       },
-      () => {
-        logout();
-      }
+      () => logout()
     );
   }, [logout]);
 
@@ -208,7 +186,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       api.client.setTokens(storedAccess, storedRefresh);
-
       setAccessToken(storedAccess);
       setRefreshToken(storedRefresh);
 
@@ -218,16 +195,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(sessionUser);
       }
-
       setLoading(false);
     };
-
     initAuth();
   }, [getUserProfile, clearSession]);
 
-  const isSuperAdmin = user?.role === "super_admin"; // Ajusta según tu enum
+  const isSuperAdmin = user?.role === "super_admin";
   const hasBranch = !!user?.activeBranch;
-
   const hasAccess = isSuperAdmin || hasBranch;
 
   return (
