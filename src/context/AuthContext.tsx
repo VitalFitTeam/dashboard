@@ -63,10 +63,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     api.client.removeTokens();
   }, []);
 
-  const logout = useCallback(() => {
-    clearSession();
-    router.push("/login");
-  }, [clearSession, router]);
+ const logout = useCallback(() => {
+  console.log("AuthProvider: Iniciando protocolo de cierre forzado...");
+  
+  // 1. Limpieza de datos
+  authService.clearSession();
+  api.client.removeTokens();
+  
+  // 2. Limpieza de estado local
+  setAccessToken(null);
+  setUser(null);
+
+  // 3. REDIRECCIÓN FÍSICA (Esto mata cualquier proceso pendiente como las notificaciones)
+  // Usamos .replace para que el usuario no pueda darle a "atrás" y volver al dashboard
+  window.location.replace("/login"); 
+}, []);
 
   const getUserProfile = useCallback(
     async (token: string): Promise<SessionUser | null> => {
@@ -80,11 +91,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           ]);
 
         const sdkUser: SdkUser | null = profileResponse.user;
-        if (!sdkUser) return null;
+        if (!sdkUser) {
+          return null;
+        }
 
         const rawRoleName = (sdkUser.role as any)?.name?.toLowerCase();
         const role = rawRoleName as UserRole;
-        if (!Object.values(UserRole).includes(role)) return null;
+        if (!Object.values(UserRole).includes(role)) {
+          return null;
+        }
 
         const assignedBranches = branchesRes.data ?? [];
         const managedBranches = managedRes.data ?? [];
@@ -117,7 +132,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const reloadUser = useCallback(async () => {
-    if (!accessToken) return;
+    if (!accessToken) {
+      return;
+    }
     try {
       const sessionUser = await getUserProfile(accessToken);
       if (!sessionUser) {
@@ -135,7 +152,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       try {
         const sessionUser = await getUserProfile(token);
-        if (!sessionUser) throw new Error("Usuario sin permisos");
+        if (!sessionUser) {
+          throw new Error("Usuario sin permisos");
+        }
 
         setTokens(token, refresh);
         setUser(sessionUser);
@@ -155,7 +174,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const hasRole = useCallback(
     (roles: UserRole | UserRole[]) => {
-      if (!user?.role) return false;
+      if (!user?.role){
+         return false;
+      }
       const allowed = Array.isArray(roles) ? roles : [roles];
       return allowed.includes(user.role);
     },

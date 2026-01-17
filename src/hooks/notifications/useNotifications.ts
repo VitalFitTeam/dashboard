@@ -5,7 +5,6 @@ import { api } from "@/lib/sdk-config";
 import useSWR from "swr";
 
 export function useNotifications(jwt: string) {
-
   const [limit, setLimit] = useState(10);
 
   const listKey = jwt ? ["notifications", "list", jwt, limit] : null;
@@ -19,16 +18,21 @@ export function useNotifications(jwt: string) {
   } = useSWR(
     listKey,
     async () => {
-      const response = await api.notification.getNotifications(jwt, { 
+      if (!jwt) {
+        throw new Error("No JWT provided");
+      }
+      return await api.notification.getNotifications(jwt, { 
         page: 1, 
         limit: limit, 
         sort: "desc" 
       });
-      return response; 
     },
     {
       revalidateOnFocus: true,
       refreshInterval: 60000,
+      shouldRetryOnError: false, 
+      dedupingInterval: 5000, 
+      keepPreviousData: true, 
     }
   );
 
@@ -38,10 +42,15 @@ export function useNotifications(jwt: string) {
   } = useSWR(
     countKey,
     async () => {
-      const response = await api.notification.getUnreadCount(jwt);
-      return response;
+      if (!jwt) {
+        throw new Error("No JWT provided");
+      }
+      return await api.notification.getUnreadCount(jwt);
     },
-    { refreshInterval: 30000 }
+    { 
+      refreshInterval: 30000,
+      shouldRetryOnError: false 
+    }
   );
 
   const markAsRead = async (notificationId: string) => {
