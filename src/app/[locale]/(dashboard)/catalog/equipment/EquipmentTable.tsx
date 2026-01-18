@@ -120,11 +120,6 @@ export default function EquipmentTable({
             <SelectItem value="Accessory">{tCategories("Accessory")}</SelectItem>
           </SelectContent>
         </Select>
-
-        <Button variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          {t("download")}
-        </Button>
       </div>
 
       <DataTable<Equipment>

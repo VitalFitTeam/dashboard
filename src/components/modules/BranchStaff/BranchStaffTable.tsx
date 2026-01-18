@@ -3,38 +3,44 @@
 import React, { useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Staff } from "@vitalfit/sdk";
+import { useTranslations } from "next-intl";
 
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
+
 interface BranchStaffTableProps {
   data: (Staff & { isPending?: boolean })[];
   isLoading?: boolean;
   onRemove: (id: string, isPending?: boolean) => void;
+  isDisabled?: boolean; 
 }
 
 export default function BranchStaffTable({
   data,
   isLoading,
   onRemove,
-}: BranchStaffTableProps) {
-
+  isDisabled = false,
+}: BranchStaffTableProps){
+  const t = useTranslations("branches");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  const totalPages = Math.ceil(data.length / pageSize);
+  const totalPages = Math.ceil(data.length / pageSize) || 1;
+
+  const start = data.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, data.length);
 
   const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    return data.slice(start, end);
+    const startIdx = (currentPage - 1) * pageSize;
+    return data.slice(startIdx, startIdx + pageSize);
   }, [data, currentPage, pageSize]);
 
-  const columns = useMemo<Column<Staff & { isPending?: boolean }>[]>(() => [
+const columns = useMemo<Column<Staff & { isPending?: boolean }>[]>(() => [
     {
-      header: "Empleado",
+      header: t("table.employee"), 
       accessor: "first_name",
       render: (_, row) => (
         <div className="flex items-center gap-3 py-1 text-left">
@@ -48,7 +54,7 @@ export default function BranchStaffTable({
               </span>
               {row.isPending && (
                 <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px] px-1.5 py-0 font-bold uppercase tracking-wider">
-                  Pendiente
+                  {t("table.status_pending")} 
                 </Badge>
               )}
             </div>
@@ -58,7 +64,7 @@ export default function BranchStaffTable({
       ),
     },
     {
-      header: "Rol",
+      header: t("table.role"), 
       accessor: "role",
       render: (value) => (
         <div className="text-left">
@@ -68,7 +74,25 @@ export default function BranchStaffTable({
         </div>
       ),
     },
-  ], []);
+    {
+      header: t("table.phone"), 
+      accessor: "phone",
+      render: (value) => (
+        <div className="text-left text-sm text-slate-600 tabular-nums">
+          {value || "-"}
+        </div>
+      ),
+    },
+    {
+      header: t("table.email"), 
+      accessor: "email",
+      render: (value) => (
+        <div className="text-left text-xs text-slate-500 lowercase truncate max-w-[180px]">
+          {value}
+        </div>
+      ),
+    },
+  ], [t]);
 
   return (
     <Card className="rounded-xl shadow-sm border overflow-hidden bg-white">
@@ -82,8 +106,8 @@ export default function BranchStaffTable({
         totalPages={totalPages}
         onPageChange={(newPage) => setCurrentPage(newPage)}
         enableRowSelection={false}
-        actions={(row) => (
-          <div className="flex justify-end pr-2">
+        actions={!isDisabled ? (row) => (
+          <div className="flex  pr-2">
             <Button
               size="icon"
               variant="ghost"
@@ -93,10 +117,15 @@ export default function BranchStaffTable({
               <Trash2 size={16} />
             </Button>
           </div>
-        )}
+        ) : undefined}
       />
+
       <div className="px-6 py-3 bg-slate-50/50 border-t text-[11px] text-slate-400 font-medium italic">
-        Mostrando {paginatedData.length} de {data.length} empleados totales
+        {t("pagination.show", {
+          start,
+          end,
+          total: data.length
+        })}
       </div>
     </Card>
   );

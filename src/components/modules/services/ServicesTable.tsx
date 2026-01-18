@@ -163,10 +163,6 @@ export default function ServicesTable({
           </Select>
         </div>
 
-        <Button variant="outline" onClick={() => toast.info(t("downloading"))}>
-          <Download className="mr-2 h-4 w-4" />
-          {t("download")}
-        </Button>
       </div>
 
       <DataTable<ServiceFullDetail>

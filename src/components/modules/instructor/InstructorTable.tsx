@@ -111,13 +111,6 @@ export default function InstructorsTable({
             onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
-
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => toast.info(t("messages.export_start"))}>
-            <Download className="mr-2 h-4 w-4" />
-            {t("download_csv")}
-          </Button>
-        </div>
       </div>
 
       <DataTable<InstructorDataList>

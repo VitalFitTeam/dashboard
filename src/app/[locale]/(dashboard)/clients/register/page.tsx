@@ -4,17 +4,21 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, Loader2 } from "lucide-react";
+import { PlusIcon, Loader2, FileDown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import ClientsTable from "@/components/modules/clients/ClientsTable";
 import { useClients } from "@/hooks/clients/useClients";
+import { api } from "@/lib/sdk-config";
+import { useExport } from "@/hooks/export/use-export";
 
 export default function Clients() {
   const t = useTranslations("clients");
   const router = useRouter();
   const { token } = useAuth();
+
+  const { handleExport, isExporting } = useExport();
 
   const [searchInput, setSearchInput] = useState("");
 
@@ -37,6 +41,17 @@ export default function Clients() {
 
     return () => clearTimeout(handler);
   }, [searchInput, onFilterChange, filters.search]);
+
+  const onExportClick = () => {
+    const fileName = t("export_filename"); 
+
+    handleExport(
+      "clients-list",
+      (jwt) => api.exports.exportClients(jwt),
+      `${fileName}_${new Date().toISOString().split("T")[0]}`,
+      "csv"
+    );
+  };
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
@@ -70,10 +85,26 @@ export default function Clients() {
         title={t("title")}
         subtitle={t("description", { count: stats.total })}
       >
-        <Button onClick={() => router.push("/clients/register/new")}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          {t("add_button")}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={onExportClick}
+            disabled={isExporting !== null || isLoading}
+          >
+            {isExporting === "clients-list" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FileDown className="mr-2 h-4 w-4" />
+            )}
+            {isExporting === "clients-list"
+              ? t("exporting")
+              : t("export_button")}
+          </Button>
+          <Button onClick={() => router.push("/clients/register/new")}>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            {t("add_button")}
+          </Button>
+        </div>
       </PageHeader>
 
       <div className="flex flex-col gap-6 p-3">

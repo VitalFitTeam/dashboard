@@ -1,20 +1,24 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import { useState, useEffect } from "react";
+import { FileDown, Loader2 } from "lucide-react"; 
 import { MembershipType } from "@vitalfit/sdk";
-import MembershipTable from "./MembershipTable";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/sdk-config";
 import { useTranslations } from "next-intl";
+import MembershipTable from "@/components/modules/membership/MembershipTable";
+import { useExport } from "@/hooks/export/use-export";
 
 export default function Membership() {
   const t = useTranslations("catalog.memberships");
   const router = useRouter();
   const { token } = useAuth();
+
+  const { handleExport, isExporting } = useExport();
 
   const [membershipData, setMembershipData] = useState<MembershipType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,8 +35,8 @@ export default function Membership() {
 
   useEffect(() => {
     const loadMembershipData = async () => {
-      if (!token) {
-        return;
+      if (!token){
+         return;
       }
 
       setIsLoading(true);
@@ -69,20 +73,47 @@ export default function Membership() {
     setReloadFlag((prev) => prev + 1);
   };
 
+  const onExportClick = () => {
+    const fileName = t("export_filename");
+
+    handleExport(
+      "membership-plans", 
+      (jwt) => api.exports.exportMembershipPlans(jwt),
+      `${fileName}_${new Date().toISOString().split("T")[0]}`, 
+      "csv", 
+    );
+  };
+
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       <PageHeader title={t("title")}>
-        <Button
-          className="bg-transparent text-black border border-gray-100"
-          onClick={() => router.push("/catalog/memberships/new")}
-        >
-          <PlusIcon className="h-5 w-5" />
-          {t("add_button")}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={onExportClick}
+            disabled={isExporting === "membership-plans" || isLoading}
+          >
+            {isExporting === "membership-plans" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FileDown className="mr-2 h-4 w-4" />
+            )}
+            {isExporting === "membership-plans" ? t("exporting") : t("export")}
+          </Button>
+          <Button
+            onClick={() => router.push("/catalog/memberships/new")}
+          >
+            <PlusIcon className="h-5 w-5 mr-1" />
+            {t("add_button")}
+          </Button>
+        </div>
       </PageHeader>
 
       {isLoading ? (
-        <div className="text-center p-10">{t("loading")}</div>
+        <div className="flex flex-col items-center justify-center p-20 space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="text-muted-foreground">{t("loading")}</span>
+        </div>
       ) : (
         <MembershipTable
           data={membershipData}

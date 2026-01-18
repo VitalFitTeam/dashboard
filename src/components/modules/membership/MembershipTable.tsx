@@ -10,7 +10,7 @@ import { Eye, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
-import { useRouter } from "@/i18n/navigation"; // Usar el router de i18n
+import { useRouter } from "@/i18n/navigation"; 
 import { MembershipType } from "@vitalfit/sdk";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { useTranslations } from "next-intl";
@@ -124,15 +124,6 @@ export default function MembershipTable({
           />
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            onClick={() => toast.info(t("table.downloading") || "Exporting...")}
-          >
-            <ArrowDownTray className="mr-2 h-4 w-4" />
-            {t("table.download")}
-          </Button>
-        </div>
       </div>
 
       <DataTable<MembershipType>

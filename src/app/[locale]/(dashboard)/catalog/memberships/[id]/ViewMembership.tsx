@@ -1,11 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
-import MembershipForm from "../MembershipForm";
 import { MembershipType } from "@vitalfit/sdk";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import MembershipForm from "@/components/modules/membership/MembershipForm";
 
 interface ViewMembershipProps {
   membership: MembershipType;

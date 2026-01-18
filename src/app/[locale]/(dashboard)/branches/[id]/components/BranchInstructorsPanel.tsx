@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { 
+  Plus, 
+  Save, 
+  Trash2, 
+  UserRound, 
+  RotateCcw,
+  Loader2 
+} from "lucide-react";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { BranchInstructorInfo, InstructorDataList } from "@vitalfit/sdk";
+
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
-import { BranchInstructorInfo, InstructorDataList } from "@vitalfit/sdk";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import {
-  Plus,
-  Save,
-  Trash2,
-  UserRound,
-  RotateCcw
-} from "lucide-react";
 import EntityItem from "@/components/layout/EntityItem";
 import { PaginationControls } from "@/components/ui/table/PaginationControls";
 import {
@@ -26,17 +29,29 @@ import { InstructorGlobalSelector } from "@/components/modules/branches/Instruct
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { SectionHeader } from "@/components/modules/branches/SectionHeader";
+import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 
-export default function BranchInstructorPanel({ branchId, mode = "edit" }: { branchId: string; mode?: "view" | "edit" }) {
+export default function BranchInstructorPanel({ 
+  branchId, 
+  mode = "edit" 
+}: { 
+  branchId: string; 
+  mode?: "view" | "edit" 
+}) {
+  const t = useTranslations("branches.details.instructors");
   const { token } = useAuth();
   const isViewMode = mode === "view";
+
+
   const [branchInstructors, setBranchInstructors] = useState<BranchInstructorInfo[]>([]);
   const [newInstructorIds, setNewInstructorIds] = useState<string[]>([]);
+  const [removedInstructorIds, setRemovedInstructorIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [branchPage, setBranchPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedTemp, setSelectedTemp] = useState<InstructorDataList | null>(null);
+  const [instructorToRemove, setInstructorToRemove] = useState<{ id: string; name: string } | null>(null);
 
   const fetchBranchInstructors = useCallback(async () => {
     if (!token || !branchId) {
@@ -52,12 +67,13 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
         phone: i.phone,
       })));
       setNewInstructorIds([]);
+      setRemovedInstructorIds([]);
     } catch (err) {
-      toast.error("Error al cargar los instructores de la sede");
+      toast.error(t("toast_error_load"));
     } finally {
       setLoading(false);
     }
-  }, [token, branchId]);
+  }, [token, branchId, t]);
 
   useEffect(() => { fetchBranchInstructors(); }, [fetchBranchInstructors]);
 
@@ -67,77 +83,98 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
       return;
     }
 
-    if (branchInstructors.some(i => i.instructorID === selectedTemp.instructor_id)) {
-        toast.warning("Este instructor ya está en la lista");
-        return;
-    }
+    const isAlreadyInBranch = branchInstructors.some(i => i.instructorID === selectedTemp.instructor_id);
+    const isInRemovedList = removedInstructorIds.includes(selectedTemp.instructor_id);
 
-    setBranchInstructors(prev => [...prev, {
-      instructorID: selectedTemp.instructor_id,
-      instructorName: `${selectedTemp.first_name} ${selectedTemp.last_name}`,
-      email: selectedTemp.email ?? "",
-      phone: selectedTemp.phone ?? ""
-    }]);
-    setNewInstructorIds(prev => [...prev, selectedTemp.instructor_id]);
-    setSelectedTemp(null);
-    toast.info("Instructor agregado a la cola local");
-  };
-
-  const handleRemove = async (id: string) => {
-
-    if (newInstructorIds.includes(id)) {
-      setBranchInstructors(prev => prev.filter(i => i.instructorID !== id));
-      setNewInstructorIds(prev => prev.filter(curr => curr !== id));
+    if (isAlreadyInBranch && !isInRemovedList) {
+      toast.warning(t("toast_already_exists"));
       return;
     }
 
-    try {
-      setLoading(true);
-      await api.instructor.removeBranchInstructor(branchId, id, token!);
+    if (isInRemovedList) {
+
+      setRemovedInstructorIds(prev => prev.filter(id => id !== selectedTemp.instructor_id));
+    } else {
+
+      setBranchInstructors(prev => [...prev, {
+        instructorID: selectedTemp.instructor_id,
+        instructorName: `${selectedTemp.first_name} ${selectedTemp.last_name}`,
+        email: selectedTemp.email ?? "",
+        phone: selectedTemp.phone ?? ""
+      }]);
+      setNewInstructorIds(prev => [...prev, selectedTemp.instructor_id]);
+    }
+
+    setSelectedTemp(null);
+    toast.success(t("toast_added_local"));
+  };
+
+  const handleRemoveClick = (id: string, name: string) => {
+    if (newInstructorIds.includes(id)) {
+
       setBranchInstructors(prev => prev.filter(i => i.instructorID !== id));
-      toast.success("Instructor eliminado con éxito");
-    } catch {
-      toast.error("Error al eliminar el instructor");
-    } finally {
-      setLoading(false);
+      setNewInstructorIds(prev => prev.filter(curr => curr !== id));
+      toast.info(t("toast_removed_local"));
+    } else {
+
+      setInstructorToRemove({ id, name });
+    }
+  };
+
+  const confirmRemoval = () => {
+    if (instructorToRemove) {
+      setRemovedInstructorIds(prev => [...prev, instructorToRemove.id]);
+      setInstructorToRemove(null);
+      toast.warning(t("toast_marked_for_deletion"));
     }
   };
 
   const handleSave = async () => {
-    if (!token || newInstructorIds.length === 0){
-       return;
+    if (!token) {
+      return;
     }
     setIsSaving(true);
     try {
-      await api.instructor.addBranchInstructor(branchId, newInstructorIds, token);
-      setNewInstructorIds([]);
-      toast.success("Instructores vinculados correctamente");
-      fetchBranchInstructors(); 
+
+      if (newInstructorIds.length > 0) {
+        await api.instructor.addBranchInstructor(branchId, newInstructorIds, token);
+      }
+      // 2. Eliminar marcados
+      for (const id of removedInstructorIds) {
+        await api.instructor.removeBranchInstructor(branchId, id, token);
+      }
+
+      toast.success(t("toast_sync_success"));
+      await fetchBranchInstructors(); 
     } catch {
-      toast.error("Error al guardar los cambios");
+      toast.error(t("toast_sync_error"));
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDiscard = () => {
-      fetchBranchInstructors();
-      toast.info("Cambios locales descartados");
+    fetchBranchInstructors();
+    toast.info(t("toast_discarded"));
   };
+
+  const displayedInstructors = useMemo(() => {
+    return branchInstructors.filter(i => !removedInstructorIds.includes(i.instructorID));
+  }, [branchInstructors, removedInstructorIds]);
 
   const paginatedData = useMemo(() => {
     const start = (branchPage - 1) * pageSize;
-    return branchInstructors.slice(start, start + pageSize);
-  }, [branchInstructors, branchPage, pageSize]);
+    return displayedInstructors.slice(start, start + pageSize);
+  }, [displayedInstructors, branchPage, pageSize]);
 
-  const hasChanges = newInstructorIds.length > 0;
-  const totalPages = Math.ceil(branchInstructors.length / pageSize) || 1;
+  const hasChanges = newInstructorIds.length > 0 || removedInstructorIds.length > 0;
+  const totalPages = Math.ceil(displayedInstructors.length / pageSize) || 1;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <SectionHeader
-        title="Gestión de instructores"
-        subtitle="Administra los instructores asignados a esta sede."
+        title={t("title")}
+        subtitle={t("subtitle")}
         icon={UserRound}
         isViewMode={isViewMode}
       />
@@ -146,15 +183,15 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
         <div className="p-6 border rounded-2xl bg-slate-50/50 shadow-sm space-y-6">
           <div className="space-y-4">
             <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-400 ml-1">
-              Vincular Nuevo Instructor
+              {t("add_card_title")}
             </h3>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-grow">
                 <InstructorGlobalSelector
                   token={token}
                   onSelect={setSelectedTemp}
-                  excludeIds={branchInstructors.map(i => i.instructorID)}
-                  placeholder="Buscar instructor en el catálogo..."
+                  excludeIds={displayedInstructors.map(i => i.instructorID)}
+                  placeholder={t("selector_placeholder")}
                 />
               </div>
               <Button
@@ -164,7 +201,7 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
                 className="bg-white font-bold text-xs uppercase tracking-widest border-slate-200 shadow-sm transition-all active:scale-95"
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Agregar a la lista
+                {t("btn_add")}
               </Button>
             </div>
           </div>
@@ -176,8 +213,8 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
                 disabled={!hasChanges || isSaving}
                 className="font-bold text-xs uppercase tracking-widest bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-100 transition-all active:scale-95"
               >
-                <Save className="mr-2 h-4 w-4" />
-                {isSaving ? "Guardando..." : "Sincronizar Cambios"}
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {isSaving ? t("btn_saving") : t("btn_sync")}
               </Button>
               {hasChanges && (
                 <Button
@@ -186,13 +223,13 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
                   className="text-slate-400 hover:text-orange-500 font-black text-[10px] uppercase tracking-tighter"
                 >
                   <RotateCcw className="mr-2 h-3.5 w-3.5" />
-                  Descartar
+                  {t("btn_discard")}
                 </Button>
               )}
             </div>
             {hasChanges && (
               <Badge className="bg-orange-50 text-orange-600 border-orange-100 animate-pulse font-black text-[10px]">
-                CAMBIOS PENDIENTES
+                {t("badge_pending")}
               </Badge>
             )}
           </div>
@@ -201,21 +238,20 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
 
       <div className="space-y-4">
         <div className="flex items-center gap-3 px-1">
-          <h3 className="font-black uppercase tracking-[0.25em] text-slate-500 flex items-center gap-3">
-            Instructores Asignados  {branchInstructors.length}
-        
+          <h3 className="font-black uppercase tracking-[0.25em] text-slate-500">
+            {t("total_label", { count: displayedInstructors.length })}
           </h3>
         </div>
 
         <div className="rounded-xl border bg-white divide-y overflow-hidden shadow-sm">
           {loading && branchInstructors.length === 0 ? (
             <div className="p-12 text-center text-slate-400 font-bold text-xs uppercase animate-pulse tracking-widest italic">
-              Cargando instructores...
+              {t("loading")}
             </div>
-          ) : branchInstructors.length === 0 ? (
+          ) : displayedInstructors.length === 0 ? (
             <div className="p-12 text-center text-slate-300">
               <UserRound className="h-10 w-10 mx-auto mb-3 opacity-20" />
-              <p className="text-[10px] uppercase font-black tracking-[0.2em]">No hay instructores asignados</p>
+              <p className="text-[10px] uppercase font-black tracking-[0.2em]">{t("empty")}</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
@@ -231,7 +267,7 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleRemove(instr.instructorID)}
+                        onClick={() => handleRemoveClick(instr.instructorID, instr.instructorName)}
                         className="h-9 w-9 text-slate-400 hover:text-destructive hover:bg-red-50 rounded-lg"
                       >
                         <Trash2 size={18} />
@@ -244,10 +280,10 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
           )}
         </div>
 
-        {branchInstructors.length > 0 && (
+        {displayedInstructors.length > 0 && (
           <div className="flex items-center justify-between pt-4 px-1">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Mostrar</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{t("show_label")}</span>
               <Select value={pageSize.toString()} onValueChange={v => { setPageSize(Number(v)); setBranchPage(1); }}>
                 <SelectTrigger className="h-8 w-16 text-[11px] font-bold border-slate-200 shadow-none">
                   <SelectValue />
@@ -265,6 +301,16 @@ export default function BranchInstructorPanel({ branchId, mode = "edit" }: { bra
           </div>
         )}
       </div>
+
+      <GeneralAlertDialog
+        open={!!instructorToRemove}
+        onOpenChange={(open) => !open && setInstructorToRemove(null)}
+        title={t("dialog_remove_title")}
+        description={t("dialog_remove_description")}
+        actionText={t("dialog_remove_action")}
+        actionVariant="destructive"
+        onAction={confirmRemoval}
+      />
     </div>
   );
 }

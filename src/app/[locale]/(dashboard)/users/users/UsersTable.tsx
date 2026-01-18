@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { MagnifyingGlassIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { toast } from "sonner";
@@ -22,11 +22,6 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-
-
-
-
-
 
 export type UserTableProps = {
   data: User[];
@@ -153,10 +148,6 @@ export default function UsersTable({
           </Select>
         </div>
 
-        <Button variant="outline" onClick={() => toast.info(t("table.actions.export_toast"))}>
-          <ArrowDownTrayIcon className="mr-2 h-4 w-4" />
-          {t("table.actions.export")}
-        </Button>
       </div>
 
       <DataTable<User>
