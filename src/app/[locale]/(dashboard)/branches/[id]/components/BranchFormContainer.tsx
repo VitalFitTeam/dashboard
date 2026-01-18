@@ -69,8 +69,8 @@ export default function BranchFormContainer({
       content: <BranchEquipmentPanel mode={mode} branchId={branch.branch_id} />,
     },
     {
-      value: "Staff",
-      label: "Staff",
+      value: "staff",
+      label: t("details.tabs.staff"), 
       content: <BranchStaffManager mode={mode} branchId={branch.branch_id} />,
     },
   ];
@@ -82,10 +82,11 @@ export default function BranchFormContainer({
 
   return (
     <div className="space-y-6">
+
       <div className="flex items-center justify-between p-4 bg-white border shadow-sm rounded-xl">
         <div className="flex flex-col text-left">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            {mode === "edit" ? "Configuración de Sede" : "Detalles de Sede"}
+            {mode === "edit" ? t("details.header.config") : t("details.header.view")}
           </span>
           <span className="text-sm font-bold text-slate-700">{formData.name}</span>
         </div>

@@ -1,45 +1,60 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { 
-  AccountsReceivableStat, 
-  ActiveBranchesCount, 
-  AverageCLV, 
-  MRRStat, 
-  WeeklyRevenueStat 
+import {
+  AccountsReceivableStat,
+  ActiveBranchesCount,
+  AverageCLV,
+  MRRStat,
+  WeeklyRevenueStat,
 } from "@/components/modules/analytics/finance/FinancialStats";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { FileDown } from "lucide-react";
+import {
+  FileDown,
+  Loader2,
+  ChevronDown,
+  FileText,
+  FileSpreadsheet,
+  Table,
+} from "lucide-react";
 import { ReportFilters } from "@/components/modules/analytics/ReportFilter";
 import { useBranches } from "@/hooks/branches/useBranches";
 import { ProjectedCashFlowReport } from "@/components/modules/analytics/finance/ProjectedCashFlow";
 import { MonthlyRevenueReport } from "@/components/modules/analytics/finance/MonthlyRevenueReport";
-
-import { 
-  format, 
-  startOfMonth, 
-  endOfMonth, 
-  subMonths, 
-  endOfDay 
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  subMonths,
+  endOfDay,
 } from "date-fns";
 import { BillingMatrixReport } from "@/components/modules/analytics/finance/BillingMatrixBanch";
 import { useTranslations } from "next-intl";
 import { UserRole } from "@/lib/roles";
+import { api } from "@/lib/sdk-config";
+import { toast } from "sonner";
+import { ExportFormat, useExport } from "@/hooks/export/use-export";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function FinancePage() {
   const t = useTranslations("analytics.finance");
   const { token, user, hasRole } = useAuth();
 
+  const { handleExport, isExporting } = useExport();
+
   const activeBranchId = user?.activeBranch?.id;
   const isGlobalAdmin = hasRole([UserRole.SUPER_ADMIN]);
 
-  const [branchId, setBranchId] = useState<string>(() => {
-    return user?.activeBranch?.id || "all";
-  });
-
-
+  const [branchId, setBranchId] = useState<string>(
+    () => user?.activeBranch?.id || "all",
+  );
   const [range, setRange] = useState("this-month");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -50,10 +65,8 @@ export default function FinancePage() {
     }
   }, [user, isGlobalAdmin, branchId]);
 
-
   useEffect(() => {
     const now = new Date();
-
     if (range === "this-month") {
       setStartDate(startOfMonth(now));
       setEndDate(endOfDay(now));
@@ -65,23 +78,7 @@ export default function FinancePage() {
       setStartDate(startOfMonth(subMonths(now, 2)));
       setEndDate(endOfDay(now));
     }
-
   }, [range]);
-
-
-  const handleStartDateChange = (date: Date | undefined) => {
-    setStartDate(date);
-    if (date) {
-      setRange("custom");
-    }
-  };
-
-  const handleEndDateChange = (date: Date | undefined) => {
-    setEndDate(date);
-    if (date) {
-      setRange("custom");
-    }
-  };
 
   const { branches, isLoading: loadingBranches } = useBranches({
     token: token ?? "",
@@ -106,9 +103,31 @@ export default function FinancePage() {
   ];
 
   const selectedBranch = branchId === "all" ? undefined : branchId;
-  
   const sDate = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
   const eDate = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
+
+  const onExportFinancial = (formatType: ExportFormat) => {
+    if (!sDate || !eDate) {
+      toast.error(t("errors.select_dates"));
+      return;
+    }
+
+    const baseFileName = t("export_filename") || "Reporte_Financiero";
+
+    handleExport(
+      "financial",
+      (jwt) =>
+        api.exports.exportFinancialReport(
+          jwt,
+          sDate,
+          eDate,
+          selectedBranch,
+          formatType,
+        ),
+      `${baseFileName}_${sDate}_to_${eDate}`,
+      formatType,
+    );
+  };
 
   if (!token) {
     return null;
@@ -120,14 +139,54 @@ export default function FinancePage() {
         title={t("title")}
         subtitle={t("subtitle")}
         actionButton={
-          <Button variant="outline">
-            <FileDown className="mr-2 h-4 w-4" />
-            {t("export")}
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="default"
+                  className="shadow-sm min-w-[160px] text-white font-bold text-xs uppercase tracking-widest"
+                  disabled={isExporting !== null || !sDate || !eDate}
+                >
+                  {isExporting === "financial" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileDown className="mr-2 h-4 w-4" />
+                  )}
+                  {isExporting === "financial" ? t("exporting") : t("export")}
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => onExportFinancial("csv")}
+                  className="cursor-pointer"
+                >
+                  <Table className="mr-2 h-4 w-4 text-slate-500" />
+                  <span>{t("formats.csv")}</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => onExportFinancial("excel")}
+                  className="cursor-pointer"
+                >
+                  <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
+                  <span>{t("formats.excel")}</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => onExportFinancial("pdf")}
+                  className="cursor-pointer"
+                >
+                  <FileText className="mr-2 h-4 w-4 text-red-600" />
+                  <span>{t("formats.pdf")}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         }
       />
 
-      <div className="dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 sticky top-4 z-10 backdrop-blur-md">
+      <div className="dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 sticky top-4 z-10 backdrop-blur-md bg-white/80">
         <ReportFilters
           branches={branchOptions}
           branchValue={branchId}
@@ -137,13 +196,24 @@ export default function FinancePage() {
           onRangeChange={setRange}
           startDate={startDate}
           endDate={endDate}
-          onStartDateChange={handleStartDateChange}
-          onEndDateChange={handleEndDateChange}
+          onStartDateChange={(d) => {
+            setStartDate(d);
+            if (d) {
+              setRange("custom");
+            }
+          }}
+          onEndDateChange={(d) => {
+            setEndDate(d);
+            if (d) {
+              setRange("custom");
+            }
+          }}
           loadingBranches={loadingBranches}
           onClear={() => {
-            setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
-            setRange("this-month"); 
-
+            setBranchId(
+              !isGlobalAdmin && activeBranchId ? activeBranchId : "all",
+            );
+            setRange("this-month");
           }}
         />
       </div>
@@ -162,7 +232,6 @@ export default function FinancePage() {
       </section>
 
       <section className="mt-10">
-
         <BillingMatrixReport token={token} startDate={sDate} endDate={eDate} />
       </section>
     </div>

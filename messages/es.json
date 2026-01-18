@@ -277,9 +277,20 @@
       "error": "Ha ocurrido un error al cargar la información"
     },
     "finance": {
+      "formats": {
+        "csv": "CSV (Texto plano)",
+        "excel": "Excel (.xlsx)",
+        "pdf": "PDF (Documento)"
+      },
       "title": "Reporte de Finanzas Detallado",
       "subtitle": "Análisis de flujo de caja, solvencia y proyecciones financieras",
-      "export": "Exportar",
+      "export": "Exportar CSV",
+      "exporting": "Exportando...",
+      "export_sales": "Exportar Ventas",
+      "export_filename": "reporte_financiero",
+      "errors": {
+        "select_dates": "Por favor selecciona un rango de fechas"
+      },
       "stats": {
         "weekly_revenue": "Ingresos Semanales",
         "mrr": "MRR (Ingreso Recurrente)",
@@ -330,9 +341,16 @@
       }
     },
     "Sales": {
+      "formats": {
+        "csv": "CSV (Plain text)",
+        "excel": "Excel (.xlsx)",
+        "pdf": "PDF (Document)"
+      },
       "title": "Reporte de Ventas",
       "subtitle": "Rendimiento comercial, métodos de pago y productividad de sucursales",
-      "export": "Exportar Reporte",
+      "export": "Exportar CSV",
+      "exporting": "Exportando...",
+      "export_filename": "reporte_ventas",
       "stats": {
         "total_sales": "Ventas Totales Históricas",
         "average_ticket": "KPI Ticket Promedio (Mensual)",
@@ -405,10 +423,17 @@
       }
     },
     "clients": {
+      "formats": {
+        "csv": "CSV (Plain text)",
+        "excel": "Excel (.xlsx)",
+        "pdf": "PDF (Document)"
+      },
       "header": {
         "title": "Reporte de Clientes",
         "subtitle": "Análisis detallado de fidelización, retención y staff",
-        "export": "Exportar Reporte"
+        "export": "Export CSV",
+        "exporting": "Exporting...",
+        "export_filename": "reporte_clientes"
       },
       "stats": {
         "total_clients": "Total de clientes",
@@ -597,6 +622,9 @@
       "title": "SERVICIOS",
       "add_button": "Agregar Servicio",
       "id_prefix": "Servicio ID",
+      "export": "Exportar CSV",
+      "exporting": "Exportando...",
+      "export_filename": "reporte_servicios",
       "stats": {
         "total": "Total",
         "actives": "Activos",
@@ -713,6 +741,9 @@
     "payment_methods": {
       "title": "Métodos de Pago",
       "add_button": "Nuevo Método",
+      "export": "Exportar CSV",
+      "exporting": "Exportando...",
+      "export_filename": "metodos_de_pago",
       "stats": {
         "total": "Total Métodos",
         "cash": "Efectivo",
@@ -832,6 +863,9 @@
     "equipment": {
       "title": "EQUIPAMIENTO",
       "addButton": "Agregar Equipamiento",
+      "export": "Exportar CSV",
+      "exporting": "Exportando...",
+      "export_filename": "catalogo_equipamiento",
       "loading": "Cargando equipamiento...",
       "create": {
         "title": "AGREGAR EQUIPAMIENTO",
@@ -926,6 +960,9 @@
       "title": "MEMBRESÍAS",
       "add_button": "Agregar una membresía",
       "loading": "Cargando Membresías...",
+      "export": "Exportar CSV",
+      "exporting": "Exportando...",
+      "export_filename": "lista_membresias",
       "table": {
         "placeholder": "Buscar membresía por nombre",
         "download": "Descargar",
@@ -1022,10 +1059,11 @@
       "add_button": "Agregar un paquete",
       "loading": "Cargando paquetes...",
       "error_loading": "Error al cargar los paquetes",
+      "export": "Exportar CSV",
+      "exporting": "Exportando...",
+      "export_filename": "lista_paquetes",
       "table": {
         "placeholder": "Buscar paquete por nombre",
-        "download": "Descargar",
-        "downloading": "Descargando...",
         "columns": {
           "name": "Nombre",
           "description": "Descripción",
@@ -1254,6 +1292,9 @@
     "instructor": {
       "title": "Instructores",
       "add_button": "Agregar Instructor",
+      "export": "Exportar CSV",
+      "exporting": "Exportando...",
+      "export_filename": "lista_instructores",
       "stats": {
         "total": "Total Instructores",
         "active": "Activos",
@@ -1471,6 +1512,13 @@
       "invalidUuid": "Seleccion no válido",
       "positiveNumber": "Debe ser un número positivo",
       "invalidSelection": "Selección no válida"
+    },
+    "notifications": {
+      "export_success": "Reporte generado con éxito",
+      "export_error": "Hubo un problema al generar el reporte"
+    },
+    "ui": {
+      "view_mode": "Modo Lectura"
     }
   },
   "roles": {
@@ -1562,6 +1610,9 @@
     "title": "CLIENTES",
     "description": "Visualiza, filtra y administra el acceso de los usuarios registrados en la plataforma.",
     "add_button": "Nuevo Cliente",
+    "export_button": "Exportar Lista",
+    "exporting": "Exportando...",
+    "export_filename": "listado_clientes",
     "create": {
       "title": "Registrar Nuevo Cliente",
       "subtitle": "Complete los datos para dar de alta a un nuevo miembro en el sistema.",
@@ -1912,7 +1963,13 @@
         "error": "Error al eliminar la sucursal. Intenta nuevamente.",
         "success_title": "Eliminación exitosa",
         "error_title": "Error"
-      }
+      },
+     "employee": "Empleado",
+      "email": "Correo Electrónico",
+      "role": "Rol",
+      "phone": "Teléfono",
+      "id": "ID Sistema",
+      "status_pending": "Pendiente"
     },
     "create": {
       "title": "CREAR NUEVA SUCURSAL",
@@ -2022,12 +2079,17 @@
       "loading": "Cargando sucursal...",
       "not_found": "No se encontró la sucursal.",
       "error_loading": "No se pudo cargar la información de la sucursal.",
+      "header": {
+        "config": "Configuración de Sede",
+        "view": "Detalles de Sede"
+      },
       "tabs": {
-        "basic": "General",
-        "payment": "Métodos de pago",
+        "basic": "Información Básica",
+        "payment": "Pagos",
         "services": "Servicios",
         "instructors": "Instructores",
-        "equipment": "Equipamiento"
+        "equipment": "Equipamiento",
+        "staff": "Personal Administrativo"
       },
       "basic": {
         "title": "Información básica",
@@ -2062,9 +2124,36 @@
         "error_remove": "No se pudo eliminar el método de pago",
         "saving": "Guardando métodos de pago...",
         "success_save": "Métodos de pago guardados correctamente",
-        "error_save": "No se pudieron guardar los métodos de pago"
+        "error_save": "No se pudieron guardar los métodos de pago",
+        "add_card_title": "Vincular Nuevo Método",
+        "selector_placeholder": "Selecciona un método de pago...",
+        "no_methods_available": "No hay métodos disponibles",
+        "btn_add": "Agregar a cola",
+        "btn_sync": "Sincronizar Cambios",
+        "btn_saving": "Guardando...",
+        "btn_discard": "Descartar",
+        "badge_pending": "CAMBIOS PENDIENTES",
+        "total_label": "Métodos Habilitados {count}",
+        "loading": "Cargando métodos...",
+        "dialog_remove_title": "¿Quitar método de pago?",
+        "dialog_remove_description": "Esta acción se aplicará en el servidor cuando sincronices los cambios.",
+        "dialog_remove_action": "Quitar",
+        "toast_error_load": "Error al cargar los métodos de pago",
+        "toast_added_local": "Método añadido a la cola local",
+        "toast_removed_local": "Método eliminado de la cola",
+        "toast_marked_for_deletion": "Método marcado para eliminar (pendiente de sincronizar)",
+        "toast_sync_success": "Sincronización exitosa",
+        "toast_sync_error": "Error al guardar los cambios",
+        "toast_discarded": "Cambios locales descartados"
       },
       "equipment": {
+        "inventory_subtitle": "Gestiona las máquinas y herramientas disponibles en esta sede.",
+        "add_card_title": "Registrar Nuevo Equipo",
+        "dialog_remove_title": "¿Retirar equipo del inventario?",
+        "dialog_remove_description": "El elemento seleccionado se marcará para su retiro. Este cambio se aplicará de forma permanente al sincronizar.",
+        "dialog_remove_action": "Retirar Equipo",
+        "toast_removed_local": "Equipo eliminado de la cola",
+        "toast_marked_for_deletion": "Equipo marcado para retiro (pendiente de sincronizar)",
         "error_loading_catalog": "Error cargando catálogo de equipos",
         "error_loading_inventory": "Error cargando inventario",
         "select_before_adding": "Debes seleccionar un equipo antes de agregarlo",
@@ -2079,6 +2168,11 @@
         "error_update": "Error al actualizar equipo: {errors}",
         "success_update": "Equipo \"{name}\" actualizado correctamente",
         "error_updating": "Error actualizando equipamiento",
+        "export": "Exportar Inventario",
+        "exporting": "Exportando...",
+        "export_filename": "inventario_sucursal",
+        "btn_discard": "Descartar",
+        "badge_pending": "CAMBIOS PENDIENTES",
         "table": {
           "name": "Nombre",
           "serial": "Serial",
@@ -2100,7 +2194,8 @@
           "serial_placeholder": "Ej: SN-ROG-123",
           "notes_label": "Notas",
           "notes_placeholder": "Ej: Equipo listo para usar",
-          "button": "Agregar"
+          "button": "Agregar",
+          "model_label": "Modelo"
         },
         "inventory_title": "Inventario de la sucursal",
         "empty": "No hay equipamiento asignado a esta sucursal.",
@@ -2116,7 +2211,28 @@
         }
       },
       "instructors": {
-        "error_loading": "No se pudieron cargar los instructores",
+        "title": "Gestión de Instructores",
+        "subtitle": "Administra los instructores asignados a esta sede.",
+        "add_card_title": "Vincular Nuevo Instructor",
+        "selector_placeholder": "Buscar instructor en el catálogo...",
+        "btn_add": "Agregar a la lista",
+        "btn_sync": "Sincronizar Cambios",
+        "btn_saving": "Guardando...",
+        "btn_discard": "Descartar",
+        "badge_pending": "CAMBIOS PENDIENTES",
+        "total_label": "Instructores Asignados {count}",
+        "show_label": "Mostrar",
+        "dialog_remove_title": "¿Desvincular instructor?",
+        "dialog_remove_description": "El instructor será quitado de esta sede. Este cambio se aplicará permanentemente al sincronizar.",
+        "dialog_remove_action": "Desvincular",
+        "toast_error_load": "Error al cargar los instructores de la sede",
+        "toast_already_exists": "Este instructor ya está en la lista",
+        "toast_added_local": "Instructor agregado a la cola local",
+        "toast_removed_local": "Instructor quitado de la lista",
+        "toast_marked_for_deletion": "Instructor marcado para desvincular",
+        "toast_sync_success": "Instructores actualizados correctamente",
+        "toast_sync_error": "Error al guardar los cambios",
+        "toast_discarded": "Cambios locales descartados",
         "already_assigned": "El instructor ya está asignado",
         "success_added_pending": "Instructor agregado (pendiente de guardar)",
         "success_removed_local": "Instructor eliminado localmente",
@@ -2134,6 +2250,18 @@
         "info_scroll": "Hay muchos instructores, usa el scroll para ver más."
       },
       "services": {
+        "dialog_remove_title": "¿Desvincular servicio de la sede?",
+        "dialog_remove_description": "El servicio seleccionado se quitará de esta sede. Este cambio se aplicará de forma permanente al sincronizar.",
+        "dialog_remove_action": "Desvincular",
+        "btn_sync": "Sincronizar Cambios",
+        "btn_discard": "Descartar",
+        "badge_pending": "CAMBIOS PENDIENTES",
+        "toast_added_local": "Servicio añadido a la cola local",
+        "toast_removed_local": "Servicio eliminado de la cola",
+        "toast_marked_for_deletion": "Servicio marcado para desvincular (pendiente de sincronizar)",
+        "toast_discarded": "Cambios locales descartados",
+        "save_success": "Servicios sincronizados correctamente",
+        "save_error": "Error al sincronizar los servicios",
         "success_load_catalog": "Servicios de la sucursal cargados correctamente",
         "error_load_catalog": "No se pudieron cargar los servicios disponibles",
         "error_load_branch": "No se pudieron cargar los servicios de la sucursal",
@@ -2147,6 +2275,9 @@
         "error_update": "Error al actualizar el servicio",
         "title": "Servicios de la sucursal",
         "subtitle": "Administra los servicios disponibles y sus precios.",
+        "export": "Exportar Servicios",
+        "exporting": "Exportando...",
+        "export_filename": "servicios_sucursal_precios",
         "add": {
           "title": "Agregar nuevo servicio",
           "select_placeholder": "Selecciona un servicio",
@@ -2172,6 +2303,35 @@
           "visible": "Visible",
           "save": "Guardar"
         }
+      },
+      "staff": {
+        "title": "Gestión de Personal",
+        "subtitle": "Administra el personal administrativo y contable de la sede.",
+        "add_card_title": "Vincular Nuevo Personal",
+        "search_label": "Búsqueda Directa",
+        "search_placeholder": "Nombre o email...",
+        "role_filter_label": "Filtrar por Rol",
+        "role_all": "Cualquier especialidad",
+        "roles_loading": "Cargando roles...",
+        "profile_label": "Perfil Seleccionado",
+        "profile_placeholder": "Elige un perfil de la lista",
+        "catalog_loading": "Sincronizando perfiles...",
+        "btn_add_queue": "Agregar a cola",
+        "btn_sync": "Sincronizar Cambios",
+        "btn_saving": "Guardando...",
+        "btn_discard": "Descartar",
+        "badge_pending": "CAMBIOS PENDIENTES",
+        "total_staff_label": "Personal en Sede {count}",
+        "dialog_remove_title": "¿Quitar empleado de la sede?",
+        "dialog_remove_description": "Esta acción se aplicará en el servidor cuando sincronices los cambios.",
+        "dialog_remove_action": "Quitar",
+        "toast_added_local": "Empleado añadido a la cola local",
+        "toast_removed_local": "Empleado quitado de la cola",
+        "toast_pending_sync": "Cambio pendiente de sincronizar",
+        "toast_marked_for_deletion": "Empleado marcado para eliminar",
+        "toast_sync_success": "Sincronización exitosa",
+        "toast_sync_error": "Error al sincronizar los cambios",
+        "toast_discarded": "Cambios locales descartados"
       }
     },
     "notifications": {
@@ -2193,6 +2353,9 @@
       "opening_required": "La hora de apertura es obligatoria",
       "closing_required": "La hora de cierre es obligatoria",
       "payment_method_required": "Debe seleccionar al menos un método de pago"
+    },
+    "pagination": {
+      "show": "Mostrando {start} - {end} de {total} "
     }
   },
   "finance": {
@@ -2674,6 +2837,9 @@
       "personal_info": "Información Personal",
       "user_id": "ID Usuario",
       "sessions_info": "Información de sesiones",
+      "export_button": "Exportar Lista",
+      "exporting": "Exportando...",
+      "export_filename": "lista_personal",
       "stats": {
         "active_sessions": "Sesiones Activas",
         "total_logins": "Total inicio de sesión",

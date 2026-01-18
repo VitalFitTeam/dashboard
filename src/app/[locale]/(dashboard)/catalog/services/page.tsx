@@ -5,16 +5,22 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { FileDown, Loader2 } from "lucide-react";
 import { StatCard } from "@/components/ui/StatCard";
 import { useRouter } from "@/i18n/navigation";
 import ServicesTable from "@/components/modules/services/ServicesTable";
 import { useAuth } from "@/context/AuthContext";
 import { useServices } from "@/hooks/services/useServices";
+import { api } from "@/lib/sdk-config";
+import { useExport } from "@/hooks/export/use-export";
+import { cn } from "@/lib/utils";
 
 export default function ServicesPage() {
   const t = useTranslations("catalog.services");
   const router = useRouter();
   const { token } = useAuth();
+
+  const { handleExport, isExporting } = useExport();
 
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({ search: "", category: "all" });
@@ -31,28 +37,45 @@ export default function ServicesPage() {
 
   const handlePageChange = (newPage: number) => setPage(newPage);
 
-  const handleFilterChange = (newFilters: { search?: string; category?: string }) => {
+  const handleFilterChange = (newFilters: {
+    search?: string;
+    category?: string;
+  }) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
     setPage(1);
   };
 
-  const statCardsConfig = useMemo(() => [
-    {
-      title: t("stats.total"),
-      value: summary?.total,
-      fontColor: "text-blue-600",
-    },
-    {
-      title: t("stats.actives"),
-      value: summary?.actives,
-      fontColor: "text-green-600",
-    },
-    {
-      title: t("stats.featured"),
-      value: summary?.featured,
-      fontColor: "text-purple-600",
-    },
-  ], [t, summary]);
+  const onExportServices = () => {
+    const baseFileName = t("export_filename");
+
+    handleExport(
+      "services-catalog",
+      (jwt) => api.exports.exportServices(jwt),
+      `${baseFileName}_${new Date().toISOString().split("T")[0]}`,
+      "csv",
+    );
+  };
+
+  const statCardsConfig = useMemo(
+    () => [
+      {
+        title: t("stats.total"),
+        value: summary?.total,
+        fontColor: "text-blue-600",
+      },
+      {
+        title: t("stats.actives"),
+        value: summary?.actives,
+        fontColor: "text-green-600",
+      },
+      {
+        title: t("stats.featured"),
+        value: summary?.featured,
+        fontColor: "text-purple-600",
+      },
+    ],
+    [t, summary],
+  );
 
   if (!token) {
     return null;
@@ -65,26 +88,45 @@ export default function ServicesPage() {
           <StatCard
             key={idx}
             title={card.title}
+            isLoading={isLoading}
             value={
-              <>
-                <span className="font-bold text-2xl">{card.value}</span>
-                <span className={`ml-1.5 font-semibold uppercase ${card.fontColor}`}>
+              <div className="flex items-baseline gap-1.5">
+                <span className=" text-2xl tabular-nums tracking-tight">
+                  {card.value ?? 0}
+                </span>
+                <span
+                  className={cn(
+                    "text-2xl ",
+                    card.fontColor,
+                  )}
+                >
                   {t("stats.unit")}
                 </span>
-              </>
+              </div>
             }
           />
         ))}
       </div>
 
       <PageHeader title={t("title")}>
-        <Button
-          className="bg-primary text-white"
-          onClick={() => router.push("/catalog/services/new")}
-        >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          {t("add_button")}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={onExportServices}
+            disabled={isExporting === "services-catalog" || isLoading}
+          >
+            {isExporting === "services-catalog" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FileDown className="mr-2 h-4 w-4" />
+            )}
+            {isExporting === "services-catalog" ? t("exporting") : t("export")}
+          </Button>
+          <Button onClick={() => router.push("/catalog/services/new")}>
+            <PlusIcon className="h-5 w-5 mr-2" />
+            {t("add_button")}
+          </Button>
+        </div>
       </PageHeader>
 
       <ServicesTable

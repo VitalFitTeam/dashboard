@@ -113,11 +113,6 @@ export default function ClientsTable({
             />
           </div>      
         </div>
-
-        <Button variant="outline" size="sm" className="h-9">
-          <Download className="mr-2 h-4 w-4" />
-          {t("table.download")}
-        </Button>
       </div>
 
       <DataTable<Client>

@@ -6,7 +6,14 @@ import { useBranches } from "@/hooks/branches/useBranches";
 import { ReportFilters } from "@/components/modules/analytics/ReportFilter";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { 
+  FileDown, 
+  Loader2, 
+  ChevronDown, 
+  FileText, 
+  FileSpreadsheet, 
+  Table 
+} from "lucide-react"; 
 import { 
   endOfMonth, 
   format, 
@@ -16,6 +23,16 @@ import {
 } from "date-fns";
 import { useTranslations } from "next-intl";
 import { UserRole } from "@/lib/roles";
+
+import { api } from "@/lib/sdk-config";
+import { ExportFormat, useExport } from "@/hooks/export/use-export";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { 
   ActiveMember, 
@@ -32,14 +49,12 @@ import { TopInstructorsReport } from "@/components/modules/analytics/clients/Top
 export default function ClientReportPage() {
   const t = useTranslations("analytics.clients");
   const { token, user, hasRole } = useAuth();
+  const { handleExport, isExporting } = useExport();
 
   const isGlobalAdmin = hasRole([UserRole.SUPER_ADMIN]);
   const activeBranchId = user?.activeBranch?.id;
 
-  const [branchId, setBranchId] = useState<string>(() => {
-    return user?.activeBranch?.id || "all";
-  });
-
+  const [branchId, setBranchId] = useState<string>(() => user?.activeBranch?.id || "all");
   const [range, setRange] = useState("this-month");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -52,7 +67,6 @@ export default function ClientReportPage() {
 
   useEffect(() => {
     const now = new Date();
-
     if (range === "this-month") {
       setStartDate(startOfMonth(now));
       setEndDate(endOfDay(now));
@@ -64,22 +78,7 @@ export default function ClientReportPage() {
       setStartDate(startOfMonth(subMonths(now, 2)));
       setEndDate(endOfDay(now));
     }
-
   }, [range]);
-
-  const handleStartDateChange = (date: Date | undefined) => {
-    setStartDate(date);
-    if (date) {
-      setRange("custom");
-    }
-  };
-
-  const handleEndDateChange = (date: Date | undefined) => {
-    setEndDate(date);
-    if (date){
-       setRange("custom");
-    }
-  };
 
   const { branches, isLoading: loadingBranches } = useBranches({ 
     token: token ?? "", 
@@ -98,6 +97,7 @@ export default function ClientReportPage() {
 
   const sDate = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
   const eDate = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
+  const selectedBranch = branchId === "all" ? undefined : branchId;
 
   const rangeOptions = [
     { value: "this-month", label: t("filters.ranges.this_month") },
@@ -106,7 +106,17 @@ export default function ClientReportPage() {
     { value: "custom", label: t("filters.ranges.custom") },
   ];
 
-  const selectedBranch = branchId === "all" ? undefined : branchId;
+  const onExportClients = (formatType: ExportFormat) => {
+    const baseFileName = t("header.export_filename") || "Reporte_Clientes";
+    const dateTag = sDate && eDate ? `_${sDate}_to_${eDate}` : "";
+
+    handleExport(
+      "clients-report", 
+      (jwt) => api.exports.exportClientsReport(jwt, formatType),
+      `${baseFileName}${dateTag}`, 
+      formatType 
+    );
+  };
 
   if (!token) {
     return null;
@@ -118,14 +128,41 @@ export default function ClientReportPage() {
         title={t("header.title")}
         subtitle={t("header.subtitle")}
         actionButton={
-          <Button variant="default" className="shadow-sm">
-            <FileDown className="mr-2 h-4 w-4" />
-            {t("header.export")}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="default" 
+                className="shadow-sm min-w-[160px]  text-white font-bold text-xs uppercase tracking-widest"
+                disabled={isExporting === "clients-report"}
+              >
+                {isExporting === "clients-report" ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <FileDown className="mr-2 h-4 w-4" />
+                )}
+                {isExporting === "clients-report" ? t("header.exporting") : t("header.export")}
+                <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => onExportClients("csv")} className="cursor-pointer">
+                <Table className="mr-2 h-4 w-4 text-slate-500" />
+                <span>{t("formats.csv")}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onExportClients("excel")} className="cursor-pointer">
+                <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
+                <span>{t("formats.excel")}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onExportClients("pdf")} className="cursor-pointer">
+                <FileText className="mr-2 h-4 w-4 text-red-600" />
+                <span>{t("formats.pdf")}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         }
       />
 
-      <div className="bg-white dark:bg-gray-800 p-2 rounded-2xl shadow-sm border border-slate-200/60 dark:border-gray-700 sticky top-4 z-10 backdrop-blur-md bg-white/90">
+      <div className=" dark:bg-gray-800 p-2 rounded-2xl shadow-sm border border-slate-200/60 dark:border-gray-700 sticky top-4 z-10 backdrop-blur-md">
         <ReportFilters
           branches={branchOptions}
           branchValue={branchId}
@@ -135,8 +172,12 @@ export default function ClientReportPage() {
           onRangeChange={setRange}
           startDate={startDate}
           endDate={endDate}
-          onStartDateChange={handleStartDateChange}
-          onEndDateChange={handleEndDateChange}
+          onStartDateChange={(d) => { setStartDate(d); if(d)  {
+            setRange("custom");
+          } }}
+          onEndDateChange={(d) => { setEndDate(d); if(d) {
+            setRange("custom");
+          } }}
           loadingBranches={loadingBranches}
           onClear={() => {
             setBranchId(!isGlobalAdmin && activeBranchId ? activeBranchId : "all");
@@ -155,14 +196,14 @@ export default function ClientReportPage() {
 
       <div className="space-y-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          <div className="xl:col-span-1 bg-white dark:bg-gray-900  rounded-2xl border border-slate-200/60 shadow-sm">
+          <div className="xl:col-span-1 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 shadow-sm">
             <NewVsRecurringReport 
               token={token} 
               branchId={selectedBranch} 
             />
           </div>
 
-          <div className="xl:col-span-2 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-slate-200/60 shadow-sm overflow-x-auto">
+          <div className="xl:col-span-2 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-slate-200/60 shadow-sm overflow-x-auto text-left">
             <CohortAnalysisReport token={token} branchId={selectedBranch} />
           </div>
         </div>

@@ -7,7 +7,8 @@ import {
   RotateCcw, 
   Trash2, 
   Save, 
-  WalletCards 
+  WalletCards,
+  Loader2 
 } from "lucide-react";
 import { BranchPaymentMethodInfo, PaymentMethod } from "@vitalfit/sdk";
 import { toast } from "sonner";
@@ -35,9 +36,10 @@ interface Props {
 }
 
 export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Props) {
-  const t = useTranslations("branches");
+  const t = useTranslations("branches.details.payment_methods");
   const { token } = useAuth();
   const isViewMode = mode === "view";
+
   const [allMethods, setAllMethods] = useState<PaymentMethod[]>([]);
   const [branchMethods, setBranchMethods] = useState<BranchPaymentMethodInfo[]>([]);
   const [pendingIds, setPendingIds] = useState<string[]>([]);
@@ -48,8 +50,8 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
   const [methodToRemove, setMethodToRemove] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
-    if (!token || !branchId){
-       return;
+    if (!token || !branchId) {
+      return;
     }
     setLoading(true);
     try {
@@ -62,7 +64,7 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
       setPendingIds([]);
       setRemovedIds([]);
     } catch (err) {
-      toast.error(t("details.payment_methods.error_load"));
+      toast.error(t("toast_error_load"));
     } finally {
       setLoading(false);
     }
@@ -71,13 +73,15 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleAddToQueue = useCallback(() => {
-    if (!selectedId) {
-      return;
+    if (!selectedId){
+       return;
     }
+    
     const method = allMethods.find(x => x.method_id === selectedId);
     if (!method) {
       return;
     }
+
     if (removedIds.includes(selectedId)) {
       setRemovedIds(prev => prev.filter(id => id !== selectedId));
     } else {
@@ -86,8 +90,26 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
 
     setBranchMethods(prev => [...prev, { ...method, branch_id: branchId, is_active: true }]);
     setSelectedId("");
-    toast.info("Método añadido a la cola local");
-  }, [selectedId, allMethods, branchId, removedIds]);
+    toast.info(t("toast_added_local"));
+  }, [selectedId, allMethods, branchId, removedIds, t]);
+
+  const handleRemoveClick = (id: string) => {
+    if (pendingIds.includes(id)) {
+      setBranchMethods(prev => prev.filter(m => m.method_id !== id));
+      setPendingIds(prev => prev.filter(curr => curr !== id));
+      toast.info(t("toast_removed_local"));
+    } else {
+      setMethodToRemove(id);
+    }
+  };
+
+  const confirmRemoval = () => {
+    if (methodToRemove) {
+      setRemovedIds(prev => [...prev, methodToRemove]);
+      setMethodToRemove(null);
+      toast.warning(t("toast_marked_for_deletion"));
+    }
+  };
 
   const handleSyncChanges = async () => {
     if (!token || !branchId) {
@@ -103,10 +125,10 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
           await api.paymentMethod.removeBranchPaymentMethod(branchId, id, token);
         }
       }
-      toast.success("Sincronización exitosa");
+      toast.success(t("toast_sync_success"));
       await fetchData();
     } catch (error) {
-      toast.error("Error al guardar los cambios");
+      toast.error(t("toast_sync_error"));
     } finally {
       setIsSaving(false);
     }
@@ -114,7 +136,7 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
 
   const handleDiscard = () => {
     fetchData();
-    toast.info("Cambios locales descartados");
+    toast.info(t("toast_discarded"));
   };
 
   const displayMethods = useMemo(() => {
@@ -126,25 +148,24 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <SectionHeader 
-        title="Métodos de Pago"
-        subtitle="Configura los medios de pago aceptados en esta sucursal."
+        title={t("title")}
+        subtitle={t("subtitle")}
         icon={CreditCard}
         isViewMode={isViewMode}
       />
-
 
       {!isViewMode && (
         <Card className="border shadow-none bg-slate-50/40">
           <CardHeader className="pb-4 text-left">
             <CardTitle className="text-[11px] font-black uppercase tracking-wider text-muted-foreground">
-              Vincular Nuevo Método
+              {t("add_card_title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={selectedId} onValueChange={setSelectedId}>
                 <SelectTrigger className="w-full sm:w-[350px] bg-white">
-                  <SelectValue placeholder="Selecciona un método de pago..." />
+                  <SelectValue placeholder={t("selector_placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {allMethods
@@ -155,7 +176,7 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
                       </SelectItem>
                     ))}
                   {allMethods.length === 0 && (
-                     <p className="p-2 text-xs text-center text-muted-foreground">No hay métodos disponibles</p>
+                     <p className="p-2 text-xs text-center text-muted-foreground">{t("no_methods_available")}</p>
                   )}
                 </SelectContent>
               </Select>
@@ -165,7 +186,7 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
                 variant="outline"
                 className="bg-white font-bold text-xs uppercase tracking-widest border-slate-200 shadow-sm transition-all active:scale-95"
               >
-                <Plus className="mr-2 h-4 w-4" /> Agregar a cola
+                <Plus className="mr-2 h-4 w-4" /> {t("btn_add")}
               </Button>
             </div>
 
@@ -174,25 +195,25 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
                 <Button 
                   onClick={handleSyncChanges} 
                   disabled={!hasChanges || isSaving}
-                  className="font-bold text-xs uppercase tracking-widest bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-100 transition-all active:scale-95"
+                  className="font-bold text-xs uppercase tracking-widest bg-orange-500 hover:bg-orange-600 text-white shadow-lg transition-all active:scale-95"
                 >
-                  <Save className="mr-2 h-4 w-4" />
-                  {isSaving ? "Guardando..." : "Sincronizar Cambios"}
+                  {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  {isSaving ? t("btn_saving") : t("btn_sync")}
                 </Button>
                 {hasChanges && (
                   <Button 
                     variant="ghost" 
                     onClick={handleDiscard}
-                    className="text-slate-400 hover:text-orange-500 font-black text-[10px] uppercase tracking-tighter"
+                    className="text-slate-400 hover:text-orange-500 font-black text-[10px] uppercase tracking-tighter transition-colors"
                   >
                     <RotateCcw className="mr-2 h-3.5 w-3.5" />
-                    Descartar
+                    {t("btn_discard")}
                   </Button>
                 )}
               </div>
               {hasChanges && (
                 <Badge className="bg-orange-50 text-orange-600 border-orange-100 animate-pulse font-black text-[10px]">
-                  CAMBIOS PENDIENTES
+                  {t("badge_pending")}
                 </Badge>
               )}
             </div>
@@ -202,21 +223,20 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
 
       <div className="space-y-4">
         <div className="flex items-center gap-3 px-1">
-           <h3 className="font-black uppercase tracking-[0.25em] text-slate-500 flex items-center gap-3">
-            Métodos Habilitados {displayMethods.length}
-        
+           <h3 className="font-black uppercase tracking-[0.25em] text-slate-500">
+            {t("total_label", { count: displayMethods.length })}
           </h3>
         </div>
 
         <div className="rounded-xl border bg-white divide-y overflow-hidden shadow-sm">
           {loading && branchMethods.length === 0 ? (
             <div className="p-12 text-center text-slate-400 font-bold text-xs uppercase animate-pulse tracking-widest italic">
-              Cargando métodos...
+              {t("loading")}
             </div>
           ) : displayMethods.length === 0 ? (
             <div className="p-12 text-center text-slate-300">
               <WalletCards className="h-10 w-10 mx-auto mb-3 opacity-20" />
-              <p className="text-[10px] uppercase font-black tracking-[0.2em]">Sin métodos configurados</p>
+              <p className="text-[10px] uppercase font-black tracking-[0.2em]">{t("empty")}</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
@@ -235,7 +255,7 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        onClick={() => setMethodToRemove(method.method_id)}
+                        onClick={() => handleRemoveClick(method.method_id)}
                         className="h-9 w-9 text-slate-400 hover:text-destructive hover:bg-red-50 rounded-lg"
                       >
                         <Trash2 size={18} />
@@ -252,17 +272,11 @@ export default function BranchPaymentMethodPanel({ branchId, mode = "edit" }: Pr
       <GeneralAlertDialog
         open={!!methodToRemove}
         onOpenChange={(open) => !open && setMethodToRemove(null)}
-        title="¿Quitar método de pago?"
-        description="Esta acción se aplicará en el servidor cuando sincronices los cambios."
-        actionText="Quitar"
+        title={t("dialog_remove_title")}
+        description={t("dialog_remove_description")}
+        actionText={t("dialog_remove_action")}
         actionVariant="destructive"
-        onAction={() => {
-          if(methodToRemove) {
-            setRemovedIds(prev => [...prev, methodToRemove]);
-            setMethodToRemove(null);
-            toast.warning("Método marcado para eliminar");
-          }
-        }}
+        onAction={confirmRemoval}
       />
     </div>
   );
