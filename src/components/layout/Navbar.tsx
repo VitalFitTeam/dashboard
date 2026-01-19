@@ -2,88 +2,87 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import {
-  BellIcon,
-  SunIcon,
-} from "@heroicons/react/24/outline";
-import { Menu, Search } from "lucide-react";
-import { useSidebar } from "../ui/sidebar";
-import { Button } from "../ui/button";
+import { 
+  Menu, 
+  Search, 
+  Sun, 
+
+} from "lucide-react";
+
+import { useSidebar } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
 import { DynamicBreadcrumb } from "./DynamicBreadcrumb";
 import LocaleSwitcher from "./localeSwitcher/LocaleSwitcher";
+import { useAuth } from "@/context/AuthContext";
+import { Input } from "../ui/Input";
+import { NotificationCenter } from "./NotificationCenter";
 
 const Navbar: React.FC = () => {
-  const t = useTranslations("Navbar"); 
+  const t = useTranslations("Navbar");
   const { toggleSidebar } = useSidebar();
+  const {token} = useAuth();
+  if(!token){
+    return;
+  }
+
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center px-4 md:px-6">
-        
+      <div className="flex h-14 items-center px-4 gap-4">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
+            className="md:h-9 md:w-9"
             onClick={toggleSidebar}
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">{t("toggleMenu")}</span>
           </Button>
           
+          <Separator orientation="vertical" className="hidden h-6 md:block" />
+          
           <div className="hidden sm:block">
             <DynamicBreadcrumb />
           </div>
         </div>
+        <div className="flex flex-1 items-center justify-end gap-2">
 
-        <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
-          
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input
-                type="search"
-                placeholder={t("searchPlaceholder")}
-                className="flex h-9 w-64 rounded-md border border-input bg-muted/50 px-9 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              />
-            </div>
-            
-            <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground">
-              <Search className="h-5 w-5" />
-              <span className="sr-only">{t("searchPlaceholder")}</span>
-            </Button>
+          <div className="relative w-full max-w-[300px] hidden md:block">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder={t("searchPlaceholder")}
+              className="pl-9 bg-muted/50 focus-visible:ring-1"
+            />
           </div>
 
           <nav className="flex items-center gap-1">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative h-9 w-9">
-                    <BellIcon className="h-5 w-5 text-muted-foreground" />
-                    <span className="absolute right-2.5 top-2.5 flex h-2 w-2 rounded-full bg-orange-600 border-2 border-background" />
-                    <span className="sr-only">{t("notifications")}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{t("notifications")}</TooltipContent>
-              </Tooltip>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Search className="h-5 w-5 text-muted-foreground" />
+            </Button>
 
+            <TooltipProvider delayDuration={300}>
+              <NotificationCenter jwt={token} />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-9 w-9">
-                    <SunIcon className="h-5 w-5 text-muted-foreground" />
+                    <Sun className="h-5 w-5 text-muted-foreground" />
                     <span className="sr-only">{t("appearance")}</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>{t("appearance")}</TooltipContent>
+                <TooltipContent side="bottom">{t("appearance")}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
-            <div className="mx-2 hidden h-4 w-[1px] bg-border md:block" />
+            <Separator orientation="vertical" className="mx-1 h-6" />
             <LocaleSwitcher />
           </nav>
         </div>
