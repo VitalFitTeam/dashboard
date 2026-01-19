@@ -2,12 +2,9 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useFormatter, useNow } from "next-intl";
 import { Bell, CheckCheck, MessageSquare, Loader2, Calendar, ExternalLink } from "lucide-react";
-import { formatDistanceToNow, isValid, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
-
-// Shadcn UI
+import { isValid, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +17,8 @@ interface NotificationCenterProps {
 }
 
 export function NotificationCenter({ jwt }: NotificationCenterProps) {
-  const t = useTranslations("Navbar");
+  const t = useTranslations("Notifications.Center");
+  const format = useFormatter();
   const router = useRouter();
   
   const {
@@ -34,7 +32,8 @@ export function NotificationCenter({ jwt }: NotificationCenterProps) {
     isSyncing,
   } = useNotifications(jwt);
 
-  // Limpieza de formato de duración (Regex)
+  const now = useNow();
+
   const formatMessageTime = (message: string) => {
     return message.replace(/(\d+h)?(\d+m)?(\d+)(\.\d+)?s$/, (match, h, m, s) => {
       const hours = h ? `${h} ` : "";
@@ -44,11 +43,15 @@ export function NotificationCenter({ jwt }: NotificationCenterProps) {
     });
   };
 
-  const formatRelativeTime = (dateString: string) => {
-    if (!dateString) return "";
+ const formatRelativeTime = (dateString: string) => {
+    if (!dateString) {
+      return "";
+    }
     const date = parseISO(dateString);
-    if (!isValid(date)) return "";
-    return formatDistanceToNow(date, { addSuffix: true, locale: es });
+    if (!isValid(date)) {
+      return "";
+    }
+    return format.relativeTime(date, now); 
   };
 
   return (
@@ -68,12 +71,13 @@ export function NotificationCenter({ jwt }: NotificationCenterProps) {
       </PopoverTrigger>
 
       <PopoverContent className="w-80 p-0 sm:w-[400px] shadow-xl" align="end">
-        {/* Header */}
         <div className="flex items-center justify-between p-4">
           <div className="space-y-0.5">
-            <h4 className="text-sm font-semibold text-foreground">Notificaciones</h4>
+            <h4 className="text-sm font-semibold text-foreground">
+              {t("title")}
+            </h4>
             <p className="text-[11px] text-muted-foreground font-medium">
-              Tienes {unreadCount} sin leer
+              {t("unread", { count: unreadCount })}
             </p>
           </div>
           {unreadCount > 0 && (
@@ -84,14 +88,11 @@ export function NotificationCenter({ jwt }: NotificationCenterProps) {
               onClick={() => markAllAsRead()}
             >
               <CheckCheck className="mr-1.5 h-3.5 w-3.5" />
-              Marcar todo
+              {t("markAll")}
             </Button>
           )}
         </div>
-        
         <Separator />
-
-        {/* Listado de Notificaciones */}
         <ScrollArea className="h-[380px]">
           {isLoading ? (
             <div className="flex h-40 items-center justify-center">
@@ -133,14 +134,11 @@ export function NotificationCenter({ jwt }: NotificationCenterProps) {
             </div>
           ) : (
             <div className="flex h-40 items-center justify-center text-xs text-muted-foreground">
-              No hay notificaciones pendientes
+              {t("empty")}
             </div>
           )}
         </ScrollArea>
-
         <Separator />
-
-        {/* Footer con doble acción */}
         <div className="p-2 bg-muted/20 space-y-1">
           {hasMore && (
             <Button
@@ -150,16 +148,16 @@ export function NotificationCenter({ jwt }: NotificationCenterProps) {
               onClick={() => loadMore()}
             >
               {isSyncing ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
-              {isSyncing ? "Cargando..." : "Cargar más anteriores"}
+              {isSyncing ? t("loading") : t("loadMore")}
             </Button>
           )}
           
           <Button
             variant="outline"
             className="w-full text-xs h-9 font-semibold shadow-sm"
-            onClick={() => router.push("/dashboard/notifications")}
+            onClick={() => router.push("/settings/activity?tab=activity")}
           >
-            Ver centro de notificaciones
+            {t("viewAll")}
             <ExternalLink className="ml-2 h-3 w-3 opacity-70" />
           </Button>
         </div>

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations, useFormatter } from "next-intl"; 
 import { Inbox, CheckCircle2, Loader2, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,8 @@ import { useNotifications } from "@/hooks/notification/useNotifications";
 
 export function ActivityNotifications() {
   const { token } = useAuth();
+ const t = useTranslations("Notifications.ActivityNotifications");
+  const format = useFormatter(); 
 
   const {
     notifications,
@@ -36,11 +39,11 @@ export function ActivityNotifications() {
   }
 
   return (
-    <div className="flex flex-col h-[600px] w-full bg-background overflow-hidden">
+    <div className="flex flex-col h-[600px] w-full bg-background overflow-hidden border rounded-xl shadow-sm">
       <div className="flex items-center justify-between px-4 py-4 border-b border-muted/50 shrink-0">
         <div className="flex items-center gap-2">
           <h4 className="text-sm font-bold text-foreground tracking-tight">
-            Actividad Reciente
+            {t("title")}
           </h4>
           {unreadCount > 0 && (
             <Badge className="bg-orange-500 hover:bg-orange-600 h-5 px-1.5 rounded-full animate-in zoom-in duration-300">
@@ -57,7 +60,7 @@ export function ActivityNotifications() {
             className="text-xs h-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50 font-semibold transition-colors"
           >
             <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
-            Marcar todo leído
+            {t("markAllRead")}
           </Button>
         )}
       </div>
@@ -70,10 +73,10 @@ export function ActivityNotifications() {
                 <Inbox className="h-8 w-8 text-muted-foreground/30" />
               </div>
               <p className="text-sm font-semibold text-foreground">
-                Bandeja vacía
+                {t("emptyTitle")}
               </p>
               <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-                No hay actividades ni notificaciones registradas.
+                {t("emptyDescription")}
               </p>
             </div>
           ) : (
@@ -110,7 +113,7 @@ export function ActivityNotifications() {
                           {n.title}
                         </span>
                         <span className="text-[10px] text-muted-foreground/60 tabular-nums font-medium whitespace-nowrap">
-                          {new Date(n.created_at).toLocaleTimeString([], {
+                          {format.dateTime(new Date(n.created_at), {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
@@ -127,7 +130,7 @@ export function ActivityNotifications() {
                             variant="outline"
                             className="text-[9px] uppercase font-bold tracking-wider py-0 px-1.5 bg-background"
                           >
-                            {n.metadata?.service_name || "VitalFit"}
+                            {n.metadata?.service_name || t("systemName")}
                           </Badge>
                           {n.metadata?.booking_id && (
                             <span className="text-[10px] text-muted-foreground/40 tabular-nums">
@@ -153,13 +156,16 @@ export function ActivityNotifications() {
                     disabled={isSyncing}
                   >
                     {isSyncing ? (
-                      <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                      <>
+                        <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                        {t("loadingMore")}
+                      </>
                     ) : (
-                      <ChevronDown className="h-3 w-3 mr-2" />
+                      <>
+                        <ChevronDown className="h-3 w-3 mr-2" />
+                        {t("loadMore")}
+                      </>
                     )}
-                    {isSyncing
-                      ? "Cargando actividades..."
-                      : "Cargar actividades anteriores"}
                   </Button>
                 </div>
               )}
@@ -170,7 +176,7 @@ export function ActivityNotifications() {
 
       <div className="px-4 py-3 border-t border-muted/50 bg-muted/5 shrink-0">
         <p className="text-[10px] text-muted-foreground text-center italic font-medium">
-          Las actividades se conservan por 30 días automáticamente.
+          {t("footerNote")}
         </p>
       </div>
     </div>

@@ -257,11 +257,13 @@
     "locale": "{locale, select, es {Español} en {English} other {{locale}}}"
   },
   "Navbar": {
-    "searchPlaceholder": "Buscar...",
     "notifications": "Notificaciones",
+    "details": "Detalles #{id}",
+    "searchPlaceholder": "Buscar en VitalFit...",
+    "searchMobile": "Buscar...",
+    "noResults": "No se encontraron resultados.",
     "appearance": "Apariencia",
-    "toggleMenu": "Alternar menú",
-    "details": "Detalles #{id}"
+    "toggleMenu": "Alternar Menú"
   },
   "UserNav": {
     "account": "Cuenta",
@@ -3265,5 +3267,50 @@
     "noBranchDescription": "Tu cuenta de <role>{role}</role> está activa, pero no tienes una sede válida asignada para operar.",
     "retry": "Reintentar",
     "logout": "Cerrar Sesión"
+  },
+  "SettingsPage": {
+    "title": "Configuración",
+    "description": "Administra la configuración de tu cuenta y preferencias.",
+    "loading": "Cargando perfil...",
+    "tabs": {
+      "profile": "Perfil",
+      "activity": "Actividad",
+      "security": "Seguridad"
+    },
+    "sections": {
+      "profile": {
+        "title": "Perfil",
+        "description": "Información pública de tu cuenta."
+      },
+      "activity": {
+        "title": "Bandeja de Actividad",
+        "description": "Historial de tus clases y recordatorios."
+      },
+      "security": {
+        "title": "Seguridad",
+        "description": "Protege tu acceso al gimnasio."
+      }
+    }
+  },
+  "Notifications":{
+    "Center": {
+      "title": "Notificaciones",
+      "unread": "Tienes {count} sin leer",
+      "markAll": "Marcar todo",
+      "empty": "No hay notificaciones pendientes",
+      "loadMore": "Cargar más anteriores",
+      "loading": "Cargando...",
+      "viewAll": "Ver centro de notificaciones"
+    },
+    "ActivityNotifications": {
+    "title": "Actividad Reciente",
+    "markAllRead": "Marcar todo leído",
+    "emptyTitle": "Bandeja vacía",
+    "emptyDescription": "No hay actividades ni notificaciones registradas.",
+    "loadingMore": "Cargando actividades...",
+    "loadMore": "Cargar actividades anteriores",
+    "footerNote": "Las actividades se conservan por 30 días automáticamente.",
+    "systemName": "VitalFit"
+  }
   }
 }

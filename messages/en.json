@@ -257,11 +257,13 @@
     "locale": "{locale, select, es {Spanish} en {English} other {{locale}}}"
   },
   "Navbar": {
-    "searchPlaceholder": "Search...",
     "notifications": "Notifications",
     "appearance": "Appearance",
     "toggleMenu": "Toggle menu",
-    "details": "Details #{id}"
+    "details": "Details #{id}",
+    "searchPlaceholder": "Search VitalFit...",
+    "searchMobile": "Search...",
+    "noResults": "No results found."
   },
   "UserNav": {
     "account": "Account",
@@ -3266,6 +3268,51 @@
     "success": {
       "booked": "Booking successful",
       "cancelled": "Cancelled successfully"
+    }
+  },
+  "SettingsPage": {
+    "title": "Settings",
+    "description": "Manage your account settings and preferences.",
+    "loading": "Loading profile...",
+    "tabs": {
+      "profile": "Profile",
+      "activity": "Activity",
+      "security": "Security"
+    },
+    "sections": {
+      "profile": {
+        "title": "Profile",
+        "description": "Your account's public information."
+      },
+      "activity": {
+        "title": "Activity Feed",
+        "description": "History of your classes and reminders."
+      },
+      "security": {
+        "title": "Security",
+        "description": "Protect your access to the gym."
+      }
+    }
+  },
+  "Notifications":{
+    "Center": {
+      "title": "Notifications",
+      "unread": "You have {count} unread",
+      "markAll": "Mark all",
+      "empty": "No pending notifications",
+      "loadMore": "Load previous",
+      "loading": "Loading...",
+      "viewAll": "View notification center"
+    },
+    "ActivityNotifications": {
+    "title": "Recent Activity",
+    "markAllRead": "Mark all as read",
+    "emptyTitle": "Empty Inbox",
+    "emptyDescription": "No activities or notifications found.",
+    "loadingMore": "Loading activities...",
+    "loadMore": "Load previous activities",
+    "footerNote": "Activities are automatically kept for 30 days.",
+    "systemName": "VitalFit"
     }
   }
 }
