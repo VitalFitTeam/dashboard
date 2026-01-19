@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Download, Eye, Pencil, Search, Trash2 } from "lucide-react";
+import {  Eye, Pencil, Search, Trash2 } from "lucide-react";
 import { RowActions } from "@/components/ui/table/RowActions";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
@@ -167,10 +167,6 @@ export default function BranchesTable({
           </Button>
         )}
 
-        <Button variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          {t("table.download")}
-        </Button>
       </div>
 
       <GeneralAlertDialog

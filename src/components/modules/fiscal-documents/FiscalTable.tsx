@@ -2,10 +2,9 @@
 import { useState, useEffect } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { RowActions } from "@/components/ui/table/RowActions";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
-import { Download, Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { toast } from "sonner"; 
 import { useTranslations } from "next-intl";
@@ -99,12 +98,6 @@ export default function FiscalTable({
           />
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => toast.info(t("downloading") || "Generando descarga...")}>
-            <Download className="mr-2 h-4 w-4" />
-            {t("download")}
-          </Button>
-        </div>
       </div>
 
       <DataTable<FiscalDocument>

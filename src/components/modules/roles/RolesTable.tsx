@@ -233,12 +233,6 @@ export default function RolesTable() {
           />
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="outline">
-            <ArrowDownTray className="mr-2 h-4 w-4" />
-            {t("table.download")}
-          </Button>
-        </div>
       </div>
 
       <DataTable<Roles>

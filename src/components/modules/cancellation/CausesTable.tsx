@@ -124,12 +124,6 @@ export default function CausesTable({
           />
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            {t("download")}
-          </Button>
-        </div>
       </div>
 
       <DataTable<CancellationReason>
