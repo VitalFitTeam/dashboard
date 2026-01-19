@@ -14,6 +14,12 @@ import { BranchStaff, User as SdkUser } from "@vitalfit/sdk";
 import { UserRole, ROLE_LABELS } from "@/lib/roles";
 import { authService } from "@/lib/auth-service";
 
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import { SessionWarningModal } from "@/components/modules/auth/SessionWarningModal";
+
+const WARNING_TIME = (Number(process.env.NEXT_PUBLIC_IDLE_TIMEOUT_MINS) || 14) * 60 * 1000;
+const GRACE_PERIOD = (Number(process.env.NEXT_PUBLIC_GRACE_PERIOD_SEC) || 60) * 1000;
+
 export interface SessionUser extends Omit<SdkUser, "role"> {
   role: UserRole;
   role_label: string;
@@ -30,7 +36,6 @@ interface AuthContextType {
   user: SessionUser | null;
   loading: boolean;
   isAuthenticated: boolean;
-
   login: (token: string, refresh: string) => Promise<void>;
   logout: () => void;
   reloadUser: () => Promise<void>;
@@ -50,13 +55,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const router = useRouter();
 
-  const setTokens = useCallback((token: string, refresh: string) => {
-    authService.setTokens(token, refresh);
-    setAccessToken(token);
-    setRefreshToken(refresh);
-    api.client.setTokens(token, refresh);
-  }, []);
-
   const clearSession = useCallback(() => {
     authService.clearSession();
     setAccessToken(null);
@@ -69,6 +67,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearSession();
     router.push("/login");
   }, [clearSession, router]);
+
+  const { showWarning, remainingTime, resetTimer } = useSessionTimeout({
+    onLogout: logout,
+    isEnabled: !!accessToken && !loading,
+    warningTimeMs: WARNING_TIME,
+    logoutTimeMs: GRACE_PERIOD,
+  });
+
+  const setTokens = useCallback((token: string, refresh: string) => {
+    authService.setTokens(token, refresh);
+    setAccessToken(token);
+    setRefreshToken(refresh);
+    api.client.setTokens(token, refresh);
+  }, []);
 
   const getUserProfile = useCallback(
     async (token: string): Promise<SessionUser | null> => {
@@ -96,16 +108,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const assignedBranches = branchesRes.data ?? [];
         const managedBranches = managedRes.data ?? [];
         const instructorBranches = instructorRes.data ?? [];
-
-        const allBranches = [
-          ...assignedBranches,
-          ...managedBranches,
-          ...instructorBranches,
-        ];
+        const allBranches = [...assignedBranches, ...managedBranches, ...instructorBranches];
 
         const savedBranchId = localStorage.getItem("active_branch_id");
-        const activeBranch =
-          allBranches.find((b) => b.id === savedBranchId) || allBranches[0];
+        const activeBranch = allBranches.find((b) => b.id === savedBranchId) || allBranches[0];
 
         if (activeBranch) {
           localStorage.setItem("active_branch_id", activeBranch.id);
@@ -129,11 +135,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     []
   );
 
-  const reloadUser = useCallback(async () => {
-    if (!accessToken) {
-      return;
-    }
+  const login = useCallback(
+    async (token: string, refresh: string) => {
+      setLoading(true);
+      try {
+        const sessionUser = await getUserProfile(token);
+        if (!sessionUser) {
+          throw new Error("Usuario sin permisos");
+        };
 
+        setTokens(token, refresh);
+        setUser(sessionUser);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [getUserProfile, setTokens]
+  );
+
+  const reloadUser = useCallback(async () => {
+    if (!accessToken){
+       return;
+    }
     try {
       const sessionUser = await getUserProfile(accessToken);
       if (!sessionUser) {
@@ -145,24 +168,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       logout();
     }
   }, [accessToken, getUserProfile, logout]);
-
-  const login = useCallback(
-    async (token: string, refresh: string) => {
-      setLoading(true);
-      try {
-        const sessionUser = await getUserProfile(token);
-        if (!sessionUser) {
-          throw new Error("Usuario sin permisos");
-        }
-
-        setTokens(token, refresh);
-        setUser(sessionUser);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [getUserProfile, setTokens]
-  );
 
   const switchBranch = useCallback((branch: BranchStaff) => {
     setUser((prev) =>
@@ -189,9 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAccessToken(access);
         setRefreshToken(refresh);
       },
-      () => {
-        logout();
-      }
+      () => logout()
     );
   }, [logout]);
 
@@ -208,7 +211,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       api.client.setTokens(storedAccess, storedRefresh);
-
       setAccessToken(storedAccess);
       setRefreshToken(storedRefresh);
 
@@ -218,17 +220,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(sessionUser);
       }
-
       setLoading(false);
     };
 
     initAuth();
   }, [getUserProfile, clearSession]);
 
-  const isSuperAdmin = user?.role === "super_admin"; // Ajusta según tu enum
-  const hasBranch = !!user?.activeBranch;
-
-  const hasAccess = isSuperAdmin || hasBranch;
+  const isSuperAdmin = user?.role === UserRole.SUPER_ADMIN; 
+  const hasAccess = isSuperAdmin || !!user?.activeBranch;
 
   return (
     <AuthContext.Provider
@@ -244,10 +243,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         switchBranch,
         hasRole,
         setTokens,
-        hasAccess
+        hasAccess,
       }}
     >
       {children}
+      {showWarning && (
+        <SessionWarningModal 
+          remainingTime={remainingTime} 
+          onStayLoggedIn={resetTimer} 
+        />
+      )}
     </AuthContext.Provider>
   );
 };

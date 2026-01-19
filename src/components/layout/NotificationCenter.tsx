@@ -155,7 +155,7 @@ export function NotificationCenter({ jwt }: NotificationCenterProps) {
           <Button
             variant="outline"
             className="w-full text-xs h-9 font-semibold shadow-sm"
-            onClick={() => router.push("/settings/activity?tab=activity")}
+            onClick={() => router.push("/settings/profile?tab=activity")}
           >
             {t("viewAll")}
             <ExternalLink className="ml-2 h-3 w-3 opacity-70" />

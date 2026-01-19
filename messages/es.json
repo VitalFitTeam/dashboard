@@ -3312,5 +3312,12 @@
     "footerNote": "Las actividades se conservan por 30 días automáticamente.",
     "systemName": "VitalFit"
   }
+  },
+  "Auth": {
+    "sessionWarning": {
+      "title": "Tu sesión está por expirar",
+      "description": "Has estado inactivo demasiado tiempo. Por seguridad, cerraremos tu sesión automáticamente en:",
+      "button": "Mantener sesión activa"
+    }
   }
 }
