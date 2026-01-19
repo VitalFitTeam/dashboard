@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useBranches } from "@/hooks/branches/useBranches";
 import { useUserByEmail } from "@/hooks/users/useUserByEmail";
@@ -14,23 +14,23 @@ import { CreateInvoiceForm } from "@/components/modules/billing/CreateInvoiceFor
 import { useRouter } from "@/i18n/navigation";
 import { useBranchPaymentMethods } from "@/hooks/branches/useBranchPaymentMethods";
 import { usePaymentMethods } from "@/hooks/payment-methods/usePaymentMethods";
+import { useBranchServices } from "@/hooks/branches/useBranchServices"; 
 import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl"; 
+import { useTranslations } from "next-intl";
 
 export default function StaffNewInvoicePage() {
-  const t = useTranslations("finance.Billing"); 
+  const t = useTranslations("finance.Billing");
   const router = useRouter();
   const { token, user: authUser } = useAuth();
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedBranchId, setSelectedBranchId] = useState<string | undefined>(
     authUser?.activeBranch?.id
   );
-  
-  // ESTADO PARA LA BÚSQUEDA DE USUARIO
-  const [emailToSearch, setEmailToSearch] = useState<string | null>(null);
 
-  // Hooks de datos financieros
+
+  const [emailToSearch, setEmailToSearch] = useState<string | null>(null);
+  const {  services, loading: loadingServices } = useBranchServices(selectedBranchId, token);
   const branchData = useBranchPaymentMethods(selectedBranchId ?? "", token ?? "");
   const globalData = usePaymentMethods(selectedBranchId ? null : (token ?? ""));
   const { taxRate, isLoading: loadingTax } = useTaxRate(selectedBranchId, token ?? "");
@@ -38,23 +38,22 @@ export default function StaffNewInvoicePage() {
   const paymentMethods = selectedBranchId ? branchData.methods : globalData.methods;
   const loadingMethods = selectedBranchId ? branchData.loading : globalData.loading;
 
-  // HOOK DE USUARIO CORREGIDO
   const { userData, isLoading: searchingUser, clearUser } = useUserByEmail(
-    token, 
-    emailToSearch 
+    token,
+    emailToSearch
   );
 
-  // Hooks de catálogos
+
+
   const { branches } = useBranches({ token: token ?? "", limit: 100 });
   const { memberships, loading: loadingMems } = useMembershipTypes({ token: token ?? "", initialLimit: 50 });
   const { packageData: packages, isLoading: loadingPkgs } = usePackages(token ?? "", 1, 100, { search: "" });
 
-  // FUNCIÓN PARA DISPARAR LA BÚSQUEDA (se pasa al formulario)
   const handleSearchUser = (email: string) => {
     if (email.includes("@")) {
       setEmailToSearch(email);
     } else {
-      toast.error("Por favor ingresa un email válido");
+      toast.error(t("newInvoice.messages.invalidEmail")); 
     }
   };
 
@@ -62,12 +61,12 @@ export default function StaffNewInvoicePage() {
     targetBranchId: string,
     items: any[],
     paymentMethodId: string,
-    totalUSD: number,     
-    amountPaid: number,     
-    currencyPaid: string   
+    totalUSD: number,
+    amountPaid: number,
+    currencyPaid: string
   ) => {
-    // BLINDAJE: Acceso seguro al user_id
-    const userId = userData?.user_id || userData?.data?.user_id;
+
+    const userId = userData?.data?.user_id || userData?.user_id;
 
     if (!token || !userId) {
       return toast.error(t("newInvoice.messages.selectUserError"));
@@ -77,12 +76,13 @@ export default function StaffNewInvoicePage() {
     let createdInvoiceId = null;
 
     try {
+
       const invoicePayload = {
         branch_id: targetBranchId,
         user_id: userId,
         items: items.map((item) => ({
           item_id: item.item_id,
-          item_type: item.item_type,
+          item_type: item.item_type, 
           quantity: Number(item.quantity),
         })),
       };
@@ -92,25 +92,24 @@ export default function StaffNewInvoicePage() {
 
       const paymentPayload = {
         invoice_id: createdInvoiceId,
-        amount_paid: amountPaid,   
+        amount_paid: amountPaid,
         currency_paid: currencyPaid,
         payment_method_id: paymentMethodId,
         transaction_id: `STAFF-${authUser?.user_id || "UID"}-${Date.now()}`,
         receipt_url: "",
       };
-      
+
       await api.billing.AddPaymentToInvoice(paymentPayload, token);
 
       toast.success(t("newInvoice.messages.success", { currency: currencyPaid }));
       router.push("/finance/billing");
     } catch (error: any) {
       console.error("Error creating invoice/payment:", error);
-      
+
       if (createdInvoiceId) {
         toast.error(t("newInvoice.messages.partialError"));
         router.push(`/finance/billing/${createdInvoiceId}/pay`);
       } else {
-        // Evitamos mostrar el error crudo, usamos la traducción
         toast.error(t("newInvoice.messages.error"));
       }
     } finally {
@@ -132,12 +131,15 @@ export default function StaffNewInvoicePage() {
         title={t("newInvoice.title")} 
         subtitle={t("newInvoice.subtitle")} 
       />
+
       <CreateInvoiceForm
         token={token}
         branches={branches}
         memberships={memberships}
         packages={packages || []}
-        userData={userData}
+        services={services || []}
+        loadingServices={loadingServices}
+        userData={userData} 
         paymentMethods={paymentMethods || []}
         loadingMethods={loadingMethods}
         loadingMems={loadingMems}
@@ -147,7 +149,10 @@ export default function StaffNewInvoicePage() {
         isSubmitting={isSubmitting}
         isSearchingUser={searchingUser}
         onSearchUser={handleSearchUser}
-        onClearUser={clearUser}
+        onClearUser={() => {
+          setEmailToSearch(null);
+          clearUser();
+        }}
         onSubmit={handleCreateInvoice}
         onCancel={() => router.back()}
         canSelectBranch={!authUser?.activeBranch?.id}

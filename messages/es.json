@@ -2493,6 +2493,8 @@
       },
       "form": {
         "branch": "Sucursal",
+        "service": "Servicio de Sede",
+        "memberPrice": "Tarifa Socio",
         "selectBranch": "Seleccionar sucursal",
         "client": "Cliente",
         "emailPlaceholder": "Email del cliente...",
@@ -2540,6 +2542,7 @@
         "paymentsTitle": "Registro de Pagos",
         "paymentsSubtitle": "Historial completo de abonos y transacciones",
         "statusLabel": "Estado de Cobro",
+        
         "status": {
           "paid": "CONCILIADO",
           "pending": "PENDIENTE"
@@ -2548,7 +2551,7 @@
           "subtotal": "Subtotal",
           "taxes": "Impuestos",
           "currentDebt": "Deuda Actual",
-          "fullyPaid": "FACTURA TOTALMENTE PAGADA"
+          "fullyPaid": "Factura totalmente solvente"
         },
         "accountInfo": {
           "title": "Información de Cuenta",
@@ -2558,9 +2561,16 @@
           "principal": "Principal",
           "uuidLabel": "UUID de Factura",
           "uuidInfo": "INFO",
-          "uuidTooltip": "Identificador único de sistema"
+          "uuidTooltip": "Identificador único de sistema",
+          "phoneLabel": "Teléfono",
+          "birthLabel": "Cumpleaños"
+          
         }
       },
+     "alerts": {
+          "failed": "PAGO RECHAZADO: EL CLIENTE AÚN DEBE EL TOTAL.",
+          "refunded": "PAGO REEMBOLSADO: SE REQUIERE NUEVO COBRO MANUAL."
+        },
       "detailPage": {
         "title": "Factura {number}",
         "defaultTitle": "Detalle de Factura",
@@ -2591,11 +2601,13 @@
         "types": {
           "membership": "Membresía",
           "package": "Paquete",
-          "unknown": "Ítem Desconocido"
+          "unknown": "Ítem Desconocido",
+          "service": "Servicio"
         },
         "defaultNames": {
           "membership": "Membresía",
-          "package": "Paquete de Clases"
+          "package": "Paquete de Clases",
+          "service": "Servicio"
         }
       },
       "paymentsTable": {
