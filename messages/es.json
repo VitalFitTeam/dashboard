@@ -244,7 +244,7 @@
     "CheckinCheckout": "Check-in/Check-out",
     "ReporteVentas": "Reporte de Ventas",
     "CombosPaquetes": "Combos/Paquetes",
-    "GestionMarketing": "Gestión Maketing",
+    "GestionMarketing": "Gestión Marketing",
     "branches_label": "Sedes de {name}",
     "select_branch": "Seleccionar Sede",
     "available_branches": "Sedes disponibles",
@@ -1693,7 +1693,7 @@
         "male": "Masculino",
         "prefer-not-to-say": "Prefiero no especificarlo"
       },
-     "placeholders": {
+      "placeholders": {
         "first_name": "Ej. Juan Alberto",
         "last_name": "Ej. Pérez García",
         "select_date": "Seleccionar fecha",
@@ -1728,7 +1728,8 @@
       "loading_subtitle": "Obteniendo datos del servidor",
       "loading_message": "Estamos preparando la información",
       "form_actions": {
-        "save": "Guardar Cambios"
+        "save": "Guardar Cambios",
+         "cancel": "Cancelar"
       },
       "tabs": {
         "general": "General",
@@ -1750,7 +1751,10 @@
         "image_url": "URL de Imagen",
         "role": "Rol de Usuario",
         "default_role": "Cliente",
-        "status": "Estado del Cliente"
+        "status": "Estado del Cliente",
+        "category": "Categoría",
+        "membership_status": "Estado de Membresía",
+        "validation_status": "Estado de Perfil"
       },
       "status": {
         "active": "Activa",
@@ -1758,7 +1762,9 @@
         "pending": "Pendiente",
         "canceled": "Cancelada",
         "validated": "Validado / Activo",
-        "blocked": "No Validado / Bloqueado"
+        "blocked": "No Validado / Bloqueado",
+        "active_member": "Miembro Activo",
+        "inactive": "Inactivo"
       },
       "actions": {
         "edit": "Editar Perfil",
@@ -1767,12 +1773,23 @@
         "service_usage": "Uso de Servicios",
         "complaints": "Quejas y Reclamos",
         "rfm": "Análisis de Cliente (RFM)",
+        "block": "Bloquear Cliente",
         "no_permissions": "No tienes acciones permitidas para este perfil."
       },
       "gender_options": {
-        "female": "Femenino",
         "male": "Masculino",
-        "other": "Otro"
+        "female": "Femenino",
+        "other": "Otro",
+        "prefer-not-to-say": "Prefiero no decirlo"
+      },
+      "block_dialog": {
+        "title": "Bloquear Cliente",
+        "description": "¿Estás seguro de que deseas bloquear a",
+        "label": "Justificación del bloqueo",
+        "placeholder": "Escribe el motivo (ej. Falta de pago, conducta inapropiada...)",
+        "error_required": "Debes indicar un motivo para el bloqueo",
+        "confirm": "Bloquear Usuario",
+        "cancel": "Cancelar"
       },
       "errors": {
         "not_found": "Cliente no encontrado",
@@ -1793,7 +1810,9 @@
         "update_error": "Error al actualizar la información",
         "invalid_image": "Por favor selecciona una imagen válida",
         "image_success": "Imagen cargada correctamente",
-        "image_error": "Error al subir la imagen"
+        "image_error": "Error al subir la imagen",
+        "block_success": "Cliente bloqueado correctamente",
+        "block_error": "No se pudo bloquear al cliente"
       }
     },
     "medical": {
@@ -1837,6 +1856,7 @@
     "payments": {
       "title": "HISTORIAL DE PAGOS",
       "subtitle": "Consulta el estado de facturación y transacciones de este cliente",
+      "back": "Volver",
       "table": {
         "reference": "Referencia",
         "date": "Fecha",
@@ -1867,42 +1887,45 @@
       "session_expired": "Sesión expirada. Por favor inicia sesión nuevamente"
     },
     "AttendanceHistory": {
-    "title": "Historial de Asistencias",
-    "subtitle": "Visualiza y filtra los registros de acceso y clases del cliente.",
-    "filters": {
-      "from": "Desde",
-      "until": "Hasta",
-      "placeholder": "Seleccionar fecha",
-      "clear": "Limpiar"
+      "title": "Historial de Asistencias",
+      "subtitle": "Visualiza y filtra los registros de acceso y clases del cliente.",
+      "back": "Volver",
+      "filters": {
+        "from": "Desde",
+        "until": "Hasta",
+        "placeholder": "Seleccionar fecha",
+        "clear": "Limpiar"
+      },
+      "states": {
+        "loading": "Actualizando datos...",
+        "errorTitle": "Error de conexión",
+        "errorSubtitle": "No pudimos obtener el historial en este momento.",
+        "retry": "Reintentar"
+      },
+      "AttendanceTable": {
+        "columns": {
+          "classService": "Clase / Servicio",
+          "classTime": "Horario Clase",
+          "checkIn": "Check-in",
+          "status": "Estado"
+        },
+        "placeholders": {
+          "facilityUse": "Uso de Instalaciones",
+          "generalService": "Servicio General",
+          "notApplicable": "No aplica"
+        },
+        "status": {
+          "Attended": "Asistió",
+          "NoShow": "No asistió",
+          "Late": "Tarde"
+        }
+      }
     },
-    "states": {
-      "loading": "Actualizando datos...",
-      "errorTitle": "Error de conexión",
-      "errorSubtitle": "No pudimos obtener el historial en este momento.",
-      "retry": "Reintentar"
-    },
-   "AttendanceTable": {
-    "columns": {
-      "classService": "Clase / Servicio",
-      "classTime": "Horario Clase",
-      "checkIn": "Check-in",
-      "status": "Estado"
-    },
-    "placeholders": {
-      "facilityUse": "Uso de Instalaciones",
-      "generalService": "Servicio General",
-      "notApplicable": "No aplica"
-    },
-    "status": {
-      "Attended": "Asistió",
-      "NoShow": "No asistió",
-      "Late": "Tarde"
-    }
-  }
-  },
-  "ServiceUsage": {
+    "ServiceUsage": {
       "title": "Uso de Servicios",
       "subtitle": "Análisis de servicios consumidos por el cliente en todas las sucursales.",
+      "back": "Volver",
+      "total_records": "Total de registros",
       "Table": {
         "columns": {
           "service": "Servicio",
@@ -1913,11 +1936,25 @@
         "placeholders": {
           "unknownBranch": "Sucursal Principal"
         },
+       
         "status": {
           "Attended": "Asistió",
           "NoShow": "No asistió",
           "Late": "Tarde"
         }
+        
+      },
+       "filters": {
+        "from": "Desde",
+        "until": "Hasta",
+        "placeholder": "Seleccionar fecha",
+        "clear": "Limpiar Filtros"
+      },
+      "states": {
+        "loading": "Actualizando datos...",
+        "errorTitle": "Error de Carga",
+        "errorSubtitle": "No pudimos obtener el historial de uso. Intenta de nuevo.",
+        "retry": "Reintentar"
       }
     }
   },
@@ -1964,7 +2001,7 @@
         "success_title": "Eliminación exitosa",
         "error_title": "Error"
       },
-     "employee": "Empleado",
+      "employee": "Empleado",
       "email": "Correo Electrónico",
       "role": "Rol",
       "phone": "Teléfono",
@@ -2542,7 +2579,6 @@
         "paymentsTitle": "Registro de Pagos",
         "paymentsSubtitle": "Historial completo de abonos y transacciones",
         "statusLabel": "Estado de Cobro",
-        
         "status": {
           "paid": "CONCILIADO",
           "pending": "PENDIENTE"
@@ -2564,13 +2600,12 @@
           "uuidTooltip": "Identificador único de sistema",
           "phoneLabel": "Teléfono",
           "birthLabel": "Cumpleaños"
-          
         }
       },
-     "alerts": {
-          "failed": "PAGO RECHAZADO: EL CLIENTE AÚN DEBE EL TOTAL.",
-          "refunded": "PAGO REEMBOLSADO: SE REQUIERE NUEVO COBRO MANUAL."
-        },
+      "alerts": {
+        "failed": "PAGO RECHAZADO: EL CLIENTE AÚN DEBE EL TOTAL.",
+        "refunded": "PAGO REEMBOLSADO: SE REQUIERE NUEVO COBRO MANUAL."
+      },
       "detailPage": {
         "title": "Factura {number}",
         "defaultTitle": "Detalle de Factura",
@@ -2778,7 +2813,8 @@
         "sortDesc": "Descendente",
         "sortAsc": "Ascendente",
         "limit": "Resultados",
-        "limitRows": "{count} filas"
+        "limitRows": "{count} filas",
+        "limitRowsSuffix": "filas"
       },
       "status": {
         "results": "Resultados de actividad",
@@ -2809,13 +2845,15 @@
         "author": "Autor de la acción",
         "systemProcess": "PROCESO_SISTEMA",
         "viewSessions": "Ver Sesiones",
-        "payload": {
-          "label": "Cuerpo de la Petición",
-          "empty": "// No hay datos enviados en esta operación",
+        "userSection": "Actor de la Acción",
+        "close": "Cerrar Detalle",
+       "payload": {
+          "label": "Datos Enviados (Payload)",
+          "empty": "Sin datos en el cuerpo",
           "copied": "Log copiado al portapapeles"
         },
-        "metadata": {
-          "endpoint": "Endpoint / Ruta",
+       "metadata": {
+          "endpoint": "Ruta del Recurso",
           "dateTime": "Fecha y Hora",
           "ipAddress": "Dirección IP"
         },

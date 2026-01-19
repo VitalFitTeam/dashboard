@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useClientActions } from "@/hooks/clients/useClientActions";
 import { User } from "@vitalfit/sdk";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export interface Client extends User {
   role_name: string;
@@ -57,35 +58,42 @@ export default function ClientsTable({
     handleEdit 
   } = useClientActions(token);
 
-  const columns = useMemo<Column<Client>[]>(() => [
+const columns = useMemo<Column<Client>[]>(() => [
     {
       header: t("table.columns.name"),
       accessor: "first_name",
       render: (_, row) => (
-        <div className="flex flex-col text-left">
-          <span className="font-medium text-foreground leading-none">
-            {`${row.first_name} ${row.last_name}`}
-          </span>
-          {row.identity_document && (
-            <span className="text-[10px] text-muted-foreground mt-1">
-              ID: {row.identity_document}
+        <div className="flex items-center gap-3 text-left">
+          <Avatar className="h-9 w-9 border border-border">
+            <AvatarImage src={row.profile_picture_url} alt={row.first_name} />
+            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+              {row.first_name[0]}{row.last_name[0]}
+            </AvatarFallback>
+          </Avatar>
+          
+          <div className="flex flex-col">
+            <span className="font-medium text-foreground leading-none lowercase first-letter:uppercase">
+              {`${row.first_name} ${row.last_name}`}
             </span>
-          )}
+            <span className="text-[10px] text-muted-foreground mt-1">
+              ID: {row.identity_document || "N/A"}
+            </span>
+          </div>
         </div>
       )
     },
     { 
       header: t("table.columns.email"), 
       accessor: "email",
-      render: (val) => <span className="text-sm">{String(val)}</span>
+      render: (val) => <span className="text-sm lowercase">{String(val)}</span>
     },
     { 
       header: t("table.columns.role"), 
       accessor: "role_name", 
       render: (val) => (
-        <span className="inline-flex items-center rounded-md bg-secondary/50 px-2 py-0.5 text-[11px] font-medium capitalize border border-border">
-          {String(val) || "N/A"}
-        </span>
+        <Badge variant="outline" className="font-normal capitalize bg-secondary/30">
+          {String(val) || "client"}
+        </Badge>
       )
     },
     {
@@ -98,7 +106,6 @@ export default function ClientsTable({
       )
     },
   ], [t]);
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
@@ -115,7 +122,7 @@ export default function ClientsTable({
         </div>
       </div>
 
-      <DataTable<Client>
+    <DataTable<Client>
         columns={columns}
         data={data}
         onPageChange={onPageChange}
@@ -125,31 +132,30 @@ export default function ClientsTable({
         isLoading={isLoading}
         rowIdKey="user_id" 
         actions={(row) => (
-         <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-primary"
+              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
               onClick={() => handleView(row.user_id)}
             >
               <Eye className="h-4 w-4" />
-              <span className="sr-only">{t("table.actions.view")}</span>
             </Button>
+            
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               onClick={() => setDeleteRowId(row.user_id)}
             >
               <Trash2 className="h-4 w-4" />
-              <span className="sr-only">{t("table.actions.delete")}</span>
             </Button>
 
             <GeneralAlertDialog
               open={deleteRowId === row.user_id}
               onOpenChange={(open) => !open && setDeleteRowId(null)}
               title={t("table.delete_dialog.title")}
-              description={t("table.delete_dialog.description")}
+              description={`${t("table.delete_dialog.description")} ${row.first_name}?`}
               actionText={isDeleting ? t("table.delete_dialog.action_deleting") : t("table.delete_dialog.action_delete")}
               cancelText={t("table.delete_dialog.action_cancel")}
               onAction={() => deleteClient(row.user_id, onReload)}

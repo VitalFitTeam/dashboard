@@ -1763,7 +1763,10 @@
         "image_url": "Image URL",
         "role": "User Role",
         "status": "System Status",
-        "default_role": "Client"
+        "default_role": "Client",
+        "category": "Category",
+        "membership_status": "Membership Status",
+        "validation_status": "Profile Status"
       },
       "status": {
         "active": "Active",
@@ -1771,7 +1774,18 @@
         "pending": "Pending",
         "canceled": "Canceled",
         "validated": "Validated / Active",
-        "blocked": "Not Validated / Blocked"
+        "blocked": "Not Validated / Blocked",
+        "active_member": "Active Member",
+        "inactive": "No Membership"
+      },
+      "block_dialog": {
+        "title": "Block Client",
+        "description": "Are you sure you want to block",
+        "label": "Block justification",
+        "placeholder": "Type the reason (e.g., Unpaid fees, inappropriate behavior...)",
+        "error_required": "You must provide a reason for the block",
+        "confirm": "Block User",
+        "cancel": "Cancel"
       },
       "actions": {
         "edit": "Edit Profile",
@@ -1780,12 +1794,14 @@
         "service_usage": "Service Usage",
         "complaints": "Complaints & Claims",
         "rfm": "Customer Analysis (RFM)",
-        "no_permissions": "You do not have any allowed actions for this profile."
+        "no_permissions": "You do not have any allowed actions for this profile.",
+        "block": "Block Client"
       },
       "gender_options": {
-        "female": "Female",
         "male": "Male",
-        "other": "Other"
+        "female": "Female",
+        "other": "Other",
+        "prefer-not-to-say": "Prefer not to say"
       },
       "errors": {
         "not_found": "Client not found",
@@ -1798,7 +1814,9 @@
         "update_error": "Error updating information",
         "invalid_image": "Please select a valid image",
         "image_success": "Image uploaded successfully",
-        "image_error": "Error uploading image"
+        "image_error": "Error uploading image",
+        "block_success": "Client successfully blocked",
+        "block_error": "Could not block client"
       }
     },
     "medical": {
@@ -1842,6 +1860,7 @@
     "payments": {
       "title": "PAYMENT HISTORY",
       "subtitle": "View and manage all invoices and transactions for this client.",
+      "back": "Back",
       "table": {
         "reference": "Reference",
         "date": "Date",
@@ -1874,6 +1893,7 @@
     "AttendanceHistory": {
       "title": "Attendance History",
       "subtitle": "View and filter client access logs and class attendance.",
+      "back": "Back",
       "filters": {
         "from": "From",
         "until": "Until",
@@ -1908,6 +1928,20 @@
     "ServiceUsage": {
       "title": "Service Usage",
       "subtitle": "Analysis of services consumed by the client across all branches.",
+      "back": "Back",
+      "total_records": "Total records",
+      "filters": {
+        "from": "From",
+        "until": "Until",
+        "placeholder": "Select date",
+        "clear": "Clear Filters"
+      },
+      "states": {
+        "loading": "Updating data...",
+        "errorTitle": "Loading Error",
+        "errorSubtitle": "We couldn't retrieve the usage history. Please try again.",
+        "retry": "Retry"
+      },
       "Table": {
         "columns": {
           "service": "Service",
@@ -2782,7 +2816,8 @@
         "sortDesc": "Descending",
         "sortAsc": "Ascending",
         "limit": "Results",
-        "limitRows": "{count} rows"
+        "limitRows": "{count} rows",
+        "limitRowsSuffix": "rows"
       },
       "status": {
         "results": "Activity results",
@@ -2811,8 +2846,9 @@
         "title": "Operation Analysis",
         "traceId": "Trace ID",
         "author": "Action Author",
-        "systemProcess": "SYSTEM_PROCESS",
-        "viewSessions": "View Sessions",
+        "userSection": "Action Actor",
+        "viewSessions": "Security Sessions",
+        "close": "Close Detail",
         "payload": {
           "label": "Request Body",
           "empty": "// No data sent in this operation",

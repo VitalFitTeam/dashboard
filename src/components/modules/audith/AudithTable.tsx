@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
 
 interface AudithTableProps {
-  data: AuditLog[];
+  data: any[];
   isLoading: boolean;
   page: number;
   totalPages: number;
@@ -17,7 +17,7 @@ interface AudithTableProps {
   limit?: number;
 }
 
-export const getAuditColumns = (t: any): Column<AuditLog>[] => [
+export const getAuditColumns = (t: any): Column<any>[] => [
   {
     header: t("table.event"),
     accessor: "created_at",
@@ -50,8 +50,7 @@ export const getAuditColumns = (t: any): Column<AuditLog>[] => [
         GET: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800",
         POST: "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-800",
         PUT: "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-800",
-        DELETE:
-          "bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-800",
+        DELETE: "bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-800",
       };
 
       return (
@@ -66,11 +65,11 @@ export const getAuditColumns = (t: any): Column<AuditLog>[] => [
   },
   {
     header: t("table.resource"),
-    accessor: "path",
+    accessor: "displayPath", 
     render: (value) => (
       <div className="flex items-center gap-2 group">
         <div className="h-1.5 w-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 group-hover:bg-primary transition-colors" />
-        <code className="text-[12px] text-muted-foreground font-mono truncate max-w-[200px]">
+        <code className="text-[12px] text-muted-foreground font-mono truncate max-w-[250px]">
           {value as string}
         </code>
       </div>

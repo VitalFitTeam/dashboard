@@ -3,10 +3,32 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Fingerprint, Calendar, Phone, Mail, User as UserIcon } from "lucide-react";
+import { 
+  Fingerprint, 
+  Calendar, 
+  Phone, 
+  Mail, 
+  User as UserIcon, 
+  Tag, 
+  ShieldCheck,
+  Activity
+} from "lucide-react";
 
 interface Props {
-  client: any; 
+  client: {
+    user_id: string;
+    first_name: string;
+    last_name: string;
+    identity_document: string;
+    email: string;
+    phone: string;
+    birth_date: string;
+    gender: string;
+    category: string;
+    role_name: string;
+    profile_picture_url: string;
+    has_active_membership: boolean;
+  };
   t: any;
   formatDate: (date: string) => string;
   formatPhone: (phone: string) => string;
@@ -25,9 +47,16 @@ export const ClientPersonalInfo = ({ client, t, formatDate, formatPhone }: Props
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <CardTitle className="text-xl italic font-black uppercase tracking-tighter">
-            {client.first_name} {client.last_name}
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-xl italic font-black uppercase tracking-tighter">
+              {client.first_name} {client.last_name}
+            </CardTitle>
+            {client.has_active_membership && (
+              <Badge variant="success" className="h-5 text-[9px] font-black uppercase">
+                {t("status.active_member")}
+              </Badge>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
             ID: {client.user_id}
           </p>
@@ -35,24 +64,18 @@ export const ClientPersonalInfo = ({ client, t, formatDate, formatPhone }: Props
       </CardHeader>
 
       <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 pt-6">
-
+        
         <InfoItem 
           label={t("fields.identity")} 
           value={client.identity_document} 
           icon={<Fingerprint className="h-3.5 w-3.5" />} 
         />
 
-        <div className="space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">
-            {t("fields.gender")}
-          </p>
-          <div className="h-9 flex items-center px-1">
-            <span className="capitalize font-semibold text-sm">
-
-              { client.gender || t(`gender_options.${client.gender}`) }
-            </span>
-          </div>
-        </div>
+        <InfoItem 
+          label={t("fields.category")} 
+          value={client.category} 
+          icon={<Tag className="h-3.5 w-3.5" />} 
+        />
 
         <InfoItem 
           label={t("fields.email")} 
@@ -72,21 +95,36 @@ export const ClientPersonalInfo = ({ client, t, formatDate, formatPhone }: Props
           icon={<Calendar className="h-3.5 w-3.5" />} 
         />
 
+        <div className="space-y-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">
+            {t("fields.gender")}
+          </p>
+          <div className="h-9 flex items-center px-1">
+            <span className="capitalize font-semibold text-sm">
+              { client.gender ? t(`gender_options.${client.gender.toLowerCase()}`) : "N/A" }
+            </span>
+          </div>
+        </div>
+
         <InfoItem 
           label={t("fields.role")} 
-          value={client.role_label || t("fields.default_role")} 
+          value={client.role_name} 
           icon={<UserIcon className="h-3.5 w-3.5" />}
         />
 
-        <div className="space-y-1 sm:col-span-2 border-t pt-4 mt-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">
-            {t("fields.status")}
-          </p>
-          <div className="flex items-center gap-2 mt-1">
-            <Badge variant={client.is_validated ? "success" : "error"} className="px-3 font-bold uppercase text-[10px]">
-              {client.is_validated ? t("status.validated") : t("status.blocked")}
-            </Badge>
+        <div className="space-y-1 sm:col-span-2 border-t pt-4 mt-2 grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">
+              {t("fields.membership_status")}
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge variant={client.has_active_membership ? "success" : "secondary"} className="px-3 font-bold uppercase text-[10px]">
+                <ShieldCheck className="h-3 w-3 mr-1" />
+                {client.has_active_membership ? t("status.active") : t("status.inactive")}
+              </Badge>
+            </div>
           </div>
+
         </div>
       </CardContent>
     </Card>
