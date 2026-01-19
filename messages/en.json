@@ -1775,12 +1775,12 @@
       },
       "actions": {
         "edit": "Edit Profile",
-        "membership_history": "Payment History",
+        "membership_history": "Membership History",
         "attendance_history": "Attendance Record",
         "service_usage": "Service Usage",
-        "complaints": "Complaints & Suggestions",
-        "activity": "Activity Log",
-        "rfm": "RFM Analysis"
+        "complaints": "Complaints & Claims",
+        "rfm": "Customer Analysis (RFM)",
+        "no_permissions": "You do not have any allowed actions for this profile."
       },
       "gender_options": {
         "female": "Female",

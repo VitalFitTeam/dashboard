@@ -178,6 +178,7 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
       title: "General",
       items: [
         { label: "Dashboard", icon: HomeIcon, href: "/" },
+        { label: "RegistroConsulta", icon: UserIcon, href: "/clients/register" }, 
         { label: "FacturacionElectronica", icon: CurrencyDollarIcon, href: "/finance/billing" },
       ],
     },

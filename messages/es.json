@@ -1762,12 +1762,12 @@
       },
       "actions": {
         "edit": "Editar Perfil",
-        "membership_history": "Historial de Pagos",
+        "membership_history": "Historial de Membresías",
         "attendance_history": "Registro de Asistencia",
         "service_usage": "Uso de Servicios",
-        "complaints": "Quejas y Sugerencias",
-        "activity": "Log de Actividad",
-        "rfm": "Análisis RFM"
+        "complaints": "Quejas y Reclamos",
+        "rfm": "Análisis de Cliente (RFM)",
+        "no_permissions": "No tienes acciones permitidas para este perfil."
       },
       "gender_options": {
         "female": "Femenino",
