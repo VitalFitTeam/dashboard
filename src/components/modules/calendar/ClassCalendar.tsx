@@ -5,7 +5,6 @@ import FullCalendar from "@fullcalendar/react";
 import { useAuth } from "@/context/AuthContext";
 import { useSWRConfig } from "swr";
 import { format, parseISO, addMonths, subMonths } from "date-fns";
-import { useBranchCalendar } from "@/hooks/class/useBranchCalendar";
 import { useCalendarResources } from "@/hooks/class/useCalendarResources";
 import { useClientBookings } from "@/hooks/booking/useClientBookings";
 import { CalendarToolbar } from "./CalendarToolbar";
@@ -16,6 +15,7 @@ import { useTranslations } from "next-intl";
 import { MapPinIcon } from "lucide-react";
 import { UserRole } from "@/lib/roles";
 import { api } from "@/lib/sdk-config";
+import { useBranchCalendar } from "@/hooks/class/useBranchCalendar";
 
 export function ClassCalendar() {
   const { token, user } = useAuth();
@@ -52,8 +52,7 @@ export function ClassCalendar() {
 
   const branchToUse = selectedBranchId || activeBranchId;
 
-  const { branches, services, instructors, isLoadingResources } =
-    useCalendarResources(token, branchToUse);
+  const { branches, services, instructors, isLoadingResources } =useCalendarResources(token, branchToUse);
 
   const { scheduleMap, isLoading: isLoadingClasses } = useBranchCalendar(
     branchToUse || null,

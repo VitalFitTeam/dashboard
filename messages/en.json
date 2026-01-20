@@ -3159,6 +3159,11 @@
   "calendar": {
     "no_branch_title": "No branch selected",
     "no_branch_description": "Please select a branch to view the class schedule.",
+    "resources": {
+      "loading": "Cargando recursos...",
+      "error": "Error al cargar los recursos del calendario",
+      "no_branch": "Sin sede seleccionada"
+    },
     "toolbar": {
       "week": "Week",
       "month": "Month",
@@ -3257,7 +3262,12 @@
         "total_students": "Total Students: {count}",
         "processed": "Processed",
         "active_booking": "Active Booking",
-        "cancel_tooltip": "Cancel booking"
+        "cancel_tooltip": "Cancel booking",
+        "view_only": "Read-only access",
+        "check_in": "Check-in",
+        "status": "Status",
+        "client": "Client",
+        "no_reservations": "No reservations found for this class"
       },
       "info_panel": {
         "admin_title": "Administrative Management Panel",

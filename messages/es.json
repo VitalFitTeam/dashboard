@@ -3169,6 +3169,11 @@
       "default_title": "Clase",
       "no_instructor": "Sin instructor"
     },
+    "resources": {
+      "loading": "Cargando recursos...",
+      "error": "Error al cargar los recursos del calendario",
+      "no_branch": "Sin sede seleccionada"
+    },
     "create_sheet": {
       "title": "Programar Clase",
       "description": "Define los detalles de la nueva sesión, instructor y aforo.",
@@ -3257,7 +3262,11 @@
         "cancel_tooltip": "Cancelar reserva",
         "view_only": "Solo lectura",
         "no_bookings": "No hay reservas activas para esta clase",
-        "loading_list": "Cargando participantes..."
+        "loading_list": "Cargando participantes...",
+        "check_in": "Marcar asistencia",
+        "status": "Estado",
+        "client": "Cliente",
+        "no_reservations": "No hay reservas para esta clase"
       },
       "info_panel": {
         "admin_title": "Panel de Gestión Administrativa",

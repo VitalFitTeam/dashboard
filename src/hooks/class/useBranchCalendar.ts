@@ -20,6 +20,7 @@ export function useBranchCalendar(
        return null;
     }
     
+
     const response = await api.schedule.ListBranchesClass(
       branchID, 
       jwt, 
