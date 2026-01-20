@@ -195,7 +195,6 @@ export default function ClientDetails() {
               onNavigate={(path) => router.push(path)} 
               onEditClick={() => setIsEditing(true)}
               onBlockClick={() => setIsBlockDialogOpen(true)}
-              onWalletClick={() => router.push(`/clients/register/${user.user_id}/balances`)} 
               onUnblockClick={handleUnblock}
               isBlocked={user.status === "blocked" || !user.is_validated}
               canEdit={canManageClient}
