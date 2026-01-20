@@ -20,7 +20,7 @@ import { format } from "date-fns";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
 import { getScheduleClassSchema } from "@/lib/validation/scheduleClassSchema";
-import { Loader2, MapPinIcon } from "lucide-react";
+import { Loader2, MapPinIcon, AlertCircle } from "lucide-react";
 
 interface CreateClassSheetProps {
   isOpen: boolean;
@@ -33,7 +33,6 @@ export function CreateClassSheet({
   onOpenChange,
   onSuccess,
 }: CreateClassSheetProps) {
-
   const t = useTranslations("calendar.create_sheet");
   const tForm = useTranslations("calendar.form");
   
@@ -41,8 +40,8 @@ export function CreateClassSheet({
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const managedBranchIds = useMemo(() => {
-    if (user?.role === "super_admin"){
-       return [];
+    if (user?.role === "super_admin") {
+      return [];
     }
     
     const activeId =
@@ -111,7 +110,16 @@ export function CreateClassSheet({
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || t("errors.server_error"));
+      const apiMessage = error?.response?.data?.message || "";
+      
+      if (apiMessage === "the branch is closed on the selected start date") {
+        toast.error(t("errors.branch_closed"), {
+          icon: <AlertCircle className="h-4 w-4 text-red-500" />,
+          duration: 5000,
+        });
+      } else {
+        toast.error(apiMessage || t("errors.server_error"));
+      }
     } finally {
       setIsSubmitting(false);
     }

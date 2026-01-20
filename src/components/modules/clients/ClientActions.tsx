@@ -87,14 +87,14 @@ export const ClientActions = ({
         label: t("actions.service_usage"),
         icon: ClipboardList,
         onClick: () => onNavigate(`/clients/register/${userId}/service-usage`),
-        visible: true,
+         visible: [UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.RECEPTIONIST, UserRole.ACCOUNTANT].includes(userRole),
         variant: "default",
       },
       {
         label: t("actions.view_wallet"), 
         icon: Wallet,
         onClick: () => onNavigate(`/clients/register/${userId}/clientServiceBalances`),
-        visible: true,
+         visible: [UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.RECEPTIONIST, UserRole.ACCOUNTANT].includes(userRole),
         variant: "default",
       },
       {

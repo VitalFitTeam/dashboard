@@ -250,7 +250,8 @@
     "available_branches": "Available branches",
     "no_branches": "No branches assigned",
     "system_footer": "Vitalfit System",
-    "PoliticasComerciales": "Commercial Policies"
+    "PoliticasComerciales": "Commercial Policies",
+    "MisClientes": "My clients"
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -3192,7 +3193,8 @@
       "errors": {
         "missing_data": "Missing required data or session expired",
         "check_fields": "Please check the fields with errors",
-        "server_error": "There was an error processing the request"
+        "server_error": "There was an error processing the request",
+        "branch_closed": "The selected branch is closed on the chosen date. Please check the branch schedule."
       }
     },
     "edit_popover": {
@@ -3400,6 +3402,22 @@
       "title": "Your session is about to expire",
       "description": "You have been inactive for too long. For your security, we will automatically log you out in:",
       "button": "Stay logged in"
+    }
+  },
+  "instructor_clients": {
+    "title": "My clients",
+    "description": "Managing the database of your assigned clients.",
+    "export_button": "Export CSV",
+    "exporting": "Exporting...",
+    "table": {
+      "columns": {
+        "client": "Client",
+        "contact": "Contact",
+        "bookings": "Bookings"
+      },
+      "bookings_unit": "Classes",
+      "view_details": "View details",
+      "loading": "Loading students..."
     }
   }
 }
