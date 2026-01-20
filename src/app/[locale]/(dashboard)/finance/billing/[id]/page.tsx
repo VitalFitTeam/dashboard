@@ -17,11 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/PageHeader";
-
 import { useAuth } from "@/context/AuthContext";
 import { useGetUser } from "@/hooks/users/useGetUser";
 import { api } from "@/lib/sdk-config";
-
 import { InvoiceDetailForm } from "@/components/modules/billing/InvoiceDetailForm";
 import useGetBranch from "@/hooks/branches/useGetBranch";
 
@@ -31,6 +29,7 @@ export default function InvoiceDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { token } = useAuth();
+  
   const [invoice, setInvoice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +64,7 @@ export default function InvoiceDetailPage() {
       setLoading(true);
       setError(null);
       const response = await api.billing.getInvoiceByID(id as string, token);
+      
       if (response?.data) {
         setInvoice(response.data);
       } else {
@@ -86,18 +86,22 @@ export default function InvoiceDetailPage() {
     invoice?.branch_id,
     token
   );
-
+  
   const financialSummary = useMemo(() => {
     if (!invoice) {
       return { totalPaid: 0, pendingAmount: 0 };
     }
-    const totalAmount = Number(invoice.total_amount || 0);
-    const totalPaidUSD = (invoice.payments || []).reduce(
-      (acc: number, p: any) => acc + Number(p.amount_base || 0),
-      0
-    );
+
+    const totalInvoiceAmount = Number(invoice.total_amount || 0);
+
+    const totalPaidUSD = (invoice.payments || [])
+      .filter((p: any) => p.status === "Completed")
+      .reduce((acc: number, p: any) => acc + Number(p.amount_base || 0), 0);
+
     const roundedTotalPaid = Math.round(totalPaidUSD * 100) / 100;
-    const pending = Math.max(0, totalAmount - roundedTotalPaid);
+
+    const pending = totalInvoiceAmount - roundedTotalPaid;
+
     return {
       totalPaid: roundedTotalPaid,
       pendingAmount: pending <= 0.05 ? 0 : pending,
@@ -156,7 +160,6 @@ export default function InvoiceDetailPage() {
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="h-9 w-9 rounded-full border bg-background shadow-sm hover:bg-muted"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -170,15 +173,14 @@ export default function InvoiceDetailPage() {
           className="bg-destructive/5 border-destructive/20 text-destructive"
         >
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle className="font-bold uppercase tracking-tight">
+          <AlertTitle className="font-bold uppercase tracking-tight text-xs">
             {t("errors.title")}
           </AlertTitle>
           <AlertDescription className="flex flex-col gap-3 text-sm mt-1">
             {error}
             <Button
               variant="outline"
-              size="sm"
-              className="w-fit border-destructive/30 hover:bg-destructive/10"
+            
               onClick={fetchInvoiceDetails}
             >
               {t("errors.retry")}

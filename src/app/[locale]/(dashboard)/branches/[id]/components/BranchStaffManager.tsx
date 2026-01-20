@@ -57,7 +57,7 @@ export default function BranchStaffManager({
   });
 
   const availableRoles = useMemo(() => {
-    const FORBIDDEN = ["super_admin", "instructor"]; 
+    const FORBIDDEN = ["super_admin", "instructor", "clients"]; 
     return rolesData.filter(role => !FORBIDDEN.includes(role.name.toLowerCase()));
   }, [rolesData]);
 

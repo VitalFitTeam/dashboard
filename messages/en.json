@@ -1682,7 +1682,7 @@
         "identity": "Identification & Contact"
       },
       "labels": {
-       "profile_picture": "Profile Picture",
+        "profile_picture": "Profile Picture",
         "optional": "(Optional)",
         "first_name": "First Name",
         "last_name": "Last Name",
@@ -1775,12 +1775,12 @@
       },
       "actions": {
         "edit": "Edit Profile",
-        "membership_history": "Payment History",
+        "membership_history": "Membership History",
         "attendance_history": "Attendance Record",
         "service_usage": "Service Usage",
-        "complaints": "Complaints & Suggestions",
-        "activity": "Activity Log",
-        "rfm": "RFM Analysis"
+        "complaints": "Complaints & Claims",
+        "rfm": "Customer Analysis (RFM)",
+        "no_permissions": "You do not have any allowed actions for this profile."
       },
       "gender_options": {
         "female": "Female",
@@ -1969,7 +1969,7 @@
         "success_title": "Successfully deleted",
         "error_title": "Error"
       },
-     "employee": "Employee",
+      "employee": "Employee",
       "email": "Email Address",
       "role": "Role",
       "phone": "Phone",
@@ -2157,7 +2157,7 @@
         "inventory_subtitle": "Manage machines and tools available at this location.",
         "add_card_title": "Register New Equipment",
         "dialog_remove_title": "Remove equipment from inventory?",
-       "dialog_remove_description": "The selected item will be marked for removal. This change will be permanently applied upon synchronization.",
+        "dialog_remove_description": "The selected item will be marked for removal. This change will be permanently applied upon synchronization.",
         "dialog_remove_action": "Remove Equipment",
         "toast_removed_local": "Equipment removed from queue",
         "toast_marked_for_deletion": "Equipment marked for removal (pending sync)",
@@ -2499,6 +2499,8 @@
       },
       "form": {
         "branch": "Branch",
+        "service": "Branch Service",
+        "memberPrice": "Member Rate",
         "selectBranch": "Select branch",
         "client": "Client",
         "emailPlaceholder": "Client email...",
@@ -2556,6 +2558,10 @@
           "currentDebt": "Current Debt",
           "fullyPaid": "INVOICE FULLY PAID"
         },
+        "alerts": {
+          "failed": "PREVIOUS PAYMENT FAILED. MANUAL COLLECTION REQUIRED.",
+          "pending": "THERE IS A PAYMENT UNDER VERIFICATION."
+        },
         "accountInfo": {
           "title": "Account Information",
           "loading": "Loading...",
@@ -2564,7 +2570,9 @@
           "principal": "Main",
           "uuidLabel": "Invoice UUID",
           "uuidInfo": "INFO",
-          "uuidTooltip": "Unique system identifier"
+          "uuidTooltip": "Unique system identifier",
+          "phoneLabel": "Phone",
+          "birthLabel": "Birthday"
         }
       },
       "detailPage": {
@@ -2597,11 +2605,13 @@
         "types": {
           "membership": "Membership",
           "package": "Package",
+          "service": "Service",
           "unknown": "Unknown Item"
         },
         "defaultNames": {
           "membership": "Membership",
-          "package": "Class Package"
+          "package": "Package",
+          "service": "Service"
         }
       },
       "paymentsTable": {
