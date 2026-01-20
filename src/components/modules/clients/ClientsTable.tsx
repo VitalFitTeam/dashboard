@@ -2,21 +2,29 @@
 
 import { useMemo } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
-import { RowActions } from "@/components/ui/table/RowActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
-import { Download, Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Trash2, MailCheck, MailQuestion} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { GeneralAlertDialog } from "@/components/ui/GeneralAlertDialog";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
 import { useClientActions } from "@/hooks/clients/useClientActions";
-import { User } from "@vitalfit/sdk";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
-export interface Client extends User {
+export interface Client {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  identity_document: string;
+  role_id: string;
   role_name: string;
+  status: "Active" | "Inactive";
+  is_validated: boolean;
+  profile_picture_url?: string;
 }
 
 interface ClientsTableProps {
@@ -28,8 +36,6 @@ interface ClientsTableProps {
   totalItems?: number;
   isLoading?: boolean;
   onPageChange: (page: number) => void;
-  filters: { search: string; role: string };
-  onFilterChange: (filters: { search?: string; role?: string }) => void;
   searchInput: string;
   setSearchInput: (val: string) => void;
 }
@@ -40,7 +46,6 @@ export default function ClientsTable({
   page,
   pageSize,
   totalPages,
-  totalItems,
   isLoading = false,
   onPageChange,
   searchInput,
@@ -54,29 +59,32 @@ export default function ClientsTable({
     deleteRowId, 
     setDeleteRowId, 
     deleteClient, 
-    handleView, 
-    handleEdit 
+    handleView 
   } = useClientActions(token);
 
-const columns = useMemo<Column<Client>[]>(() => [
+  const selectedClient = useMemo(() => 
+    data.find(c => c.user_id === deleteRowId), 
+  [data, deleteRowId]);
+
+  const columns = useMemo<Column<Client>[]>(() => [
     {
       header: t("table.columns.name"),
       accessor: "first_name",
       render: (_, row) => (
-        <div className="flex items-center gap-3 text-left">
-          <Avatar className="h-9 w-9 border border-border">
+        <div className="flex items-center gap-3 py-1 text-left">
+          <Avatar className="h-9 w-9 border border-slate-200 shadow-sm">
             <AvatarImage src={row.profile_picture_url} alt={row.first_name} />
-            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+            <AvatarFallback className="bg-orange-50 text-orange-600 font-bold text-xs uppercase">
               {row.first_name[0]}{row.last_name[0]}
             </AvatarFallback>
           </Avatar>
           
           <div className="flex flex-col">
-            <span className="font-medium text-foreground leading-none lowercase first-letter:uppercase">
+            <span className="font-bold text-slate-900 leading-none lowercase first-letter:uppercase">
               {`${row.first_name} ${row.last_name}`}
             </span>
-            <span className="text-[10px] text-muted-foreground mt-1">
-              ID: {row.identity_document || "N/A"}
+            <span className="text-[10px] text-slate-500 mt-1 font-medium">
+              DOC: {row.identity_document || "N/A"}
             </span>
           </div>
         </div>
@@ -85,44 +93,79 @@ const columns = useMemo<Column<Client>[]>(() => [
     { 
       header: t("table.columns.email"), 
       accessor: "email",
-      render: (val) => <span className="text-sm lowercase">{String(val)}</span>
+      render: (val, row) => (
+        <div className="flex items-center gap-2 group">
+          <span className="text-sm text-slate-600 lowercase">{String(val)}</span>
+          {row.is_validated ? (
+            <MailCheck className="w-3.5 h-3.5 text-emerald-500" />
+          ) : (
+            <MailQuestion className="w-3.5 h-3.5 text-amber-500" />
+          )}
+        </div>
+      )
     },
     { 
       header: t("table.columns.role"), 
       accessor: "role_name", 
       render: (val) => (
-        <Badge variant="outline" className="font-normal capitalize bg-secondary/30">
+        <Badge variant="secondary" className="font-bold uppercase text-[9px] bg-slate-100 text-slate-500 border-slate-200">
           {String(val) || "client"}
         </Badge>
       )
     },
     {
       header: t("table.columns.status"),
+      accessor: "status",
+      render: (val) => {
+        const isActive = val === "Active";
+        return (
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "font-bold shadow-none gap-1.5 py-0.5 uppercase text-[10px]",
+              isActive 
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
+                : "bg-red-50 text-red-700 border-red-200"
+            )}
+          >
+            <span className={cn("w-1.5 h-1.5 rounded-full", isActive ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
+            {isActive ? t("table.status.active") : t("table.status.blocked")}
+          </Badge>
+        );
+      }
+    },
+    {
+      header: t("table.columns.validation"),
       accessor: "is_validated",
       render: (val) => (
-        <Badge variant={val ? "success" : "error"} className="capitalize">
-          {val ? t("table.status.active") : t("table.status.blocked")}
+        <Badge 
+          variant="outline" 
+          className={cn(
+            "font-black  uppercase tracking-tighter",
+            val ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-slate-50 text-slate-400 border-slate-100"
+          )}
+        >
+          {val ? t("table.status.verified") : t("table.status.pending")}
         </Badge>
       )
-    },
+    }
   ], [t]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-        <div className="flex flex-1 items-center gap-3">
-          <div className="relative w-full sm:w-[300px]">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={t("table.filter_placeholder")}
-              className="pl-9 h-9"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-          </div>      
+        <div className="relative w-full sm:w-[320px] group">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+          <Input
+            placeholder={t("table.filter_placeholder")}
+            className="pl-10 h-10 rounded-xl border-slate-200 bg-white shadow-sm focus:ring-4 focus:ring-orange-500/10 transition-all outline-none"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
         </div>
       </div>
 
-    <DataTable<Client>
+      <DataTable<Client>
         columns={columns}
         data={data}
         onPageChange={onPageChange}
@@ -132,11 +175,11 @@ const columns = useMemo<Column<Client>[]>(() => [
         isLoading={isLoading}
         rowIdKey="user_id" 
         actions={(row) => (
-          <div className="flex items-center justify-center gap-1">
+          <div className="flex items-center justify-end gap-1 pr-2">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+              className="h-8 w-8 text-slate-400 hover:text-orange-600 hover:bg-blue-50 rounded-lg transition-all"
               onClick={() => handleView(row.user_id)}
             >
               <Eye className="h-4 w-4" />
@@ -145,24 +188,24 @@ const columns = useMemo<Column<Client>[]>(() => [
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
               onClick={() => setDeleteRowId(row.user_id)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
-
-            <GeneralAlertDialog
-              open={deleteRowId === row.user_id}
-              onOpenChange={(open) => !open && setDeleteRowId(null)}
-              title={t("table.delete_dialog.title")}
-              description={`${t("table.delete_dialog.description")} ${row.first_name}?`}
-              actionText={isDeleting ? t("table.delete_dialog.action_deleting") : t("table.delete_dialog.action_delete")}
-              cancelText={t("table.delete_dialog.action_cancel")}
-              onAction={() => deleteClient(row.user_id, onReload)}
-              actionVariant="destructive"
-            />
           </div>
         )}
+      />
+
+      <GeneralAlertDialog
+        open={!!deleteRowId}
+        onOpenChange={(open) => !open && setDeleteRowId(null)}
+        title={t("table.delete_dialog.title")}
+        description={`${t("table.delete_dialog.description")} ${selectedClient?.first_name || ""}?`}
+        actionText={isDeleting ? t("table.delete_dialog.action_deleting") : t("table.delete_dialog.action_delete")}
+        cancelText={t("table.delete_dialog.action_cancel")}
+        onAction={() => deleteClient(deleteRowId!, onReload)}
+        actionVariant="destructive"
       />
     </div>
   );

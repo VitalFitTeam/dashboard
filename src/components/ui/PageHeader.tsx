@@ -1,32 +1,48 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { typography } from "@/styles/styles";
 import React from "react";
 
 type PageHeaderProps = {
   title: string;
-  children?: React.ReactNode;
   subtitle?: React.ReactNode;
+  children?: React.ReactNode;
   actionButton?: React.ReactNode;
+  className?: string;
 };
 
-export const PageHeader: React.FC<PageHeaderProps> = ({
+export const PageHeader = ({
   title,
-  children,
   subtitle,
+  children,
   actionButton,
-}) => {
+  className,
+}: PageHeaderProps) => {
   return (
-    <div className="flex items-start justify-between pb-4 ">
-      <div>
-        <h1 >{title}</h1>
-        {subtitle && <p className="mt-1 text-base text-gray-600">{subtitle}</p>}
+    <header 
+      className={cn(
+        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-6 mb-6 border-b border-slate-100",
+        className
+      )}
+    >
+      <div className="space-y-1">
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight sm:text-3xl">
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="text-sm font-medium text-slate-500 max-w-2xl leading-relaxed">
+            {subtitle}
+          </p>
+        )}
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2 shrink-0">
         {children}
-        {actionButton}
+        {actionButton && (
+          <div className="flex-none">
+            {actionButton}
+          </div>
+        )}
       </div>
-    </div>
+    </header>
   );
 };

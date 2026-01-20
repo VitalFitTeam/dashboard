@@ -14,7 +14,6 @@ interface ReservationsTableProps {
   onCancel: (id: string) => void;
   isProcessing: boolean;
   canManage: boolean;
-  // Propiedades de paginación opcionales para evitar errores de TS (Type 'undefined' is not assignable)
   total?: number;
   currentPage?: number;
   pageSize?: number;

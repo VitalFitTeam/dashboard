@@ -1682,16 +1682,16 @@
       "download": "Descargar",
       "loading": "Cargando Clientes...",
       "columns": {
-        "name": "Nombre",
+        "name": "Cliente",
         "email": "Email",
         "role": "Rol",
-        "category": "Categoría",
-        "status": "Estado"
+        "status": "Cuenta",
+        "validation": "Email"
       },
       "status": {
         "active": "Activo",
-        "inactive": "Inactivo",
-        "blocked": "Bloqueado",
+        "blocked": "Inactivo",
+        "verified": "Verificado",
         "pending": "Pendiente"
       },
       "actions": {
@@ -1789,7 +1789,8 @@
         "status": "Estado del Cliente",
         "category": "Categoría",
         "membership_status": "Estado de Membresía",
-        "validation_status": "Estado de Perfil"
+        "validation_status": "Estado de Perfil",
+        "user_id": "ID de Usuario"
       },
       "status": {
         "active": "Activa",
@@ -1799,7 +1800,8 @@
         "validated": "Validado / Activo",
         "blocked": "No Validado / Bloqueado",
         "active_member": "Miembro Activo",
-        "inactive": "Inactivo"
+        "inactive": "Inactivo",
+        "verified": "Email Verificado"
       },
       "actions": {
         "edit": "Editar Perfil",

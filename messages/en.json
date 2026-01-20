@@ -1686,16 +1686,16 @@
       "download": "Download",
       "loading": "Loading Clients...",
       "columns": {
-        "name": "Name",
-        "email": "Email",
+       "name": "Client",
+        "email": "Email Address",
         "role": "Role",
-        "category": "Category",
-        "status": "Status"
+        "status": "Account Status",
+        "validation": "Verification"
       },
       "status": {
-        "active": "Active",
-        "inactive": "Inactive",
-        "blocked": "Blocked",
+       "active": "Active",
+        "blocked": "Inactive",
+        "verified": "Verified",
         "pending": "Pending"
       },
       "actions": {
@@ -1801,7 +1801,8 @@
         "default_role": "Client",
         "category": "Category",
         "membership_status": "Membership Status",
-        "validation_status": "Profile Status"
+        "validation_status": "Profile Status",
+        "user_id": "User ID"
       },
       "status": {
         "active": "Active",
@@ -1811,7 +1812,8 @@
         "validated": "Validated / Active",
         "blocked": "Not Validated / Blocked",
         "active_member": "Active Member",
-        "inactive": "No Membership"
+        "inactive": "No Membership",
+      "verified": "Email Verified"
       },
       "block_dialog": {
         "title": "Block Client",
