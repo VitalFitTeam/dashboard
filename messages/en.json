@@ -1665,6 +1665,24 @@
       "invalid_data": "The provided data is invalid.",
       "email_in_use": "This email address is already registered."
     },
+    "balances": {
+      "walletTitle": "Service Wallet",
+      "searchPlaceholder": "Search service or package...",
+      "syncing": "Syncing wallet...",
+      "noResults": "No balances match your search",
+      "emptyWallet": "Client has no active service packages",
+      "updateButton": "Update balances",
+      "status": {
+        "available": "Balance Available",
+        "critical": "Critical Balance!",
+        "empty": "No Balance",
+        "lastUpdate": "Upd:",
+        "credits": "Credits",
+        "duration": "Duration",
+        "fitnessService": "Fitness Service",
+        "defaultServiceName": "Special Package"
+      }
+    },
     "stats": {
       "total": "TOTAL",
       "active": "ACTIVE",
@@ -1686,14 +1704,14 @@
       "download": "Download",
       "loading": "Loading Clients...",
       "columns": {
-       "name": "Client",
+        "name": "Client",
         "email": "Email Address",
         "role": "Role",
         "status": "Account Status",
         "validation": "Verification"
       },
       "status": {
-       "active": "Active",
+        "active": "Active",
         "blocked": "Inactive",
         "verified": "Verified",
         "pending": "Pending"
@@ -1780,6 +1798,7 @@
       },
       "tabs": {
         "general": "General",
+        "balances": "Service Wallet",
         "medical": "Medical File"
       },
       "sections": {
@@ -1813,7 +1832,7 @@
         "blocked": "Not Validated / Blocked",
         "active_member": "Active Member",
         "inactive": "No Membership",
-      "verified": "Email Verified"
+        "verified": "Email Verified"
       },
       "block_dialog": {
         "title": "Block Client",
@@ -3342,7 +3361,7 @@
       }
     }
   },
-  "Notifications":{
+  "Notifications": {
     "Center": {
       "title": "Notifications",
       "unread": "You have {count} unread",
@@ -3353,14 +3372,14 @@
       "viewAll": "View notification center"
     },
     "ActivityNotifications": {
-    "title": "Recent Activity",
-    "markAllRead": "Mark all as read",
-    "emptyTitle": "Empty Inbox",
-    "emptyDescription": "No activities or notifications found.",
-    "loadingMore": "Loading activities...",
-    "loadMore": "Load previous activities",
-    "footerNote": "Activities are automatically kept for 30 days.",
-    "systemName": "VitalFit"
+      "title": "Recent Activity",
+      "markAllRead": "Mark all as read",
+      "emptyTitle": "Empty Inbox",
+      "emptyDescription": "No activities or notifications found.",
+      "loadingMore": "Loading activities...",
+      "loadMore": "Load previous activities",
+      "footerNote": "Activities are automatically kept for 30 days.",
+      "systemName": "VitalFit"
     }
   },
   "Auth": {

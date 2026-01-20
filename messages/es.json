@@ -1667,6 +1667,24 @@
       "inactive": "INACTIVOS/BLOQUEADOS",
       "unit": "CLIENTES"
     },
+    "balances": {
+      "walletTitle": "Billetera de Servicios",
+      "searchPlaceholder": "Buscar servicio o paquete...",
+      "syncing": "Sincronizando billetera...",
+      "noResults": "No hay saldos que coincidan con la búsqueda",
+      "emptyWallet": "El cliente no tiene paquetes de servicios activos",
+      "updateButton": "Actualizar saldos",
+      "status": {
+        "available": "Saldo Disponible",
+        "critical": "¡Saldo Crítico!",
+        "empty": "Sin Saldo",
+        "lastUpdate": "Act:",
+        "credits": "Créditos",
+        "duration": "Duración",
+        "fitnessService": "Servicio Fitness",
+        "defaultServiceName": "Paquete Especial"
+      }
+    },
     "table": {
       "filter_placeholder": "Filtrar por nombre o apellido",
       "filter_role": "Filtrar por Rol",
@@ -1767,7 +1785,8 @@
         "cancel": "Cancelar"
       },
       "tabs": {
-        "general": "General",
+        "general": "Información General",
+        "balances": "Billetera de Servicios",
         "medical": "Ficha Médica"
       },
       "sections": {

@@ -1,7 +1,7 @@
-"use client";
 
 import { cn } from "@/lib/utils";
 import React from "react";
+
 
 type PageHeaderProps = {
   title: string;
@@ -26,6 +26,7 @@ export const PageHeader = ({
       )}
     >
       <div className="space-y-1">
+
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight sm:text-3xl">
           {title}
         </h1>

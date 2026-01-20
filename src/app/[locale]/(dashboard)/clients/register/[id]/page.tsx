@@ -9,13 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { toast } from "sonner";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Wallet } from "lucide-react";
 import { ClientPersonalInfo } from "@/components/modules/clients/ClientPersonalInfo";
 import { ClientActions } from "@/components/modules/clients/ClientActions";
 import { MembershipInfo } from "@/components/modules/clients/MembershipInfo";
 import { ClientEditForm } from "@/components/modules/clients/ClientEditForm";
 import { ClientMedicalSection } from "@/components/modules/clients/ClientMedicalSection";
 import { BlockClientDialog } from "@/components/modules/clients/BlockClientDialog";
+import { ClientServiceBalances } from "@/components/modules/clients/ClientServiceBalances";
 
 import { useGetUser } from "@/hooks/users/useGetUser";
 
@@ -40,8 +41,8 @@ const ROLES_CAN_EDIT_MEDICAL = [
 ];
 
 const formatDate = (date: string, locale: string) => {
-  if (!date){
-     return "N/A";
+  if (!date) {
+    return "N/A";
   }
   return new Date(date).toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
     year: "numeric", month: "long", day: "numeric"
@@ -60,8 +61,8 @@ export default function ClientDetails() {
   const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
   const [isBlocking, setIsBlocking] = useState(false);
   const [isUnblocking, setIsUnblocking] = useState(false);
-
   const { user, loading, error, reload } = useGetUser(id as string, token);
+
   const canManageClient = useMemo(() => {
     if (!currentUser?.role) {
       return false;
@@ -80,7 +81,6 @@ export default function ClientDetails() {
     if (!token || !id || !canManageClient) {
       return;
     }
-    
     setIsUpdating(true);
     try {
       await api.user.updateUserClient(id as string, updatedData, token);
@@ -98,7 +98,6 @@ export default function ClientDetails() {
     if (!token || !id) {
       return;
     }
-
     setIsBlocking(true);
     try {
       await api.user.blockUser(id as string, { block_justification: justification }, token);
@@ -113,10 +112,9 @@ export default function ClientDetails() {
   };
 
   const handleUnblock = async () => {
-    if (!token || !id || !canManageClient){
-       return;
+    if (!token || !id || !canManageClient) {
+      return;
     }
-
     setIsUnblocking(true);
     try {
       await api.user.unblockUser(id as string, token);
@@ -145,25 +143,17 @@ export default function ClientDetails() {
   if (error || !user) {
     if (error === 401) {
       router.replace("/login");
-    
     }
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
-        <div className="p-4 bg-red-50 rounded-full">
-          <AlertCircle className="h-12 w-12 text-red-500" />
-        </div>
+        <div className="p-4 bg-red-50 rounded-full"><AlertCircle className="h-12 w-12 text-red-500" /></div>
         <div className="space-y-2">
           <h2 className="text-xl font-black uppercase italic tracking-tighter text-slate-900">
             {error === 404 ? t("errors.not_found") : t("errors.connection")}
           </h2>
-          <p className="text-sm text-muted-foreground max-w-xs mx-auto font-medium">
-            {t("errors.description")}
-          </p>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto font-medium">{t("errors.description")}</p>
         </div>
-        <button 
-          onClick={() => window.location.reload()}
-          className="text-[10px] font-bold uppercase underline tracking-widest text-primary hover:text-primary/80 transition-colors"
-        >
+        <button onClick={() => window.location.reload()} className="text-[10px] font-bold uppercase underline tracking-widest text-primary hover:text-primary/80 transition-colors">
           {t("errors.retry")}
         </button>
       </div>
@@ -185,6 +175,9 @@ export default function ClientDetails() {
           <TabsTrigger value="general" className="px-8 font-bold italic uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:shadow-sm">
             {t("tabs.general")}
           </TabsTrigger>
+          <TabsTrigger value="balances" className="px-8 font-bold italic uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:shadow-sm flex gap-2">
+            <Wallet className="h-3.5 w-3.5" /> {t("tabs.balances") || "Billetera"}
+          </TabsTrigger>
           <TabsTrigger value="medical" className="px-8 font-bold italic uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:shadow-sm">
             {t("tabs.medical")}
           </TabsTrigger>
@@ -192,7 +185,6 @@ export default function ClientDetails() {
 
         <TabsContent value="general" className="space-y-6 outline-none">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
             <div className="lg:col-span-2">
               {isEditing && canManageClient ? (
                 <ClientEditForm
@@ -234,7 +226,14 @@ export default function ClientDetails() {
             </div>
           )}
         </TabsContent>
-        
+
+        <TabsContent value="balances" className="outline-none animate-in fade-in duration-300">
+          <ClientServiceBalances 
+            userId={user.user_id} 
+            token={token} 
+          />
+        </TabsContent>
+
         <TabsContent value="medical" className="outline-none animate-in fade-in duration-300">
            <ClientMedicalSection 
              userId={user.user_id} 
