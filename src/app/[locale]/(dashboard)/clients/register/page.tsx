@@ -42,14 +42,21 @@ export default function Clients() {
     return () => clearTimeout(handler);
   }, [searchInput, onFilterChange, filters.search]);
 
+  const localDate = new Date();
+  const formattedDate = [
+    localDate.getFullYear(),
+    String(localDate.getMonth() + 1).padStart(2, "0"),
+    String(localDate.getDate()).padStart(2, "0"),
+  ].join("-");
+
   const onExportClick = () => {
-    const fileName = t("export_filename"); 
+    const fileName = t("export_filename");
 
     handleExport(
       "clients-list",
       (jwt) => api.exports.exportClients(jwt),
-      `${fileName}_${new Date().toISOString().split("T")[0]}`,
-      "csv"
+      `${fileName}_${formattedDate}`,
+      "csv",
     );
   };
 

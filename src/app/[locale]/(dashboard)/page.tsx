@@ -8,7 +8,7 @@ import SuperAdminDashboard from "@/components/modules/dashboard/SuperAdminDashbo
 import BranchAdminDashboard from "@/components/modules/dashboard/BranchDashboard";
 import InstructorDashboard from "@/components/modules/dashboard/InstructorDashboard";
 import ReceptionDashboard from "@/components/modules/dashboard/ReceptionDashboard";
-import { useTranslations } from "next-intl"; // Hook de traducción
+import { useTranslations } from "next-intl";
 import DataAnalystDashboard from "@/components/modules/dashboard/DataAnalystDashboard";
 import AccountantDashboard from "@/components/modules/dashboard/AccountantDashboard";
 

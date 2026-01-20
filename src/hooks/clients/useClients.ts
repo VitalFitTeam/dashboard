@@ -33,7 +33,7 @@ export function useClients({ token, initialLimit = 10 }: { token: string | null;
         return;
     }
     try {
-      const response = await api.user.getClientUsers(token, { limit: 1000 }) as unknown as APIResponse;
+      const response = await api.user.getClientUsers(token, { limit: 10 }) as unknown as APIResponse;
       const all = response.data || [];
       
       setStats({

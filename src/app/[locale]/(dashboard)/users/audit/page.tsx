@@ -20,26 +20,42 @@ import {
 } from "@/components/ui/select";
 import { SecuritySessionsDialog } from "@/components/modules/audith/SecuritySessionsDialog";
 
+
+const getDynamicActivity = (path: string) => {
+
+  const segments = path.replace(/^\/v1\//, "").split("/");
+
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  const cleanSegments = segments
+    .filter(segment => segment.length > 0 && !uuidRegex.test(segment))
+    .map(segment => segment.replace(/-/g, " ").toUpperCase());
+
+  if (cleanSegments.length === 0) {
+    return "SISTEMA";
+  }
+  if (cleanSegments.length > 1) {
+    const [module, ...actions] = cleanSegments;
+    return `${module}: ${actions.join(" ")}`;
+  }
+
+  return cleanSegments[0];
+};
+
 export default function AudithPage() {
   const t = useTranslations("user.audit");
   const { token, user } = useAuth();
 
-  // Estados de Filtros y Paginación
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  // Estados para Nivel 3 (Detalle de Log)
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  // Estados para Nivel 4 (Gestión de Sesiones)
   const [sessionTargetUserId, setSessionTargetUserId] = useState<string | null>(null);
   const [isSessionsDialogOpen, setIsSessionsDialogOpen] = useState(false);
 
-  // Lógica de Debounce para búsqueda
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search.trim());
@@ -48,7 +64,6 @@ export default function AudithPage() {
     return () => clearTimeout(handler);
   }, [search]);
 
-  // Memorización de filtros para el SDK
   const filters = useMemo(() => ({
     page,
     limit,
@@ -56,14 +71,23 @@ export default function AudithPage() {
     search: debouncedSearch || undefined
   }), [page, limit, sort, debouncedSearch]);
 
-  // Consumo del Hook de Auditoría
   const { logs, totalPages, isLoading } = useAuditLogs(
     token || "",
     user?.user_id || "",
     filters
   );
 
-  // Función para abrir el gestor de sesiones desde el Sheet o la Tabla
+  const processedLogs = useMemo(() => {
+    if (!logs) {
+      return [];
+    }
+    
+    return logs.map((log: any) => ({
+      ...log,
+      displayPath: getDynamicActivity(log.path)
+    }));
+  }, [logs]);
+
   const handleViewSessions = (userId: string) => {
     setSessionTargetUserId(userId);
     setIsSessionsDialogOpen(true);
@@ -74,39 +98,34 @@ export default function AudithPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6">
+    <div className="flex-1 space-y-6 p-8 pt-6 text-left animate-in fade-in duration-500">
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
       />
 
-      {/* Panel de Filtros */}
-      <Card className="border-none bg-zinc-50/50 dark:bg-zinc-900/50 shadow-none border-b">
+      <Card className="border-none bg-zinc-50/50 dark:bg-zinc-900/50 shadow-none border-b rounded-2xl">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-end">
-            
-            {/* Input de Búsqueda */}
+
             <div className="flex-1 space-y-2">
-              <label className="text-[11px] font-bold uppercase text-muted-foreground flex items-center gap-2">
+              <label className="text-[11px] font-bold uppercase text-muted-foreground flex items-center gap-2 ml-1">
                 <Search className="h-3 w-3" /> {t("filters.search")}
               </label>
-              <div className="relative">
-                <Input
-                  placeholder={t("filters.searchPlaceholder")}
-                  className="h-9 pl-4 bg-background"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+              <Input
+                placeholder={t("filters.searchPlaceholder")}
+                className="h-10 pl-4 bg-background border-zinc-200"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
 
-            {/* Selector de Orden */}
-            <div className="w-full md:w-40 space-y-2">
-              <label className="text-[11px] font-bold uppercase text-muted-foreground flex items-center gap-2">
+            <div className="w-full md:w-44 space-y-2">
+              <label className="text-[11px] font-bold uppercase text-muted-foreground flex items-center gap-2 ml-1">
                 <ArrowUpDown className="h-3 w-3" /> {t("filters.sort")}
               </label>
               <Select value={sort} onValueChange={(v: "asc" | "desc") => setSort(v)}>
-                <SelectTrigger className="h-9 bg-background">
+                <SelectTrigger className="h-10 bg-background border-zinc-200">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -116,22 +135,21 @@ export default function AudithPage() {
               </Select>
             </div>
 
-            {/* Selector de Límite */}
-            <div className="w-full md:w-32 space-y-2">
-              <label className="text-[11px] font-bold uppercase text-muted-foreground flex items-center gap-2">
+            <div className="w-full md:w-36 space-y-2">
+              <label className="text-[11px] font-bold uppercase text-muted-foreground flex items-center gap-2 ml-1">
                 <SlidersHorizontal className="h-3 w-3" /> {t("filters.limit")}
               </label>
               <Select 
                 value={String(limit)} 
                 onValueChange={(v) => { setLimit(Number(v)); setPage(1); }}
               >
-                <SelectTrigger className="h-9 bg-background">
+                <SelectTrigger className="h-10 bg-background border-zinc-200">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {[10, 20, 50].map((num) => (
                     <SelectItem key={num} value={String(num)}>
-                      {t("filters.limitRows", { count: num })}
+                      {num} {t("filters.limitRowsSuffix") || "filas"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -141,21 +159,21 @@ export default function AudithPage() {
         </CardContent>
       </Card>
 
-      <div className="rounded-xl border bg-card shadow-sm">
-        <div className="p-4 border-b flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+      <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <div className="p-4 border-b bg-muted/20 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             <ListFilter className="h-4 w-4" />
             {t("status.results")}
             {isLoading && (
-              <span className="ml-2 animate-pulse text-primary text-[10px] font-bold uppercase">
-                {t("status.loading")}
+              <span className="ml-2 animate-pulse text-primary font-black italic">
+                {t("status.loading")}...
               </span>
             )}
           </div>
         </div>
         
         <AudithTable
-          data={logs}
+          data={processedLogs} 
           isLoading={isLoading}
           page={page}
           totalPages={totalPages}

@@ -257,11 +257,13 @@
     "locale": "{locale, select, es {Spanish} en {English} other {{locale}}}"
   },
   "Navbar": {
-    "searchPlaceholder": "Search...",
     "notifications": "Notifications",
     "appearance": "Appearance",
     "toggleMenu": "Toggle menu",
-    "details": "Details #{id}"
+    "details": "Details #{id}",
+    "searchPlaceholder": "Search VitalFit...",
+    "searchMobile": "Search...",
+    "noResults": "No results found."
   },
   "UserNav": {
     "account": "Account",
@@ -483,6 +485,13 @@
         "description": "Monthly comparison of acquisition and loyalty",
         "label_new": "New",
         "label_recurring": "Recurring"
+      },
+      "rfm": {
+        "title": "Customer Segmentation",
+        "description": "Analysis based on Recency, Frequency, and Monetary Value (RFM)",
+        "noDataTitle": "Insufficient data",
+        "noDataDescription": "Purchase history and attendance records are required to generate RFM segmentation.",
+        "footer": "Sampling based on {count} active customers. Segments are updated automatically."
       }
     },
     "branch": {
@@ -596,6 +605,32 @@
       "tabs": {
         "control_panel": "Control Panel",
         "history": "Daily History"
+      },
+      "manualCheckInModal": {
+        "title": "Manual Check-In",
+        "console": "Reception Console",
+        "description": "Verify the member's identity before allowing entry.",
+        "search": {
+          "label": "Member Identification (Email)",
+          "placeholder": "member@vitalfit.com",
+          "button": "Search Member"
+        },
+        "policies": {
+          "title": "Access Policies",
+          "timeRuleDescription": "Entry is only permitted **15 minutes before** the class starts.",
+          "verificationAdvice": "Validate the member's identity with their ID and digitalized photo."
+        },
+        "results": {
+          "title": "Identity Validation",
+          "verified": "Identity Verified",
+          "waiting": "Awaiting Identification",
+          "waitingDescription": "Enter the member's email to validate membership status.",
+          "footerNote": "Attendance synchronized in real-time"
+        },
+        "actions": {
+          "confirm": "Register Check-In",
+          "loading": "Processing..."
+        }
       }
     },
     "BranchDashboard": {
@@ -1630,6 +1665,26 @@
       "invalid_data": "The provided data is invalid.",
       "email_in_use": "This email address is already registered."
     },
+    "balances": {
+      "walletTitle": "Service Wallet",
+      "searchPlaceholder": "Search service or package...",
+      "syncing": "Syncing wallet...",
+      "noResults": "No balances match your search",
+      "emptyWallet": "Client has no active service packages",
+      "updateButton": "Update balances",
+      "backButton": "Back to Client Profile",
+  "walletSubtitle": "Credit management and service usage",
+      "status": {
+        "available": "Balance Available",
+        "critical": "Critical Balance!",
+        "empty": "No Balance",
+        "lastUpdate": "Upd:",
+        "credits": "Credits",
+        "duration": "Duration",
+        "fitnessService": "Fitness Service",
+        "defaultServiceName": "Special Package"
+      }
+    },
     "stats": {
       "total": "TOTAL",
       "active": "ACTIVE",
@@ -1651,16 +1706,16 @@
       "download": "Download",
       "loading": "Loading Clients...",
       "columns": {
-        "name": "Name",
-        "email": "Email",
+        "name": "Client",
+        "email": "Email Address",
         "role": "Role",
-        "category": "Category",
-        "status": "Status"
+        "status": "Account Status",
+        "validation": "Verification"
       },
       "status": {
         "active": "Active",
-        "inactive": "Inactive",
-        "blocked": "Blocked",
+        "blocked": "Inactive",
+        "verified": "Verified",
         "pending": "Pending"
       },
       "actions": {
@@ -1745,6 +1800,7 @@
       },
       "tabs": {
         "general": "General",
+        "balances": "Service Wallet",
         "medical": "Medical File"
       },
       "sections": {
@@ -1763,7 +1819,11 @@
         "image_url": "Image URL",
         "role": "User Role",
         "status": "System Status",
-        "default_role": "Client"
+        "default_role": "Client",
+        "category": "Category",
+        "membership_status": "Membership Status",
+        "validation_status": "Profile Status",
+        "user_id": "User ID"
       },
       "status": {
         "active": "Active",
@@ -1771,7 +1831,19 @@
         "pending": "Pending",
         "canceled": "Canceled",
         "validated": "Validated / Active",
-        "blocked": "Not Validated / Blocked"
+        "blocked": "Not Validated / Blocked",
+        "active_member": "Active Member",
+        "inactive": "No Membership",
+        "verified": "Email Verified"
+      },
+      "block_dialog": {
+        "title": "Block Client",
+        "description": "Are you sure you want to block",
+        "label": "Block justification",
+        "placeholder": "Type the reason (e.g., Unpaid fees, inappropriate behavior...)",
+        "error_required": "You must provide a reason for the block",
+        "confirm": "Block User",
+        "cancel": "Cancel"
       },
       "actions": {
         "edit": "Edit Profile",
@@ -1780,12 +1852,15 @@
         "service_usage": "Service Usage",
         "complaints": "Complaints & Claims",
         "rfm": "Customer Analysis (RFM)",
-        "no_permissions": "You do not have any allowed actions for this profile."
+        "no_permissions": "You do not have any allowed actions for this profile.",
+        "block": "Block Client",
+        "view_wallet": "View Wallet"
       },
       "gender_options": {
-        "female": "Female",
         "male": "Male",
-        "other": "Other"
+        "female": "Female",
+        "other": "Other",
+        "prefer-not-to-say": "Prefer not to say"
       },
       "errors": {
         "not_found": "Client not found",
@@ -1798,7 +1873,9 @@
         "update_error": "Error updating information",
         "invalid_image": "Please select a valid image",
         "image_success": "Image uploaded successfully",
-        "image_error": "Error uploading image"
+        "image_error": "Error uploading image",
+        "block_success": "Client successfully blocked",
+        "block_error": "Could not block client"
       }
     },
     "medical": {
@@ -1842,6 +1919,7 @@
     "payments": {
       "title": "PAYMENT HISTORY",
       "subtitle": "View and manage all invoices and transactions for this client.",
+      "back": "Back",
       "table": {
         "reference": "Reference",
         "date": "Date",
@@ -1874,6 +1952,7 @@
     "AttendanceHistory": {
       "title": "Attendance History",
       "subtitle": "View and filter client access logs and class attendance.",
+      "back": "Back",
       "filters": {
         "from": "From",
         "until": "Until",
@@ -1908,6 +1987,20 @@
     "ServiceUsage": {
       "title": "Service Usage",
       "subtitle": "Analysis of services consumed by the client across all branches.",
+      "back": "Back",
+      "total_records": "Total records",
+      "filters": {
+        "from": "From",
+        "until": "Until",
+        "placeholder": "Select date",
+        "clear": "Clear Filters"
+      },
+      "states": {
+        "loading": "Updating data...",
+        "errorTitle": "Loading Error",
+        "errorSubtitle": "We couldn't retrieve the usage history. Please try again.",
+        "retry": "Retry"
+      },
       "Table": {
         "columns": {
           "service": "Service",
@@ -2782,7 +2875,8 @@
         "sortDesc": "Descending",
         "sortAsc": "Ascending",
         "limit": "Results",
-        "limitRows": "{count} rows"
+        "limitRows": "{count} rows",
+        "limitRowsSuffix": "rows"
       },
       "status": {
         "results": "Activity results",
@@ -2811,8 +2905,9 @@
         "title": "Operation Analysis",
         "traceId": "Trace ID",
         "author": "Action Author",
-        "systemProcess": "SYSTEM_PROCESS",
-        "viewSessions": "View Sessions",
+        "userSection": "Action Actor",
+        "viewSessions": "Security Sessions",
+        "close": "Close Detail",
         "payload": {
           "label": "Request Body",
           "empty": "// No data sent in this operation",
@@ -3133,13 +3228,26 @@
       "columns": {
         "student": "Student",
         "check_in": "Check-in",
-        "status": "Status"
+        "status": "Status",
+        "booking_date": "Booking Date",
+        "service": "Service"
+      },
+      "table": {
+        "delete_dialog": {
+          "title": "Confirm cancellation?",
+          "description": "This action will remove the client's reservation and free up the spot in the class. This action cannot be undone.",
+          "confirm": "Yes, cancel reservation",
+          "cancel": "No, keep it"
+        }
       },
       "status": {
         "confirmed": "Confirmed",
         "attended": "Attended",
         "missed": "Missed",
         "cancelled": "Cancelled"
+      },
+      "actions": {
+        "cancel": "Cancel Reservation"
       },
       "tabs": {
         "bookings": "Active Bookings",
@@ -3230,6 +3338,58 @@
     "success": {
       "booked": "Booking successful",
       "cancelled": "Cancelled successfully"
+    }
+  },
+  "SettingsPage": {
+    "title": "Settings",
+    "description": "Manage your account settings and preferences.",
+    "loading": "Loading profile...",
+    "tabs": {
+      "profile": "Profile",
+      "activity": "Activity",
+      "security": "Security"
+    },
+    "sections": {
+      "profile": {
+        "title": "Profile",
+        "description": "Your account's public information."
+      },
+      "activity": {
+        "title": "Activity Feed",
+        "description": "History of your classes and reminders."
+      },
+      "security": {
+        "title": "Security",
+        "description": "Protect your access to the gym."
+      }
+    }
+  },
+  "Notifications": {
+    "Center": {
+      "title": "Notifications",
+      "unread": "You have {count} unread",
+      "markAll": "Mark all",
+      "empty": "No pending notifications",
+      "loadMore": "Load previous",
+      "loading": "Loading...",
+      "viewAll": "View notification center"
+    },
+    "ActivityNotifications": {
+      "title": "Recent Activity",
+      "markAllRead": "Mark all as read",
+      "emptyTitle": "Empty Inbox",
+      "emptyDescription": "No activities or notifications found.",
+      "loadingMore": "Loading activities...",
+      "loadMore": "Load previous activities",
+      "footerNote": "Activities are automatically kept for 30 days.",
+      "systemName": "VitalFit"
+    }
+  },
+  "Auth": {
+    "sessionWarning": {
+      "title": "Your session is about to expire",
+      "description": "You have been inactive for too long. For your security, we will automatically log you out in:",
+      "button": "Stay logged in"
     }
   }
 }

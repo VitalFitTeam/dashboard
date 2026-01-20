@@ -193,7 +193,7 @@ export function CalendarToolbar({
             </div>
 
             <PopoverContent
-              className="p-2  w-[500px] rounded-2xl shadow-2xl border-slate-100 animate-in zoom-in-95 duration-200"
+              className="p-2  w-[700px] rounded-2xl shadow-2xl border-slate-100 animate-in zoom-in-95 duration-200"
               align="end"
               sideOffset={12}
             >

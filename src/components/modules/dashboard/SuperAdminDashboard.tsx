@@ -25,12 +25,6 @@ export default function SuperAdminDashboard() {
       <PageHeader
         title={t("header.title")}
         subtitle={t("header.subtitle")}
-        actionButton={
-          <Button size="sm" className="ml-auto">
-            <Download className="mr-2 h-4 w-4" />
-            {t("header.download_report")}
-          </Button>
-        }
       />
 
       <div className="space-y-6">

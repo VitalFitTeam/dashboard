@@ -137,7 +137,7 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
     {
       title: "Operacion",
       items: [
-        { label: "ClientesSocios", icon: UserIcon, href: "/clients" },
+        { label: "ClientesSocios", icon: UserIcon, href: "/clients/register"},
         { label: "AgendaCalendario", icon: Calendar, href: "/operations/calendar" },
         { label: "ReservasActivas", icon: Calendar, href: "/operations/reservations" },
         { label: "RegistroAsistencia", icon: UsersIcon, href: "/operations/attendance" },
@@ -213,7 +213,7 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
         { label: "ClientesSocios", icon: UsersIcon, href: "/clients/register"  },
         { label: "AgendaCalendario", icon: Calendar, href: "/operations/calendar" },
         { label: "ReservasActivas", icon: Calendar, href: "/operations/reservations" },
-        { label: "QuejasSugerencias", icon: Megaphone, href: "/clients/feedback" },
+        // { label: "QuejasSugerencias", icon: Megaphone, href: "/clients/feedback" },
       ],
     },
   ],

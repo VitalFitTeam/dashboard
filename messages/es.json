@@ -244,7 +244,7 @@
     "CheckinCheckout": "Check-in/Check-out",
     "ReporteVentas": "Reporte de Ventas",
     "CombosPaquetes": "Combos/Paquetes",
-    "GestionMarketing": "Gestión Maketing",
+    "GestionMarketing": "Gestión Marketing",
     "branches_label": "Sedes de {name}",
     "select_branch": "Seleccionar Sede",
     "available_branches": "Sedes disponibles",
@@ -257,11 +257,13 @@
     "locale": "{locale, select, es {Español} en {English} other {{locale}}}"
   },
   "Navbar": {
-    "searchPlaceholder": "Buscar...",
     "notifications": "Notificaciones",
+    "details": "Detalles #{id}",
+    "searchPlaceholder": "Buscar en VitalFit...",
+    "searchMobile": "Buscar...",
+    "noResults": "No se encontraron resultados.",
     "appearance": "Apariencia",
-    "toggleMenu": "Alternar menú",
-    "details": "Detalles #{id}"
+    "toggleMenu": "Alternar Menú"
   },
   "UserNav": {
     "account": "Cuenta",
@@ -483,6 +485,13 @@
         "description": "Comparativa mensual de captación y fidelización",
         "label_new": "Nuevos",
         "label_recurring": "Recurrentes"
+      },
+      "rfm": {
+        "title": "Segmentación de Clientes",
+        "description": "Análisis basado en Recencia, Frecuencia y Valor Monetario (RFM)",
+        "noDataTitle": "No hay suficientes datos",
+        "noDataDescription": "Se requiere historial de compras y asistencias para generar la segmentación RFM.",
+        "footer": "Muestreo basado en {count} clientes activos. Los segmentos se actualizan automáticamente."
       }
     },
     "branch": {
@@ -590,12 +599,38 @@
     },
     "ReceptionDashboard": {
       "title": "Recepción: {branch}",
-      "welcome": "¡Buen día, {name}!",
+      "welcome": "¡Bienvenido, {name}!",
       "status_ready": "Control de acceso y aforo listo para operar.",
       "global": "Global",
       "tabs": {
         "control_panel": "Panel de Control",
         "history": "Historial del Día"
+      },
+      "manualCheckInModal": {
+        "title": "Registro Manual",
+        "console": "Consola de Recepción",
+        "description": "Verifique la identidad del socio antes de permitir el ingreso.",
+        "search": {
+          "label": "Identificación del Socio (Email)",
+          "placeholder": "socio@vitalfit.com",
+          "button": "Buscar Socio"
+        },
+        "policies": {
+          "title": "Políticas de Acceso",
+          "timeRuleDescription": "El ingreso solo se permite **15 minutos antes** del inicio de la clase.",
+          "verificationAdvice": "Valide la identidad del socio con su documento y fotografía digitalizada."
+        },
+        "results": {
+          "title": "Validación de Identidad",
+          "verified": "Identidad Verificada",
+          "waiting": "Esperando Identificación",
+          "waitingDescription": "Ingrese el email del socio para validar el estado de su membresía.",
+          "footerNote": "Asistencia sincronizada en tiempo real"
+        },
+        "actions": {
+          "confirm": "Registrar Check-In",
+          "loading": "Procesando..."
+        }
       }
     },
     "BranchDashboard": {
@@ -1632,6 +1667,26 @@
       "inactive": "INACTIVOS/BLOQUEADOS",
       "unit": "CLIENTES"
     },
+    "balances": {
+      "walletTitle": "Billetera de Servicios",
+      "searchPlaceholder": "Buscar servicio o paquete...",
+      "syncing": "Sincronizando billetera...",
+      "noResults": "No hay saldos que coincidan con la búsqueda",
+      "emptyWallet": "El cliente no tiene paquetes de servicios activos",
+      "updateButton": "Actualizar saldos",
+      "backButton": "Volver al Perfil del Cliente",
+  "walletSubtitle": "Gestión de créditos y consumo de servicios",
+      "status": {
+        "available": "Saldo Disponible",
+        "critical": "¡Saldo Crítico!",
+        "empty": "Sin Saldo",
+        "lastUpdate": "Act:",
+        "credits": "Créditos",
+        "duration": "Duración",
+        "fitnessService": "Servicio Fitness",
+        "defaultServiceName": "Paquete Especial"
+      }
+    },
     "table": {
       "filter_placeholder": "Filtrar por nombre o apellido",
       "filter_role": "Filtrar por Rol",
@@ -1647,16 +1702,16 @@
       "download": "Descargar",
       "loading": "Cargando Clientes...",
       "columns": {
-        "name": "Nombre",
+        "name": "Cliente",
         "email": "Email",
         "role": "Rol",
-        "category": "Categoría",
-        "status": "Estado"
+        "status": "Cuenta",
+        "validation": "Email"
       },
       "status": {
         "active": "Activo",
-        "inactive": "Inactivo",
-        "blocked": "Bloqueado",
+        "blocked": "Inactivo",
+        "verified": "Verificado",
         "pending": "Pendiente"
       },
       "actions": {
@@ -1693,7 +1748,7 @@
         "male": "Masculino",
         "prefer-not-to-say": "Prefiero no especificarlo"
       },
-     "placeholders": {
+      "placeholders": {
         "first_name": "Ej. Juan Alberto",
         "last_name": "Ej. Pérez García",
         "select_date": "Seleccionar fecha",
@@ -1728,10 +1783,12 @@
       "loading_subtitle": "Obteniendo datos del servidor",
       "loading_message": "Estamos preparando la información",
       "form_actions": {
-        "save": "Guardar Cambios"
+        "save": "Guardar Cambios",
+        "cancel": "Cancelar"
       },
       "tabs": {
-        "general": "General",
+        "general": "Información General",
+        "balances": "Billetera de Servicios",
         "medical": "Ficha Médica"
       },
       "sections": {
@@ -1750,7 +1807,11 @@
         "image_url": "URL de Imagen",
         "role": "Rol de Usuario",
         "default_role": "Cliente",
-        "status": "Estado del Cliente"
+        "status": "Estado del Cliente",
+        "category": "Categoría",
+        "membership_status": "Estado de Membresía",
+        "validation_status": "Estado de Perfil",
+        "user_id": "ID de Usuario"
       },
       "status": {
         "active": "Activa",
@@ -1758,7 +1819,10 @@
         "pending": "Pendiente",
         "canceled": "Cancelada",
         "validated": "Validado / Activo",
-        "blocked": "No Validado / Bloqueado"
+        "blocked": "No Validado / Bloqueado",
+        "active_member": "Miembro Activo",
+        "inactive": "Inactivo",
+        "verified": "Email Verificado"
       },
       "actions": {
         "edit": "Editar Perfil",
@@ -1767,12 +1831,24 @@
         "service_usage": "Uso de Servicios",
         "complaints": "Quejas y Reclamos",
         "rfm": "Análisis de Cliente (RFM)",
-        "no_permissions": "No tienes acciones permitidas para este perfil."
+        "block": "Bloquear Cliente",
+        "no_permissions": "No tienes acciones permitidas para este perfil.",
+        "view_wallet": "Consultar Billetera"
       },
       "gender_options": {
-        "female": "Femenino",
         "male": "Masculino",
-        "other": "Otro"
+        "female": "Femenino",
+        "other": "Otro",
+        "prefer-not-to-say": "Prefiero no decirlo"
+      },
+      "block_dialog": {
+        "title": "Bloquear Cliente",
+        "description": "¿Estás seguro de que deseas bloquear a",
+        "label": "Justificación del bloqueo",
+        "placeholder": "Escribe el motivo (ej. Falta de pago, conducta inapropiada...)",
+        "error_required": "Debes indicar un motivo para el bloqueo",
+        "confirm": "Bloquear Usuario",
+        "cancel": "Cancelar"
       },
       "errors": {
         "not_found": "Cliente no encontrado",
@@ -1793,7 +1869,9 @@
         "update_error": "Error al actualizar la información",
         "invalid_image": "Por favor selecciona una imagen válida",
         "image_success": "Imagen cargada correctamente",
-        "image_error": "Error al subir la imagen"
+        "image_error": "Error al subir la imagen",
+        "block_success": "Cliente bloqueado correctamente",
+        "block_error": "No se pudo bloquear al cliente"
       }
     },
     "medical": {
@@ -1837,6 +1915,7 @@
     "payments": {
       "title": "HISTORIAL DE PAGOS",
       "subtitle": "Consulta el estado de facturación y transacciones de este cliente",
+      "back": "Volver",
       "table": {
         "reference": "Referencia",
         "date": "Fecha",
@@ -1867,42 +1946,45 @@
       "session_expired": "Sesión expirada. Por favor inicia sesión nuevamente"
     },
     "AttendanceHistory": {
-    "title": "Historial de Asistencias",
-    "subtitle": "Visualiza y filtra los registros de acceso y clases del cliente.",
-    "filters": {
-      "from": "Desde",
-      "until": "Hasta",
-      "placeholder": "Seleccionar fecha",
-      "clear": "Limpiar"
+      "title": "Historial de Asistencias",
+      "subtitle": "Visualiza y filtra los registros de acceso y clases del cliente.",
+      "back": "Volver",
+      "filters": {
+        "from": "Desde",
+        "until": "Hasta",
+        "placeholder": "Seleccionar fecha",
+        "clear": "Limpiar"
+      },
+      "states": {
+        "loading": "Actualizando datos...",
+        "errorTitle": "Error de conexión",
+        "errorSubtitle": "No pudimos obtener el historial en este momento.",
+        "retry": "Reintentar"
+      },
+      "AttendanceTable": {
+        "columns": {
+          "classService": "Clase / Servicio",
+          "classTime": "Horario Clase",
+          "checkIn": "Check-in",
+          "status": "Estado"
+        },
+        "placeholders": {
+          "facilityUse": "Uso de Instalaciones",
+          "generalService": "Servicio General",
+          "notApplicable": "No aplica"
+        },
+        "status": {
+          "Attended": "Asistió",
+          "NoShow": "No asistió",
+          "Late": "Tarde"
+        }
+      }
     },
-    "states": {
-      "loading": "Actualizando datos...",
-      "errorTitle": "Error de conexión",
-      "errorSubtitle": "No pudimos obtener el historial en este momento.",
-      "retry": "Reintentar"
-    },
-   "AttendanceTable": {
-    "columns": {
-      "classService": "Clase / Servicio",
-      "classTime": "Horario Clase",
-      "checkIn": "Check-in",
-      "status": "Estado"
-    },
-    "placeholders": {
-      "facilityUse": "Uso de Instalaciones",
-      "generalService": "Servicio General",
-      "notApplicable": "No aplica"
-    },
-    "status": {
-      "Attended": "Asistió",
-      "NoShow": "No asistió",
-      "Late": "Tarde"
-    }
-  }
-  },
-  "ServiceUsage": {
+    "ServiceUsage": {
       "title": "Uso de Servicios",
       "subtitle": "Análisis de servicios consumidos por el cliente en todas las sucursales.",
+      "back": "Volver",
+      "total_records": "Total de registros",
       "Table": {
         "columns": {
           "service": "Servicio",
@@ -1918,6 +2000,18 @@
           "NoShow": "No asistió",
           "Late": "Tarde"
         }
+      },
+      "filters": {
+        "from": "Desde",
+        "until": "Hasta",
+        "placeholder": "Seleccionar fecha",
+        "clear": "Limpiar Filtros"
+      },
+      "states": {
+        "loading": "Actualizando datos...",
+        "errorTitle": "Error de Carga",
+        "errorSubtitle": "No pudimos obtener el historial de uso. Intenta de nuevo.",
+        "retry": "Reintentar"
       }
     }
   },
@@ -1964,7 +2058,7 @@
         "success_title": "Eliminación exitosa",
         "error_title": "Error"
       },
-     "employee": "Empleado",
+      "employee": "Empleado",
       "email": "Correo Electrónico",
       "role": "Rol",
       "phone": "Teléfono",
@@ -2542,7 +2636,6 @@
         "paymentsTitle": "Registro de Pagos",
         "paymentsSubtitle": "Historial completo de abonos y transacciones",
         "statusLabel": "Estado de Cobro",
-        
         "status": {
           "paid": "CONCILIADO",
           "pending": "PENDIENTE"
@@ -2564,13 +2657,12 @@
           "uuidTooltip": "Identificador único de sistema",
           "phoneLabel": "Teléfono",
           "birthLabel": "Cumpleaños"
-          
         }
       },
-     "alerts": {
-          "failed": "PAGO RECHAZADO: EL CLIENTE AÚN DEBE EL TOTAL.",
-          "refunded": "PAGO REEMBOLSADO: SE REQUIERE NUEVO COBRO MANUAL."
-        },
+      "alerts": {
+        "failed": "PAGO RECHAZADO: EL CLIENTE AÚN DEBE EL TOTAL.",
+        "refunded": "PAGO REEMBOLSADO: SE REQUIERE NUEVO COBRO MANUAL."
+      },
       "detailPage": {
         "title": "Factura {number}",
         "defaultTitle": "Detalle de Factura",
@@ -2778,7 +2870,8 @@
         "sortDesc": "Descendente",
         "sortAsc": "Ascendente",
         "limit": "Resultados",
-        "limitRows": "{count} filas"
+        "limitRows": "{count} filas",
+        "limitRowsSuffix": "filas"
       },
       "status": {
         "results": "Resultados de actividad",
@@ -2809,13 +2902,15 @@
         "author": "Autor de la acción",
         "systemProcess": "PROCESO_SISTEMA",
         "viewSessions": "Ver Sesiones",
+        "userSection": "Actor de la Acción",
+        "close": "Cerrar Detalle",
         "payload": {
-          "label": "Cuerpo de la Petición",
-          "empty": "// No hay datos enviados en esta operación",
+          "label": "Datos Enviados (Payload)",
+          "empty": "Sin datos en el cuerpo",
           "copied": "Log copiado al portapapeles"
         },
         "metadata": {
-          "endpoint": "Endpoint / Ruta",
+          "endpoint": "Ruta del Recurso",
           "dateTime": "Fecha y Hora",
           "ipAddress": "Dirección IP"
         },
@@ -3126,10 +3221,24 @@
       "error_server": "Error al conectar con el servidor"
     },
     "attendance_manager": {
+      "title": "Asistencia de Clase",
+      "actions": {
+        "cancel": "Cancelar Reserva"
+      },
+      "table": {
+        "delete_dialog": {
+          "title": "¿Confirmar cancelación?",
+          "description": "Esta acción eliminará la reserva del cliente y liberará el cupo en la clase. Esta acción no se puede deshacer.",
+          "confirm": "Sí, cancelar reserva",
+          "cancel": "No, mantener"
+        }
+      },
       "columns": {
         "student": "Alumno",
         "check_in": "Check-in",
-        "status": "Estado"
+        "status": "Estado",
+        "booking_date": "Fecha de Reserva",
+        "service": "Servicio"
       },
       "status": {
         "confirmed": "Confirmado",
@@ -3145,7 +3254,10 @@
         "total_students": "Total Alumnos: {count}",
         "processed": "Procesado",
         "active_booking": "Reserva Activa",
-        "cancel_tooltip": "Cancelar reserva"
+        "cancel_tooltip": "Cancelar reserva",
+        "view_only": "Solo lectura",
+        "no_bookings": "No hay reservas activas para esta clase",
+        "loading_list": "Cargando participantes..."
       },
       "info_panel": {
         "admin_title": "Panel de Gestión Administrativa",
@@ -3227,5 +3339,57 @@
     "noBranchDescription": "Tu cuenta de <role>{role}</role> está activa, pero no tienes una sede válida asignada para operar.",
     "retry": "Reintentar",
     "logout": "Cerrar Sesión"
+  },
+  "SettingsPage": {
+    "title": "Configuración",
+    "description": "Administra la configuración de tu cuenta y preferencias.",
+    "loading": "Cargando perfil...",
+    "tabs": {
+      "profile": "Perfil",
+      "activity": "Actividad",
+      "security": "Seguridad"
+    },
+    "sections": {
+      "profile": {
+        "title": "Perfil",
+        "description": "Información pública de tu cuenta."
+      },
+      "activity": {
+        "title": "Bandeja de Actividad",
+        "description": "Historial de tus clases y recordatorios."
+      },
+      "security": {
+        "title": "Seguridad",
+        "description": "Protege tu acceso al gimnasio."
+      }
+    }
+  },
+  "Notifications": {
+    "Center": {
+      "title": "Notificaciones",
+      "unread": "Tienes {count} sin leer",
+      "markAll": "Marcar todo",
+      "empty": "No hay notificaciones pendientes",
+      "loadMore": "Cargar más anteriores",
+      "loading": "Cargando...",
+      "viewAll": "Ver centro de notificaciones"
+    },
+    "ActivityNotifications": {
+      "title": "Actividad Reciente",
+      "markAllRead": "Marcar todo leído",
+      "emptyTitle": "Bandeja vacía",
+      "emptyDescription": "No hay actividades ni notificaciones registradas.",
+      "loadingMore": "Cargando actividades...",
+      "loadMore": "Cargar actividades anteriores",
+      "footerNote": "Las actividades se conservan por 30 días automáticamente.",
+      "systemName": "VitalFit"
+    }
+  },
+  "Auth": {
+    "sessionWarning": {
+      "title": "Tu sesión está por expirar",
+      "description": "Has estado inactivo demasiado tiempo. Por seguridad, cerraremos tu sesión automáticamente en:",
+      "button": "Mantener sesión activa"
+    }
   }
 }
