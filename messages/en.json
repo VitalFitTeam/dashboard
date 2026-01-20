@@ -577,10 +577,13 @@
         "no_branch": "No branch assigned"
       },
       "stats": {
-        "next_class": "Next Class",
-        "students_today": "Students Today",
-        "monthly_classes": "Classes this month",
-        "meta": "Goal"
+       "next_class": "Next Class",
+        "students_today_count": "Students Today",
+        "students_today_desc": "Total confirmed for today",
+        "attendance_rate": "Attendance Rate",
+        "attendance_desc": "Check-in effectiveness",
+        "monthly_classes": "Monthly Classes",
+        "meta": "Target"
       },
       "classes_list": {
         "title": "My classes today",

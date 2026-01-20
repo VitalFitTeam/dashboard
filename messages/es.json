@@ -577,9 +577,12 @@
         "no_branch": "Sin sede asignada"
       },
       "stats": {
-        "next_class": "Próxima Clase",
-        "students_today": "Alumnos Hoy",
-        "monthly_classes": "Clases este mes",
+        "next_class": "Siguiente clase",
+        "students_today_count": "Alumnos hoy",
+        "students_today_desc": "Total confirmados para hoy",
+        "attendance_rate": "Tasa de Asistencia",
+        "attendance_desc": "Efectividad de asistencia",
+        "monthly_classes": "Clases del mes",
         "meta": "Meta"
       },
       "classes_list": {

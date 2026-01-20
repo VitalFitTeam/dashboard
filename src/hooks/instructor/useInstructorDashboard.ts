@@ -11,20 +11,25 @@ interface FlexibleKPICard extends Omit<KPICard, "value" | "target"> {
   target?: string | number;
 }
 
-export default function useInstructorDashboard(token: string | null) {
+interface DashboardData {
+  classesToday: ClassScheduleItem[];
+  monthlyCount: FlexibleKPICard | null;
+  nextClass: string;
+  studentCount: FlexibleKPICard | null;
+  attendanceRate: number; 
+  studentsToday: number;  
+}
 
+export default function useInstructorDashboard(token: string | null) {
   const t = useTranslations("dashboards.InstructorDashboard");
 
-  const [data, setData] = useState<{
-    classesToday: ClassScheduleItem[];
-    monthlyCount: FlexibleKPICard | null;
-    nextClass: string;
-    studentCount: FlexibleKPICard | null;
-  }>({
+  const [data, setData] = useState<DashboardData>({
     classesToday: [],
     monthlyCount: null,
     nextClass: t("classes_list.loading") || "...", 
     studentCount: null,
+    attendanceRate: 0,
+    studentsToday: 0,
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -37,25 +42,40 @@ export default function useInstructorDashboard(token: string | null) {
 
       let toastId: string | number | undefined;
       if (isManual) {
-        // Mensaje de actualización traducido
         toastId = toast.loading(t("messages.updating"));
       }
 
       setIsLoading(true);
 
       try {
-        const [todayRes, monthlyRes, nextRes, studentRes] = await Promise.all([
+        const [
+          todayRes, 
+          monthlyRes, 
+          nextRes, 
+          studentRes, 
+          attendanceRes, 
+          studentsTodayRes
+        ] = await Promise.all([
           api.report.instructorClassesToday(token),
           api.report.instructorMonthlyClassesCount(token),
           api.report.instructorNextClass(token),
           api.report.instructorStudentCountKPI(token),
+          api.report.instructorAttendanceRate(token),
+          api.report.instructorStudentsToday(token),
         ]);
+
+        const rawNextClass = nextRes?.data;
+        const normalizedNextClass = (rawNextClass === "Sin pendientes" || !rawNextClass)
+          ? t("classes_list.empty")
+          : rawNextClass;
 
         setData({
           classesToday: todayRes?.data || [],
           monthlyCount: (monthlyRes?.data as FlexibleKPICard) || null,
-          nextClass: nextRes?.data || t("classes_list.empty"),
+          nextClass: normalizedNextClass, 
           studentCount: (studentRes?.data as FlexibleKPICard) || null,
+          attendanceRate: attendanceRes?.data ?? 0,
+          studentsToday: studentsTodayRes?.data ?? 0,
         });
 
         if (isManual) {
