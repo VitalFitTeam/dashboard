@@ -1,6 +1,6 @@
 import { api } from "@/lib/sdk-config";
 import { useReportBase } from "./useReportBase";
-import { KPICard, ChartData,  CohortRetention, StackedChartData } from "@vitalfit/sdk";
+import { KPICard, ChartData,  CohortRetention, StackedChartData, RFMMetric } from "@vitalfit/sdk";
 
 export const useClientReport = {
 
@@ -101,6 +101,18 @@ export const useClientReport = {
             throw new Error("No JWT provided");
         }
         return api.report.churnRateKPI(jwt, branchId);
+      }
+    ),
+
+    useRfmAnalysis: (jwt: string | null, branchId?: string) =>
+    useReportBase<RFMMetric[]>(
+      jwt ? ["client", "rfmAnalysis", jwt, branchId] : null,
+      async () => {
+        if (!jwt) {
+          throw new Error("No JWT provided");
+        }
+         return api.report.rfmAnalysis(jwt, branchId);
+        
       }
     ),
 };

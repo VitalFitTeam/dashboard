@@ -485,6 +485,13 @@
         "description": "Comparativa mensual de captación y fidelización",
         "label_new": "Nuevos",
         "label_recurring": "Recurrentes"
+      },
+      "rfm": {
+        "title": "Segmentación de Clientes",
+        "description": "Análisis basado en Recencia, Frecuencia y Valor Monetario (RFM)",
+        "noDataTitle": "No hay suficientes datos",
+        "noDataDescription": "Se requiere historial de compras y asistencias para generar la segmentación RFM.",
+        "footer": "Muestreo basado en {count} clientes activos. Los segmentos se actualizan automáticamente."
       }
     },
     "branch": {
@@ -592,12 +599,38 @@
     },
     "ReceptionDashboard": {
       "title": "Recepción: {branch}",
-      "welcome": "¡Buen día, {name}!",
+      "welcome": "¡Bienvenido, {name}!",
       "status_ready": "Control de acceso y aforo listo para operar.",
       "global": "Global",
       "tabs": {
         "control_panel": "Panel de Control",
         "history": "Historial del Día"
+      },
+      "manualCheckInModal": {
+        "title": "Registro Manual",
+        "console": "Consola de Recepción",
+        "description": "Verifique la identidad del socio antes de permitir el ingreso.",
+        "search": {
+          "label": "Identificación del Socio (Email)",
+          "placeholder": "socio@vitalfit.com",
+          "button": "Buscar Socio"
+        },
+        "policies": {
+          "title": "Políticas de Acceso",
+          "timeRuleDescription": "El ingreso solo se permite **15 minutos antes** del inicio de la clase.",
+          "verificationAdvice": "Valide la identidad del socio con su documento y fotografía digitalizada."
+        },
+        "results": {
+          "title": "Validación de Identidad",
+          "verified": "Identidad Verificada",
+          "waiting": "Esperando Identificación",
+          "waitingDescription": "Ingrese el email del socio para validar el estado de su membresía.",
+          "footerNote": "Asistencia sincronizada en tiempo real"
+        },
+        "actions": {
+          "confirm": "Registrar Check-In",
+          "loading": "Procesando..."
+        }
       }
     },
     "BranchDashboard": {

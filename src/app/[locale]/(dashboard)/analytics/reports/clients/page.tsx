@@ -45,6 +45,7 @@ import { CohortAnalysisReport } from "@/components/modules/analytics/clients/Coh
 import { MostUsedServicesReport } from "@/components/modules/analytics/clients/MostUsedServicesReport";
 import { NewVsRecurringReport } from "@/components/modules/analytics/clients/NewVsRecurringReport";
 import { TopInstructorsReport } from "@/components/modules/analytics/clients/TopInstructorsReport";
+import { RFMTreemapReport } from "@/components/modules/analytics/clients/RFMTreemapReport";
 
 export default function ClientReportPage() {
   const t = useTranslations("analytics.clients");
@@ -192,6 +193,15 @@ export default function ClientReportPage() {
         <NewClients token={token} branchId={selectedBranch} />
         <RetentionRate token={token} branchId={selectedBranch}/>
         <ChurnRateKPI token={token}  branchId={selectedBranch}/>
+      </section>
+
+      <section className="space-y-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+          <RFMTreemapReport 
+            token={token} 
+            branchId={selectedBranch} 
+          />
+        </div>
       </section>
 
       <div className="space-y-8">

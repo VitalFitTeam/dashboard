@@ -485,6 +485,13 @@
         "description": "Monthly comparison of acquisition and loyalty",
         "label_new": "New",
         "label_recurring": "Recurring"
+      },
+      "rfm": {
+        "title": "Customer Segmentation",
+        "description": "Analysis based on Recency, Frequency, and Monetary Value (RFM)",
+        "noDataTitle": "Insufficient data",
+        "noDataDescription": "Purchase history and attendance records are required to generate RFM segmentation.",
+        "footer": "Sampling based on {count} active customers. Segments are updated automatically."
       }
     },
     "branch": {
@@ -598,6 +605,32 @@
       "tabs": {
         "control_panel": "Control Panel",
         "history": "Daily History"
+      },
+      "manualCheckInModal": {
+        "title": "Manual Check-In",
+        "console": "Reception Console",
+        "description": "Verify the member's identity before allowing entry.",
+        "search": {
+          "label": "Member Identification (Email)",
+          "placeholder": "member@vitalfit.com",
+          "button": "Search Member"
+        },
+        "policies": {
+          "title": "Access Policies",
+          "timeRuleDescription": "Entry is only permitted **15 minutes before** the class starts.",
+          "verificationAdvice": "Validate the member's identity with their ID and digitalized photo."
+        },
+        "results": {
+          "title": "Identity Validation",
+          "verified": "Identity Verified",
+          "waiting": "Awaiting Identification",
+          "waitingDescription": "Enter the member's email to validate membership status.",
+          "footerNote": "Attendance synchronized in real-time"
+        },
+        "actions": {
+          "confirm": "Register Check-In",
+          "loading": "Processing..."
+        }
       }
     },
     "BranchDashboard": {

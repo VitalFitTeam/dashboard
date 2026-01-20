@@ -17,8 +17,10 @@ import { authService } from "@/lib/auth-service";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { SessionWarningModal } from "@/components/modules/auth/SessionWarningModal";
 
-const WARNING_TIME = (Number(process.env.NEXT_PUBLIC_IDLE_TIMEOUT_MINS) || 14) * 60 * 1000;
-const GRACE_PERIOD = (Number(process.env.NEXT_PUBLIC_GRACE_PERIOD_SEC) || 60) * 1000;
+const WARNING_TIME =
+  (Number(process.env.NEXT_PUBLIC_IDLE_TIMEOUT_MINS) || 14) * 60 * 1000;
+const GRACE_PERIOD =
+  (Number(process.env.NEXT_PUBLIC_GRACE_PERIOD_SEC) || 60) * 1000;
 
 export interface SessionUser extends Omit<SdkUser, "role"> {
   role: UserRole;
@@ -105,17 +107,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return null;
         }
 
-        const assignedBranches = branchesRes.data ?? [];
-        const managedBranches = managedRes.data ?? [];
-        const instructorBranches = instructorRes.data ?? [];
-        const allBranches = [...assignedBranches, ...managedBranches, ...instructorBranches];
+        const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+        const filterValid = (branches: BranchStaff[] | undefined) =>
+          (branches ?? []).filter((b) => b.id && b.id !== EMPTY_GUID);
+        const assignedBranches = filterValid(branchesRes.data);
+        const managedBranches = filterValid(managedRes.data);
+        const instructorBranches = filterValid(instructorRes.data);
+        const allBranches = [
+          ...assignedBranches,
+          ...managedBranches,
+          ...instructorBranches,
+        ];
 
         const savedBranchId = localStorage.getItem("active_branch_id");
-        const activeBranch = allBranches.find((b) => b.id === savedBranchId) || allBranches[0];
+        let activeBranch = allBranches.find((b) => b.id === savedBranchId);
+
+        if (!activeBranch || activeBranch.id === EMPTY_GUID) {
+        activeBranch = allBranches.length > 0 ? allBranches[0] : undefined;
+      }
 
         if (activeBranch) {
-          localStorage.setItem("active_branch_id", activeBranch.id);
-        }
+        localStorage.setItem("active_branch_id", activeBranch.id);
+      } else {
+        localStorage.removeItem("active_branch_id"); 
+      }
 
         return {
           ...sdkUser,
@@ -132,7 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
     },
-    []
+    [],
   );
 
   const login = useCallback(
@@ -142,7 +157,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const sessionUser = await getUserProfile(token);
         if (!sessionUser) {
           throw new Error("Usuario sin permisos");
-        };
+        }
 
         setTokens(token, refresh);
         setUser(sessionUser);
@@ -150,12 +165,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     },
-    [getUserProfile, setTokens]
+    [getUserProfile, setTokens],
   );
 
   const reloadUser = useCallback(async () => {
-    if (!accessToken){
-       return;
+    if (!accessToken) {
+      return;
     }
     try {
       const sessionUser = await getUserProfile(accessToken);
@@ -171,7 +186,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const switchBranch = useCallback((branch: BranchStaff) => {
     setUser((prev) =>
-      prev ? { ...prev, activeBranch: branch, branch_id: branch.id } : prev
+      prev ? { ...prev, activeBranch: branch, branch_id: branch.id } : prev,
     );
     localStorage.setItem("active_branch_id", branch.id);
   }, []);
@@ -184,7 +199,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const allowed = Array.isArray(roles) ? roles : [roles];
       return allowed.includes(user.role);
     },
-    [user]
+    [user],
   );
 
   useEffect(() => {
@@ -194,7 +209,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAccessToken(access);
         setRefreshToken(refresh);
       },
-      () => logout()
+      () => logout(),
     );
   }, [logout]);
 
@@ -226,7 +241,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initAuth();
   }, [getUserProfile, clearSession]);
 
-  const isSuperAdmin = user?.role === UserRole.SUPER_ADMIN; 
+  const isSuperAdmin = user?.role === UserRole.SUPER_ADMIN;
   const hasAccess = isSuperAdmin || !!user?.activeBranch;
 
   return (
@@ -248,9 +263,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     >
       {children}
       {showWarning && (
-        <SessionWarningModal 
-          remainingTime={remainingTime} 
-          onStayLoggedIn={resetTimer} 
+        <SessionWarningModal
+          remainingTime={remainingTime}
+          onStayLoggedIn={resetTimer}
         />
       )}
     </AuthContext.Provider>
