@@ -1764,7 +1764,7 @@
       "loading_message": "Estamos preparando la información",
       "form_actions": {
         "save": "Guardar Cambios",
-         "cancel": "Cancelar"
+        "cancel": "Cancelar"
       },
       "tabs": {
         "general": "General",
@@ -1971,15 +1971,13 @@
         "placeholders": {
           "unknownBranch": "Sucursal Principal"
         },
-       
         "status": {
           "Attended": "Asistió",
           "NoShow": "No asistió",
           "Late": "Tarde"
         }
-        
       },
-       "filters": {
+      "filters": {
         "from": "Desde",
         "until": "Hasta",
         "placeholder": "Seleccionar fecha",
@@ -2882,12 +2880,12 @@
         "viewSessions": "Ver Sesiones",
         "userSection": "Actor de la Acción",
         "close": "Cerrar Detalle",
-       "payload": {
+        "payload": {
           "label": "Datos Enviados (Payload)",
           "empty": "Sin datos en el cuerpo",
           "copied": "Log copiado al portapapeles"
         },
-       "metadata": {
+        "metadata": {
           "endpoint": "Ruta del Recurso",
           "dateTime": "Fecha y Hora",
           "ipAddress": "Dirección IP"
@@ -3199,10 +3197,24 @@
       "error_server": "Error al conectar con el servidor"
     },
     "attendance_manager": {
+      "title": "Asistencia de Clase",
+      "actions": {
+        "cancel": "Cancelar Reserva"
+      },
+      "table": {
+        "delete_dialog": {
+          "title": "¿Confirmar cancelación?",
+          "description": "Esta acción eliminará la reserva del cliente y liberará el cupo en la clase. Esta acción no se puede deshacer.",
+          "confirm": "Sí, cancelar reserva",
+          "cancel": "No, mantener"
+        }
+      },
       "columns": {
         "student": "Alumno",
         "check_in": "Check-in",
-        "status": "Estado"
+        "status": "Estado",
+        "booking_date": "Fecha de Reserva",
+        "service": "Servicio"
       },
       "status": {
         "confirmed": "Confirmado",
@@ -3218,7 +3230,10 @@
         "total_students": "Total Alumnos: {count}",
         "processed": "Procesado",
         "active_booking": "Reserva Activa",
-        "cancel_tooltip": "Cancelar reserva"
+        "cancel_tooltip": "Cancelar reserva",
+        "view_only": "Solo lectura",
+        "no_bookings": "No hay reservas activas para esta clase",
+        "loading_list": "Cargando participantes..."
       },
       "info_panel": {
         "admin_title": "Panel de Gestión Administrativa",
@@ -3325,7 +3340,7 @@
       }
     }
   },
-  "Notifications":{
+  "Notifications": {
     "Center": {
       "title": "Notificaciones",
       "unread": "Tienes {count} sin leer",
@@ -3336,15 +3351,15 @@
       "viewAll": "Ver centro de notificaciones"
     },
     "ActivityNotifications": {
-    "title": "Actividad Reciente",
-    "markAllRead": "Marcar todo leído",
-    "emptyTitle": "Bandeja vacía",
-    "emptyDescription": "No hay actividades ni notificaciones registradas.",
-    "loadingMore": "Cargando actividades...",
-    "loadMore": "Cargar actividades anteriores",
-    "footerNote": "Las actividades se conservan por 30 días automáticamente.",
-    "systemName": "VitalFit"
-  }
+      "title": "Actividad Reciente",
+      "markAllRead": "Marcar todo leído",
+      "emptyTitle": "Bandeja vacía",
+      "emptyDescription": "No hay actividades ni notificaciones registradas.",
+      "loadingMore": "Cargando actividades...",
+      "loadMore": "Cargar actividades anteriores",
+      "footerNote": "Las actividades se conservan por 30 días automáticamente.",
+      "systemName": "VitalFit"
+    }
   },
   "Auth": {
     "sessionWarning": {

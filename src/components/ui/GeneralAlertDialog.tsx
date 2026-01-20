@@ -26,6 +26,7 @@ interface GeneralAlertDialogProps {
   cancelText?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  className?: string; 
 }
 
 export function GeneralAlertDialog({
@@ -39,13 +40,14 @@ export function GeneralAlertDialog({
   cancelText = "Cancelar",
   open,
   onOpenChange,
+  className,
 }: GeneralAlertDialogProps) {
   const isInfoOrSuccess = type === "info" || type === "success";
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className={className}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
@@ -61,7 +63,7 @@ export function GeneralAlertDialog({
                 }),
               )}
             >
-              {actionText} 
+              {actionText} 
             </AlertDialogAction>
           ) : (
             <>
@@ -73,7 +75,7 @@ export function GeneralAlertDialog({
                     buttonVariants({ variant: "destructive" }),
                 )}
               >
-                                {actionText}             
+                {actionText}              
               </AlertDialogAction>
             </>
           )}

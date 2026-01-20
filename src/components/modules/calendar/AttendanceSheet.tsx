@@ -12,18 +12,17 @@ import { BookingAttendanceManager } from "./BookingAttendanceManager";
 import {
   Users,
   Loader2,
-  AlertCircle,
   Search,
   UserPlus2,
   ShieldCheck,
 } from "lucide-react";
-import { useClassBookings } from "@/hooks/booking/useClassBookings";
 import { useAuth } from "@/context/AuthContext";
 import { useBookingOperations } from "@/hooks/booking/useBookingOperations";
 import { Button } from "@/components/ui/button";
 import { useUserByEmail } from "@/hooks/users/useUserByEmail";
 import { UserSelectionCard } from "../user/UserSelectionCard";
 import { useTranslations } from "next-intl";
+import { useClassBookings } from "@/hooks/booking/useClassBookings";
 
 interface AttendanceSheetProps {
   isOpen: boolean;
@@ -49,16 +48,6 @@ export function AttendanceSheet({
     return allowedRoles.includes(role || "");
   }, [role]);
 
-  const {
-    participants,
-    isLoading,
-    error,
-    refresh,
-    total,
-    currentPage,
-    setPage,
-  } = useClassBookings(token || null, isOpen ? classId : null);
-
   const { 
     userData, 
     isLoading: searching, 
@@ -66,6 +55,7 @@ export function AttendanceSheet({
   } = useUserByEmail(token, emailToSearch);
 
   const { book, isProcessing: isBooking } = useBookingOperations(token);
+  const { refresh } = useClassBookings(isOpen ? token : null, classId);
 
   if (!token) {
     return null;
@@ -83,21 +73,19 @@ export function AttendanceSheet({
     const userId = userData?.user_id || userData?.data?.user_id;
     
     if (!userId) {
-      console.warn("Intento de inscripción sin un ID de usuario válido.");
       return;
     }
 
     try {
       const success = await book(classId, userId);
-      
       if (success) {
         clearUser();
         setEmailInput("");
         setEmailToSearch(null);
-        refresh();
+        refresh(); 
       }
     } catch (err) {
-      console.error("Error en el proceso de inscripción manual:", err);
+      console.error("Error en inscripción manual:", err);
     }
   };
 
@@ -191,31 +179,11 @@ export function AttendanceSheet({
           </div>
 
           <div className="space-y-4">
-            {error ? (
-              <div className="py-20 flex flex-col items-center gap-2 text-red-500 bg-white rounded-3xl border border-red-50">
-                <AlertCircle className="w-8 h-8" />
-                <p className="text-xs font-bold tracking-tight">{t("error_server")}</p>
-              </div>
-            ) : isLoading && !participants.length ? (
-              <div className="py-20 flex flex-col items-center gap-3 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  {t("loading_list")}
-                </p>
-              </div>
-            ) : (
               <BookingAttendanceManager
-                data={participants}
-                isLoading={isLoading}
                 classId={classId}
                 token={token}
-                refresh={refresh}
-                total={total}
-                currentPage={currentPage}
-                onPageChange={setPage}
                 canManage={canInscribeManually}
               />
-            )}
           </div>
         </div>
       </SheetContent>
