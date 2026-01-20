@@ -22,9 +22,10 @@ import { MedicalInfoItem } from "./MedicalInfoItem";
 interface Props {
   userId: string;
   token: string | null;
+  canEdit: boolean; 
 }
 
-export const ClientMedicalSection = ({ userId, token }: Props) => {
+export const ClientMedicalSection = ({ userId, token, canEdit }: Props) => {
   const t = useTranslations("clients.medical");
   const [isEditing, setIsEditing] = useState(false);
 
@@ -62,13 +63,12 @@ export const ClientMedicalSection = ({ userId, token }: Props) => {
             {t("title")}
           </h2>
         </div>
-
-        {!isEditing && (
+        {!isEditing && canEdit && (
           <Button
             variant={medicalData ? "outline" : "default"}
             size="sm"
             onClick={() => setIsEditing(true)}
-            className="font-bold italic uppercase tracking-tighter"
+            className="font-bold italic uppercase tracking-tighter shadow-sm"
           >
             {medicalData ? (
               <>
@@ -93,8 +93,8 @@ export const ClientMedicalSection = ({ userId, token }: Props) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
 
-          <Card className="border-red-200 bg-red-50/20 shadow-sm">
-            <CardHeader className="pb-3 border-b border-red-100 mb-4">
+          <Card className="border-red-200 bg-red-50/20 shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-red-100 mb-4 bg-red-50/50">
               <CardTitle className="text-xs font-black italic uppercase tracking-widest text-red-600 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" /> {t("sections.alerts")}
               </CardTitle>
@@ -114,7 +114,7 @@ export const ClientMedicalSection = ({ userId, token }: Props) => {
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-2 border-primary/10 shadow-sm">
+          <Card className="md:col-span-2 border-primary/10 shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="pb-3 border-b bg-muted/30 mb-4">
               <CardTitle className="text-xs font-black italic uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                 <Activity className="h-4 w-4" /> {t("sections.profile")}

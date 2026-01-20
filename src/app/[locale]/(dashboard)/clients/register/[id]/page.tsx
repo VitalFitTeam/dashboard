@@ -16,6 +16,7 @@ import { MembershipInfo } from "@/components/modules/clients/MembershipInfo";
 import { ClientEditForm } from "@/components/modules/clients/ClientEditForm";
 import { ClientMedicalSection } from "@/components/modules/clients/ClientMedicalSection";
 import { BlockClientDialog } from "@/components/modules/clients/BlockClientDialog";
+
 import { useGetUser } from "@/hooks/users/useGetUser";
 
 export enum UserRole {
@@ -33,9 +34,14 @@ const AUTHORIZED_ROLES = [
   UserRole.RECEPTIONIST
 ];
 
+const ROLES_CAN_EDIT_MEDICAL = [
+  UserRole.SUPER_ADMIN, 
+  UserRole.BRANCH_ADMIN
+];
+
 const formatDate = (date: string, locale: string) => {
-  if (!date) {
-    return "N/A";
+  if (!date){
+     return "N/A";
   }
   return new Date(date).toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
     year: "numeric", month: "long", day: "numeric"
@@ -53,14 +59,21 @@ export default function ClientDetails() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
   const [isBlocking, setIsBlocking] = useState(false);
+  const [isUnblocking, setIsUnblocking] = useState(false);
 
   const { user, loading, error, reload } = useGetUser(id as string, token);
-
   const canManageClient = useMemo(() => {
-    if (!currentUser?.role){
-       return false;
+    if (!currentUser?.role) {
+      return false;
     }
     return AUTHORIZED_ROLES.includes(currentUser.role as UserRole);
+  }, [currentUser]);
+
+  const canEditMedical = useMemo(() => {
+    if (!currentUser?.role) {
+      return false;
+    }
+    return ROLES_CAN_EDIT_MEDICAL.includes(currentUser.role as UserRole);
   }, [currentUser]);
 
   const handleSave = async (updatedData: any) => {
@@ -99,6 +112,24 @@ export default function ClientDetails() {
     }
   };
 
+  const handleUnblock = async () => {
+    if (!token || !id || !canManageClient){
+       return;
+    }
+
+    setIsUnblocking(true);
+    try {
+      await api.user.unblockUser(id as string, token);
+      toast.success(t("notifications.unblock_success"));
+      reload?.(); 
+    } catch (err) {
+      toast.error(t("notifications.unblock_error"));
+    } finally {
+      setIsUnblocking(false);
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="flex-1 space-y-8 p-8 pt-6">
@@ -114,8 +145,8 @@ export default function ClientDetails() {
   if (error || !user) {
     if (error === 401) {
       router.replace("/login");
-    }
     
+    }
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
         <div className="p-4 bg-red-50 rounded-full">
@@ -185,10 +216,14 @@ export default function ClientDetails() {
               onNavigate={(path) => router.push(path)} 
               onEditClick={() => setIsEditing(true)}
               onBlockClick={() => setIsBlockDialogOpen(true)}
+              onUnblockClick={handleUnblock}
+              isBlocked={user.status === "blocked" || !user.is_validated}
               canEdit={canManageClient}
               currentUser={currentUser}
+              isUnblocking={isUnblocking}
             />
           </div>
+
           {!isEditing && user.client_membership && (
             <div className="animate-in slide-in-from-bottom-4 duration-500">
               <MembershipInfo 
@@ -201,7 +236,11 @@ export default function ClientDetails() {
         </TabsContent>
         
         <TabsContent value="medical" className="outline-none animate-in fade-in duration-300">
-           <ClientMedicalSection userId={user.user_id} token={token} />
+           <ClientMedicalSection 
+             userId={user.user_id} 
+             token={token} 
+             canEdit={canEditMedical} 
+           />
         </TabsContent>
       </Tabs>
 

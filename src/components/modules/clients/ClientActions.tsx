@@ -10,12 +10,12 @@ import {
   FileText,   
   BarChart,
   ClipboardList,
-  Lock,
-  Ban
+  Lock, 
+  Ban,  
+  Loader2
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-
 
 export enum UserRole {
   SUPER_ADMIN = "super_admin",
@@ -30,18 +30,24 @@ interface Props {
   userId: string;
   currentUser: any; 
   canEdit: boolean; 
+  isBlocked: boolean; 
   onNavigate: (path: string) => void;
   onEditClick: () => void;
-  onBlockClick: () => void; 
+  onBlockClick: () => void;
+  onUnblockClick: () => void; 
+  isUnblocking?: boolean;    
 }
 
 export const ClientActions = ({ 
   userId, 
   currentUser, 
   canEdit, 
+  isBlocked,
   onNavigate, 
   onEditClick,
-  onBlockClick 
+  onBlockClick,
+  onUnblockClick,
+  isUnblocking
 }: Props) => {
 
   const t = useTranslations("clients.view");
@@ -84,11 +90,12 @@ export const ClientActions = ({
       variant: "default"
     },
     { 
-      label: t("actions.block"), 
-      icon: Ban, 
-      onClick: () => onBlockClick(),
+      label: isBlocked ? t("actions.unblock") : t("actions.block"), 
+      icon: isBlocked ? Lock : Ban, 
+      onClick: isBlocked ? () => onUnblockClick() : () => onBlockClick(),
       visible: [UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN].includes(userRole),
-      variant: "destructive" 
+      variant: isBlocked ? "unblock" : "destructive", 
+      isLoading: isBlocked && isUnblocking
     },
     { 
       label: t("actions.rfm"), 
@@ -97,7 +104,7 @@ export const ClientActions = ({
       visible: [UserRole.SUPER_ADMIN, UserRole.DATA_ANALYST].includes(userRole),
       variant: "default"
     },
-  ], [userId, t, userRole, canEdit, onNavigate, onEditClick, onBlockClick]);
+  ], [userId, t, userRole, canEdit, isBlocked, onNavigate, onEditClick, onBlockClick, onUnblockClick, isUnblocking]);
 
   const visibleActions = actions.filter(action => action.visible);
 
@@ -112,6 +119,7 @@ export const ClientActions = ({
       <CardContent className="flex flex-col gap-2.5">
         {visibleActions.map((action, idx) => {
           const isDestructive = action.variant === "destructive";
+          const isUnblock = action.variant === "unblock";
           
           return (
             <Button
@@ -119,25 +127,29 @@ export const ClientActions = ({
               variant="outline"
               className={cn(
                 "w-full justify-start text-[11px] font-black uppercase tracking-wider h-11 transition-all group border-muted-foreground/10 shadow-sm",
-                isDestructive 
-                  ? "hover:bg-destructive hover:text-destructive-foreground hover:border-destructive" 
-                  : "hover:bg-primary hover:text-primary-foreground"
+                isDestructive && "hover:bg-destructive hover:text-destructive-foreground hover:border-destructive",
+                isUnblock && "hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
+                (!isDestructive && !isUnblock) && "hover:bg-primary hover:text-primary-foreground"
               )}
               onClick={() => action.onClick && action.onClick()}
-              disabled={!action.onClick}
+              disabled={!action.onClick || action.isLoading}
             >
               <div className={cn(
                 "p-1.5 rounded-lg mr-3 transition-colors",
-                isDestructive 
-                  ? "bg-destructive/10 group-hover:bg-destructive-foreground/10" 
-                  : "bg-primary/5 group-hover:bg-primary-foreground/10"
+                isDestructive && "bg-destructive/10 group-hover:bg-destructive-foreground/10",
+                isUnblock && "bg-emerald-100 group-hover:bg-emerald-500/20",
+                (!isDestructive && !isUnblock) && "bg-primary/5 group-hover:bg-primary-foreground/10"
               )}>
-                <action.icon className={cn(
-                  "h-4 w-4 group-hover:scale-110 transition-transform",
-                  isDestructive 
-                    ? "text-destructive group-hover:text-destructive-foreground" 
-                    : "text-primary group-hover:text-primary-foreground"
-                )} />
+                {action.isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-emerald-600 group-hover:text-white" />
+                ) : (
+                  <action.icon className={cn(
+                    "h-4 w-4 group-hover:scale-110 transition-transform",
+                    isDestructive ? "text-destructive group-hover:text-destructive-foreground" : 
+                    isUnblock ? "text-emerald-600 group-hover:text-white" :
+                    "text-primary group-hover:text-primary-foreground"
+                  )} />
+                )}
               </div>
               {action.label}
             </Button>
