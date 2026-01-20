@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { SetStateAction, useMemo } from "react";
 import { Column, DataTable } from "@/components/ui/table/DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
@@ -13,22 +13,14 @@ import { useAuth } from "@/context/AuthContext";
 import { useClientActions } from "@/hooks/clients/useClientActions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { ClientFromAPI } from "@/hooks/clients/useClients";
 
-export interface Client {
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  identity_document: string;
-  role_id: string;
-  role_name: string;
-  status: "Active" | "Inactive";
-  is_validated: boolean;
-  profile_picture_url?: string;
+export interface ClientFilters {
+  search: string;
 }
 
 interface ClientsTableProps {
-  data: Client[];
+  data: ClientFromAPI[];
   onReload: () => void;
   page: number;
   pageSize: number;
@@ -38,6 +30,8 @@ interface ClientsTableProps {
   onPageChange: (page: number) => void;
   searchInput: string;
   setSearchInput: (val: string) => void;
+  filters: ClientFilters;
+  onFilterChange: (f: Partial<ClientFilters>) => void;
 }
 
 export default function ClientsTable({
@@ -50,6 +44,8 @@ export default function ClientsTable({
   onPageChange,
   searchInput,
   setSearchInput,
+  filters,
+  onFilterChange,
 }: ClientsTableProps) {
   const t = useTranslations("clients");
   const { token } = useAuth();
@@ -66,7 +62,7 @@ export default function ClientsTable({
     data.find(c => c.user_id === deleteRowId), 
   [data, deleteRowId]);
 
-  const columns = useMemo<Column<Client>[]>(() => [
+  const columns = useMemo<Column<ClientFromAPI>[]>(() => [
     {
       header: t("table.columns.name"),
       accessor: "first_name",
@@ -165,7 +161,7 @@ export default function ClientsTable({
         </div>
       </div>
 
-      <DataTable<Client>
+      <DataTable<ClientFromAPI>
         columns={columns}
         data={data}
         onPageChange={onPageChange}

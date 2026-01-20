@@ -4,20 +4,18 @@ import React, { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { PageHeader } from "@/components/ui/PageHeader"; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; 
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/sdk-config";
 import { toast } from "sonner";
-import { AlertCircle, Loader2, Wallet } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { ClientPersonalInfo } from "@/components/modules/clients/ClientPersonalInfo";
 import { ClientActions } from "@/components/modules/clients/ClientActions";
 import { MembershipInfo } from "@/components/modules/clients/MembershipInfo";
 import { ClientEditForm } from "@/components/modules/clients/ClientEditForm";
 import { ClientMedicalSection } from "@/components/modules/clients/ClientMedicalSection";
 import { BlockClientDialog } from "@/components/modules/clients/BlockClientDialog";
-import { ClientServiceBalances } from "@/components/modules/clients/ClientServiceBalances";
-
 import { useGetUser } from "@/hooks/users/useGetUser";
 
 export enum UserRole {
@@ -29,20 +27,12 @@ export enum UserRole {
   RECEPTIONIST = "recepcionist",
 }
 
-const AUTHORIZED_ROLES = [
-  UserRole.SUPER_ADMIN, 
-  UserRole.BRANCH_ADMIN, 
-  UserRole.RECEPTIONIST
-];
-
-const ROLES_CAN_EDIT_MEDICAL = [
-  UserRole.SUPER_ADMIN, 
-  UserRole.BRANCH_ADMIN
-];
+const AUTHORIZED_ROLES = [UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN, UserRole.RECEPTIONIST];
+const ROLES_CAN_EDIT_MEDICAL = [UserRole.SUPER_ADMIN, UserRole.BRANCH_ADMIN];
 
 const formatDate = (date: string, locale: string) => {
-  if (!date) {
-    return "N/A";
+  if (!date){
+     return "N/A";
   }
   return new Date(date).toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
     year: "numeric", month: "long", day: "numeric"
@@ -61,6 +51,7 @@ export default function ClientDetails() {
   const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
   const [isBlocking, setIsBlocking] = useState(false);
   const [isUnblocking, setIsUnblocking] = useState(false);
+
   const { user, loading, error, reload } = useGetUser(id as string, token);
 
   const canManageClient = useMemo(() => {
@@ -71,8 +62,8 @@ export default function ClientDetails() {
   }, [currentUser]);
 
   const canEditMedical = useMemo(() => {
-    if (!currentUser?.role) {
-      return false;
+    if (!currentUser?.role){
+       return false;
     }
     return ROLES_CAN_EDIT_MEDICAL.includes(currentUser.role as UserRole);
   }, [currentUser]);
@@ -127,7 +118,6 @@ export default function ClientDetails() {
     }
   };
 
-
   if (loading) {
     return (
       <div className="flex-1 space-y-8 p-8 pt-6">
@@ -141,8 +131,8 @@ export default function ClientDetails() {
   }
 
   if (error || !user) {
-    if (error === 401) {
-      router.replace("/login");
+    if (error === 401){
+       router.replace("/login");
     }
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
@@ -175,9 +165,6 @@ export default function ClientDetails() {
           <TabsTrigger value="general" className="px-8 font-bold italic uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:shadow-sm">
             {t("tabs.general")}
           </TabsTrigger>
-          <TabsTrigger value="balances" className="px-8 font-bold italic uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:shadow-sm flex gap-2">
-            <Wallet className="h-3.5 w-3.5" /> {t("tabs.balances") || "Billetera"}
-          </TabsTrigger>
           <TabsTrigger value="medical" className="px-8 font-bold italic uppercase tracking-tighter data-[state=active]:bg-white data-[state=active]:shadow-sm">
             {t("tabs.medical")}
           </TabsTrigger>
@@ -208,6 +195,7 @@ export default function ClientDetails() {
               onNavigate={(path) => router.push(path)} 
               onEditClick={() => setIsEditing(true)}
               onBlockClick={() => setIsBlockDialogOpen(true)}
+              onWalletClick={() => router.push(`/clients/register/${user.user_id}/balances`)} 
               onUnblockClick={handleUnblock}
               isBlocked={user.status === "blocked" || !user.is_validated}
               canEdit={canManageClient}
@@ -226,14 +214,7 @@ export default function ClientDetails() {
             </div>
           )}
         </TabsContent>
-
-        <TabsContent value="balances" className="outline-none animate-in fade-in duration-300">
-          <ClientServiceBalances 
-            userId={user.user_id} 
-            token={token} 
-          />
-        </TabsContent>
-
+        
         <TabsContent value="medical" className="outline-none animate-in fade-in duration-300">
            <ClientMedicalSection 
              userId={user.user_id} 

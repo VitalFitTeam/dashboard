@@ -1674,6 +1674,8 @@
       "noResults": "No hay saldos que coincidan con la búsqueda",
       "emptyWallet": "El cliente no tiene paquetes de servicios activos",
       "updateButton": "Actualizar saldos",
+      "backButton": "Volver al Perfil del Cliente",
+  "walletSubtitle": "Gestión de créditos y consumo de servicios",
       "status": {
         "available": "Saldo Disponible",
         "critical": "¡Saldo Crítico!",
@@ -1830,7 +1832,8 @@
         "complaints": "Quejas y Reclamos",
         "rfm": "Análisis de Cliente (RFM)",
         "block": "Bloquear Cliente",
-        "no_permissions": "No tienes acciones permitidas para este perfil."
+        "no_permissions": "No tienes acciones permitidas para este perfil.",
+        "view_wallet": "Consultar Billetera"
       },
       "gender_options": {
         "male": "Masculino",

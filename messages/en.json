@@ -1672,6 +1672,8 @@
       "noResults": "No balances match your search",
       "emptyWallet": "Client has no active service packages",
       "updateButton": "Update balances",
+      "backButton": "Back to Client Profile",
+  "walletSubtitle": "Credit management and service usage",
       "status": {
         "available": "Balance Available",
         "critical": "Critical Balance!",
@@ -1851,7 +1853,8 @@
         "complaints": "Complaints & Claims",
         "rfm": "Customer Analysis (RFM)",
         "no_permissions": "You do not have any allowed actions for this profile.",
-        "block": "Block Client"
+        "block": "Block Client",
+        "view_wallet": "View Wallet"
       },
       "gender_options": {
         "male": "Male",
