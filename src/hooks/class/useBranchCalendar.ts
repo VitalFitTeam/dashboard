@@ -5,14 +5,27 @@ import { mapClassesToDateKey } from "@/utils/calendar-mappers";
 import { useMemo } from "react";
 import useSWR from "swr";
 
-export function useBranchCalendar(branchID: string | null, jwt: string) {
-  const swrKey = branchID ? ["branches", branchID, "schedule"] : null;
+export function useBranchCalendar(
+  branchID: string | null, 
+  jwt: string,
+  month?: number,
+  year?: number
+) {
+  const swrKey = branchID && month && year 
+    ? ["branches", branchID, "schedule", year, month] 
+    : null;
 
   const fetcher = async () => {
-    if (!branchID){
+    if (!branchID || !month || !year) {
        return null;
     }
-    const response = await api.schedule.ListBranchesClass(branchID, jwt);
+    
+    const response = await api.schedule.ListBranchesClass(
+      branchID, 
+      jwt, 
+      month, 
+      year
+    );
     return response.data;
   };
 
@@ -21,7 +34,7 @@ export function useBranchCalendar(branchID: string | null, jwt: string) {
     fetcher,
     {
       revalidateOnFocus: false,
-      dedupingInterval: 3000, 
+      dedupingInterval: 10000, 
     }
   );
 
@@ -32,8 +45,8 @@ export function useBranchCalendar(branchID: string | null, jwt: string) {
   return {
     scheduleMap,
     isLoading: !data && isValidating,
-    isSyncing: isValidating,         
+    isSyncing: isValidating,
     isError: error,
-    mutate,                          
+    mutate,
   };
 }

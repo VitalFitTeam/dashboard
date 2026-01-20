@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import FullCalendar from "@fullcalendar/react";
 import { useAuth } from "@/context/AuthContext";
 import { useSWRConfig } from "swr";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, addMonths, subMonths } from "date-fns";
 import { useBranchCalendar } from "@/hooks/class/useBranchCalendar";
 import { useCalendarResources } from "@/hooks/class/useCalendarResources";
 import { useClientBookings } from "@/hooks/booking/useClientBookings";
@@ -12,9 +12,10 @@ import { CalendarToolbar } from "./CalendarToolbar";
 import { CalendarDisplay } from "./CalendarDisplay";
 import { CreateClassSheet } from "./CreateClassSheet";
 import { EditClassPopover } from "./EditClassPopover";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { MapPinIcon } from "lucide-react";
 import { UserRole } from "@/lib/roles";
+import { api } from "@/lib/sdk-config";
 
 export function ClassCalendar() {
   const { token, user } = useAuth();
@@ -24,13 +25,22 @@ export function ClassCalendar() {
   const tGeneral = useTranslations("calendar");
   const tToolbar = useTranslations("calendar.toolbar");
   const tDisplay = useTranslations("calendar.display");
-  const locale = useLocale();
 
   const role = user?.role as UserRole;
   const isSuperAdmin = useMemo(() => role === UserRole.SUPER_ADMIN, [role]);
 
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentView, setCurrentView] = useState("timeGridWeek");
+  
+  const apiMonth = useMemo(() => currentDate.getMonth() + 1, [currentDate]);
+  const apiYear = useMemo(() => currentDate.getFullYear(), [currentDate]);
+
   const [focusedUserId, setFocusedUserId] = useState<string | null>(null);
   const [selectedBranchId, setSelectedBranchId] = useState<string>("");
+
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const activeBranchId = useMemo(() => {
     const val = user?.activeBranch || user?.branch_id;
@@ -40,25 +50,43 @@ export function ClassCalendar() {
     return typeof val === "string" ? val : val.id;
   }, [user]);
 
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentView, setCurrentView] = useState("timeGridWeek");
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const branchToUse = selectedBranchId || activeBranchId;
 
   const { branches, services, instructors, isLoadingResources } =
-    useCalendarResources(token, selectedBranchId || activeBranchId);
+    useCalendarResources(token, branchToUse);
 
   const { scheduleMap, isLoading: isLoadingClasses } = useBranchCalendar(
-    selectedBranchId || null,
-    token || ""
+    branchToUse || null,
+    token || "",
+    apiMonth,
+    apiYear
   );
 
   const { availableClasses, isAvailabilityLoading } = useClientBookings(
     token,
     focusedUserId,
-    selectedBranchId
+    branchToUse
   );
+
+  useEffect(() => {
+    if (!branchToUse || !token){
+       return;
+    }
+
+    const prefetchMonth = async (date: Date) => {
+      const m = date.getMonth() + 1;
+      const y = date.getFullYear();
+      const key = ["branches", branchToUse, "schedule", y, m];
+
+      mutate(key, async () => {
+        const response = await api.schedule.ListBranchesClass(branchToUse, token, m, y);
+        return response.data;
+      }, { revalidate: false }); 
+    };
+
+    prefetchMonth(addMonths(currentDate, 1));
+    prefetchMonth(subMonths(currentDate, 1));
+  }, [currentDate, branchToUse, token, mutate]);
 
   const events = useMemo(() => {
     const allEvents = Object.values(scheduleMap).flat();
@@ -66,12 +94,6 @@ export function ClassCalendar() {
 
     return allEvents.map((item) => {
       const serviceInfo = services.find((s) => s.service_id === item.service_id);
-      const instructorInfo = instructors.find(
-        (i) =>
-          (i as any).instructorID === item.instructor_id ||
-          (i as any).instructor_id === item.instructor_id
-      );
-
       const startDate = parseISO(item.starts_at);
       const endDate = parseISO(item.ends_at);
       const isBookedByClient = focusedUserId ? bookedIds.has(item.class_id) : false;
@@ -82,9 +104,7 @@ export function ClassCalendar() {
         start: startDate,
         end: endDate,
         className: focusedUserId
-          ? isBookedByClient
-            ? "event-highlighted"
-            : "event-dimmed"
+          ? isBookedByClient ? "event-highlighted" : "event-dimmed"
           : "",
         extendedProps: {
           ...item,
@@ -94,15 +114,7 @@ export function ClassCalendar() {
         },
       };
     });
-  }, [
-    scheduleMap,
-    services,
-    instructors,
-    tDisplay,
-    focusedUserId,
-    availableClasses,
-  ]);
-
+  }, [scheduleMap, services, tDisplay, focusedUserId, availableClasses]);
 
   useEffect(() => {
     if (activeBranchId && !isSuperAdmin) {
@@ -116,24 +128,30 @@ export function ClassCalendar() {
     mutate((key: any) => Array.isArray(key) && key.includes("schedule"));
   };
 
+  const handleViewChange = useCallback((info: any) => {
+    const newDate = info.view.currentStart;
+    setCurrentDate((prev) => {
+      if (prev.getMonth() === newDate.getMonth() && prev.getFullYear() === newDate.getFullYear()) {
+        return prev;
+      }
+      return newDate;
+    });
+    setCurrentView(info.view.type);
+  }, []);
+
   const filteredBranches = useMemo(() => {
-    if (isSuperAdmin){
-       return branches;
+    if (isSuperAdmin) {
+      return branches;
     }
     return branches.filter((b) => b.branch_id === activeBranchId);
   }, [branches, isSuperAdmin, activeBranchId]);
-
 
   if (!isSuperAdmin && activeBranchId === "" && !isLoadingResources) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 m-4 text-center px-6">
         <MapPinIcon className="h-10 w-10 text-slate-300 mb-4" />
-        <h3 className="text-lg font-bold text-slate-900">
-          {tGeneral("no_branch_title")}
-        </h3>
-        <p className="text-sm text-slate-500 mt-2 max-w-xs">
-          {tGeneral("no_branch_description")}
-        </p>
+        <h3 className="text-lg font-bold text-slate-900">{tGeneral("no_branch_title")}</h3>
+        <p className="text-sm text-slate-500 mt-2 max-w-xs">{tGeneral("no_branch_description")}</p>
       </div>
     );
   }
@@ -181,12 +199,7 @@ export function ClassCalendar() {
             setSelectedClassId(id);
             setIsEditModalOpen(true);
           }}
-          onViewChange={(info: {
-            view: { currentStart: Date; type: string };
-          }) => {
-            setCurrentDate(info.view.currentStart);
-            setCurrentView(info.view.type);
-          }}
+          onViewChange={handleViewChange}
         />
       </div>
 
