@@ -65,8 +65,8 @@ export default function ProtectedRoute({
 
         <p className="mt-2 max-w-[400px] text-muted-foreground text-lg">
           {t.rich("noBranchDescription", {
-            role: (chunks) => <strong>{chunks}</strong>, 
             roleValue: user.role_label, 
+            role: (chunks) => <strong>{chunks}</strong>, 
           })}
         </p>
 

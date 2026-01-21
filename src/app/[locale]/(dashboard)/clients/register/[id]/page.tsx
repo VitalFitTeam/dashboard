@@ -196,7 +196,7 @@ export default function ClientDetails() {
               onEditClick={() => setIsEditing(true)}
               onBlockClick={() => setIsBlockDialogOpen(true)}
               onUnblockClick={handleUnblock}
-              isBlocked={user.status === "blocked" || !user.is_validated}
+              isBlocked={user.status === "Blocked" || !user.is_validated}
               canEdit={canManageClient}
               currentUser={currentUser}
               isUnblocking={isUnblocking}

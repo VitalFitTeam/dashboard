@@ -250,7 +250,8 @@
     "available_branches": "Available branches",
     "no_branches": "No branches assigned",
     "system_footer": "Vitalfit System",
-    "PoliticasComerciales": "Commercial Policies"
+    "PoliticasComerciales": "Commercial Policies",
+    "MisClientes": "My clients"
   },
   "LocaleSwitcher": {
     "label": "Change language",
@@ -576,10 +577,13 @@
         "no_branch": "No branch assigned"
       },
       "stats": {
-        "next_class": "Next Class",
-        "students_today": "Students Today",
-        "monthly_classes": "Classes this month",
-        "meta": "Goal"
+       "next_class": "Next Class",
+        "students_today_count": "Students Today",
+        "students_today_desc": "Total confirmed for today",
+        "attendance_rate": "Attendance Rate",
+        "attendance_desc": "Check-in effectiveness",
+        "monthly_classes": "Monthly Classes",
+        "meta": "Target"
       },
       "classes_list": {
         "title": "My classes today",
@@ -1854,7 +1858,9 @@
         "rfm": "Customer Analysis (RFM)",
         "no_permissions": "You do not have any allowed actions for this profile.",
         "block": "Block Client",
-        "view_wallet": "View Wallet"
+        "view_wallet": "View Wallet",
+        "unblock": "Desbloquear Cliente",
+        "delete": "Eliminar Cliente"
       },
       "gender_options": {
         "male": "Male",
@@ -1875,7 +1881,9 @@
         "image_success": "Image uploaded successfully",
         "image_error": "Error uploading image",
         "block_success": "Client successfully blocked",
-        "block_error": "Could not block client"
+        "block_error": "Could not block client",
+        "unblock_success": "Client unblocked successfully.",
+        "unblock_error": "Failed to unblock the client. Please try again."
       }
     },
     "medical": {
@@ -2769,6 +2777,8 @@
       "updateSuccessDescription": "The policy value was successfully saved.",
       "updateErrorTitle": "Update Failed",
       "updateErrorDescription": "The policy could not be saved. Please try again.",
+      "readOnly": "Read Only",
+      "fullAccess": "Full Access",
       "actions": {
         "refresh": "Refresh Policies"
       },
@@ -3159,6 +3169,11 @@
   "calendar": {
     "no_branch_title": "No branch selected",
     "no_branch_description": "Please select a branch to view the class schedule.",
+    "resources": {
+      "loading": "Cargando recursos...",
+      "error": "Error al cargar los recursos del calendario",
+      "no_branch": "Sin sede seleccionada"
+    },
     "toolbar": {
       "week": "Week",
       "month": "Month",
@@ -3187,7 +3202,8 @@
       "errors": {
         "missing_data": "Missing required data or session expired",
         "check_fields": "Please check the fields with errors",
-        "server_error": "There was an error processing the request"
+        "server_error": "There was an error processing the request",
+        "branch_closed": "The selected branch is closed on the chosen date. Please check the branch schedule."
       }
     },
     "edit_popover": {
@@ -3257,7 +3273,12 @@
         "total_students": "Total Students: {count}",
         "processed": "Processed",
         "active_booking": "Active Booking",
-        "cancel_tooltip": "Cancel booking"
+        "cancel_tooltip": "Cancel booking",
+        "view_only": "Read-only access",
+        "check_in": "Check-in",
+        "status": "Status",
+        "client": "Client",
+        "no_reservations": "No reservations found for this class"
       },
       "info_panel": {
         "admin_title": "Administrative Management Panel",
@@ -3333,7 +3354,9 @@
       "already_booked": "Customer is already enrolled.",
       "insufficient_credits": "Insufficient credits.",
       "expired": "Membership has expired.",
-      "unexpected": "An unexpected error occurred."
+      "unexpected": "An unexpected error occurred.",
+      "restricted_window": "Cannot cancel: the class starts soon (restricted window).",
+      "restricted_time": "You cannot cancel this booking within the restricted time window."
     },
     "success": {
       "booked": "Booking successful",
@@ -3390,6 +3413,22 @@
       "title": "Your session is about to expire",
       "description": "You have been inactive for too long. For your security, we will automatically log you out in:",
       "button": "Stay logged in"
+    }
+  },
+  "instructor_clients": {
+    "title": "My clients",
+    "description": "Managing the database of your assigned clients.",
+    "export_button": "Export CSV",
+    "exporting": "Exporting...",
+    "table": {
+      "columns": {
+        "client": "Client",
+        "contact": "Contact",
+        "bookings": "Bookings"
+      },
+      "bookings_unit": "Classes",
+      "view_details": "View details",
+      "loading": "Loading students..."
     }
   }
 }

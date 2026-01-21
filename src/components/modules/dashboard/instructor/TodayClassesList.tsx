@@ -37,9 +37,7 @@ export function TodayClassesList({ classes, branchName }: TodayClassesListProps)
         <CardTitle className="text-xl font-semibold tracking-tight">
           {t("title")}
         </CardTitle>
-        <CardDescription className="text-sm">
-          {t("description")} {branchName || "Vitalfit"}
-        </CardDescription>
+        
       </CardHeader>
       <CardContent>
         <ScrollArea className={cn(

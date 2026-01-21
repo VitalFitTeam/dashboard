@@ -110,12 +110,21 @@ export default function NewPaymentMethodPage() {
       }, 1500);
 
     } catch (error: any) {
+    console.error("Error creating payment method:", error);
 
-      const errorMsg = error.response?.data?.error || t("notifications.error_title");
-      toast.error(t("notifications.error_title"), {
-        description: errorMsg
-      });
-    } finally {
+    const backendError = 
+      error.response?.data?.error || 
+      error.response?.data?.message || 
+      error.response?.data?.detail;
+
+    toast.error(t("notifications.error_title"), {
+      description: backendError || t("notifications.error_description"),
+      action: {
+        label: t("form.actions.close"), 
+        onClick: () => {},
+      },
+    });
+  } finally {
       setIsSubmitting(false);
     }
   };

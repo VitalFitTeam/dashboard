@@ -11,6 +11,7 @@ import {
   CalendarDays,
   BadgePercent,
   Wallet,
+  Lock, 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -27,6 +28,7 @@ interface PolicyCardProps {
   policy: Policy;
   onSave: (newValue: string) => Promise<void> | void;
   isSaving?: boolean;
+  readOnly?: boolean;
 }
 
 const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
@@ -41,6 +43,7 @@ export default function PolicyCard({
   policy,
   onSave,
   isSaving = false,
+  readOnly = false, 
 }: PolicyCardProps) {
   const t = useTranslations("settings.Policies.card");
 
@@ -53,7 +56,6 @@ export default function PolicyCard({
     setIsEditing(false);
   }, [policy.value]);
 
-
   const categoryIcon = useMemo(() => {
     const key = Object.keys(CATEGORY_ICON_MAP).find((k) =>
       policy.category.includes(k)
@@ -61,20 +63,19 @@ export default function PolicyCard({
     return key ? CATEGORY_ICON_MAP[key] : <Info className="size-5" />;
   }, [policy.category]);
 
-
   const unit = useMemo(() => {
     if (policy.data_type === "PERCENTAGE") {
-        return "%";
+      return "%";
     }
     const name = policy.name.toLowerCase();
     if (name.includes("day")) {
-        return t("units.days");
+      return t("units.days");
     }
-    if (name.includes("hour")) {
-        return t("units.hours");
+    if (name.includes("hour")){
+       return t("units.hours");
     }
     if (name.includes("minute")){
-         return t("units.minutes");
+       return t("units.minutes");
     }
     return "";
   }, [policy.data_type, policy.name, t]);
@@ -106,11 +107,10 @@ export default function PolicyCard({
         "admin-theme group transition-all duration-300 border-border shadow-sm",
         isEditing
           ? "ring-2 ring-primary/20 border-primary"
-          : "hover:border-primary/40",
+          : !readOnly && "hover:border-primary/40", 
         !policy.active && "opacity-60 grayscale pointer-events-none"
       )}
     >
-
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3">
           <div
@@ -125,9 +125,14 @@ export default function PolicyCard({
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] uppercase tracking-widest opacity-60">
-              {policy.category.replace(/_/g, " ")}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest opacity-60">
+                {policy.category.replace(/_/g, " ")}
+              </span>
+              {readOnly && (
+                <Lock size={10} className="text-muted-foreground/50" />
+              )}
+            </div>
             <CardTitle className="text-sm font-black italic tracking-tight uppercase">
               {policy.name}
             </CardTitle>
@@ -135,9 +140,7 @@ export default function PolicyCard({
         </div>
       </CardHeader>
 
-
       <CardContent className="space-y-4">
-
         <div className="flex gap-2 rounded-lg bg-muted/40 p-3">
           <Info size={14} className="mt-0.5 shrink-0 text-primary" />
           <CardDescription className="text-[11px] font-medium leading-relaxed text-foreground/80">
@@ -145,16 +148,22 @@ export default function PolicyCard({
           </CardDescription>
         </div>
 
-
         {!isEditing ? (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="w-full h-12 rounded-md border border-dashed border-input bg-muted/30 px-4 text-left
-                       text-lg font-black italic tracking-tighter transition-colors
-                       hover:border-primary/40"
+          <div
+            onClick={() => !readOnly && setIsEditing(true)}
+            className={cn(
+              "w-full h-12 rounded-md border border-dashed border-input bg-muted/30 px-4 flex items-center justify-between",
+              "text-lg font-black italic tracking-tighter transition-colors",
+              readOnly 
+                ? "cursor-default opacity-80" 
+                : "cursor-pointer hover:border-primary/40 hover:bg-muted/50"
+            )}
           >
-            {value} {unit}
-          </button>
+            <span>
+              {value} {unit}
+            </span>
+            {readOnly && <Lock size={14} className="text-muted-foreground/30" />}
+          </div>
         ) : (
           <div className="relative">
             <input
@@ -164,7 +173,7 @@ export default function PolicyCard({
               onChange={(e) => setValue(e.target.value)}
               {...inputProps}
               className="flex h-12 w-full rounded-md border border-input bg-background px-4
-                         text-lg font-black  tracking-tighter outline-none
+                         text-lg font-black tracking-tighter outline-none
                          focus:ring-2 focus:ring-primary/10 focus:border-primary"
             />
             {unit && (
@@ -174,7 +183,6 @@ export default function PolicyCard({
             )}
           </div>
         )}
-
         <div
           className={cn(
             "flex items-center gap-2 overflow-hidden transition-all",
@@ -225,9 +233,16 @@ export default function PolicyCard({
             {t("status.saved")}
           </span>
         ) : (
-          <span className="text-[9px] font-black italic uppercase text-primary/60">
-            {policy.data_type}
-          </span>
+          <div className="flex items-center gap-2">
+             {readOnly && (
+               <span className="text-[8px] font-bold uppercase text-muted-foreground/40">
+                 {t("status.readOnly") || "READ ONLY"}
+               </span>
+             )}
+             <span className="text-[9px] font-black italic uppercase text-primary/60">
+              {policy.data_type}
+            </span>
+          </div>
         )}
       </CardFooter>
     </Card>

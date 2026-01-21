@@ -250,7 +250,8 @@
     "available_branches": "Sedes disponibles",
     "no_branches": "No hay sedes asignadas",
     "system_footer": "Sistema Vitalfit",
-    "PoliticasComerciales": "Políticas Comerciales"
+    "PoliticasComerciales": "Políticas Comerciales",
+    "MisClientes": "Mis clientes"
   },
   "LocaleSwitcher": {
     "label": "Cambiar idioma",
@@ -576,9 +577,12 @@
         "no_branch": "Sin sede asignada"
       },
       "stats": {
-        "next_class": "Próxima Clase",
-        "students_today": "Alumnos Hoy",
-        "monthly_classes": "Clases este mes",
+        "next_class": "Siguiente clase",
+        "students_today_count": "Alumnos hoy",
+        "students_today_desc": "Total confirmados para hoy",
+        "attendance_rate": "Tasa de Asistencia",
+        "attendance_desc": "Efectividad de asistencia",
+        "monthly_classes": "Clases del mes",
         "meta": "Meta"
       },
       "classes_list": {
@@ -1823,6 +1827,7 @@
         "active_member": "Miembro Activo",
         "inactive": "Inactivo",
         "verified": "Email Verificado"
+        
       },
       "actions": {
         "edit": "Editar Perfil",
@@ -1833,7 +1838,9 @@
         "rfm": "Análisis de Cliente (RFM)",
         "block": "Bloquear Cliente",
         "no_permissions": "No tienes acciones permitidas para este perfil.",
-        "view_wallet": "Consultar Billetera"
+        "view_wallet": "Consultar Billetera",
+        "unblock": "Desbloquear Cliente",
+        "delete": "Eliminar Cliente"
       },
       "gender_options": {
         "male": "Masculino",
@@ -1871,7 +1878,9 @@
         "image_success": "Imagen cargada correctamente",
         "image_error": "Error al subir la imagen",
         "block_success": "Cliente bloqueado correctamente",
-        "block_error": "No se pudo bloquear al cliente"
+        "block_error": "No se pudo bloquear al cliente",
+        "unblock_success": "Cliente desbloqueado con éxito.",
+        "unblock_error": "No se pudo desbloquear al cliente. Intenta de nuevo."
       }
     },
     "medical": {
@@ -2764,6 +2773,8 @@
       "updateSuccessDescription": "El valor de la política se ha guardado correctamente.",
       "updateErrorTitle": "Error al actualizar",
       "updateErrorDescription": "No se pudo guardar la política. Intenta de nuevo.",
+      "readOnly": "Solo Lectura",
+      "fullAccess": "Acceso Total",
       "actions": {
         "refresh": "Actualizar políticas"
       },
@@ -3169,6 +3180,11 @@
       "default_title": "Clase",
       "no_instructor": "Sin instructor"
     },
+    "resources": {
+      "loading": "Cargando recursos...",
+      "error": "Error al cargar los recursos del calendario",
+      "no_branch": "Sin sede seleccionada"
+    },
     "create_sheet": {
       "title": "Programar Clase",
       "description": "Define los detalles de la nueva sesión, instructor y aforo.",
@@ -3183,7 +3199,8 @@
       "errors": {
         "missing_data": "Faltan datos obligatorios o sesión expirada",
         "check_fields": "Por favor, revisa los campos con errores",
-        "server_error": "Hubo un error al procesar la solicitud"
+        "server_error": "Hubo un error al procesar la solicitud",
+        "branch_closed": "La sede seleccionada se encuentra cerrada en la fecha elegida. Por favor, verifica el horario de la sucursal."
       }
     },
     "edit_popover": {
@@ -3257,7 +3274,11 @@
         "cancel_tooltip": "Cancelar reserva",
         "view_only": "Solo lectura",
         "no_bookings": "No hay reservas activas para esta clase",
-        "loading_list": "Cargando participantes..."
+        "loading_list": "Cargando participantes...",
+        "check_in": "Marcar asistencia",
+        "status": "Estado",
+        "client": "Cliente",
+        "no_reservations": "No hay reservas para esta clase"
       },
       "info_panel": {
         "admin_title": "Panel de Gestión Administrativa",
@@ -3327,7 +3348,8 @@
       "already_booked": "Este cliente ya está inscrito en esta clase.",
       "insufficient_credits": "El cliente no tiene créditos suficientes.",
       "expired": "La membresía del cliente ha expirado.",
-      "unexpected": "Ocurrió un error inesperado en el sistema."
+      "unexpected": "Ocurrió un error inesperado en el sistema.",
+      "restricted_time": "No puedes cancelar dentro del periodo restringido"
     },
     "success": {
       "booked": "Reserva realizada con éxito",
@@ -3390,6 +3412,22 @@
       "title": "Tu sesión está por expirar",
       "description": "Has estado inactivo demasiado tiempo. Por seguridad, cerraremos tu sesión automáticamente en:",
       "button": "Mantener sesión activa"
+    }
+  },
+  "instructor_clients": {
+    "title": "Mis clientes",
+    "description": "Gestionando la base de datos de tus clientes asignados.",
+    "export_button": "Exportar CSV",
+    "exporting": "Exportando...",
+    "table": {
+      "columns": {
+        "client": "Cliente",
+        "contact": "Contacto",
+        "bookings": "Reservas"
+      },
+      "bookings_unit": "Clases",
+      "view_details": "Ver detalles",
+      "loading": "Cargando alumnos..."
     }
   }
 }

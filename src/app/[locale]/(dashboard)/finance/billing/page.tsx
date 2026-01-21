@@ -26,9 +26,12 @@ export default function BillingPage() {
   const router = useRouter();
   const { token, user, hasRole } = useAuth();
 
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedBranch, setSelectedBranch] = useState<string | undefined>(
     user?.activeBranch?.id
   );
+
 
   const { branches, isLoading: loadingBranches } = useBranches({
     token: token ?? "",
@@ -46,6 +49,21 @@ export default function BillingPage() {
   } = useInvoices(token ?? "", selectedBranch);
 
   useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+
+      if (searchTerm !== (filters.search || "")) {
+        updateFilters({ search: searchTerm, page: 1 });
+      }
+    }, 500); 
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, token]);
+
+  useEffect(() => {
     if (user?.activeBranch?.id && user.activeBranch.id !== selectedBranch) {
       setSelectedBranch(user.activeBranch.id);
     }
@@ -60,21 +78,16 @@ export default function BillingPage() {
     "super_admin",
     "accountant",
   ] as any);
+  
   const canCreateInvoice = hasRole(["branch_admin", "super_admin"] as any);
 
   const filteredBranches = user?.activeBranch?.id
     ? branches.filter((b) => b.branch_id === user.activeBranch?.id)
     : branches;
 
-  const handleSearchChange = (val: string) => {
-    const timer = setTimeout(() => {
-      updateFilters({ search: val, page: 1 });
-    }, 500);
-    return () => clearTimeout(timer);
-  };
-
   return (
     <div className="flex flex-col gap-6 p-6">
+
       <div className="flex justify-between items-start">
         <PageHeader
           title={t("title")}
@@ -97,11 +110,13 @@ export default function BillingPage() {
           <Input
             placeholder={t("searchPlaceholder")}
             className="pl-10 focus-visible:ring-primary w-full"
-            onChange={(e) => handleSearchChange(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} 
           />
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 w-full lg:flex-1">
+
           <Select
             value={selectedBranch || "all"}
             onValueChange={(v) =>
