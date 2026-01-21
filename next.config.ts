@@ -3,6 +3,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   images: {
+    unoptimized: true,
     domains: ["res.cloudinary.com"],
     remotePatterns: [
       {

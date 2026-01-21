@@ -8,6 +8,7 @@ import { Loader2, Save, Camera, Mail, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/sdk-config";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslations } from "next-intl"; 
 
 interface UserData {
   id?: string;
@@ -31,13 +32,14 @@ interface AccountFormProps {
 }
 
 export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
+  const t = useTranslations("account.profile"); 
   const { reloadUser, token } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
- const [previewUrl, setPreviewUrl] = useState<string | null>(user.profile_picture_url || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(user.profile_picture_url || null);
 
   const userId = user.id || user.user_id || "";
 
@@ -65,7 +67,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
       role_name: user.role || "",
     }));
     if (!selectedFile) {
-        setPreviewUrl(user.profile_picture_url || null); 
+      setPreviewUrl(user.profile_picture_url || null);
     }
   }, [user, selectedFile]);
 
@@ -88,7 +90,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
     const file = e.target.files?.[0] || null;
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        toast.error("La imagen es muy pesada (Máx 2MB).");
+        toast.error(t("notifications.imageTooHeavy"));
         return;
       }
       setSelectedFile(file);
@@ -112,7 +114,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
 
     const responseData = await res.json();
     if (!responseData.success) {
-      throw new Error("Fallo al subir imagen a ImgBB");
+      throw new Error("Failed to upload image to ImgBB");
     }
     return responseData.data.url;
   };
@@ -121,10 +123,10 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
     e.preventDefault();
 
     if (!userId) {
-      return toast.error("Error: ID de usuario no encontrado");
+      return toast.error(t("notifications.noUserId"));
     }
     if (!token) {
-      return toast.error("No hay sesión activa");
+      return toast.error(t("notifications.noSession"));
     }
 
     setIsLoading(true);
@@ -137,7 +139,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
           finalProfileUrl = await uploadToImgBB(selectedFile);
         } catch (uploadError) {
           console.error(uploadError);
-          toast.error("Error al subir imagen, se guardarán solo los textos.");
+          toast.error(t("notifications.uploadError"));
         }
       }
 
@@ -148,13 +150,13 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
 
       await api.user.updateUserStaff(userId, payload, token);
 
-      toast.success("Perfil actualizado correctamente");
+      toast.success(t("notifications.updateSuccess"));
 
       setSelectedFile(null);
       await reloadUser();
     } catch (error: any) {
       console.error(error);
-      toast.error(error?.message || "Error al actualizar perfil");
+      toast.error(error?.message || t("notifications.updateError"));
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +178,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    toast.info("Cambios descartados");
+    toast.info(t("notifications.discarded"));
   };
 
   const getInitials = () => {
@@ -220,11 +222,11 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
             {user.first_name} {user.last_name}
           </h3>
           <p className="text-sm text-gray-500 max-w-sm">
-            Gestiona tu información personal.
+            {t("manageInfo")}
           </p>
           <div className="flex items-center justify-center sm:justify-start gap-2 mt-2">
             <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-              {user.role_label || "Staff"}
+              {user.role_label || t("staff")}
             </span>
             {user.activeBranch && (
               <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
@@ -237,14 +239,14 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <InputField
-          label="Nombre"
+          label={t("firstName")}
           name="first_name"
           value={formData.first_name}
           onChange={handleChange}
           required
         />
         <InputField
-          label="Apellido"
+          label={t("lastName")}
           name="last_name"
           value={formData.last_name}
           onChange={handleChange}
@@ -253,7 +255,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
 
         <div className="md:col-span-2">
           <label className="text-sm font-medium mb-1.5 block">
-            Correo Electrónico
+            {t("email")}
           </label>
           <div className="relative">
             <Mail className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -267,18 +269,18 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
           </div>
           <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
             <ShieldAlert className="w-3 h-3" />
-            Cambiar el correo podría requerir verificarlo nuevamente.
+            {t("emailWarning")}
           </p>
         </div>
 
         <InputField
-          label="Cédula / Identidad"
+          label={t("identityDocument")}
           name="identity_document"
           value={formData.identity_document}
           onChange={handleChange}
         />
         <InputField
-          label="Teléfono"
+          label={t("phone")}
           name="phone"
           value={formData.phone}
           onChange={handleChange}
@@ -286,22 +288,22 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
         />
 
         <div className="space-y-2">
-          <label className="text-sm font-medium leading-none">Género</label>
+          <label className="text-sm font-medium leading-none">{t("gender")}</label>
           <select
             name="gender"
             value={formData.gender}
             onChange={handleChange}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="">Seleccionar...</option>
-            <option value="male">Masculino</option>
-            <option value="female">Femenino</option>
-            <option value="other">Otro</option>
+            <option value="">{t("genderPlaceholder")}</option>
+            <option value="male">{t("genderMale")}</option>
+            <option value="female">{t("genderFemale")}</option>
+            <option value="other">{t("genderOther")}</option>
           </select>
         </div>
 
         <InputField
-          label="Fecha de Nacimiento"
+          label={t("birthDate")}
           name="birth_date"
           type="date"
           value={formData.birth_date}
@@ -311,7 +313,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
 
       <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-100 dark:border-gray-800">
         <Button type="button" variant="ghost" onClick={handleCancel}>
-          Cancelar
+          {t("cancel")}
         </Button>
         <Button
           type="submit"
@@ -321,12 +323,12 @@ export const AccountForm: React.FC<AccountFormProps> = ({ user }) => {
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Guardando...
+              {t("saving")}
             </>
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              Guardar Cambios
+              {t("saveChanges")}
             </>
           )}
         </Button>

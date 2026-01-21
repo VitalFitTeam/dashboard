@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import {
   BadgeCheck,
-  CreditCard,
   LogOut,
   ChevronsUpDown,
   Settings2,
+  User as UserIcon,
 } from "lucide-react";
 
 import {
@@ -25,6 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth, SessionUser } from "@/context/AuthContext";
 import LocaleSwitcher from "./localeSwitcher/LocaleSwitcher";
 import { Link } from "@/i18n/navigation";
@@ -38,11 +38,8 @@ export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { logout } = useAuth();
 
-  const fullName =
-    `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || "User";
-  const avatarUrl =
-    user.profile_picture_url ||
-    `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(fullName)}`;
+  const initials = `${user.first_name?.[0] ?? ""}${user.last_name?.[0] ?? ""}`.toUpperCase() || "??";
+  const fullName = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || "User";
 
   return (
     <SidebarMenu>
@@ -53,22 +50,23 @@ export function NavUser({ user }: NavUserProps) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border bg-background overflow-hidden">
-                <Image
-                  src={avatarUrl}
-                  alt={fullName}
-                  width={32}
-                  height={32}
-                  className="aspect-square object-cover"
-                  unoptimized
+              <Avatar className="h-8 w-8 rounded-lg border shadow-sm">
+                <AvatarImage 
+                  src={user.profile_picture_url || ""} 
+                  alt={fullName} 
+                  className="object-cover"
                 />
-              </div>
+                <AvatarFallback className="rounded-lg bg-primary/10 text-[10px] font-bold text-primary italic">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              
               <div className="grid flex-1 text-left text-sm leading-tight ml-2">
-                <span className="truncate font-semibold tracking-tight">
+                <span className="truncate font-semibold tracking-tight text-foreground">
                   {fullName}
                 </span>
-                <span className="truncate text-[11px] text-muted-foreground uppercase font-medium">
-                  {user.email.split("@")[0]}
+                <span className="truncate text-[10px] text-muted-foreground uppercase font-black italic tracking-wider">
+                  {user.role|| user.email.split("@")[0]}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4 opacity-50" />
@@ -76,28 +74,28 @@ export function NavUser({ user }: NavUserProps) {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-[240px] rounded-xl p-2 shadow-xl"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-[240px] rounded-xl p-2 shadow-xl border-sidebar-border"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={8}
           >
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex items-center gap-3 px-1 py-2">
-                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg border shadow-sm">
-                  <Image
-                    src={avatarUrl}
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-3 px-1 py-1.5">
+                <Avatar className="h-10 w-10 rounded-lg border shadow-sm">
+                  <AvatarImage 
+                    src={user.profile_picture_url || ""} 
                     alt={fullName}
-                    width={40}
-                    height={40}
                     className="object-cover"
-                    unoptimized
                   />
-                </div>
+                  <AvatarFallback className="rounded-lg bg-primary/10 text-xs font-bold text-primary italic uppercase">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <p className="truncate font-bold text-foreground">
+                  <p className="truncate font-black italic uppercase tracking-tighter text-foreground leading-none">
                     {fullName}
                   </p>
-                  <p className="truncate text-xs text-muted-foreground">
+                  <p className="truncate text-xs text-muted-foreground mt-1">
                     {user.email}
                   </p>
                 </div>
@@ -107,10 +105,10 @@ export function NavUser({ user }: NavUserProps) {
             <DropdownMenuSeparator className="my-2" />
 
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild className="py-2.5 cursor-pointer">
-                <Link href="/settings/profile">
-                  <BadgeCheck className="mr-2 size-4 text-muted-foreground" />
-                  <span className="font-medium">{t("account")}</span>
+              <DropdownMenuItem asChild className="py-2.5 cursor-pointer focus:bg-primary/5">
+                <Link href="/settings/profile" className="flex w-full items-center">
+                  <BadgeCheck className="mr-2 size-4 text-primary/60" />
+                  <span className="font-bold italic uppercase tracking-tighter text-[11px]">{t("account")}</span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -118,24 +116,25 @@ export function NavUser({ user }: NavUserProps) {
             <DropdownMenuSeparator className="my-2" />
 
             <DropdownMenuGroup>
-              <div className="flex items-center justify-between px-2 py-2">
-                <div className="flex items-center text-sm font-medium text-muted-foreground">
-                  <Settings2 className="mr-2 size-4" />
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <div className="flex items-center text-[11px] font-bold italic uppercase tracking-tighter text-muted-foreground">
+                  <Settings2 className="mr-2 size-4 opacity-50" />
                   {t("language")}
                 </div>
-                <div className="scale-90 origin-right">
+                <div className="scale-90 origin-right shadow-sm border rounded-md overflow-hidden">
                   <LocaleSwitcher />
                 </div>
               </div>
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator className="my-2" />
+            
             <DropdownMenuItem
               onClick={() => logout()}
-              className="py-2.5 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer rounded-md transition-colors"
+              className="py-2.5 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer rounded-md transition-colors group"
             >
-              <LogOut className="mr-2 size-4" />
-              <span className="font-semibold">{t("logout")}</span>
+              <LogOut className="mr-2 size-4 transition-transform group-hover:-translate-x-1" />
+              <span className="font-black italic uppercase tracking-tighter text-[11px]">{t("logout")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

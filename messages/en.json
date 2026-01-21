@@ -3430,5 +3430,35 @@
       "view_details": "View details",
       "loading": "Loading students..."
     }
+  },
+  "account": {
+    "profile": {
+      "manageInfo": "Manage your personal information.",
+      "staff": "Staff",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "emailWarning": "Changing your email might require re-verification.",
+      "identityDocument": "ID / Identity Document",
+      "phone": "Phone Number",
+      "gender": "Gender",
+      "genderPlaceholder": "Select...",
+      "genderMale": "Male",
+      "genderFemale": "Female",
+      "genderOther": "Other",
+      "birthDate": "Birth Date",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "notifications": {
+        "imageTooHeavy": "Image is too heavy (Max 2MB).",
+        "noUserId": "Error: User ID not found",
+        "noSession": "No active session",
+        "uploadError": "Error uploading image, only text will be saved.",
+        "updateSuccess": "Profile updated successfully",
+        "updateError": "Error updating profile",
+        "discarded": "Changes discarded"
+      }
+    }
   }
 }
