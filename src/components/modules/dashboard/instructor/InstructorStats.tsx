@@ -1,31 +1,37 @@
 "use client";
 
-import { Clock, Users, GraduationCap, TrendingUp, Activity } from "lucide-react";
+import {
+  Clock,
+  Users,
+  GraduationCap,
+  TrendingUp,
+  Activity,
+} from "lucide-react";
 import { StatCard } from "@/components/ui/StatCard";
 import { useTranslations } from "next-intl";
 
 interface InstructorStatsProps {
   nextClass: string;
   studentCount: any; //
-  monthlyCount: any; 
-  attendanceRate: number; 
-  studentsToday: number;  
+  monthlyCount: any;
+  attendanceRate: number;
+  studentsToday: number;
 }
 
-export function InstructorStats({ 
-  nextClass, 
-  studentCount, 
+export function InstructorStats({
+  nextClass,
+  studentCount,
   monthlyCount,
   attendanceRate,
-  studentsToday 
+  studentsToday,
 }: InstructorStatsProps) {
-  
   const t = useTranslations("dashboards.InstructorDashboard.stats");
-  const tCommon = useTranslations("dashboards.InstructorDashboard.classes_list");
+  const tCommon = useTranslations(
+    "dashboards.InstructorDashboard.classes_list",
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
       <StatCard
         title={t("next_class")}
         value={<span className="truncate block">{nextClass}</span>}
@@ -44,10 +50,10 @@ export function InstructorStats({
         value={`${attendanceRate}%`}
         icon={<Activity className="h-5 w-5 text-emerald-600" />}
         description={
-          <div className="flex items-center gap-1">
+          <span className="inline-flex items-center gap-1">
             <TrendingUp className="h-3 w-3 text-emerald-500" />
             <span>{t("attendance_desc")}</span>
-          </div>
+          </span>
         }
       />
 
@@ -56,9 +62,7 @@ export function InstructorStats({
         value={monthlyCount?.value?.toString() || "0"}
         icon={<GraduationCap className="h-5 w-5 text-purple-600" />}
         description={`${t("meta") || "Meta"}: ${monthlyCount?.target || 0}`}
-
       />
-
     </div>
   );
 }

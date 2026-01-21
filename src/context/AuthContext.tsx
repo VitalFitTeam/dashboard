@@ -265,7 +265,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         hasAccess,
       }}
     >
-      {loading ? <p>Cargando...</p> : children}
+      {children}
       {showWarning && (
         <SessionWarningModal
           remainingTime={remainingTime}

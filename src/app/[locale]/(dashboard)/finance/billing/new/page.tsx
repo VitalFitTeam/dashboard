@@ -108,7 +108,7 @@ export default function StaffNewInvoicePage() {
 
       if (createdInvoiceId) {
         toast.error(t("newInvoice.messages.partialError"));
-        router.push(`/finance/billing/${createdInvoiceId}/pay`);
+
       } else {
         toast.error(t("newInvoice.messages.error"));
       }

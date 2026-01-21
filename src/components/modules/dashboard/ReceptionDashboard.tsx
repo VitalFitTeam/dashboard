@@ -7,8 +7,6 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { SessionUser, useAuth } from "@/context/AuthContext";
 import { BranchStaff } from "@vitalfit/sdk";
 import { useTranslations } from "next-intl";
-
-// Componentes
 import { CheckInsToday, OccupancyStat } from "./reception/ReceptionStats";
 import { RecentCheckInsCard } from "./reception/RecentCheckInsCard";
 import { ClassCapacityMonitor } from "./reception/ClassCapacityMonitor";
