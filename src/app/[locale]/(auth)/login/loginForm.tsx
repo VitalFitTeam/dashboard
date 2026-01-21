@@ -137,7 +137,7 @@ export default function LoginForm() {
           disabled={isLoading}
           variant="default"
           size="lg"
-          className="py-4 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-[0.98]"
+          className="py-4 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-[0.98] w-full"
         >
           {t("accessButton")}
         </Button>

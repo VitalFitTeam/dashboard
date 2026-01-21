@@ -1858,7 +1858,9 @@
         "rfm": "Customer Analysis (RFM)",
         "no_permissions": "You do not have any allowed actions for this profile.",
         "block": "Block Client",
-        "view_wallet": "View Wallet"
+        "view_wallet": "View Wallet",
+        "unblock": "Desbloquear Cliente",
+        "delete": "Eliminar Cliente"
       },
       "gender_options": {
         "male": "Male",
@@ -1879,7 +1881,9 @@
         "image_success": "Image uploaded successfully",
         "image_error": "Error uploading image",
         "block_success": "Client successfully blocked",
-        "block_error": "Could not block client"
+        "block_error": "Could not block client",
+        "unblock_success": "Client unblocked successfully.",
+        "unblock_error": "Failed to unblock the client. Please try again."
       }
     },
     "medical": {
@@ -2773,6 +2777,8 @@
       "updateSuccessDescription": "The policy value was successfully saved.",
       "updateErrorTitle": "Update Failed",
       "updateErrorDescription": "The policy could not be saved. Please try again.",
+      "readOnly": "Read Only",
+      "fullAccess": "Full Access",
       "actions": {
         "refresh": "Refresh Policies"
       },
@@ -3348,7 +3354,9 @@
       "already_booked": "Customer is already enrolled.",
       "insufficient_credits": "Insufficient credits.",
       "expired": "Membership has expired.",
-      "unexpected": "An unexpected error occurred."
+      "unexpected": "An unexpected error occurred.",
+      "restricted_window": "Cannot cancel: the class starts soon (restricted window).",
+      "restricted_time": "You cannot cancel this booking within the restricted time window."
     },
     "success": {
       "booked": "Booking successful",

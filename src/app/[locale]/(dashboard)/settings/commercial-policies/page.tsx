@@ -1,53 +1,62 @@
 "use client";
 
+import { useMemo } from "react";
 import PolicyCard from "@/components/modules/Policy/PolicyCard";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/context/AuthContext";
 import { usePoliciesConfiguration } from "@/hooks/Policies/usePoliciesConfiguration";
 import { useTranslations } from "next-intl";
+import { UserRole } from "@/lib/roles";
 import {
   Loader2,
   RefreshCw,
+  Lock,
+  ShieldCheck
 } from "lucide-react";
 
 const CATEGORY_META: Record<
   string,
-  { titleKey: string; descriptionKey: string;  }
+  { titleKey: string; descriptionKey: string }
 > = {
   INVOICE: {
     titleKey: "categories.invoice.title",
     descriptionKey: "categories.invoice.description",
-    
   },
   CLASS: {
     titleKey: "categories.class.title",
     descriptionKey: "categories.class.description",
-    
   },
   ACCESS: {
     titleKey: "categories.access.title",
     descriptionKey: "categories.access.description",
-    
   },
   MEMBERSHIP: {
     titleKey: "categories.membership.title",
     descriptionKey: "categories.membership.description",
-    
   },
   DISCOUNT: {
     titleKey: "categories.discount.title",
     descriptionKey: "categories.discount.description",
-   
   },
 };
 
 export default function CommercialPolicies() {
-  const { token } = useAuth();
+  const { token, user, hasRole } = useAuth();
   const t = useTranslations("settings.Policies");
+  if (!user) {
+    return null;
+  }
+  const canEdit = hasRole(UserRole.SUPER_ADMIN);
 
-  const { policies, isLoading, update, isUpdating, refresh } =
+  const { policies, isLoading, update, isUpdating, refresh } = 
     usePoliciesConfiguration.useCommercialPolicies(token);
+
+  const categories = useMemo(() => {
+    return Object.keys(CATEGORY_META).filter((key) =>
+      policies?.some((p) => p.category.includes(key))
+    );
+  }, [policies]);
 
   if (isLoading) {
     return (
@@ -60,32 +69,42 @@ export default function CommercialPolicies() {
     );
   }
 
-  const categories = Object.keys(CATEGORY_META).filter((key) =>
-    policies?.some((p) => p.category.includes(key))
-  );
-
   return (
     <div className="admin-theme min-h-screen bg-background p-8">
       <PageHeader
         title={t("title")}
         subtitle={t("subtitle")}
         actionButton={
-          <Button
-            onClick={() => refresh()}
-            variant="outline"
-            className="flex items-center gap-2 font-bold uppercase"
-          >
-            <RefreshCw
-              size={16}
-              className={isUpdating ? "animate-spin" : ""}
-            />
-            {t("actions.refresh")}
-          </Button>
+          <div className="flex items-center gap-3">
+            {!canEdit ? (
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-md border text-muted-foreground text-xs font-bold uppercase">
+                <Lock size={14} />
+                {t("readOnly") || "Solo Lectura"}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-md border border-primary/20 text-primary text-xs font-bold uppercase">
+                <ShieldCheck size={14} />
+                {t("fullAccess") || "Editor"}
+              </div>
+            )}
+
+            <Button
+              onClick={() => refresh()}
+              variant="outline"
+              className="flex items-center gap-2 font-bold uppercase"
+            >
+              <RefreshCw
+                size={16}
+                className={isUpdating ? "animate-spin" : ""}
+              />
+              {t("actions.refresh")}
+            </Button>
+          </div>
         }
       />
 
       {isUpdating && (
-        <div className="mt-4 rounded-md bg-primary/5 px-4 py-2 text-xs font-bold uppercase text-primary">
+        <div className="mt-4 rounded-md bg-primary/5 px-4 py-2 text-xs font-bold uppercase text-primary animate-pulse">
           {t("saving")}
         </div>
       )}
@@ -104,7 +123,7 @@ export default function CommercialPolicies() {
 
           return (
             <section key={key} className="space-y-6">
-              <header className="flex items-start gap-3">
+              <header className="flex items-start gap-3 border-l-4 border-primary pl-4">
                 <div>
                   <h2 className="text-lg font-black uppercase tracking-tight">
                     {t(meta.titleKey)}
@@ -123,9 +142,12 @@ export default function CommercialPolicies() {
                       key={policy.id}
                       policy={policy}
                       isSaving={isUpdating}
-                      onSave={(newValue) =>
-                        update(policy.id, newValue)
-                      }
+                      readOnly={!canEdit}
+                      onSave={(newValue) => {
+                        if (canEdit) {
+                          update(policy.id, newValue);
+                        }
+                      }}
                     />
                   ))}
               </div>

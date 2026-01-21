@@ -140,7 +140,6 @@ export const sidebarMenusByRole: Record<UserRole, NavSection[]> = {
         { label: "ClientesSocios", icon: UserIcon, href: "/clients/register"},
         { label: "AgendaCalendario", icon: Calendar, href: "/operations/calendar" },
         { label: "ReservasActivas", icon: Calendar, href: "/operations/reservations" },
-        { label: "RegistroAsistencia", icon: UsersIcon, href: "/operations/attendance" },
       ],
     },
     {

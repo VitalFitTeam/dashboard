@@ -63,12 +63,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setRefreshToken(null);
     setUser(null);
     api.client.removeTokens();
+    authService.clearSession();
+    localStorage.removeItem("active_branch_id");;
+    api.client.removeTokens();
   }, []);
 
-  const logout = useCallback(() => {
-    clearSession();
-    router.push("/login");
-  }, [clearSession, router]);
+ const logout = useCallback(() => {
+  clearSession();
+  
+  window.location.href = "/login";
+}, [clearSession]);
 
   const { showWarning, remainingTime, resetTimer } = useSessionTimeout({
     onLogout: logout,
@@ -261,7 +265,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         hasAccess,
       }}
     >
-      {children}
+      {loading ? <p>Cargando...</p> : children}
       {showWarning && (
         <SessionWarningModal
           remainingTime={remainingTime}
