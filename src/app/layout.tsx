@@ -19,7 +19,7 @@ const bebas = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "GymApp Dashboard",
+  title: "VITALFIT DASHBOARD",
   description: "Administra tus reservas, entrenadores y sucursales de gimnasio",
 };
 

@@ -3429,5 +3429,35 @@
       "view_details": "Ver detalles",
       "loading": "Cargando alumnos..."
     }
+  },
+ "account": {
+    "profile": {
+      "manageInfo": "Gestiona tu información personal.",
+      "staff": "Staff",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo Electrónico",
+      "emailWarning": "Cambiar el correo podría requerir verificarlo nuevamente.",
+      "identityDocument": "Cédula / Identidad",
+      "phone": "Teléfono",
+      "gender": "Género",
+      "genderPlaceholder": "Seleccionar...",
+      "genderMale": "Masculino",
+      "genderFemale": "Femenino",
+      "genderOther": "Otro",
+      "birthDate": "Fecha de Nacimiento",
+      "cancel": "Cancelar",
+      "saving": "Guardando...",
+      "saveChanges": "Guardar Cambios",
+      "notifications": {
+        "imageTooHeavy": "La imagen es muy pesada (Máx 2MB).",
+        "noUserId": "Error: ID de usuario no encontrado",
+        "noSession": "No hay sesión activa",
+        "uploadError": "Error al subir imagen, se guardarán solo los textos.",
+        "updateSuccess": "Perfil actualizado correctamente",
+        "updateError": "Error al actualizar perfil",
+        "discarded": "Cambios descartados"
+      }
+    }
   }
 }
