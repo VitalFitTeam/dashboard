@@ -11,3 +11,9 @@ export const loginSchema = z.object({
     .min(8, "La contraseña debe tener al menos 8 caracteres")
     .max(20, "La contraseña no puede exceder los 20 caracteres"),
 });
+
+export type LoginFormData = z.infer<typeof loginSchema>;
+
+export type LoginPayload = LoginFormData & {
+  context: "dashboard";
+};

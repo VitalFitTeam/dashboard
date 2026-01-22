@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+*.tgz
+
+/build
+
+# electron builder (IMPORTANTE: Evita subir el instalador .exe)
+/dist
+/release
+/*.exe
+/*.dmg
+/*.zip
+/*.app
+
+# misc
+.DS_Store
+*.pem

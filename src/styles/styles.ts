@@ -22,18 +22,19 @@ export const typography = {
   h4: "text-[1.5rem] leading-[2rem] font-medium font-sans",
   h5: "text-[1.25rem] leading-[1.75rem] font-medium font-sans",
   body: "text-[1rem] leading-[1.5rem] font-normal font-sans",
-  heading: "font-heading text-[2.5rem] tracking-wide", // Bebas Neue
+  heading: "font-heading text-[2.5rem] tracking-wide",
 };
 
 export const colors = {
   primary: "#F27F2A", // Naranja Vital
   complementary: {
-    black: "#1A1A1A",   // Negro Carbón
+    black: "#1A1A1A", // Negro Carbón
     darkGray: "#5C5E60", // Gris Oscuro
-    white: "#FFFFFF",    // Blanco Puro
+    white: "#FFFFFF", // Blanco Puro
+    lightGray: "#E5E5E5", // gris claro
   },
   accents: {
-    red: "#EA232D",      // Rojo Intenso
-    green: "#42672D",    // Verde Vital
+    red: "#EA232D", // Rojo Intenso
+    green: "#42672D", // Verde Vital
   },
 };
